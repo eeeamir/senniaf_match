@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>SENNIAF Match · Registro de perfil</title>
+
+<style>
+
+  :root{
+    --azul: #005A9C;
+    --azul-oscuro: #003B6F;
+    --azul-claro: #EAF3F9;
+
+    --rojo: #D71920;
+    --verde: #00843D;
+    --amarillo: #F4C300;
+
+    --texto: #263238;
+    --texto-secundario: #5F6B72;
+
+    --fondo: #F3F5F7;
+    --blanco: #FFFFFF;
+
+    --borde: #D9E0E5;
+
+    --exito: #217346;
+    --exito-fondo: #EAF6EE;
+
+    --error: #B42318;
+    --error-fondo: #FDECEC;
+
+    --sombra: 0 2px 8px rgba(0,0,0,.08);
+  }
+
+  *{
+    box-sizing: border-box;
+  }
+
+  body{
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+
+    font-family:
+      "Segoe UI",
+      Roboto,
+      Arial,
+      sans-serif;
+
+    line-height: 1.5;
+  }
+
+  .barra-gobierno{
+    background: var(--azul-oscuro);
+    color: white;
+
+    font-size: 13px;
+
+    padding: 8px 20px;
+  }
+
+  .barra-gobierno .contenido{
+    max-width: 1100px;
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .barra-gobierno span{
+    opacity: .95;
+  }
+
+  .encabezado{
+    background: white;
+
+    border-bottom: 1px solid var(--borde);
+
+    padding: 18px 20px;
+  }
+
+  .encabezado-contenido{
+    max-width: 1100px;
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .logo-senniaf{
+    width: 220px;
+    max-width: 45vw;
+    height: auto;
+    display: block;
+  }
+
+  .separador{
+    height: 55px;
+    width: 1px;
+    background: var(--borde);
+  }
+
+  .titulo-institucional{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .titulo-institucional strong{
+    color: var(--azul-oscuro);
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .titulo-institucional span{
+    color: var(--texto-secundario);
+    font-size: 14px;
+  }
+
+  .franja-sistema{
+    background: var(--azul);
+
+    color: white;
+
+    padding: 14px 20px;
+  }
+
+  .franja-contenido{
+    max-width: 1100px;
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nombre-sistema{
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .modulo{
+    font-size: 13px;
+    opacity: .9;
+  }
+
+
+  /* =====================================================
+     CONTENEDOR PRINCIPAL
+     ===================================================== */
+
+  main{
+    max-width: 900px;
+
+    margin: 32px auto;
+
+    padding: 0 20px 60px;
+  }
+
+
+  /* =====================================================
+     CABECERA DEL FORMULARIO
+     ===================================================== */
+
+  .cabecera-formulario{
+    background: white;
+
+    border: 1px solid var(--borde);
+
+    border-radius: 6px;
+
+    padding: 26px 30px 24px;
+
+    box-shadow: var(--sombra);
+
+    margin-bottom: 20px;
+  }
+
+  .cabecera-superior{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 20px;
+  }
+
+  .cabecera-formulario h1{
+    margin: 0 0 5px;
+
+    color: var(--azul-oscuro);
+
+    font-size: 25px;
+    font-weight: 650;
+  }
+
+  .cabecera-formulario p{
+    margin: 0;
+
+    color: var(--texto-secundario);
+
+    font-size: 14px;
+  }
+
+  .paso{
+    background: var(--azul-claro);
+
+    color: var(--azul-oscuro);
+
+    border: 1px solid #C8DFEE;
+
+    border-radius: 5px;
+
+    padding: 8px 13px;
+
+    white-space: nowrap;
+
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+
+  /* =====================================================
+     PROGRESO
+     ===================================================== */
+
+  .progreso{
+    display: flex;
+    align-items: center;
+
+    margin-top: 25px;
+  }
+
+  .progreso .punto{
+    width: 25px;
+    height: 25px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #DDE3E8;
+
+    color: #68757D;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    flex-shrink: 0;
+  }
+
+  .progreso .punto.activo{
+    background: var(--azul);
+    color: white;
+  }
+
+  .progreso .linea{
+    height: 3px;
+
+    flex: 1;
+
+    background: #DDE3E8;
+  }
+
+  .progreso .linea.activa{
+    background: var(--azul);
+  }
+
+
+  /* =====================================================
+     FORMULARIO
+     ===================================================== */
+
+  form{
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+
+  /* =====================================================
+     SECCIONES
+     ===================================================== */
+
+  section.grupo{
+    background: white;
+
+    border: 1px solid var(--borde);
+
+    border-radius: 6px;
+
+    overflow: hidden;
+
+    box-shadow: var(--sombra);
+  }
+
+  section.grupo h2{
+    margin: 0;
+
+    padding: 15px 22px;
+
+    background: #F7F9FA;
+
+    border-bottom: 1px solid var(--borde);
+
+    color: var(--azul-oscuro);
+
+    font-size: 16px;
+
+    font-weight: 650;
+  }
+
+  section.grupo h2::before{
+    content: "";
+
+    display: inline-block;
+
+    width: 4px;
+    height: 18px;
+
+    background: var(--azul);
+
+    vertical-align: -4px;
+
+    margin-right: 10px;
+
+    border-radius: 2px;
+  }
+
+  .contenido-seccion{
+    padding: 22px;
+  }
+
+
+  /* =====================================================
+     FILAS
+     ===================================================== */
+
+  .fila{
+    display: grid;
+
+    grid-template-columns:
+      repeat(auto-fit, minmax(220px, 1fr));
+
+    gap: 18px;
+
+    padding: 22px;
+  }
+
+
+  /* =====================================================
+     CAMPOS
+     ===================================================== */
+
+  .campo{
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+  }
+
+  .campo.ancho{
+    grid-column: 1 / -1;
+  }
+
+  label{
+    color: var(--texto);
+
+    font-size: 14px;
+
+    font-weight: 600;
+  }
+
+  label .req{
+    color: var(--rojo);
+
+    margin-left: 2px;
+  }
+
+
+  /* =====================================================
+     INPUTS
+     ===================================================== */
+
+  input,
+  select,
+  textarea{
+    width: 100%;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    color: var(--texto);
+
+    background: white;
+
+    border: 1px solid #BFC9D0;
+
+    border-radius: 4px;
+
+    padding: 11px 12px;
+
+    transition:
+      border-color .15s ease,
+      box-shadow .15s ease;
+  }
+
+  input::placeholder,
+  textarea::placeholder{
+    color: #8A969E;
+  }
+
+  input:hover,
+  select:hover,
+  textarea:hover{
+    border-color: #8A9AA5;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus{
+    outline: none;
+
+    border-color: var(--azul);
+
+    box-shadow:
+      0 0 0 3px rgba(0,90,156,.12);
+  }
+
+  textarea{
+    min-height: 90px;
+
+    resize: vertical;
+  }
+
+
+  /* =====================================================
+     AYUDA
+     ===================================================== */
+
+  .ayuda{
+    font-size: 12px;
+
+    color: var(--texto-secundario);
+
+    margin-top: 2px;
+  }
+
+
+  /* =====================================================
+     BOTONES
+     ===================================================== */
+
+  .acciones{
+    background: white;
+
+    border: 1px solid var(--borde);
+
+    border-radius: 6px;
+
+    box-shadow: var(--sombra);
+
+    padding: 18px 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+  }
+
+  button{
+    font-family: inherit;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    border-radius: 4px;
+  }
+
+  button.primario{
+    background: var(--azul);
+
+    color: white;
+
+    border: 1px solid var(--azul);
+
+    padding: 11px 24px;
+
+    font-weight: 600;
+
+    transition: background .15s ease;
+  }
+
+  button.primario:hover{
+    background: var(--azul-oscuro);
+  }
+
+  button.primario:disabled{
+    opacity: .6;
+
+    cursor: default;
+  }
+
+  button.enlace{
+    background: white;
+
+    border: 1px solid var(--borde);
+
+    color: var(--azul-oscuro);
+
+    padding: 10px 15px;
+
+    font-size: 13px;
+  }
+
+  button.enlace:hover{
+    background: #F3F7FA;
+
+    border-color: #AEBBC4;
+  }
+
+
+  /* =====================================================
+     RESULTADO
+     ===================================================== */
+
+  .resultado{
+    margin-top: 0;
+
+    padding: 16px 18px;
+
+    border-radius: 5px;
+
+    font-size: 14px;
+
+    display: none;
+  }
+
+  .resultado.exito{
+    display: block;
+
+    background: var(--exito-fondo);
+
+    color: var(--exito);
+
+    border: 1px solid #A9D5B8;
+  }
+
+  .resultado.error{
+    display: block;
+
+    background: var(--error-fondo);
+
+    color: var(--error);
+
+    border: 1px solid #E6B8B5;
+  }
+
+  .resultado .codigo{
+    font-family: "Courier New", monospace;
+
+    font-weight: 700;
+  }
+
+  .resultado ul{
+    margin: 8px 0 0;
+
+    padding-left: 20px;
+  }
+
+
+  /* =====================================================
+     PIE DE PÁGINA
+     ===================================================== */
+
+  footer{
+    background: var(--azul-oscuro);
+
+    color: white;
+
+    padding: 22px 20px;
+
+    font-size: 12px;
+  }
+
+  .footer-contenido{
+    max-width: 1100px;
+
+    margin: auto;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    flex-wrap: wrap;
+  }
+
+  footer strong{
+    font-size: 13px;
+  }
+
+  footer span{
+    opacity: .8;
+  }
+
+
+  /* =====================================================
+     RESPONSIVE
+     ===================================================== */
+
+  @media(max-width: 650px){
+
+    .barra-gobierno .contenido{
+      justify-content: center;
+    }
+
+    .barra-gobierno span:last-child{
+      display: none;
+    }
+
+    .encabezado-contenido{
+      flex-direction: column;
+
+      align-items: flex-start;
+
+      gap: 12px;
+    }
+
+    .logo-senniaf{
+      width: 190px;
+    }
+
+    .separador{
+      display: none;
+    }
+
+    .titulo-institucional{
+      display: none;
+    }
+
+    .franja-contenido{
+      flex-direction: column;
+
+      align-items: flex-start;
+
+      gap: 3px;
+    }
+
+    .cabecera-superior{
+      flex-direction: column;
+    }
+
+    .cabecera-formulario h1{
+      font-size: 21px;
+    }
+
+    .paso{
+      align-self: flex-start;
+    }
+
+    .fila{
+      grid-template-columns: 1fr;
+
+      padding: 18px;
+    }
+
+    .acciones{
+      flex-direction: column-reverse;
+
+      align-items: stretch;
+    }
+
+    button{
+      width: 100%;
+    }
+
+    .footer-contenido{
+      flex-direction: column;
+    }
+  }
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     BARRA DEL GOBIERNO
+     ===================================================== -->
+
+<div class="barra-gobierno">
+
+  <div class="contenido">
+
+    <span></span>
+
+    <span></span>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     ENCABEZADO SENNIAF
+     ===================================================== -->
+
+<header class="encabezado">
+
+  <div class="encabezado-contenido">
+
+    <img
+      src="img/logo-senniaf.jpg"
+      alt="SENNIAF"
+      class="logo-senniaf"
+    >
+
+    <div class="separador"></div>
+
+    <div class="titulo-institucional">
+
+      <strong>
+        Secretaría Nacional de Niñez,
+        Adolescencia y Familia
+      </strong>
+
+      <span>
+        Sistema institucional de gestión de perfiles
+      </span>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+
+<!-- =====================================================
+     BARRA DEL SISTEMA
+     ===================================================== -->
+
+<div class="franja-sistema">
+
+  <div class="franja-contenido">
+
+    <div class="nombre-sistema">
+      SENNIAF Match
+    </div>
+
+    <div class="modulo">
+      Registro de perfil
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     CONTENIDO PRINCIPAL
+     ===================================================== -->
+
+<main>
+
+
+  <!-- CABECERA -->
+
+  <div class="cabecera-formulario">
+
+    <div class="cabecera-superior">
+
+      <div>
+
+        <h1>
+          Registro de perfil integral
+        </h1>
+
+        <p>
+          Información del niño, niña o adolescente
+          para el proceso de compatibilidad familiar.
+        </p>
+
+      </div>
+
+      <div class="paso">
+        Paso 1 de 6
+      </div>
+
+    </div>
+
+
+    <!-- PROGRESO -->
+
+    <div class="progreso">
+
+      <div class="punto activo">1</div>
+
+      <div class="linea"></div>
+
+      <div class="punto">2</div>
+
+      <div class="linea"></div>
+
+      <div class="punto">3</div>
+
+      <div class="linea"></div>
+
+      <div class="punto">4</div>
+
+      <div class="linea"></div>
+
+      <div class="punto">5</div>
+
+      <div class="linea"></div>
+
+      <div class="punto">6</div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- =================================================
+       FORMULARIO
+       ================================================= -->
+
+  <form id="formulario" novalidate>
+
+
+    <!-- ===============================================
+         QUIÉN REGISTRA
+         =============================================== -->
+
+    <section class="grupo">
+
+      <h2>
+        Información del profesional que registra
+      </h2>
+
+      <div class="fila">
+
+        <div class="campo">
+
+          <label for="rol">
+            Rol
+          </label>
+
+          <select id="rol" name="rol">
+
+            <option value="TRABAJADOR_SOCIAL">
+              Trabajador social
+            </option>
+
+            <option value="PSICOLOGO">
+              Psicólogo
+            </option>
+
+            <option value="FAMILIA">
+              Familia (para probar el bloqueo)
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="usuarioId">
+            Identificador del profesional
+          </label>
+
+          <input
+            id="usuarioId"
+            name="usuarioId"
+            type="text"
+            placeholder="ts-001"
+          >
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ===============================================
+         DATOS GENERALES
+         =============================================== -->
+
+    <section class="grupo">
+
+      <h2>
+        Datos generales y escolaridad
+      </h2>
+
+      <div class="fila">
+
+        <div class="campo">
+
+          <label for="edad">
+            Edad <span class="req">*</span>
+          </label>
+
+          <input
+            id="edad"
+            name="edad"
+            type="number"
+            min="0"
+            max="17"
+            required
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="escolaridad">
+            Escolaridad <span class="req">*</span>
+          </label>
+
+          <input
+            id="escolaridad"
+            name="escolaridad"
+            type="text"
+            placeholder="5to grado"
+            required
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="rendimientoAcademico">
+            Rendimiento académico
+          </label>
+
+          <input
+            id="rendimientoAcademico"
+            name="rendimientoAcademico"
+            type="text"
+            placeholder="Bueno"
+          >
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ===============================================
+         HABILIDADES
+         =============================================== -->
+
+    <section class="grupo">
+
+      <h2>
+        Habilidades, gustos y personalidad
+      </h2>
+
+      <div class="fila">
+
+        <div class="campo ancho">
+
+          <label for="habilidades">
+            Habilidades y facilidades
+          </label>
+
+          <textarea
+            id="habilidades"
+            name="habilidades"
+            placeholder="Describa las habilidades, capacidades o actividades en las que presenta facilidad."
+          ></textarea>
+
+        </div>
+
+
+        <div class="campo ancho">
+
+          <label for="gustos">
+            Gustos e intereses
+          </label>
+
+          <textarea
+            id="gustos"
+            name="gustos"
+            placeholder="Describa actividades, pasatiempos o intereses relevantes."
+          ></textarea>
+
+        </div>
+
+
+        <div class="campo ancho">
+
+          <label for="personalidad">
+            Personalidad
+          </label>
+
+          <textarea
+            id="personalidad"
+            name="personalidad"
+            placeholder="Describa aspectos relevantes de su personalidad y forma de relacionarse."
+          ></textarea>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ===============================================
+         NECESIDADES Y CONTEXTO
+         =============================================== -->
+
+    <section class="grupo">
+
+      <h2>
+        Necesidades y contexto familiar
+      </h2>
+
+      <div class="fila">
+
+        <div class="campo ancho">
+
+          <label for="necesidades">
+
+            Necesidades de salud,
+            desarrollo o aprendizaje
+
+            <span class="req">*</span>
+
+          </label>
+
+          <textarea
+            id="necesidades"
+            name="necesidades"
+            placeholder="Describa necesidades relevantes para determinar las condiciones de cuidado y acompañamiento."
+            required
+          ></textarea>
+
+        </div>
+
+
+        <div class="campo ancho">
+
+          <label for="hermanos">
+            Hermanos y vínculos familiares relevantes
+          </label>
+
+          <textarea
+            id="hermanos"
+            name="hermanos"
+            placeholder="Describa vínculos familiares que deban considerarse durante el proceso."
+          ></textarea>
+
+        </div>
+
+
+        <div class="campo ancho">
+
+          <label for="contextoCultural">
+            Continuidad cultural o comunitaria
+          </label>
+
+          <textarea
+            id="contextoCultural"
+            name="contextoCultural"
+            placeholder="Describa vínculos de idioma, cultura o comunidad que convenga preservar."
+          ></textarea>
+
+          <div class="ayuda">
+
+            Opcional. Esta información busca contribuir
+            a preservar vínculos culturales, lingüísticos
+            o comunitarios relevantes.
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ===============================================
+         ACCIONES
+         =============================================== -->
+
+    <div class="acciones">
+
+      <button
+        type="button"
+        class="enlace"
+        id="btnEjemplo"
+      >
+        Cargar datos de ejemplo
+      </button>
+
+
+      <button
+        type="submit"
+        class="primario"
+        id="btnRegistrar"
+      >
+        Registrar perfil
+      </button>
+
+    </div>
+
+
+
+    <!-- RESULTADO -->
+
+    <div
+      class="resultado"
+      id="resultado"
+      role="status"
+    ></div>
+
+
+  </form>
+
+</main>
+
+
+
+<!-- =====================================================
+     PIE DE PÁGINA
+     ===================================================== -->
+
+<footer>
+
+  <div class="footer-contenido">
+
+    <div>
+
+      <strong>
+        SENNIAF Match
+      </strong>
+
+      <br>
+
+      <span>
+        Sistema de apoyo para la gestión de compatibilidad familiar.
+      </span>
+
+    </div>
+
+
+    <div>
+
+      <span>
+        Uso institucional · Datos protegidos
+      </span>
+
+    </div>
+
+  </div>
+
+</footer>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+     ===================================================== -->
+
+<script>
+
+const formulario =
+  document.getElementById('formulario');
+
+const resultado =
+  document.getElementById('resultado');
+
+const btnRegistrar =
+  document.getElementById('btnRegistrar');
+
+
+
+/* ===============================================
+   DATOS DE EJEMPLO
+   =============================================== */
+
+document
+  .getElementById('btnEjemplo')
+  .addEventListener('click', () => {
+
+    document.getElementById('edad').value = 10;
+
+    document.getElementById('escolaridad').value =
+      '5to grado';
+
+    document.getElementById('rendimientoAcademico').value =
+      'Bueno';
+
+    document.getElementById('habilidades').value =
+      'Matemáticas y dibujo';
+
+    document.getElementById('gustos').value =
+      'Fútbol, videojuegos y dibujar';
+
+    document.getElementById('personalidad').value =
+      'Reservado al principio, pero sociable cuando adquiere confianza';
+
+    document.getElementById('necesidades').value =
+      'Apoyo educativo en lectura';
+
+    document.getElementById('hermanos').value =
+      'Tiene una hermana de 7 años';
+
+  });
+
+
+
+/* ===============================================
+   REGISTRO DEL PERFIL
+   =============================================== */
+
+formulario.addEventListener(
+  'submit',
+  async (evento) => {
+
+    evento.preventDefault();
+
+    resultado.className = 'resultado';
+
+    resultado.textContent = '';
+
+    btnRegistrar.disabled = true;
+
+    btnRegistrar.textContent =
+      'Registrando…';
+
+
+
+    const cuerpo = {
+
+      edad:
+        Number(
+          document.getElementById('edad').value
+        ),
+
+      escolaridad:
+        document.getElementById('escolaridad').value,
+
+      rendimientoAcademico:
+        document.getElementById(
+          'rendimientoAcademico'
+        ).value,
+
+      habilidades:
+        document.getElementById(
+          'habilidades'
+        ).value,
+
+      gustos:
+        document.getElementById(
+          'gustos'
+        ).value,
+
+      personalidad:
+        document.getElementById(
+          'personalidad'
+        ).value,
+
+      necesidades:
+        document.getElementById(
+          'necesidades'
+        ).value,
+
+      hermanos:
+        document.getElementById(
+          'hermanos'
+        ).value,
+
+      contextoCultural:
+        document.getElementById(
+          'contextoCultural'
+        ).value
+
+    };
+
+
+
+    const rol =
+      document.getElementById('rol').value;
+
+    const usuarioId =
+      document.getElementById('usuarioId').value ||
+      'sin-identificar';
+
+
+
+    try {
+
+      const respuesta =
+        await fetch(
+          '/api/ninos',
+          {
+            method: 'POST',
+
+            headers: {
+
+              'Content-Type':
+                'application/json',
+
+              'X-User-Role':
+                rol,
+
+              'X-User-Id':
+                usuarioId
+
+            },
+
+            body:
+              JSON.stringify(cuerpo)
+
+          }
+        );
+
+
+
+      const datos =
+        await respuesta.json();
+
+
+
+      if (respuesta.ok) {
+
+        resultado.className =
+          'resultado exito';
+
+        resultado.innerHTML =
+          `${datos.mensaje}
+          · Código de caso:
+          <span class="codigo">
+            ${datos.codigoCaso}
+          </span>` +
+
+          (
+            datos.perfilCompleto
+              ? ''
+              : ' · el perfil quedó marcado como incompleto.'
+          );
+
+      }
+
+
+      else if (respuesta.status === 403) {
+
+        resultado.className =
+          'resultado error';
+
+        resultado.textContent =
+          datos.mensaje ||
+          'Este rol no está autorizado para registrar el perfil.';
+
+      }
+
+
+      else {
+
+        resultado.className =
+          'resultado error';
+
+        let texto =
+          datos.mensaje ||
+          'No se pudo registrar el perfil.';
+
+
+
+        if (datos.errores) {
+
+          const detalles =
+            Object.entries(
+              datos.errores
+            ).map(
+              ([campo, msg]) =>
+                `${campo}: ${msg}`
+            );
+
+          texto +=
+            '<ul>' +
+
+            detalles
+              .map(
+                d => `<li>${d}</li>`
+              )
+              .join('') +
+
+            '</ul>';
+
+        }
+
+        resultado.innerHTML = texto;
+
+      }
+
+    }
+
+
+    catch (error) {
+
+      resultado.className =
+        'resultado error';
+
+      resultado.textContent =
+        'No se pudo conectar con el servidor. ' +
+        'Verifica que la aplicación esté corriendo ' +
+        'en el puerto 8080.';
+
+    }
+
+
+    finally {
+
+      btnRegistrar.disabled = false;
+
+      btnRegistrar.textContent =
+        'Registrar perfil';
+
+    }
+
+  }
+
+);
+
+</script>
+
+</body>
+</html>
