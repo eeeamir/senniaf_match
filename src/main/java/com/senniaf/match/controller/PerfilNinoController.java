@@ -42,7 +42,7 @@ public class PerfilNinoController {
     public ResponseEntity<PerfilNinoResponse> registrarPerfil(
             @Valid @RequestBody PerfilNinoRequest request,
             @RequestHeader("X-User-Role") String rol,
-            @RequestHeader(value = "X-User-Id", required = false, defaultValue = "desconocido") String usuarioId) {
+            @RequestHeader("X-User-Id") String usuarioId) {
 
         if (!ROLES_AUTORIZADOS.contains(rol)) {
             throw new RolNoAutorizadoException(

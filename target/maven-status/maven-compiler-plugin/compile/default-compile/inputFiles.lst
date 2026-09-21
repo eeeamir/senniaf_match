@@ -1,9 +1,0 @@
-C:\Users\Lazul\Documents\GitHub\senniaf_match\src\main\java\com\senniaf\match\controller\GlobalExceptionHandler.java
-C:\Users\Lazul\Documents\GitHub\senniaf_match\src\main\java\com\senniaf\match\controller\PerfilNinoController.java
-C:\Users\Lazul\Documents\GitHub\senniaf_match\src\main\java\com\senniaf\match\dto\PerfilNinoRequest.java
-C:\Users\Lazul\Documents\GitHub\senniaf_match\src\main\java\com\senniaf\match\dto\PerfilNinoResponse.java
-C:\Users\Lazul\Documents\GitHub\senniaf_match\src\main\java\com\senniaf\match\model\PerfilNino.java
-C:\Users\Lazul\Documents\GitHub\senniaf_match\src\main\java\com\senniaf\match\repository\PerfilNinoRepository.java
-C:\Users\Lazul\Documents\GitHub\senniaf_match\src\main\java\com\senniaf\match\security\RolNoAutorizadoException.java
-C:\Users\Lazul\Documents\GitHub\senniaf_match\src\main\java\com\senniaf\match\SenniafMatchApplication.java
-C:\Users\Lazul\Documents\GitHub\senniaf_match\src\main\java\com\senniaf\match\service\PerfilNinoService.java
