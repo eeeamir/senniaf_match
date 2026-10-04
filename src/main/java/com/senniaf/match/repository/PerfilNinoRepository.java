@@ -4,6 +4,7 @@ import com.senniaf.match.model.PerfilNino;
 import org.springframework.stereotype.Repository;
 
 import java.util.Map;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,5 +36,9 @@ public class PerfilNinoRepository {
 
     public boolean existe(String codigoCaso) {
         return perfiles.containsKey(codigoCaso);
+    }
+
+    public List<PerfilNino> listar() {
+        return List.copyOf(perfiles.values());
     }
 }

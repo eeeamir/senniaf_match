@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SENNIAF Match · Menú funcionario</title>
+<style>
+:root{--azul:#005A9C;--azul2:#003B6F;--fondo:#EFF2EF;--panel:#F8FAF8;--borde:#D7DCD5;--texto:#263238;--suave:#5F6B72}
+*{box-sizing:border-box} body{margin:0;background:var(--fondo);color:var(--texto);font-family:"Segoe UI",Roboto,Arial,sans-serif}
+header{background:var(--azul2);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+header img{width:145px;height:auto;background:#fff;padding:5px;border-radius:8px}.usuario{display:flex;align-items:center;gap:18px}.rol{opacity:.8;font-size:13px}.salir{border:1px solid rgba(255,255,255,.55);background:transparent;color:#fff;border-radius:999px;padding:8px 15px;cursor:pointer}
+main{width:min(900px,calc(100% - 32px));margin:48px auto}.hero{padding:34px;border-radius:22px;color:#fff;background:linear-gradient(150deg,#6EC1F2,#2A8BD6 55%,#005A9C)}.hero h1{margin:0 0 7px;font-size:28px}.hero p{margin:0;opacity:.95}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px}.tarjeta{background:#fff;border:1px solid var(--borde);border-radius:18px;padding:28px;box-shadow:0 8px 22px rgba(0,59,111,.06)}.tarjeta h2{margin:0 0 8px;color:var(--azul2);font-size:20px}.tarjeta p{color:var(--suave);font-size:14px;min-height:44px}.boton{display:block;text-align:center;text-decoration:none;border:0;border-radius:999px;background:var(--azul);color:#fff;padding:12px 18px;font-weight:600;margin-top:20px}.boton.secundario{background:#fff;color:var(--azul);border:1px solid var(--azul)}
+.mensaje{margin-top:20px;padding:14px 18px;border-radius:12px;background:#EAF6EE;color:#217346;border:1px solid #B9DEC5}.mensaje[hidden]{display:none}
+@media(max-width:700px){.grid{grid-template-columns:1fr}main{margin:28px auto}.usuario .rol{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <img src="img/logo-senniaf.jpg" alt="SENNIAF">
+  <div class="usuario"><span><strong id="nombre"></strong> <span class="rol" id="rol"></span></span><button class="salir" id="btnSalir">Cerrar sesión</button></div>
+</header>
+<main>
+  <section class="hero"><h1>Gestión de perfiles</h1><p>Selecciona qué deseas hacer con los perfiles de niños, niñas y adolescentes.</p></section>
+  <div class="grid">
+    <section class="tarjeta">
+      <h2>Ver perfiles registrados</h2>
+      <p>Consulta los perfiles que ya fueron registrados en el sistema.</p>
+      <a class="boton" href="perfiles.html">Ver perfiles</a>
+    </section>
+    <section class="tarjeta">
+      <h2>Ingresar nuevo perfil</h2>
+      <p>Completa la entrevista y registra un nuevo perfil integral.</p>
+      <a class="boton" href="perfil.html">Ingresar nuevo</a>
+    </section>
+  </div>
+  <div class="mensaje" id="mensajeExito" hidden></div>
+</main>
+<script>
+const sesion=JSON.parse(sessionStorage.getItem('senniaf.sesion')||'null');
+if(!sesion||sesion.tipo!=='FUNCIONARIO'){location.replace('index.html');}
+else{
+ document.getElementById('nombre').textContent=sesion.nombre;
+ document.getElementById('rol').textContent=sesion.rol==='PSICOLOGO'?'· Psicólogo':'· Trabajador social';
+ const flash=sessionStorage.getItem('senniaf.flash');
+ if(flash){const box=document.getElementById('mensajeExito');box.textContent=flash;box.hidden=false;sessionStorage.removeItem('senniaf.flash');}
+}
+document.getElementById('btnSalir').addEventListener('click',()=>{sessionStorage.removeItem('senniaf.sesion');location.href='index.html';});
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SENNIAF Match · Motor de match</title>
+<style>
+  :root{--azul:#005A9C;--azul-oscuro:#003B6F;--azul-medio:#2A8BD6;--texto:#263238;--suave:#5F6B72;--borde:#D9E0E5}
+  *{box-sizing:border-box}
+  body{margin:0;background:#F3F5F7;color:var(--texto);font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;background:#fff;border-bottom:1px solid var(--borde)}
+  header img{height:44px;width:auto;display:block}
+  .usuario{display:flex;align-items:center;gap:14px;font-size:14px}
+  .rol{padding:3px 12px;border-radius:999px;background:#EAF3F9;color:var(--azul-oscuro);font-size:12px;font-weight:600}
+  button,a.boton{font:inherit;cursor:pointer}
+  .salir{border:0;background:none;color:var(--azul);text-decoration:underline;font-size:13px}
+  main{max-width:860px;margin:32px auto;padding:0 20px}
+  .hero{padding:36px;border-radius:24px;color:#fff;background:linear-gradient(150deg,#6EC1F2,var(--azul-medio) 55%,var(--azul))}
+  .hero h1{margin:0 0 6px;font-size:26px}
+  .hero p{margin:0;max-width:520px;opacity:.95}
+  .tarjeta{margin-top:20px;padding:24px 28px;background:#fff;border:1px solid var(--borde);border-radius:18px}
+  .tarjeta h2{margin:0 0 6px;font-size:18px;color:var(--azul-oscuro)}
+  .tarjeta p{margin:0 0 14px;color:var(--suave);font-size:14px}
+  a.boton{display:inline-block;padding:10px 22px;border-radius:999px;background:var(--azul);color:#fff;text-decoration:none;font-weight:600;font-size:14px}
+  .vacio{border-style:dashed;text-align:center;padding:40px 28px}
+</style>
+</head>
+<body>
+<header>
+  <img src="img/logo-senniaf.jpg" alt="SENNIAF">
+  <div class="usuario">
+    <span id="nombre"></span><span class="rol" id="rol"></span>
+    <button class="salir" id="btnSalir" type="button">Cerrar sesión</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>Motor de match</h1>
+    <p id="intro"></p>
+  </section>
+
+  <section class="tarjeta" id="accion"></section>
+
+  <section class="tarjeta vacio">
+    <h2>Aquí aparecerá el match</h2>
+    <p>La priorización de familias compatibles se implementará en el siguiente sprint.</p>
+  </section>
+</main>
+
+<script>
+  const sesion = JSON.parse(sessionStorage.getItem('senniaf.sesion') || 'null');
+  if (!sesion) location.replace('index.html');
+
+  const ROLES = { FAMILIA: 'Familia adoptante', TRABAJADOR_SOCIAL: 'Trabajador social', PSICOLOGO: 'Psicólogo' };
+  document.getElementById('nombre').textContent = sesion.nombre;
+  document.getElementById('rol').textContent = ROLES[sesion.rol];
+
+  const esFamilia = sesion.tipo === 'FAMILIA';
+  document.getElementById('intro').textContent = esFamilia
+    ? 'Tu entrevista familiar es la base para encontrar una compatibilidad adecuada.'
+    : 'Consulta las familias priorizadas para cada niño, niña o adolescente registrado.';
+
+  document.getElementById('accion').innerHTML = esFamilia
+    ? `<h2>Entrevista de idoneidad familiar</h2>
+       <p>Puedes completar o actualizar los datos de tu hogar cuando lo necesites.</p>
+       <a class="boton" href="perfil.html">Abrir mi formulario</a>`
+    : `<h2>Perfil del niño, niña o adolescente</h2>
+       <p>Registra un nuevo perfil integral para incluirlo en el proceso de compatibilidad.</p>
+       <a class="boton" href="perfil.html">Registrar un perfil</a>`;
+
+  document.getElementById('btnSalir').addEventListener('click', () => {
+    sessionStorage.removeItem('senniaf.sesion');
+    location.href = 'index.html';
+  });
+</script>
+</body>
+</html>

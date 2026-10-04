@@ -16,6 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PerfilFamiliaServiceTest {
@@ -39,14 +40,17 @@ class PerfilFamiliaServiceTest {
     }
 
     @Test
-    void generaCodigosDeCasoSecuencialesParaCadaPerfil() {
+    void impideRegistrarDosCasosConLaMismaCedula() {
         PerfilFamiliaRequest request = perfilCompleto();
 
-        PerfilFamiliaResponse primero = service.registrarPerfil(request, "familia-1");
-        PerfilFamiliaResponse segundo = service.registrarPerfil(request, "familia-1");
+        PerfilFamiliaResponse primero = service.registrarPerfil(request, "8-123-456");
+
+        IllegalStateException excepcion = assertThrows(
+                IllegalStateException.class,
+                () -> service.registrarPerfil(request, "8-123-456"));
 
         assertEquals("FAM-001", primero.getCodigoCaso());
-        assertEquals("FAM-002", segundo.getCodigoCaso());
+        assertTrue(excepcion.getMessage().contains("8-123-456"));
     }
 
     @Test

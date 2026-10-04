@@ -18,7 +18,18 @@ public class PerfilFamiliaService {
         this.repositorio = repositorio;
     }
 
-    public PerfilFamiliaResponse registrarPerfil(PerfilFamiliaRequest request, String registradoPor) {
+    public synchronized PerfilFamiliaResponse registrarPerfil(PerfilFamiliaRequest request, String registradoPor) {
+        String cedula = registradoPor == null ? "" : registradoPor.trim();
+
+        if (cedula.isBlank()) {
+            throw new IllegalArgumentException("La cédula del responsable es obligatoria");
+        }
+
+        if (repositorio.existePorCedula(cedula)) {
+            throw new IllegalStateException(
+                    "Ya existe un caso de familia registrado con la cédula " + cedula);
+        }
+
         String codigoCaso = repositorio.siguienteCodigoCaso();
 
         PerfilFamilia perfil = new PerfilFamilia();
@@ -39,7 +50,7 @@ public class PerfilFamiliaService {
         perfil.setCondicionesConApoyo(request.getCondicionesConApoyo());
         perfil.setNotaCondicionesSalud(request.getNotaCondicionesSalud());
         perfil.setContinuidadCultural(request.getContinuidadCultural());
-        perfil.setRegistradoPor(registradoPor);
+        perfil.setRegistradoPor(cedula);
         perfil.setFechaRegistro(LocalDateTime.now());
 
         boolean completo = calcularSiEstaCompleto(request);

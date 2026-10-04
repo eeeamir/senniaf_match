@@ -36,4 +36,9 @@ public class PerfilFamiliaRepository {
     public boolean existe(String codigoCaso) {
         return perfiles.containsKey(codigoCaso);
     }
+
+    public boolean existePorCedula(String cedula) {
+        return perfiles.values().stream()
+                .anyMatch(perfil -> cedula.equals(perfil.getRegistradoPor()));
+    }
 }

@@ -8,12 +8,16 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
+import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 /**
  * Módulo de perfil de niño/a (sección 2.12). Solo un trabajador social o
@@ -36,6 +40,32 @@ public class PerfilNinoController {
 
     public PerfilNinoController(PerfilNinoService service) {
         this.service = service;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Map<String, Object>>> listarPerfiles(
+            @RequestHeader("X-User-Role") String rol) {
+
+        if (!ROLES_AUTORIZADOS.contains(rol)) {
+            throw new RolNoAutorizadoException(
+                    "El rol '" + rol + "' no está autorizado para consultar perfiles de niños o niñas");
+        }
+
+        List<Map<String, Object>> perfiles = service.listarPerfiles().stream()
+                .map(perfil -> {
+                    Map<String, Object> resumen = new LinkedHashMap<>();
+                    resumen.put("codigoCaso", perfil.getCodigoCaso());
+                    resumen.put("edad", perfil.getEdad());
+                    resumen.put("nivelEscolar", perfil.getNivelEscolar());
+                    resumen.put("perfilCompleto", perfil.isPerfilCompleto());
+                    resumen.put("alertaMedica", perfil.isAlertaMedica());
+                    resumen.put("fechaRegistro", perfil.getFechaRegistro());
+                    resumen.put("registradoPor", perfil.getRegistradoPor());
+                    return resumen;
+                })
+                .toList();
+
+        return ResponseEntity.ok(perfiles);
     }
 
     @PostMapping

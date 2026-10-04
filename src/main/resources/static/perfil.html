@@ -1,0 +1,2555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>SENNIAF Match · Registro de perfil</title>
+
+<style>
+
+  :root{
+    --azul: #005A9C;
+    --azul-oscuro: #003B6F;
+    --azul-claro: #EAF3F9;
+
+    --rojo: #D71920;
+    --verde: #00843D;
+    --amarillo: #F4C300;
+
+    --texto: #263238;
+    --texto-secundario: #5F6B72;
+
+    --fondo: #F3F5F7;
+    --blanco: #FFFFFF;
+
+    --borde: #D9E0E5;
+
+    --exito: #217346;
+    --exito-fondo: #EAF6EE;
+
+    --error: #B42318;
+    --error-fondo: #FDECEC;
+
+    --sombra: 0 2px 8px rgba(0,0,0,.08);
+  }
+
+  *{
+    box-sizing: border-box;
+  }
+
+  body{
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+
+    font-family:
+      "Segoe UI",
+      Roboto,
+      Arial,
+      sans-serif;
+
+    line-height: 1.5;
+  }
+
+  .barra-gobierno{
+    background: var(--azul-oscuro);
+    color: white;
+
+    font-size: 13px;
+
+    padding: 8px 20px;
+  }
+
+  .barra-gobierno .contenido{
+    max-width: 1100px;
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .barra-gobierno span{
+    opacity: .95;
+  }
+
+  .encabezado{
+    background: white;
+
+    border-bottom: 1px solid var(--borde);
+
+    padding: 18px 20px;
+  }
+
+  .encabezado-contenido{
+    max-width: 1100px;
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .logo-senniaf{
+    width: 220px;
+    max-width: 45vw;
+    height: auto;
+    display: block;
+  }
+
+  .separador{
+    height: 55px;
+    width: 1px;
+    background: var(--borde);
+  }
+
+  .titulo-institucional{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .titulo-institucional strong{
+    color: var(--azul-oscuro);
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .titulo-institucional span{
+    color: var(--texto-secundario);
+    font-size: 14px;
+  }
+
+  .franja-sistema{
+    background: var(--azul);
+
+    color: white;
+
+    padding: 14px 20px;
+  }
+
+  .franja-contenido{
+    max-width: 1100px;
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nombre-sistema{
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .modulo{
+    font-size: 13px;
+    opacity: .9;
+  }
+
+
+  /* =====================================================
+     CONTENEDOR PRINCIPAL
+     ===================================================== */
+
+  main{
+    max-width: 900px;
+
+    margin: 32px auto;
+
+    padding: 0 20px 60px;
+  }
+
+
+  /* =====================================================
+     CABECERA DEL FORMULARIO
+     ===================================================== */
+
+  .cabecera-formulario{
+    background: white;
+
+    border: 1px solid var(--borde);
+
+    border-radius: 6px;
+
+    padding: 26px 30px 24px;
+
+    box-shadow: var(--sombra);
+
+    margin-bottom: 20px;
+  }
+
+  .cabecera-superior{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 20px;
+  }
+
+  .cabecera-formulario h1{
+    margin: 0 0 5px;
+
+    color: var(--azul-oscuro);
+
+    font-size: 25px;
+    font-weight: 650;
+  }
+
+  .cabecera-formulario p{
+    margin: 0;
+
+    color: var(--texto-secundario);
+
+    font-size: 14px;
+  }
+
+  .paso{
+    background: var(--azul-claro);
+
+    color: var(--azul-oscuro);
+
+    border: 1px solid #C8DFEE;
+
+    border-radius: 5px;
+
+    padding: 8px 13px;
+
+    white-space: nowrap;
+
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+
+  /* =====================================================
+     PROGRESO
+     ===================================================== */
+
+  .progreso{
+    display: flex;
+    align-items: center;
+
+    margin-top: 25px;
+  }
+
+  .progreso .punto{
+    width: 25px;
+    height: 25px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #DDE3E8;
+
+    color: #68757D;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    flex-shrink: 0;
+  }
+
+  .progreso .punto.activo{
+    background: var(--azul);
+    color: white;
+  }
+
+  .progreso .linea{
+    height: 3px;
+
+    flex: 1;
+
+    background: #DDE3E8;
+  }
+
+  .progreso .linea.activa{
+    background: var(--azul);
+  }
+
+
+  /* =====================================================
+     FORMULARIO
+     ===================================================== */
+
+  form{
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+
+  /* =====================================================
+     SECCIONES
+     ===================================================== */
+
+  section.grupo{
+    background: white;
+
+    border: 1px solid var(--borde);
+
+    border-radius: 6px;
+
+    overflow: hidden;
+
+    box-shadow: var(--sombra);
+  }
+
+  section.grupo h2{
+    margin: 0;
+
+    padding: 15px 22px;
+
+    background: #F7F9FA;
+
+    border-bottom: 1px solid var(--borde);
+
+    color: var(--azul-oscuro);
+
+    font-size: 16px;
+
+    font-weight: 650;
+  }
+
+  section.grupo h2::before{
+    content: "";
+
+    display: inline-block;
+
+    width: 4px;
+    height: 18px;
+
+    background: var(--azul);
+
+    vertical-align: -4px;
+
+    margin-right: 10px;
+
+    border-radius: 2px;
+  }
+
+  .contenido-seccion{
+    padding: 22px;
+  }
+
+
+  /* =====================================================
+     FILAS
+     ===================================================== */
+
+  .fila{
+    display: grid;
+
+    grid-template-columns:
+      repeat(auto-fit, minmax(220px, 1fr));
+
+    gap: 18px;
+
+    padding: 22px;
+  }
+
+
+  /* =====================================================
+     CAMPOS
+     ===================================================== */
+
+  .campo{
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+  }
+
+  .campo.ancho{
+    grid-column: 1 / -1;
+  }
+
+  label{
+    color: var(--texto);
+
+    font-size: 14px;
+
+    font-weight: 600;
+  }
+
+  label .req{
+    color: var(--rojo);
+
+    margin-left: 2px;
+  }
+
+
+  /* =====================================================
+     INPUTS
+     ===================================================== */
+
+  input,
+  select,
+  textarea{
+    width: 100%;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    color: var(--texto);
+
+    background: white;
+
+    border: 1px solid #BFC9D0;
+
+    border-radius: 4px;
+
+    padding: 11px 12px;
+
+    transition:
+      border-color .15s ease,
+      box-shadow .15s ease;
+  }
+
+  input::placeholder,
+  textarea::placeholder{
+    color: #8A969E;
+  }
+
+  input:hover,
+  select:hover,
+  textarea:hover{
+    border-color: #8A9AA5;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus{
+    outline: none;
+
+    border-color: var(--azul);
+
+    box-shadow:
+      0 0 0 3px rgba(0,90,156,.12);
+  }
+
+  textarea{
+    min-height: 90px;
+
+    resize: vertical;
+  }
+
+
+  /* =====================================================
+     AYUDA
+     ===================================================== */
+
+  .ayuda{
+    font-size: 12px;
+
+    color: var(--texto-secundario);
+
+    margin-top: 2px;
+  }
+
+
+  /* =====================================================
+     GRUPOS DE SELECCIÓN MÚLTIPLE (CHECKBOXES)
+     ===================================================== */
+
+  .grupo-checks{
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 8px 16px;
+
+    padding: 10px 12px;
+
+    border: 1px solid #BFC9D0;
+    border-radius: 4px;
+
+    background: white;
+  }
+
+  .grupo-checks label.opcion-check{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    font-weight: 400;
+    font-size: 13px;
+
+    white-space: nowrap;
+  }
+
+  .grupo-checks input[type="checkbox"]{
+    width: auto;
+
+    accent-color: var(--azul);
+  }
+
+  .campo.medico{
+    grid-column: 1 / -1;
+  }
+
+  .aviso-medico{
+    display: none;
+
+    margin-top: 6px;
+
+    padding: 10px 12px;
+
+    border-radius: 4px;
+
+    font-size: 13px;
+
+    background: #FFF6E5;
+    border: 1px solid #F4C300;
+    color: #7A5B00;
+  }
+
+  .aviso-medico.visible{
+    display: block;
+  }
+
+
+  /* =====================================================
+     PANTALLA DE SELECCIÓN DE ROL
+     ===================================================== */
+
+  .pantalla-selector{
+    background: white;
+
+    border: 1px solid var(--borde);
+
+    border-radius: 6px;
+
+    box-shadow: var(--sombra);
+
+    padding: 34px 30px;
+
+    text-align: center;
+  }
+
+  .pantalla-selector h1{
+    margin: 0 0 6px;
+
+    color: var(--azul-oscuro);
+
+    font-size: 23px;
+  }
+
+  .pantalla-selector > p{
+    margin: 0 0 26px;
+
+    color: var(--texto-secundario);
+
+    font-size: 14px;
+  }
+
+  .tarjetas-rol{
+    display: grid;
+
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+    gap: 14px;
+
+    margin-bottom: 22px;
+  }
+
+  .tarjeta-rol{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+
+    text-align: left;
+
+    background: white;
+
+    border: 2px solid var(--borde);
+    border-radius: 6px;
+
+    padding: 16px 18px;
+
+    cursor: pointer;
+
+    transition: border-color .15s ease, background .15s ease;
+  }
+
+  .tarjeta-rol:hover{
+    border-color: #8A9AA5;
+  }
+
+  .tarjeta-rol.activa{
+    border-color: var(--azul);
+
+    background: var(--azul-claro);
+  }
+
+  .tarjeta-rol strong{
+    color: var(--azul-oscuro);
+
+    font-size: 15px;
+  }
+
+  .tarjeta-rol span{
+    color: var(--texto-secundario);
+
+    font-size: 13px;
+  }
+
+  .selector-campo{
+    max-width: 320px;
+
+    margin: 0 auto 22px;
+
+    text-align: left;
+  }
+
+  .barra-pantalla{
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 16px;
+  }
+
+  .barra-pantalla .etiqueta-rol{
+    background: var(--azul-claro);
+
+    color: var(--azul-oscuro);
+
+    border: 1px solid #C8DFEE;
+
+    border-radius: 5px;
+
+    padding: 6px 12px;
+
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+
+  /* =====================================================
+     BOTONES
+     ===================================================== */
+
+  .acciones{
+    background: white;
+
+    border: 1px solid var(--borde);
+
+    border-radius: 6px;
+
+    box-shadow: var(--sombra);
+
+    padding: 18px 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+  }
+
+  button{
+    font-family: inherit;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    border-radius: 4px;
+  }
+
+  button.primario{
+    background: var(--azul);
+
+    color: white;
+
+    border: 1px solid var(--azul);
+
+    padding: 11px 24px;
+
+    font-weight: 600;
+
+    transition: background .15s ease;
+  }
+
+  button.primario:hover{
+    background: var(--azul-oscuro);
+  }
+
+  button.primario:disabled{
+    opacity: .6;
+
+    cursor: default;
+  }
+
+  button.enlace{
+    background: white;
+
+    border: 1px solid var(--borde);
+
+    color: var(--azul-oscuro);
+
+    padding: 10px 15px;
+
+    font-size: 13px;
+  }
+
+  button.enlace:hover{
+    background: #F3F7FA;
+
+    border-color: #AEBBC4;
+  }
+
+
+  /* =====================================================
+     RESULTADO
+     ===================================================== */
+
+  .resultado{
+    margin-top: 0;
+
+    padding: 16px 18px;
+
+    border-radius: 5px;
+
+    font-size: 14px;
+
+    display: none;
+  }
+
+  .resultado.exito{
+    display: block;
+
+    background: var(--exito-fondo);
+
+    color: var(--exito);
+
+    border: 1px solid #A9D5B8;
+  }
+
+  .resultado.error{
+    display: block;
+
+    background: var(--error-fondo);
+
+    color: var(--error);
+
+    border: 1px solid #E6B8B5;
+  }
+
+  .resultado .codigo{
+    font-family: "Courier New", monospace;
+
+    font-weight: 700;
+  }
+
+  .resultado ul{
+    margin: 8px 0 0;
+
+    padding-left: 20px;
+  }
+
+
+  /* =====================================================
+     PIE DE PÁGINA
+     ===================================================== */
+
+  footer{
+    background: var(--azul-oscuro);
+
+    color: white;
+
+    padding: 22px 20px;
+
+    font-size: 12px;
+  }
+
+  .footer-contenido{
+    max-width: 1100px;
+
+    margin: auto;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    flex-wrap: wrap;
+  }
+
+  footer strong{
+    font-size: 13px;
+  }
+
+  footer span{
+    opacity: .8;
+  }
+
+
+  /* =====================================================
+     RESPONSIVE
+     ===================================================== */
+
+  @media(max-width: 650px){
+
+    .barra-gobierno .contenido{
+      justify-content: center;
+    }
+
+    .barra-gobierno span:last-child{
+      display: none;
+    }
+
+    .encabezado-contenido{
+      flex-direction: column;
+
+      align-items: flex-start;
+
+      gap: 12px;
+    }
+
+    .logo-senniaf{
+      width: 190px;
+    }
+
+    .separador{
+      display: none;
+    }
+
+    .titulo-institucional{
+      display: none;
+    }
+
+    .franja-contenido{
+      flex-direction: column;
+
+      align-items: flex-start;
+
+      gap: 3px;
+    }
+
+    .cabecera-superior{
+      flex-direction: column;
+    }
+
+    .cabecera-formulario h1{
+      font-size: 21px;
+    }
+
+    .paso{
+      align-self: flex-start;
+    }
+
+    .fila{
+      grid-template-columns: 1fr;
+
+      padding: 18px;
+    }
+
+    .acciones{
+      flex-direction: column-reverse;
+
+      align-items: stretch;
+    }
+
+    button{
+      width: 100%;
+    }
+
+    .footer-contenido{
+      flex-direction: column;
+    }
+  }
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     BARRA DEL GOBIERNO
+     ===================================================== -->
+
+<div class="barra-gobierno">
+
+  <div class="contenido">
+
+    <span></span>
+
+    <span></span>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     ENCABEZADO SENNIAF
+     ===================================================== -->
+
+<header class="encabezado">
+
+  <div class="encabezado-contenido">
+
+    <img
+      src="img/logo-senniaf.jpg"
+      alt="SENNIAF"
+      class="logo-senniaf"
+    >
+
+    <div class="separador"></div>
+
+    <div class="titulo-institucional">
+
+      <strong>
+        Secretaría Nacional de Niñez,
+        Adolescencia y Familia
+      </strong>
+
+      <span>
+        Sistema institucional de gestión de perfiles
+      </span>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+
+<!-- =====================================================
+     BARRA DEL SISTEMA
+     ===================================================== -->
+
+<div class="franja-sistema">
+
+  <div class="franja-contenido">
+
+    <div class="nombre-sistema">
+      SENNIAF Match
+    </div>
+
+    <div class="modulo">
+      Registro de perfil
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     CONTENIDO PRINCIPAL
+     ===================================================== -->
+
+<main>
+
+
+  <!-- =================================================
+       PANTALLA 0: SELECCIÓN DE ROL
+       ================================================= -->
+
+  <div class="pantalla-selector" id="pantallaSelector">
+
+    <h1>¿Con qué rol vas a ingresar?</h1>
+
+    <p>
+      SENNIAF Match muestra una pantalla distinta según el rol: la
+      familia completa su propia entrevista y nunca ve perfiles de
+      niños o niñas; el trabajador social y el psicólogo solo ven el
+      registro del niño o niña.
+    </p>
+
+    <div class="tarjetas-rol">
+
+      <div class="tarjeta-rol" data-rol="TRABAJADOR_SOCIAL">
+        <strong>Trabajador social</strong>
+        <span>Registra el perfil integral del niño o niña.</span>
+      </div>
+
+      <div class="tarjeta-rol" data-rol="PSICOLOGO">
+        <strong>Psicólogo</strong>
+        <span>Registra el perfil integral del niño o niña.</span>
+      </div>
+
+      <div class="tarjeta-rol" data-rol="FAMILIA">
+        <strong>Familia adoptante</strong>
+        <span>Completa la entrevista de idoneidad familiar.</span>
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="primario"
+      id="btnContinuar"
+      disabled
+    >
+      Continuar
+    </button>
+
+  </div>
+
+  <div id="pantallaNino" hidden>
+
+    <div class="barra-pantalla">
+      <span class="etiqueta-rol" id="etiquetaRolNino"></span>
+      <button type="button" class="enlace" id="btnCambiarRolNino">Cambiar de rol</button>
+    </div>
+
+    <!-- CABECERA -->
+
+    <div class="cabecera-formulario">
+
+      <div class="cabecera-superior">
+
+        <div>
+
+          <h1>
+            Registro de perfil integral
+          </h1>
+
+          <p>
+            Información del niño, niña o adolescente
+            para el proceso de compatibilidad familiar.
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         FORMULARIO
+         ================================================= -->
+
+    <form id="formulario" novalidate>
+
+      <section class="grupo">
+
+        <h2>Identificación del profesional</h2>
+
+        <div class="fila">
+
+          <div class="campo">
+
+            <label for="idFuncionario">
+              ID de funcionario <span class="req">*</span>
+            </label>
+
+            <input
+              id="idFuncionario"
+              name="idFuncionario"
+              type="text"
+              inputmode="text"
+              maxlength="20"
+              placeholder="Ej. TS-001"
+              required
+            >
+
+            <div class="ayuda">
+              Obligatoria para identificar al trabajador social o psicólogo
+              que registra el perfil.
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           DATOS DEL PERFIL
+           =============================================== -->
+
+      <div class="paso-contenido" data-paso="1">
+
+    <!-- ===============================================
+         DATOS GENERALES
+         =============================================== -->
+
+    <section class="grupo">
+
+      <h2>
+        Datos generales y escolaridad
+      </h2>
+
+      <div class="fila">
+
+        <div class="campo">
+
+          <label for="edad">
+            Edad <span class="req">*</span>
+          </label>
+
+          <input
+            id="edad"
+            name="edad"
+            type="number"
+            min="0"
+            max="17"
+            required
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="nivelEscolar">
+            Nivel escolar <span class="req">*</span>
+          </label>
+
+          <select id="nivelEscolar" name="nivelEscolar" required>
+            <option value="">Seleccione…</option>
+            <option value="INICIAL">Inicial</option>
+            <option value="PRIMARIA">Primaria</option>
+            <option value="PREMEDIA">Premedia</option>
+            <option value="MEDIA">Media</option>
+            <option value="NO_ESCOLARIZADO">No escolarizado</option>
+          </select>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="gradoEscolar">
+            Grado o año (opcional)
+          </label>
+
+          <input
+            id="gradoEscolar"
+            name="gradoEscolar"
+            type="text"
+            placeholder="5to grado"
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="rendimientoAcademico">
+            Rendimiento académico <span class="req">*</span>
+          </label>
+
+          <select id="rendimientoAcademico" name="rendimientoAcademico" required>
+            <option value="">Seleccione…</option>
+            <option value="EXCELENTE">Excelente</option>
+            <option value="BUENO">Bueno</option>
+            <option value="REGULAR">Regular</option>
+            <option value="NECESITA_APOYO">Necesita apoyo</option>
+          </select>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ===============================================
+         HABILIDADES
+         =============================================== -->
+
+    <section class="grupo">
+
+      <h2>
+        Habilidades, gustos y personalidad
+      </h2>
+
+      <div class="fila">
+
+        <div class="campo ancho">
+
+          <label>
+            Habilidades y facilidades <span class="req">*</span>
+          </label>
+
+          <div class="grupo-checks" data-grupo="habilidades">
+            <label class="opcion-check"><input type="checkbox" value="NINGUNA_IDENTIFICADA"> Ninguna identificada</label>
+            <label class="opcion-check"><input type="checkbox" value="DEPORTES"> Deportes</label>
+            <label class="opcion-check"><input type="checkbox" value="ARTE"> Arte</label>
+            <label class="opcion-check"><input type="checkbox" value="MUSICA"> Música</label>
+            <label class="opcion-check"><input type="checkbox" value="MATEMATICAS"> Matemáticas</label>
+            <label class="opcion-check"><input type="checkbox" value="LECTURA_ESCRITURA"> Lectura y escritura</label>
+            <label class="opcion-check"><input type="checkbox" value="TECNOLOGIA"> Tecnología</label>
+            <label class="opcion-check"><input type="checkbox" value="CIENCIAS"> Ciencias</label>
+            <label class="opcion-check"><input type="checkbox" value="MANUALIDADES"> Manualidades</label>
+            <label class="opcion-check"><input type="checkbox" value="OTRA"> Otra</label>
+          </div>
+
+          <input
+            id="habilidadesDetalle"
+            name="habilidadesDetalle"
+            type="text"
+            placeholder="Detalle opcional (obligatorio si marcó 'Otra')"
+            style="margin-top: 8px;"
+          >
+
+        </div>
+
+
+        <div class="campo ancho">
+
+          <label>
+            Gustos e intereses <span class="req">*</span>
+          </label>
+
+          <div class="grupo-checks" data-grupo="gustos">
+            <label class="opcion-check"><input type="checkbox" value="NINGUNO_IDENTIFICADO"> Ninguno identificado</label>
+            <label class="opcion-check"><input type="checkbox" value="DEPORTES"> Deportes</label>
+            <label class="opcion-check"><input type="checkbox" value="VIDEOJUEGOS"> Videojuegos</label>
+            <label class="opcion-check"><input type="checkbox" value="MUSICA"> Música</label>
+            <label class="opcion-check"><input type="checkbox" value="ARTE_DIBUJO"> Arte / dibujo</label>
+            <label class="opcion-check"><input type="checkbox" value="LECTURA"> Lectura</label>
+            <label class="opcion-check"><input type="checkbox" value="NATURALEZA_ANIMALES"> Naturaleza y animales</label>
+            <label class="opcion-check"><input type="checkbox" value="BAILE"> Baile</label>
+            <label class="opcion-check"><input type="checkbox" value="JUEGOS_DE_MESA"> Juegos de mesa</label>
+            <label class="opcion-check"><input type="checkbox" value="OTRO"> Otro</label>
+          </div>
+
+          <input
+            id="gustosDetalle"
+            name="gustosDetalle"
+            type="text"
+            placeholder="Detalle opcional (obligatorio si marcó 'Otro')"
+            style="margin-top: 8px;"
+          >
+
+        </div>
+
+
+        <div class="campo ancho">
+
+          <label>
+            Personalidad <span class="req">*</span>
+          </label>
+
+          <div class="grupo-checks" data-grupo="personalidad">
+            <label class="opcion-check"><input type="checkbox" value="RESERVADO"> Reservado/a</label>
+            <label class="opcion-check"><input type="checkbox" value="SOCIABLE"> Sociable</label>
+            <label class="opcion-check"><input type="checkbox" value="EXTROVERTIDO"> Extrovertido/a</label>
+            <label class="opcion-check"><input type="checkbox" value="TIMIDO"> Tímido/a</label>
+            <label class="opcion-check"><input type="checkbox" value="CURIOSO"> Curioso/a</label>
+            <label class="opcion-check"><input type="checkbox" value="SENSIBLE"> Sensible</label>
+            <label class="opcion-check"><input type="checkbox" value="INDEPENDIENTE"> Independiente</label>
+            <label class="opcion-check"><input type="checkbox" value="CARINOSO"> Cariñoso/a</label>
+            <label class="opcion-check"><input type="checkbox" value="OTRO"> Otro</label>
+          </div>
+
+          <textarea
+            id="personalidadDetalle"
+            name="personalidadDetalle"
+            placeholder="Notas cualitativas para el Comité (opcional): forma de relacionarse, matices que la lista no cubre."
+            style="margin-top: 8px;"
+          ></textarea>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ===============================================
+         HERMANOS Y CONTEXTO
+         =============================================== -->
+
+    <section class="grupo">
+
+      <h2>
+        Hermanos y contexto familiar
+      </h2>
+
+      <div class="fila">
+
+        <div class="campo">
+
+          <label for="tieneHermanos">
+            ¿Tiene hermanos? <span class="req">*</span>
+          </label>
+
+          <select id="tieneHermanos" name="tieneHermanos" required>
+            <option value="">Seleccione…</option>
+            <option value="SI">Sí</option>
+            <option value="NO">No</option>
+          </select>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="cantidadHermanos">
+            Cantidad de hermanos
+          </label>
+
+          <input
+            id="cantidadHermanos"
+            name="cantidadHermanos"
+            type="number"
+            min="0"
+            placeholder="1"
+          >
+
+        </div>
+
+
+        <div class="campo ancho">
+
+          <label for="hermanosDetalle">
+            Vínculos familiares relevantes (opcional)
+          </label>
+
+          <textarea
+            id="hermanosDetalle"
+            name="hermanosDetalle"
+            placeholder="Describa vínculos familiares que deban considerarse durante el proceso."
+          ></textarea>
+
+        </div>
+
+
+        <div class="campo ancho">
+
+          <label for="contextoCultural">
+            Continuidad cultural o comunitaria
+          </label>
+
+          <textarea
+            id="contextoCultural"
+            name="contextoCultural"
+            placeholder="Describa vínculos de idioma, cultura o comunidad que convenga preservar."
+          ></textarea>
+
+          <div class="ayuda">
+
+            Opcional. Esta información busca contribuir
+            a preservar vínculos culturales, lingüísticos
+            o comunitarios relevantes.
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+      </div> <!-- fin datos del perfil -->
+
+
+      <div class="paso-contenido" data-paso="2">
+
+    <!-- ===============================================
+         INFORMACIÓN MÉDICA
+         =============================================== -->
+
+    <section class="grupo">
+
+      <h2>
+        Información médica
+      </h2>
+
+      <div class="fila">
+
+        <div class="campo ancho medico">
+
+          <label>
+            Alergias conocidas <span class="req">*</span>
+          </label>
+
+          <div class="grupo-checks" data-grupo="alergias">
+            <label class="opcion-check"><input type="checkbox" value="NINGUNA_CONOCIDA"> Ninguna conocida</label>
+            <label class="opcion-check"><input type="checkbox" value="ALIMENTARIA"> Alimentaria</label>
+            <label class="opcion-check"><input type="checkbox" value="MEDICAMENTOS"> A medicamentos</label>
+            <label class="opcion-check"><input type="checkbox" value="AMBIENTAL_POLEN"> Ambiental / polen</label>
+            <label class="opcion-check"><input type="checkbox" value="PICADURA_INSECTOS"> Picadura de insectos</label>
+            <label class="opcion-check"><input type="checkbox" value="OTRA"> Otra</label>
+          </div>
+
+          <input
+            id="alergiasDetalle"
+            name="alergiasDetalle"
+            type="text"
+            placeholder="Especifique (ej. 'alérgico al maní'). Obligatorio si marcó 'Alimentaria' u 'Otra'."
+            style="margin-top: 8px;"
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="intoleranciaLactosa">
+            ¿Es intolerante a la lactosa? <span class="req">*</span>
+          </label>
+
+          <select id="intoleranciaLactosa" name="intoleranciaLactosa" required>
+            <option value="">Seleccione…</option>
+            <option value="SI">Sí</option>
+            <option value="NO">No</option>
+            <option value="NO_SABE">No se sabe</option>
+          </select>
+
+        </div>
+
+
+        <div class="campo ancho medico">
+
+          <label>
+            Condiciones de salud o desarrollo conocidas <span class="req">*</span>
+          </label>
+
+          <div class="grupo-checks" data-grupo="condicionesSalud">
+            <label class="opcion-check"><input type="checkbox" value="NINGUNA_CONOCIDA"> Ninguna conocida</label>
+            <label class="opcion-check"><input type="checkbox" value="ASMA"> Asma</label>
+            <label class="opcion-check"><input type="checkbox" value="DIABETES"> Diabetes</label>
+            <label class="opcion-check"><input type="checkbox" value="EPILEPSIA"> Epilepsia</label>
+            <label class="opcion-check"><input type="checkbox" value="TDAH"> TDAH</label>
+            <label class="opcion-check"><input type="checkbox" value="TEA"> TEA (autismo)</label>
+            <label class="opcion-check"><input type="checkbox" value="DISCAPACIDAD_FISICA"> Discapacidad física</label>
+            <label class="opcion-check"><input type="checkbox" value="DISCAPACIDAD_INTELECTUAL"> Discapacidad intelectual</label>
+            <label class="opcion-check"><input type="checkbox" value="DISCAPACIDAD_VISUAL"> Discapacidad visual</label>
+            <label class="opcion-check"><input type="checkbox" value="DISCAPACIDAD_AUDITIVA"> Discapacidad auditiva</label>
+            <label class="opcion-check"><input type="checkbox" value="OTRA"> Otra</label>
+          </div>
+
+          <input
+            id="condicionesSaludDetalle"
+            name="condicionesSaludDetalle"
+            type="text"
+            placeholder="Especifique si marcó 'Otra' o si necesita agregar contexto."
+            style="margin-top: 8px;"
+          >
+
+          <div class="aviso-medico" id="avisoMedico">
+            Este perfil quedará marcado con una alerta médica para que el
+            Comité lo revise con atención (alergia, condición de salud o
+            intolerancia declarada).
+          </div>
+
+        </div>
+
+
+        <div class="campo ancho">
+
+          <label for="necesidadesApoyo">
+            Necesidades de apoyo en salud, desarrollo o aprendizaje
+            <span class="req">*</span>
+          </label>
+
+          <textarea
+            id="necesidadesApoyo"
+            name="necesidadesApoyo"
+            placeholder="Describa el tipo de apoyo, tratamiento o acompañamiento que requiere (más allá de lo ya marcado arriba)."
+            required
+          ></textarea>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+      </div> <!-- fin información médica -->
+
+
+    <!-- ===============================================
+         ACCIONES
+         =============================================== -->
+
+    <div class="acciones">
+
+      <div style="display:flex; gap:10px; margin-left:auto;">
+
+        <button
+          type="button"
+          class="enlace"
+          id="btnEjemplo"
+        >
+          Cargar datos de ejemplo
+        </button>
+
+
+        <button
+          type="submit"
+          class="primario"
+          id="btnRegistrar"
+        >
+          Enviar entrevista
+        </button>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- RESULTADO -->
+
+    <div
+      class="resultado"
+      id="resultado"
+      role="status"
+    ></div>
+
+
+  </form>
+
+  </div> <!-- fin #pantallaNino -->
+
+
+
+  <!-- =================================================
+       PANTALLA 2: ENTREVISTA DE IDONEIDAD FAMILIAR
+       (familia adoptante)
+       ================================================= -->
+
+  <div id="pantallaFamilia" hidden>
+
+    <div class="barra-pantalla">
+      <span class="etiqueta-rol">Familia adoptante</span>
+      <button type="button" class="enlace" id="btnCambiarRolFamilia">Cambiar de rol</button>
+    </div>
+
+    <div class="cabecera-formulario">
+
+      <div class="cabecera-superior">
+
+        <div>
+
+          <h1>
+            Entrevista de idoneidad familiar
+          </h1>
+
+          <p>
+            Cuéntanos sobre tu hogar para poder acompañarte durante
+            todo el proceso. Puedes pausar y retomar cuando quieras.
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <form id="formularioFamilia" novalidate>
+
+      <section class="grupo">
+
+        <h2>Identificación de la persona solicitante</h2>
+
+        <div class="fila">
+
+          <div class="campo">
+
+            <label for="cedulaFamilia">
+              Cédula del responsable <span class="req">*</span>
+            </label>
+
+            <input
+              id="cedulaFamilia"
+              name="cedulaFamilia"
+              type="text"
+              inputmode="numeric"
+              maxlength="20"
+              placeholder="Ej. 8-123-456"
+              required
+            >
+
+            <div class="ayuda">
+              Obligatoria para identificar a la persona responsable
+              de completar la entrevista.
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           ESTRUCTURA DEL HOGAR
+           =============================================== -->
+
+      <section class="grupo">
+
+        <h2>Tu hogar hoy</h2>
+
+        <div class="fila">
+
+          <div class="campo">
+
+            <label for="tipoFamilia">
+              ¿Cómo es tu hogar hoy? <span class="req">*</span>
+            </label>
+
+            <select id="tipoFamilia" name="tipoFamilia" required>
+              <option value="">Seleccione…</option>
+              <option value="PAREJA">Vivo en pareja</option>
+              <option value="MONOPARENTAL">Hogar monoparental</option>
+              <option value="FAMILIA_EXTENDIDA">Familia extendida (varias generaciones)</option>
+              <option value="OTRA">Otra</option>
+            </select>
+
+          </div>
+
+          <div class="campo ancho">
+
+            <label for="notaEstructuraHogar">
+              Cuéntanos quién más vive contigo, cómo es su rutina, y
+              qué esperan que cambie cuando llegue un niño o niña
+              (opcional)
+            </label>
+
+            <textarea
+              id="notaEstructuraHogar"
+              name="notaEstructuraHogar"
+              placeholder="Describe tu hogar con tus propias palabras."
+            ></textarea>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           RED DE APOYO
+           =============================================== -->
+
+      <section class="grupo">
+
+        <h2>Tu red de apoyo</h2>
+
+        <div class="fila">
+
+          <div class="campo ancho">
+
+            <label>
+              ¿Con quién cuentas para apoyarte en el día a día?
+              <span class="req">*</span>
+            </label>
+
+            <div class="grupo-checks" data-grupo="redApoyo">
+              <label class="opcion-check"><input type="checkbox" value="PAREJA"> Mi pareja</label>
+              <label class="opcion-check"><input type="checkbox" value="FAMILIA_EXTENDIDA"> Familia extendida</label>
+              <label class="opcion-check"><input type="checkbox" value="AMISTADES_O_COMUNIDAD"> Amistades o comunidad</label>
+              <label class="opcion-check"><input type="checkbox" value="NINGUNA_POR_AHORA"> Ninguna por ahora</label>
+            </div>
+
+          </div>
+
+          <div class="campo ancho">
+
+            <label for="notaRedApoyo">
+              ¿Cómo se organizarían ustedes en los primeros meses?
+              (opcional)
+            </label>
+
+            <textarea
+              id="notaRedApoyo"
+              name="notaRedApoyo"
+              placeholder="Describe cómo se apoyarían en el día a día."
+            ></textarea>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           DISTANCIA / REGIÓN
+           =============================================== -->
+
+      <section class="grupo">
+
+        <h2>Dónde vives y tu disponibilidad</h2>
+
+        <div class="fila">
+
+          <div class="campo">
+
+            <label for="provincia">
+              ¿En qué provincia o comarca vives hoy?
+              <span class="req">*</span>
+            </label>
+
+            <select id="provincia" name="provincia" required>
+              <option value="">Seleccione…</option>
+              <option value="PANAMA">Panamá</option>
+              <option value="PANAMA_OESTE">Panamá Oeste</option>
+              <option value="COLON">Colón</option>
+              <option value="COCLE">Coclé</option>
+              <option value="VERAGUAS">Veraguas</option>
+              <option value="CHIRIQUI">Chiriquí</option>
+              <option value="HERRERA">Herrera</option>
+              <option value="LOS_SANTOS">Los Santos</option>
+              <option value="DARIEN">Darién</option>
+              <option value="BOCAS_DEL_TORO">Bocas del Toro</option>
+              <option value="COMARCA_GUNA_YALA">Comarca Guna Yala</option>
+              <option value="COMARCA_EMBERA_WOUNAAN">Comarca Emberá-Wounaan</option>
+              <option value="COMARCA_NGABE_BUGLE">Comarca Ngäbe-Buglé</option>
+            </select>
+
+          </div>
+
+          <div class="campo">
+
+            <label for="disponibilidadViaje">
+              ¿Qué tan seguido podrías viajar o recibir visitas si
+              el niño o niña está en otra región?
+              <span class="req">*</span>
+            </label>
+
+            <select id="disponibilidadViaje" name="disponibilidadViaje" required>
+              <option value="">Seleccione…</option>
+              <option value="ALTA">Con mucha frecuencia</option>
+              <option value="MEDIA">De vez en cuando</option>
+              <option value="BAJA">Con poca frecuencia</option>
+            </select>
+
+          </div>
+
+          <div class="campo ancho">
+
+            <label for="notaDistancia">
+              Notas adicionales sobre tu disponibilidad (opcional)
+            </label>
+
+            <textarea
+              id="notaDistancia"
+              name="notaDistancia"
+              placeholder="Cualquier detalle que ayude a planificar el acompañamiento."
+            ></textarea>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           RANGO DE EDAD
+           =============================================== -->
+
+      <section class="grupo">
+
+        <h2>Etapa para la que sienten que están listos</h2>
+
+        <div class="fila">
+
+          <div class="campo">
+
+            <label for="edadMinimaAceptada">
+              Edad mínima <span class="req">*</span>
+            </label>
+
+            <input
+              id="edadMinimaAceptada"
+              name="edadMinimaAceptada"
+              type="number"
+              min="0"
+              max="17"
+              required
+            >
+
+          </div>
+
+          <div class="campo">
+
+            <label for="edadMaximaAceptada">
+              Edad máxima <span class="req">*</span>
+            </label>
+
+            <input
+              id="edadMaximaAceptada"
+              name="edadMaximaAceptada"
+              type="number"
+              min="0"
+              max="17"
+              required
+            >
+
+          </div>
+
+          <div class="campo ancho">
+
+            <label for="notaRangoEdad">
+              ¿En qué etapa sienten que su hogar está mejor
+              preparado ahora mismo, y por qué? (opcional)
+            </label>
+
+            <textarea
+              id="notaRangoEdad"
+              name="notaRangoEdad"
+              placeholder="Primera infancia, edad escolar, adolescencia…"
+            ></textarea>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           DISPOSICIÓN A HERMANOS
+           =============================================== -->
+
+      <section class="grupo">
+
+        <h2>Grupos de hermanos</h2>
+
+        <div class="fila">
+
+          <div class="campo">
+
+            <label for="disposicionHermanos">
+              Muchos niños y niñas en adopción tienen hermanos con
+              quienes han crecido. ¿Has pensado en recibir a un
+              grupo de hermanos? <span class="req">*</span>
+            </label>
+
+            <select id="disposicionHermanos" name="disposicionHermanos" required>
+              <option value="">Seleccione…</option>
+              <option value="DISPUESTA">Sí, estamos dispuestos</option>
+              <option value="DISPUESTA_CON_DUDAS">Lo consideraríamos, con dudas</option>
+              <option value="PREFIERE_UN_SOLO_NINO">Preferimos un solo niño o niña</option>
+            </select>
+
+          </div>
+
+          <div class="campo ancho">
+
+            <label for="notaHermanos">
+              Cuéntanos qué dudas tendrías (opcional)
+            </label>
+
+            <textarea
+              id="notaHermanos"
+              name="notaHermanos"
+              placeholder="Ayúdanos a entender tus dudas concretas, no solo un sí o no."
+            ></textarea>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           CONDICIONES DE SALUD / DESARROLLO
+           =============================================== -->
+
+      <section class="grupo">
+
+        <h2>Salud y desarrollo</h2>
+
+        <div class="fila">
+
+          <div class="campo ancho">
+
+            <label>
+              Cada niño o niña tiene necesidades distintas de
+              cuidado. ¿Con cuáles sientes que hoy cuentas con más
+              herramientas para acompañar sin apoyo adicional?
+              (opcional)
+            </label>
+
+            <div class="grupo-checks" data-grupo="condicionesPuedeAcompanarHoy">
+              <label class="opcion-check"><input type="checkbox" value="ASMA"> Asma</label>
+              <label class="opcion-check"><input type="checkbox" value="DIABETES"> Diabetes</label>
+              <label class="opcion-check"><input type="checkbox" value="EPILEPSIA"> Epilepsia</label>
+              <label class="opcion-check"><input type="checkbox" value="TDAH"> TDAH</label>
+              <label class="opcion-check"><input type="checkbox" value="TEA"> TEA (autismo)</label>
+              <label class="opcion-check"><input type="checkbox" value="DISCAPACIDAD_FISICA"> Discapacidad física</label>
+              <label class="opcion-check"><input type="checkbox" value="DISCAPACIDAD_INTELECTUAL"> Discapacidad intelectual</label>
+              <label class="opcion-check"><input type="checkbox" value="DISCAPACIDAD_VISUAL"> Discapacidad visual</label>
+              <label class="opcion-check"><input type="checkbox" value="DISCAPACIDAD_AUDITIVA"> Discapacidad auditiva</label>
+            </div>
+
+          </div>
+
+          <div class="campo ancho">
+
+            <label>
+              ¿En cuáles te gustaría recibir capacitación antes de
+              sentirte listo/a? (opcional)
+            </label>
+
+            <div class="grupo-checks" data-grupo="condicionesConApoyo">
+              <label class="opcion-check"><input type="checkbox" value="ASMA"> Asma</label>
+              <label class="opcion-check"><input type="checkbox" value="DIABETES"> Diabetes</label>
+              <label class="opcion-check"><input type="checkbox" value="EPILEPSIA"> Epilepsia</label>
+              <label class="opcion-check"><input type="checkbox" value="TDAH"> TDAH</label>
+              <label class="opcion-check"><input type="checkbox" value="TEA"> TEA (autismo)</label>
+              <label class="opcion-check"><input type="checkbox" value="DISCAPACIDAD_FISICA"> Discapacidad física</label>
+              <label class="opcion-check"><input type="checkbox" value="DISCAPACIDAD_INTELECTUAL"> Discapacidad intelectual</label>
+              <label class="opcion-check"><input type="checkbox" value="DISCAPACIDAD_VISUAL"> Discapacidad visual</label>
+              <label class="opcion-check"><input type="checkbox" value="DISCAPACIDAD_AUDITIVA"> Discapacidad auditiva</label>
+            </div>
+
+            <div class="ayuda">
+              Lo que no marques en ninguna de las dos listas se
+              registra como "aún no": es una respuesta válida, no
+              un dato faltante.
+            </div>
+
+          </div>
+
+          <div class="campo ancho">
+
+            <label for="notaCondicionesSalud">
+              Notas adicionales (opcional)
+            </label>
+
+            <textarea
+              id="notaCondicionesSalud"
+              name="notaCondicionesSalud"
+            ></textarea>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           CONTINUIDAD CULTURAL
+           =============================================== -->
+
+      <section class="grupo">
+
+        <h2>Para cerrar</h2>
+
+        <div class="fila">
+
+          <div class="campo ancho">
+
+            <label for="continuidadCultural">
+              ¿Tienes cercanía con alguna cultura, idioma o
+              comunidad que te gustaría que tu hijo o hija pueda
+              seguir conociendo? (opcional)
+            </label>
+
+            <textarea
+              id="continuidadCultural"
+              name="continuidadCultural"
+              placeholder="Este dato ayuda a preservar vínculos de identidad; no es un filtro de características."
+            ></textarea>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           ACCIONES
+           =============================================== -->
+
+      <div class="acciones">
+
+        <button type="button" class="enlace" id="btnEjemploFamilia">
+          Cargar datos de ejemplo
+        </button>
+
+        <button type="submit" class="primario" id="btnRegistrarFamilia">
+          Enviar entrevista
+        </button>
+
+      </div>
+
+      <div class="resultado" id="resultadoFamilia" role="status"></div>
+
+    </form>
+
+  </div> <!-- fin #pantallaFamilia -->
+
+</main>
+
+
+
+<!-- =====================================================
+     PIE DE PÁGINA
+     ===================================================== -->
+
+<footer>
+
+  <div class="footer-contenido">
+
+    <div>
+
+      <strong>
+        SENNIAF Match
+      </strong>
+
+      <br>
+
+      <span>
+        Sistema de apoyo para la gestión de compatibilidad familiar.
+      </span>
+
+    </div>
+
+
+    <div>
+
+      <span>
+        Uso institucional · Datos protegidos
+      </span>
+
+    </div>
+
+  </div>
+
+</footer>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+     ===================================================== -->
+
+<script>
+
+/* ===============================================
+   ESTADO Y ELEMENTOS COMPARTIDOS
+   =============================================== */
+
+let rolSeleccionado = null;
+
+const pantallaSelector = document.getElementById('pantallaSelector');
+const pantallaNino = document.getElementById('pantallaNino');
+const pantallaFamilia = document.getElementById('pantallaFamilia');
+
+const btnContinuar = document.getElementById('btnContinuar');
+
+const formulario = document.getElementById('formulario');
+const resultado = document.getElementById('resultado');
+const btnRegistrar = document.getElementById('btnRegistrar');
+
+const formularioFamilia = document.getElementById('formularioFamilia');
+const resultadoFamilia = document.getElementById('resultadoFamilia');
+const btnRegistrarFamilia = document.getElementById('btnRegistrarFamilia');
+
+
+
+/* ===============================================
+   AYUDANTES PARA GRUPOS DE CHECKBOXES
+   (compartidos por ambos formularios; cada grupo
+   tiene un data-grupo único en todo el documento)
+   =============================================== */
+
+function valoresMarcados(nombreGrupo) {
+  const contenedor = document.querySelector(
+    `.grupo-checks[data-grupo="${nombreGrupo}"]`
+  );
+  return Array.from(
+    contenedor.querySelectorAll('input[type="checkbox"]:checked')
+  ).map((casilla) => casilla.value);
+}
+
+function marcarValores(nombreGrupo, valores) {
+  const contenedor = document.querySelector(
+    `.grupo-checks[data-grupo="${nombreGrupo}"]`
+  );
+  contenedor
+    .querySelectorAll('input[type="checkbox"]')
+    .forEach((casilla) => {
+      casilla.checked = valores.includes(casilla.value);
+    });
+}
+
+
+
+/* ===============================================
+   PANTALLA 0: SELECCIÓN DE ROL
+   (aquí se resuelve, en la propia navegación de la
+   aplicación, la regla de que la familia nunca ve
+   la pantalla de registro del niño/a, y viceversa)
+   =============================================== */
+
+const NOMBRES_ROL = {
+  TRABAJADOR_SOCIAL: 'Trabajador social',
+  PSICOLOGO: 'Psicólogo',
+  FAMILIA: 'Familia adoptante'
+};
+
+document.querySelectorAll('.tarjeta-rol').forEach((tarjeta) => {
+  tarjeta.addEventListener('click', () => {
+    document
+      .querySelectorAll('.tarjeta-rol')
+      .forEach((t) => t.classList.remove('activa'));
+
+    tarjeta.classList.add('activa');
+    rolSeleccionado = tarjeta.dataset.rol;
+    btnContinuar.disabled = false;
+  });
+});
+
+btnContinuar.addEventListener('click', () => {
+  if (!rolSeleccionado) {
+    return;
+  }
+
+  pantallaSelector.hidden = true;
+
+  if (rolSeleccionado === 'FAMILIA') {
+    pantallaFamilia.hidden = false;
+  } else {
+    document.getElementById('etiquetaRolNino').textContent =
+      NOMBRES_ROL[rolSeleccionado];
+    pantallaNino.hidden = false;
+  }
+});
+
+function volverASeleccionDeRol() {
+  pantallaNino.hidden = true;
+  pantallaFamilia.hidden = true;
+  pantallaSelector.hidden = false;
+
+  rolSeleccionado = null;
+  btnContinuar.disabled = true;
+
+  document
+    .querySelectorAll('.tarjeta-rol')
+    .forEach((t) => t.classList.remove('activa'));
+}
+
+document
+  .getElementById('btnCambiarRolNino')
+  .addEventListener('click', volverASeleccionDeRol);
+
+document
+  .getElementById('btnCambiarRolFamilia')
+  .addEventListener('click', volverASeleccionDeRol);
+
+
+
+/* ===============================================
+   FORMULARIO DEL NIÑO/A
+   Todo el formulario se presenta en una sola pantalla.
+   La validación completa ocurre al pulsar "Registrar perfil".
+   =============================================== */
+
+/* ===============================================
+   AVISO MÉDICO (perfil del niño/a)
+   =============================================== */
+
+function actualizarAvisoMedico() {
+  const alergiaRelevante = valoresMarcados('alergias')
+    .some((valor) => valor !== 'NINGUNA_CONOCIDA');
+  const condicionRelevante = valoresMarcados('condicionesSalud')
+    .some((valor) => valor !== 'NINGUNA_CONOCIDA');
+  const intolerante =
+    document.getElementById('intoleranciaLactosa').value === 'SI';
+
+  document.getElementById('avisoMedico').classList.toggle(
+    'visible',
+    alergiaRelevante || condicionRelevante || intolerante
+  );
+}
+
+document
+  .querySelectorAll(
+    '.grupo-checks[data-grupo="alergias"] input, ' +
+    '.grupo-checks[data-grupo="condicionesSalud"] input'
+  )
+  .forEach((casilla) => casilla.addEventListener('change', actualizarAvisoMedico));
+
+document
+  .getElementById('intoleranciaLactosa')
+  .addEventListener('change', actualizarAvisoMedico);
+
+
+
+/* ===============================================
+   DATOS DE EJEMPLO: NIÑO/A
+   =============================================== */
+
+document
+  .getElementById('btnEjemplo')
+  .addEventListener('click', () => {
+
+    document.getElementById('edad').value = 10;
+    document.getElementById('nivelEscolar').value = 'PRIMARIA';
+    document.getElementById('gradoEscolar').value = '5to grado';
+    document.getElementById('rendimientoAcademico').value = 'BUENO';
+
+    marcarValores('habilidades', ['MATEMATICAS', 'ARTE']);
+    document.getElementById('habilidadesDetalle').value =
+      'Muestra facilidad para el dibujo técnico';
+
+    marcarValores('gustos', ['DEPORTES', 'VIDEOJUEGOS']);
+    document.getElementById('gustosDetalle').value = 'Fútbol y dibujar';
+
+    marcarValores('personalidad', ['RESERVADO', 'SOCIABLE']);
+    document.getElementById('personalidadDetalle').value =
+      'Reservado al principio, pero sociable cuando adquiere confianza';
+
+    document.getElementById('tieneHermanos').value = 'SI';
+    document.getElementById('cantidadHermanos').value = 1;
+    document.getElementById('hermanosDetalle').value =
+      'Tiene una hermana de 7 años';
+
+    marcarValores('alergias', ['NINGUNA_CONOCIDA']);
+    document.getElementById('intoleranciaLactosa').value = 'NO';
+    marcarValores('condicionesSalud', ['NINGUNA_CONOCIDA']);
+    document.getElementById('necesidadesApoyo').value =
+      'Apoyo educativo en lectura';
+
+    actualizarAvisoMedico();
+
+  });
+
+
+
+/* ===============================================
+   REGISTRO DEL PERFIL DEL NIÑO/A
+   =============================================== */
+
+formulario.addEventListener('submit', async (evento) => {
+
+  evento.preventDefault();
+
+  resultado.className = 'resultado';
+  resultado.textContent = '';
+
+  btnRegistrar.disabled = true;
+  btnRegistrar.textContent = 'Registrando…';
+
+  const cuerpo = {
+    edad: Number(document.getElementById('edad').value),
+    nivelEscolar: document.getElementById('nivelEscolar').value,
+    gradoEscolar: document.getElementById('gradoEscolar').value,
+    rendimientoAcademico: document.getElementById('rendimientoAcademico').value,
+    habilidades: valoresMarcados('habilidades'),
+    habilidadesDetalle: document.getElementById('habilidadesDetalle').value,
+    gustos: valoresMarcados('gustos'),
+    gustosDetalle: document.getElementById('gustosDetalle').value,
+    personalidad: valoresMarcados('personalidad'),
+    personalidadDetalle: document.getElementById('personalidadDetalle').value,
+    alergias: valoresMarcados('alergias'),
+    alergiasDetalle: document.getElementById('alergiasDetalle').value,
+    intoleranciaLactosa: document.getElementById('intoleranciaLactosa').value,
+    condicionesSalud: valoresMarcados('condicionesSalud'),
+    condicionesSaludDetalle: document.getElementById('condicionesSaludDetalle').value,
+    necesidadesApoyo: document.getElementById('necesidadesApoyo').value,
+    tieneHermanos: document.getElementById('tieneHermanos').value,
+    cantidadHermanos: document.getElementById('cantidadHermanos').value
+      ? Number(document.getElementById('cantidadHermanos').value)
+      : null,
+    hermanosDetalle: document.getElementById('hermanosDetalle').value,
+    contextoCultural: document.getElementById('contextoCultural').value
+  };
+
+  if (!formulario.checkValidity()) {
+    formulario.reportValidity();
+    btnRegistrar.disabled = false;
+    btnRegistrar.textContent = 'Enviar entrevista';
+    return;
+  }
+
+  const usuarioId =
+    document.getElementById('idFuncionario').value.trim();
+
+  try {
+
+    const respuesta = await fetch('/api/ninos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Role': rolSeleccionado,
+        'X-User-Id': usuarioId
+      },
+      body: JSON.stringify(cuerpo)
+    });
+
+    const datos = await respuesta.json();
+
+    if (respuesta.ok) {
+
+      resultado.className = 'resultado exito';
+      resultado.innerHTML =
+        `<strong>Entrevista enviada correctamente.</strong><br>` +
+        `${datos.mensaje} · Código de caso: <span class="codigo">${datos.codigoCaso}</span>` +
+        (datos.perfilCompleto ? '' : ' · El perfil quedó marcado como incompleto.') +
+        (datos.alertaMedica ? ' · <strong>Alerta médica activa.</strong>' : '') +
+        '<br><small>Regresando al menú de funcionario…</small>';
+
+      setTimeout(() => {
+        location.href = 'funcionario.html';
+      }, 1600);
+
+    } else if (respuesta.status === 403) {
+
+      resultado.className = 'resultado error';
+      resultado.textContent =
+        datos.mensaje || 'Este rol no está autorizado para registrar el perfil.';
+
+    } else {
+
+      resultado.className = 'resultado error';
+      let texto = datos.mensaje || 'No se pudo registrar el perfil.';
+
+      if (datos.errores) {
+        const detalles = Object.entries(datos.errores).map(
+          ([campo, msg]) => `${campo}: ${msg}`
+        );
+        texto += '<ul>' + detalles.map((d) => `<li>${d}</li>`).join('') + '</ul>';
+      }
+
+      resultado.innerHTML = texto;
+
+    }
+
+  } catch (error) {
+
+    resultado.className = 'resultado error';
+    resultado.textContent =
+      'No se pudo conectar con el servidor. ' +
+      'Verifica que la aplicación esté corriendo en el puerto 8080.';
+
+  } finally {
+
+    btnRegistrar.disabled = false;
+    btnRegistrar.textContent = 'Enviar entrevista';
+
+  }
+
+});
+
+
+
+/* ===============================================
+   DATOS DE EJEMPLO: FAMILIA
+   =============================================== */
+
+document
+  .getElementById('btnEjemploFamilia')
+  .addEventListener('click', () => {
+
+    document.getElementById('tipoFamilia').value = 'PAREJA';
+    document.getElementById('notaEstructuraHogar').value =
+      'Vivimos juntos hace 8 años, sin otros hijos en casa';
+
+    marcarValores('redApoyo', ['PAREJA', 'FAMILIA_EXTENDIDA']);
+    document.getElementById('notaRedApoyo').value =
+      'Mis padres viven cerca y podrían ayudarnos los primeros meses';
+
+    document.getElementById('provincia').value = 'PANAMA';
+    document.getElementById('disponibilidadViaje').value = 'ALTA';
+    document.getElementById('notaDistancia').value =
+      'Podemos viajar cada fin de semana si es necesario';
+
+    document.getElementById('edadMinimaAceptada').value = 3;
+    document.getElementById('edadMaximaAceptada').value = 8;
+    document.getElementById('notaRangoEdad').value =
+      'Nos sentimos más preparados para edad escolar';
+
+    document.getElementById('disposicionHermanos').value = 'DISPUESTA_CON_DUDAS';
+    document.getElementById('notaHermanos').value =
+      'Nos preocupa tener espacio suficiente en la casa para dos';
+
+    marcarValores('condicionesPuedeAcompanarHoy', ['ASMA']);
+    marcarValores('condicionesConApoyo', ['TDAH']);
+    document.getElementById('notaCondicionesSalud').value =
+      'Nos gustaría recibir capacitación sobre TDAH';
+
+    document.getElementById('continuidadCultural').value =
+      'Tenemos raíces indígenas y nos gustaría preservarlas';
+
+  });
+
+
+
+/* ===============================================
+   REGISTRO DEL PERFIL DE LA FAMILIA
+   =============================================== */
+
+formularioFamilia.addEventListener('submit', async (evento) => {
+
+  evento.preventDefault();
+
+  resultadoFamilia.className = 'resultado';
+  resultadoFamilia.textContent = '';
+
+  btnRegistrarFamilia.disabled = true;
+  btnRegistrarFamilia.textContent = 'Enviando…';
+
+  const cuerpo = {
+    tipoFamilia: document.getElementById('tipoFamilia').value,
+    notaEstructuraHogar: document.getElementById('notaEstructuraHogar').value,
+    redApoyo: valoresMarcados('redApoyo'),
+    notaRedApoyo: document.getElementById('notaRedApoyo').value,
+    provincia: document.getElementById('provincia').value,
+    disponibilidadViaje: document.getElementById('disponibilidadViaje').value,
+    notaDistancia: document.getElementById('notaDistancia').value,
+    edadMinimaAceptada: document.getElementById('edadMinimaAceptada').value
+      ? Number(document.getElementById('edadMinimaAceptada').value)
+      : null,
+    edadMaximaAceptada: document.getElementById('edadMaximaAceptada').value
+      ? Number(document.getElementById('edadMaximaAceptada').value)
+      : null,
+    notaRangoEdad: document.getElementById('notaRangoEdad').value,
+    disposicionHermanos: document.getElementById('disposicionHermanos').value,
+    notaHermanos: document.getElementById('notaHermanos').value,
+    condicionesPuedeAcompanarHoy: valoresMarcados('condicionesPuedeAcompanarHoy'),
+    condicionesConApoyo: valoresMarcados('condicionesConApoyo'),
+    notaCondicionesSalud: document.getElementById('notaCondicionesSalud').value,
+    continuidadCultural: document.getElementById('continuidadCultural').value
+  };
+
+  if (!formularioFamilia.checkValidity()) {
+    formularioFamilia.reportValidity();
+    btnRegistrarFamilia.disabled = false;
+    btnRegistrarFamilia.textContent = 'Enviar entrevista';
+    return;
+  }
+
+  const usuarioId =
+    document.getElementById('cedulaFamilia').value.trim();
+
+  try {
+
+    const respuesta = await fetch('/api/familias', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Role': 'FAMILIA',
+        'X-User-Id': usuarioId
+      },
+      body: JSON.stringify(cuerpo)
+    });
+
+    const datos = await respuesta.json();
+
+    if (respuesta.ok) {
+
+      resultadoFamilia.className = 'resultado exito';
+      resultadoFamilia.innerHTML =
+        `${datos.mensaje}
+        · Código de caso:
+        <span class="codigo">${datos.codigoCaso}</span>` +
+        (datos.perfilCompleto ? '' : ' · el perfil quedó marcado como incompleto.');
+
+    } else if (respuesta.status === 403) {
+
+      resultadoFamilia.className = 'resultado error';
+      resultadoFamilia.textContent =
+        datos.mensaje || 'Este rol no está autorizado para registrar este perfil.';
+
+    } else {
+
+      resultadoFamilia.className = 'resultado error';
+      let texto = datos.mensaje || 'No se pudo registrar el perfil.';
+
+      if (datos.errores) {
+        const detalles = Object.entries(datos.errores).map(
+          ([campo, msg]) => `${campo}: ${msg}`
+        );
+        texto += '<ul>' + detalles.map((d) => `<li>${d}</li>`).join('') + '</ul>';
+      }
+
+      resultadoFamilia.innerHTML = texto;
+
+    }
+
+  } catch (error) {
+
+    resultadoFamilia.className = 'resultado error';
+    resultadoFamilia.textContent =
+      'No se pudo conectar con el servidor. ' +
+      'Verifica que la aplicación esté corriendo en el puerto 8080.';
+
+  } finally {
+
+    btnRegistrarFamilia.disabled = false;
+    btnRegistrarFamilia.textContent = 'Enviar entrevista';
+
+  }
+
+});
+
+/* ===============================================
+   SESIÓN (viene de index.html)
+   =============================================== */
+
+const sesion = JSON.parse(sessionStorage.getItem('senniaf.sesion') || 'null');
+
+if (!sesion) {
+  location.replace('index.html');
+} else {
+  rolSeleccionado = sesion.rol;
+  pantallaSelector.hidden = true;
+
+  if (sesion.tipo === 'FAMILIA') {
+    pantallaFamilia.hidden = false;
+    const c = document.getElementById('cedulaFamilia');
+    c.value = sesion.id;
+    c.readOnly = true;
+    document.getElementById('btnCambiarRolFamilia').hidden = true;
+  } else {
+    document.getElementById('etiquetaRolNino').textContent = NOMBRES_ROL[sesion.rol];
+    pantallaNino.hidden = false;
+    const f = document.getElementById('idFuncionario');
+    f.value = sesion.id;
+    f.readOnly = true;
+    document.getElementById('btnCambiarRolNino').hidden = true;
+  }
+
+  const barra = document.querySelector('.barra-gobierno .contenido');
+  const enlaceMenu = sesion.tipo === 'FAMILIA'
+    ? ''
+    : '<a href="funcionario.html" style="color:#fff;margin-right:16px">Menú</a>';
+
+  barra.innerHTML =
+    `<span>${sesion.nombre}</span>` +
+    `<span>${enlaceMenu}<a href="#" id="salirSesion" style="color:#fff">Cerrar sesión</a></span>`;
+  document.getElementById('salirSesion').addEventListener('click', (e) => {
+    e.preventDefault();
+    sessionStorage.removeItem('senniaf.sesion');
+    location.href = 'index.html';
+  });
+}
+
+</script>
+
+</body>
+</html>

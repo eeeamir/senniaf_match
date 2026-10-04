@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Comparator;
 
 @Service
 public class PerfilNinoService {
@@ -70,6 +71,12 @@ public class PerfilNinoService {
         }
 
         return new PerfilNinoResponse(mensaje, codigoCaso, completo, alertaMedica);
+    }
+
+    public List<PerfilNino> listarPerfiles() {
+        return repositorio.listar().stream()
+                .sorted(Comparator.comparing(PerfilNino::getFechaRegistro).reversed())
+                .toList();
     }
 
     private boolean calcularSiEstaCompleto(PerfilNinoRequest r) {
