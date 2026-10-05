@@ -23,7 +23,7 @@ public class PerfilNinoService {
     }
 
     public PerfilNinoResponse registrarPerfil(PerfilNinoRequest request, String registradoPor) {
-        String codigoCaso = repositorio.siguienteCodigoCaso();
+        String codigoCaso = siguienteCodigoCaso();
 
         PerfilNino perfil = new PerfilNino();
         perfil.setCodigoCaso(codigoCaso);
@@ -56,7 +56,7 @@ public class PerfilNinoService {
         boolean alertaMedica = calcularAlertaMedica(request);
         perfil.setAlertaMedica(alertaMedica);
 
-        repositorio.guardar(perfil);
+        repositorio.save(perfil);
 
         // Comportamiento esperado según 2.4: un perfil incompleto no se
         // rechaza, pero queda marcado para que el motor de scoring lo
@@ -74,9 +74,13 @@ public class PerfilNinoService {
     }
 
     public List<PerfilNino> listarPerfiles() {
-        return repositorio.listar().stream()
+        return repositorio.findAll().stream()
                 .sorted(Comparator.comparing(PerfilNino::getFechaRegistro).reversed())
                 .toList();
+    }
+
+    private synchronized String siguienteCodigoCaso() {
+        return String.format("NNA-%03d", repositorio.count() + 1);
     }
 
     private boolean calcularSiEstaCompleto(PerfilNinoRequest r) {

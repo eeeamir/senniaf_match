@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import static org.mockito.Mockito.mock;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -18,7 +19,7 @@ class PerfilNinoControllerTest {
 
     @BeforeEach
     void setUp() {
-        PerfilNinoService service = new PerfilNinoService(new PerfilNinoRepository());
+        PerfilNinoService service = new PerfilNinoService(mock(PerfilNinoRepository.class));
         PerfilNinoController controller = new PerfilNinoController(service);
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)

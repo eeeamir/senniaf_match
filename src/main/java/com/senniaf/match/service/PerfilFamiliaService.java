@@ -25,12 +25,12 @@ public class PerfilFamiliaService {
             throw new IllegalArgumentException("La cédula del responsable es obligatoria");
         }
 
-        if (repositorio.existePorCedula(cedula)) {
+        if (repositorio.existsByRegistradoPor(cedula)) {
             throw new IllegalStateException(
                     "Ya existe un caso de familia registrado con la cédula " + cedula);
         }
 
-        String codigoCaso = repositorio.siguienteCodigoCaso();
+        String codigoCaso = siguienteCodigoCaso();
 
         PerfilFamilia perfil = new PerfilFamilia();
         perfil.setCodigoCaso(codigoCaso);
@@ -56,7 +56,7 @@ public class PerfilFamiliaService {
         boolean completo = calcularSiEstaCompleto(request);
         perfil.setPerfilCompleto(completo);
 
-        repositorio.guardar(perfil);
+        repositorio.save(perfil);
 
         String mensaje = completo
                 ? "Perfil registrado correctamente"
@@ -67,9 +67,13 @@ public class PerfilFamiliaService {
 
     /** Perfil que la familia ya registró con su cédula, si existe. */
     public java.util.Optional<PerfilFamiliaResponse> consultarPorCedula(String cedula) {
-        return repositorio.buscarPorCedula(cedula == null ? "" : cedula.trim())
+        return repositorio.findByRegistradoPor(cedula == null ? "" : cedula.trim())
                 .map(p -> new PerfilFamiliaResponse(
                         "Perfil encontrado", p.getCodigoCaso(), p.isPerfilCompleto()));
+    }
+
+    private synchronized String siguienteCodigoCaso() {
+        return String.format("FAM-%03d", repositorio.count() + 1);
     }
 
     private boolean calcularSiEstaCompleto(PerfilFamiliaRequest r) {

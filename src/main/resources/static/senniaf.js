@@ -32,16 +32,14 @@ const Sesion = {
     document.getElementById('btnSalir').addEventListener('click', () => Sesion.salir());
   },
 
-  /* Marca local de “ya completó su entrevista” (respaldo si el servidor no responde). */
-  marcarEntrevista(id) { localStorage.setItem('senniaf.entrevista.' + id, '1'); },
 
   /* A dónde debe ir una familia al iniciar sesión. */
   async destinoFamilia(s) {
     try {
       const r = await fetch('/api/familias/mi-perfil', { headers: { 'X-User-Role': 'FAMILIA', 'X-User-Id': s.id } });
-      if (r.ok) { this.marcarEntrevista(s.id); return 'match.html'; }
+      if (r.ok) return 'match.html';
       if (r.status === 404) return 'perfil.html';
-    } catch (_) { /* sin conexión: se usa la marca local */ }
-    return localStorage.getItem('senniaf.entrevista.' + s.id) ? 'match.html' : 'perfil.html';
+    } catch (_) { /* sin conexión: no se asume que exista una entrevista */ }
+    return 'perfil.html';
   }
 };

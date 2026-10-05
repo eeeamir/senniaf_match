@@ -2,6 +2,7 @@ package com.senniaf.match.service;
 
 import com.senniaf.match.dto.PerfilFamiliaRequest;
 import com.senniaf.match.dto.PerfilFamiliaResponse;
+import com.senniaf.match.model.PerfilFamilia;
 import com.senniaf.match.model.enums.CondicionSalud;
 import com.senniaf.match.model.enums.DisponibilidadViaje;
 import com.senniaf.match.model.enums.DisposicionHermanos;
@@ -14,9 +15,16 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.mockito.Mockito.*;
+
+
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PerfilFamiliaServiceTest {
@@ -25,7 +33,11 @@ class PerfilFamiliaServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new PerfilFamiliaService(new PerfilFamiliaRepository());
+        PerfilFamiliaRepository repo = mock(PerfilFamiliaRepository.class);
+        when(repo.count()).thenReturn(0L);
+        when(repo.save(any(PerfilFamilia.class))).thenAnswer(i -> i.getArgument(0));
+        when(repo.existsByRegistradoPor(anyString())).thenReturn(false);
+        service = new PerfilFamiliaService(repo);
     }
 
     @Test
@@ -42,6 +54,11 @@ class PerfilFamiliaServiceTest {
     @Test
     void impideRegistrarDosCasosConLaMismaCedula() {
         PerfilFamiliaRequest request = perfilCompleto();
+        PerfilFamiliaRepository repo = mock(PerfilFamiliaRepository.class);
+        when(repo.count()).thenReturn(0L);
+        when(repo.save(any(PerfilFamilia.class))).thenAnswer(i -> i.getArgument(0));
+        when(repo.existsByRegistradoPor("8-123-456")).thenReturn(false, true);
+        service = new PerfilFamiliaService(repo);
 
         PerfilFamiliaResponse primero = service.registrarPerfil(request, "8-123-456");
 

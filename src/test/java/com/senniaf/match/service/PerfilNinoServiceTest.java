@@ -2,6 +2,7 @@ package com.senniaf.match.service;
 
 import com.senniaf.match.dto.PerfilNinoRequest;
 import com.senniaf.match.dto.PerfilNinoResponse;
+import com.senniaf.match.model.PerfilNino;
 import com.senniaf.match.model.enums.Alergia;
 import com.senniaf.match.model.enums.AreaHabilidad;
 import com.senniaf.match.model.enums.CondicionSalud;
@@ -17,8 +18,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.mockito.Mockito.*;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PerfilNinoServiceTest {
@@ -27,7 +32,10 @@ class PerfilNinoServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new PerfilNinoService(new PerfilNinoRepository());
+        PerfilNinoRepository repo = mock(PerfilNinoRepository.class);
+        when(repo.count()).thenReturn(0L);
+        when(repo.save(any(PerfilNino.class))).thenAnswer(i -> i.getArgument(0));
+        service = new PerfilNinoService(repo);
     }
 
     @Test
@@ -45,6 +53,10 @@ class PerfilNinoServiceTest {
     @Test
     void generaCodigosDeCasoSecuencialesParaCadaPerfil() {
         PerfilNinoRequest request = perfilCompletoSinCondicionesMedicas();
+        PerfilNinoRepository repo = mock(PerfilNinoRepository.class);
+        when(repo.count()).thenReturn(0L, 1L);
+        when(repo.save(any(PerfilNino.class))).thenAnswer(i -> i.getArgument(0));
+        service = new PerfilNinoService(repo);
 
         PerfilNinoResponse primero = service.registrarPerfil(request, "trabajador-social-1");
         PerfilNinoResponse segundo = service.registrarPerfil(request, "trabajador-social-1");

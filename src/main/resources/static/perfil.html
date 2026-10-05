@@ -1501,7 +1501,6 @@ formularioFamilia.addEventListener('submit', async (evento) => {
 
     if (respuesta.ok) {
 
-      Sesion.marcarEntrevista(usuarioId);
       resultadoFamilia.className = 'resultado exito';
       resultadoFamilia.innerHTML =
         `<strong>Entrevista enviada correctamente.</strong><br>${datos.mensaje}
@@ -1513,7 +1512,6 @@ formularioFamilia.addEventListener('submit', async (evento) => {
 
     } else if (respuesta.status === 409) {
 
-      Sesion.marcarEntrevista(usuarioId);
       location.href = 'match.html';
 
     } else if (respuesta.status === 403) {
@@ -1588,4 +1586,4 @@ if (sesion) {
 </script>
 
 </body>
-</html>
+</html>

@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -18,7 +19,7 @@ class PerfilFamiliaControllerTest {
 
     @BeforeEach
     void setUp() {
-        PerfilFamiliaService service = new PerfilFamiliaService(new PerfilFamiliaRepository());
+        PerfilFamiliaService service = new PerfilFamiliaService(mock(PerfilFamiliaRepository.class));
         PerfilFamiliaController controller = new PerfilFamiliaController(service);
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)

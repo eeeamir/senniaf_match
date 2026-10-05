@@ -1,228 +1,60 @@
 package com.senniaf.match.model;
 
-import com.senniaf.match.model.enums.CondicionSalud;
-import com.senniaf.match.model.enums.DisponibilidadViaje;
-import com.senniaf.match.model.enums.DisposicionHermanos;
-import com.senniaf.match.model.enums.FuenteApoyo;
-import com.senniaf.match.model.enums.ProvinciaPanama;
-import com.senniaf.match.model.enums.TipoFamilia;
-
+import com.senniaf.match.model.enums.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Representación interna, pseudonimizada, del perfil de idoneidad de una
- * familia adoptante (PBI06/PBI07, HU02). Se identifica solo por
- * codigoCaso; no guarda nombres ni datos de contacto directos.
- *
- * Los campos siguen el orden y el diseño de la "entrevista humanizada"
- * del Sprint 0: cada pregunta empática guarda un valor estructurado que
- * el motor de scoring podrá usar, más una nota de texto libre que el
- * Comité puede leer aunque el motor no la use directamente. El orden de
- * los campos respeta el principio de la entrevista de empezar por
- * preguntas de conexión (estructura del hogar) antes de las más
- * sensibles (salud, hermanos).
- *
- * Las condiciones de salud que la familia declara poder acompañar
- * reutilizan el mismo enum CondicionSalud del perfil del niño/a, para
- * que ambos lados puedan compararse directamente en el futuro motor de
- * match (PBI08).
- */
+@Entity
+@Table(name="perfiles_familia", uniqueConstraints=@UniqueConstraint(name="uk_familia_codigo", columnNames="codigo_caso"))
 public class PerfilFamilia {
-
-    private String codigoCaso;
-
-    // Estructura del hogar
-    private TipoFamilia tipoFamilia;
-    private String notaEstructuraHogar;
-
-    // Red de apoyo
-    private List<FuenteApoyo> redApoyo;
-    private String notaRedApoyo;
-
-    // Distancia / región
-    private ProvinciaPanama provincia;
-    private DisponibilidadViaje disponibilidadViaje;
-    private String notaDistancia;
-
-    // Rango de edad aceptado
+    @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
+    @Column(name="codigo_caso", nullable=false, unique=true, length=20) private String codigoCaso;
+    @Enumerated(EnumType.STRING) private TipoFamilia tipoFamilia;
+    @Column(length=2000) private String notaEstructuraHogar;
+    @ElementCollection(fetch=FetchType.EAGER) @Enumerated(EnumType.STRING)
+    @CollectionTable(name="familia_red_apoyo", joinColumns=@JoinColumn(name="perfil_id"))
+    @Column(name="fuente") private List<FuenteApoyo> redApoyo;
+    @Column(length=2000) private String notaRedApoyo;
+    @Enumerated(EnumType.STRING) private ProvinciaPanama provincia;
+    @Enumerated(EnumType.STRING) private DisponibilidadViaje disponibilidadViaje;
+    @Column(length=2000) private String notaDistancia;
     private Integer edadMinimaAceptada;
     private Integer edadMaximaAceptada;
     private String notaRangoEdad;
-
-    // Disposición a grupos de hermanos
-    private DisposicionHermanos disposicionHermanos;
-    private String notaHermanos;
-
-    // Condiciones de salud / desarrollo aceptadas (escala, no binario)
-    private List<CondicionSalud> condicionesPuedeAcompanarHoy;
-    private List<CondicionSalud> condicionesConApoyo;
-    private String notaCondicionesSalud;
-
-    // Continuidad de identidad / cultura (texto libre a propósito)
-    private String continuidadCultural;
-
-    private String registradoPor;
+    @Enumerated(EnumType.STRING) private DisposicionHermanos disposicionHermanos;
+    @Column(length=2000) private String notaHermanos;
+    @ElementCollection(fetch=FetchType.EAGER) @Enumerated(EnumType.STRING)
+    @CollectionTable(name="familia_salud_hoy", joinColumns=@JoinColumn(name="perfil_id"))
+    @Column(name="condicion") private List<CondicionSalud> condicionesPuedeAcompanarHoy;
+    @ElementCollection(fetch=FetchType.EAGER) @Enumerated(EnumType.STRING)
+    @CollectionTable(name="familia_salud_apoyo", joinColumns=@JoinColumn(name="perfil_id"))
+    @Column(name="condicion") private List<CondicionSalud> condicionesConApoyo;
+    @Column(length=2000) private String notaCondicionesSalud;
+    @Column(length=2000) private String continuidadCultural;
+    @Column(name="registrado_por", nullable=false) private String registradoPor;
     private LocalDateTime fechaRegistro;
     private boolean perfilCompleto;
 
-    public String getCodigoCaso() {
-        return codigoCaso;
-    }
-
-    public void setCodigoCaso(String codigoCaso) {
-        this.codigoCaso = codigoCaso;
-    }
-
-    public TipoFamilia getTipoFamilia() {
-        return tipoFamilia;
-    }
-
-    public void setTipoFamilia(TipoFamilia tipoFamilia) {
-        this.tipoFamilia = tipoFamilia;
-    }
-
-    public String getNotaEstructuraHogar() {
-        return notaEstructuraHogar;
-    }
-
-    public void setNotaEstructuraHogar(String notaEstructuraHogar) {
-        this.notaEstructuraHogar = notaEstructuraHogar;
-    }
-
-    public List<FuenteApoyo> getRedApoyo() {
-        return redApoyo;
-    }
-
-    public void setRedApoyo(List<FuenteApoyo> redApoyo) {
-        this.redApoyo = redApoyo;
-    }
-
-    public String getNotaRedApoyo() {
-        return notaRedApoyo;
-    }
-
-    public void setNotaRedApoyo(String notaRedApoyo) {
-        this.notaRedApoyo = notaRedApoyo;
-    }
-
-    public ProvinciaPanama getProvincia() {
-        return provincia;
-    }
-
-    public void setProvincia(ProvinciaPanama provincia) {
-        this.provincia = provincia;
-    }
-
-    public DisponibilidadViaje getDisponibilidadViaje() {
-        return disponibilidadViaje;
-    }
-
-    public void setDisponibilidadViaje(DisponibilidadViaje disponibilidadViaje) {
-        this.disponibilidadViaje = disponibilidadViaje;
-    }
-
-    public String getNotaDistancia() {
-        return notaDistancia;
-    }
-
-    public void setNotaDistancia(String notaDistancia) {
-        this.notaDistancia = notaDistancia;
-    }
-
-    public Integer getEdadMinimaAceptada() {
-        return edadMinimaAceptada;
-    }
-
-    public void setEdadMinimaAceptada(Integer edadMinimaAceptada) {
-        this.edadMinimaAceptada = edadMinimaAceptada;
-    }
-
-    public Integer getEdadMaximaAceptada() {
-        return edadMaximaAceptada;
-    }
-
-    public void setEdadMaximaAceptada(Integer edadMaximaAceptada) {
-        this.edadMaximaAceptada = edadMaximaAceptada;
-    }
-
-    public String getNotaRangoEdad() {
-        return notaRangoEdad;
-    }
-
-    public void setNotaRangoEdad(String notaRangoEdad) {
-        this.notaRangoEdad = notaRangoEdad;
-    }
-
-    public DisposicionHermanos getDisposicionHermanos() {
-        return disposicionHermanos;
-    }
-
-    public void setDisposicionHermanos(DisposicionHermanos disposicionHermanos) {
-        this.disposicionHermanos = disposicionHermanos;
-    }
-
-    public String getNotaHermanos() {
-        return notaHermanos;
-    }
-
-    public void setNotaHermanos(String notaHermanos) {
-        this.notaHermanos = notaHermanos;
-    }
-
-    public List<CondicionSalud> getCondicionesPuedeAcompanarHoy() {
-        return condicionesPuedeAcompanarHoy;
-    }
-
-    public void setCondicionesPuedeAcompanarHoy(List<CondicionSalud> condicionesPuedeAcompanarHoy) {
-        this.condicionesPuedeAcompanarHoy = condicionesPuedeAcompanarHoy;
-    }
-
-    public List<CondicionSalud> getCondicionesConApoyo() {
-        return condicionesConApoyo;
-    }
-
-    public void setCondicionesConApoyo(List<CondicionSalud> condicionesConApoyo) {
-        this.condicionesConApoyo = condicionesConApoyo;
-    }
-
-    public String getNotaCondicionesSalud() {
-        return notaCondicionesSalud;
-    }
-
-    public void setNotaCondicionesSalud(String notaCondicionesSalud) {
-        this.notaCondicionesSalud = notaCondicionesSalud;
-    }
-
-    public String getContinuidadCultural() {
-        return continuidadCultural;
-    }
-
-    public void setContinuidadCultural(String continuidadCultural) {
-        this.continuidadCultural = continuidadCultural;
-    }
-
-    public String getRegistradoPor() {
-        return registradoPor;
-    }
-
-    public void setRegistradoPor(String registradoPor) {
-        this.registradoPor = registradoPor;
-    }
-
-    public LocalDateTime getFechaRegistro() {
-        return fechaRegistro;
-    }
-
-    public void setFechaRegistro(LocalDateTime fechaRegistro) {
-        this.fechaRegistro = fechaRegistro;
-    }
-
-    public boolean isPerfilCompleto() {
-        return perfilCompleto;
-    }
-
-    public void setPerfilCompleto(boolean perfilCompleto) {
-        this.perfilCompleto = perfilCompleto;
-    }
+    public Long getId(){return id;} public void setId(Long v){id=v;}
+    public String getCodigoCaso(){return codigoCaso;} public void setCodigoCaso(String v){codigoCaso=v;}
+    public TipoFamilia getTipoFamilia(){return tipoFamilia;} public void setTipoFamilia(TipoFamilia v){tipoFamilia=v;}
+    public String getNotaEstructuraHogar(){return notaEstructuraHogar;} public void setNotaEstructuraHogar(String v){notaEstructuraHogar=v;}
+    public List<FuenteApoyo> getRedApoyo(){return redApoyo;} public void setRedApoyo(List<FuenteApoyo> v){redApoyo=v;}
+    public String getNotaRedApoyo(){return notaRedApoyo;} public void setNotaRedApoyo(String v){notaRedApoyo=v;}
+    public ProvinciaPanama getProvincia(){return provincia;} public void setProvincia(ProvinciaPanama v){provincia=v;}
+    public DisponibilidadViaje getDisponibilidadViaje(){return disponibilidadViaje;} public void setDisponibilidadViaje(DisponibilidadViaje v){disponibilidadViaje=v;}
+    public String getNotaDistancia(){return notaDistancia;} public void setNotaDistancia(String v){notaDistancia=v;}
+    public Integer getEdadMinimaAceptada(){return edadMinimaAceptada;} public void setEdadMinimaAceptada(Integer v){edadMinimaAceptada=v;}
+    public Integer getEdadMaximaAceptada(){return edadMaximaAceptada;} public void setEdadMaximaAceptada(Integer v){edadMaximaAceptada=v;}
+    public String getNotaRangoEdad(){return notaRangoEdad;} public void setNotaRangoEdad(String v){notaRangoEdad=v;}
+    public DisposicionHermanos getDisposicionHermanos(){return disposicionHermanos;} public void setDisposicionHermanos(DisposicionHermanos v){disposicionHermanos=v;}
+    public String getNotaHermanos(){return notaHermanos;} public void setNotaHermanos(String v){notaHermanos=v;}
+    public List<CondicionSalud> getCondicionesPuedeAcompanarHoy(){return condicionesPuedeAcompanarHoy;} public void setCondicionesPuedeAcompanarHoy(List<CondicionSalud> v){condicionesPuedeAcompanarHoy=v;}
+    public List<CondicionSalud> getCondicionesConApoyo(){return condicionesConApoyo;} public void setCondicionesConApoyo(List<CondicionSalud> v){condicionesConApoyo=v;}
+    public String getNotaCondicionesSalud(){return notaCondicionesSalud;} public void setNotaCondicionesSalud(String v){notaCondicionesSalud=v;}
+    public String getContinuidadCultural(){return continuidadCultural;} public void setContinuidadCultural(String v){continuidadCultural=v;}
+    public String getRegistradoPor(){return registradoPor;} public void setRegistradoPor(String v){registradoPor=v;}
+    public LocalDateTime getFechaRegistro(){return fechaRegistro;} public void setFechaRegistro(LocalDateTime v){fechaRegistro=v;}
+    public boolean isPerfilCompleto(){return perfilCompleto;} public void setPerfilCompleto(boolean v){perfilCompleto=v;}
 }

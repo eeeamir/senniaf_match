@@ -31,7 +31,9 @@
       <form id="formLogin" novalidate>
         <label for="loginId">Cédula o ID de funcionario</label>
         <input id="loginId" autocomplete="username" placeholder="Ej. 8-123-456 o TS-001" required>
-        <p class="ayuda">Funcionarios: TS- trabajador social, PS- psicólogo, CM- comité.</p>
+        <label for="loginPassword">Contraseña</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Tu contraseña" required>
+        <p class="ayuda">Funcionarios: usa el ID y la contraseña institucional configurada. Las familias usan su cédula/correo y contraseña.</p>
         <button class="boton bloque" type="submit">Iniciar sesión</button>
         <div class="mensaje" id="msgLogin" role="alert"></div>
       </form>
@@ -54,7 +56,9 @@
         <input id="cedula" placeholder="Ej. 8-123-456" required>
         <label for="correo">Correo electrónico</label>
         <input id="correo" type="email" autocomplete="email" placeholder="nombre@correo.com" required>
-        <p class="ayuda">Te enviaremos un código de verificación.</p>
+        <label for="password">Contraseña</label>
+        <input id="password" type="password" autocomplete="new-password" minlength="8" placeholder="Mínimo 8 caracteres" required>
+        <p class="ayuda">La contraseña se guarda en la base de datos como hash seguro; nunca se guarda en texto plano.</p>
         <button class="boton bloque" type="submit">Enviar código</button>
         <div class="mensaje" id="msgRegistro" role="alert"></div>
       </form>
@@ -85,163 +89,54 @@
 
 <script src="senniaf.js"></script>
 <script>
-/* =====================================================================
-   CAPA DE ACCESO (SIMULADA)
-   El backend todavía no tiene endpoints de autenticación. Todo lo que
-   está dentro de `Acceso` usa localStorage y debe reemplazarse por
-   llamadas fetch() cuando existan. La interfaz no necesita cambios.
-   Endpoints sugeridos:
-     POST /api/auth/registro        {nombre, apellido, cedula, correo}
-     POST /api/auth/verificar       {cedula, codigo}
-     POST /api/auth/reenviar        {cedula}
-     POST /api/auth/login           {identificador}
-   ===================================================================== */
-const Acceso = (() => {
-  const CLAVE = 'senniaf.usuarios', VIGENCIA_MS = 10 * 60 * 1000, MAX_INTENTOS = 5;
-  const leer = () => JSON.parse(localStorage.getItem(CLAVE) || '{"verificados":{},"pendientes":{}}');
-  const guardar = (db) => localStorage.setItem(CLAVE, JSON.stringify(db));
-  const nuevoCodigo = () => String(Math.floor(100000 + Math.random() * 900000));
-  const falla = (mensaje) => { throw new Error(mensaje); };
-
-  return {
-    registrar(datos) {
-      const db = leer();
-      if (db.verificados[datos.cedula]) falla('Esta cédula ya está registrada. Inicia sesión para continuar.');
-      const codigo = nuevoCodigo();
-      db.pendientes[datos.cedula] = { ...datos, codigo, expira: Date.now() + VIGENCIA_MS, intentos: 0 };
-      guardar(db);
-      return { codigoDemo: codigo };
-    },
-    reenviar(cedula) {
-      const db = leer(), p = db.pendientes[cedula];
-      if (!p) falla('Tu registro expiró. Vuelve a completar tus datos.');
-      p.codigo = nuevoCodigo(); p.expira = Date.now() + VIGENCIA_MS; p.intentos = 0;
-      guardar(db);
-      return { codigoDemo: p.codigo };
-    },
-    verificar(cedula, codigo) {
-      const db = leer(), p = db.pendientes[cedula];
-      if (!p) falla('Tu registro expiró. Vuelve a completar tus datos.');
-      if (Date.now() > p.expira) falla('El código venció. Pide uno nuevo con “Reenviar código”.');
-      if (p.intentos >= MAX_INTENTOS) falla('Demasiados intentos. Pide un código nuevo con “Reenviar código”.');
-      if (p.codigo !== codigo) {
-        p.intentos++; guardar(db);
-        falla(`Código incorrecto. Te quedan ${MAX_INTENTOS - p.intentos} intentos.`);
-      }
-      const { nombre, apellido, correo } = p;
-      db.verificados[cedula] = { nombre, apellido, correo, cedula };
-      delete db.pendientes[cedula];
-      guardar(db);
-      return db.verificados[cedula];
-    },
-    iniciarSesion(id) {
-      if (FUNCIONARIO.test(id)) {
-        const rol = id.startsWith('PS') ? 'PSICOLOGO' : id.startsWith('CM') ? 'COMITE' : 'TRABAJADOR_SOCIAL';
-        return { tipo: 'FUNCIONARIO', id, nombre: id, rol };
-      }
-      const u = leer().verificados[id];
-      if (!u) falla('No encontramos esa cédula o ID. Si eres una familia nueva, regístrate primero.');
-      return { tipo: 'FAMILIA', id, nombre: `${u.nombre} ${u.apellido}`, rol: 'FAMILIA' };
-    },
-    cedulaExiste: (c) => !!leer().verificados[c]
-  };
-})();
-
-const FUNCIONARIO = /^[A-Z]{2,3}-\d{2,}$/;   // ej. TS-001, PS-014
-const CEDULA = /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/;  // ej. 8-123-456, PE-12-345
-
-const normalizar = (v) => v.trim().toUpperCase().replace(/\s+/g, '');
+const FUNCIONARIO = /^[A-Z]{2,3}-\d{2,}$/;
+const CEDULA = /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/;
 const $ = (id) => document.getElementById(id);
-const mostrar = (id) => {
-  document.querySelectorAll('.vista').forEach((v) => (v.hidden = v.id !== id));
-  const primero = $(id).querySelector('input'); if (primero) primero.focus();
-};
-const mensaje = (id, texto, tipo = 'error') => { $(id).className = 'mensaje ' + tipo; $(id).textContent = texto; };
-const marcar = (input, malo) => input.setAttribute('aria-invalid', malo ? 'true' : 'false');
+const normalizar = (v) => v.trim().toUpperCase().replace(/\s+/g, '');
+const mostrar = (id) => { document.querySelectorAll('.vista').forEach(v => v.hidden = v.id !== id); const i=$(id).querySelector('input'); if(i)i.focus(); };
+const mensaje = (id,texto,tipo='error') => { $(id).className='mensaje '+tipo; $(id).textContent=texto; };
+const marcar = (input,malo) => input.setAttribute('aria-invalid', malo?'true':'false');
+document.querySelectorAll('[data-ir]').forEach(b=>b.addEventListener('click',()=>mostrar(b.dataset.ir)));
 
-document.querySelectorAll('[data-ir]').forEach((b) => b.addEventListener('click', () => mostrar(b.dataset.ir)));
+let pendiente=null, temporizador=null;
+function mostrarCodigoDemo(codigo){ $('codigoDemo').textContent=codigo || 'Enviado por correo'; $('avisoDemo').hidden=!codigo; }
+function enfriarReenvio(){ let s=30,b=$('btnReenviar'); b.disabled=true; clearInterval(temporizador); temporizador=setInterval(()=>{b.textContent=s>0?`Reenviar código (${s--}s)`:'Reenviar código';if(s<0){b.disabled=false;clearInterval(temporizador);}},1000); }
+async function api(url,options){ const r=await fetch(url,options); let d={}; try{d=await r.json();}catch(_){ } if(!r.ok) throw new Error(d.mensaje || 'No se pudo completar la operación.'); return d; }
 
-/* ---------- Estado del registro en curso ---------- */
-let pendiente = null, temporizador = null;
-
-function mostrarCodigoDemo(codigoDemo) {
-  $('codigoDemo').textContent = codigoDemo; $('avisoDemo').hidden = false;
-}
-function enfriarReenvio() {
-  let s = 30; const b = $('btnReenviar'); b.disabled = true;
-  clearInterval(temporizador);
-  temporizador = setInterval(() => {
-    b.textContent = s > 0 ? `Reenviar código (${s--}s)` : 'Reenviar código';
-    if (s < 0) { b.disabled = false; clearInterval(temporizador); }
-  }, 1000);
-}
-
-/* ---------- Inicio de sesión ---------- */
-$('formLogin').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const input = $('loginId'), id = normalizar(input.value);
-  marcar(input, !id);
-  if (!id) return mensaje('msgLogin', 'Escribe tu cédula o tu ID de funcionario.');
-  try {
-    const sesion = Acceso.iniciarSesion(id);
-    sessionStorage.setItem('senniaf.sesion', JSON.stringify(sesion));
-    /* Familia con entrevista hecha → motor de match; sin entrevista → formulario. */
-    const destino = sesion.tipo === 'FAMILIA' ? await Sesion.destinoFamilia(sesion) : Sesion.inicio(sesion);
-    location.href = destino;
-  } catch (err) { marcar(input, true); mensaje('msgLogin', err.message); }
+$('formLogin').addEventListener('submit',async e=>{
+ e.preventDefault(); const id=normalizar($('loginId').value), password=$('loginPassword').value;
+ if(!id||!password) return mensaje('msgLogin','Escribe tu cédula/ID y contraseña.');
+ try{
+   const sesion=await api('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identificador:id,password})});
+   sessionStorage.setItem('senniaf.sesion',JSON.stringify(sesion));
+   const destino=sesion.tipo==='FAMILIA'?await Sesion.destinoFamilia(sesion):Sesion.inicio(sesion); location.href=destino;
+ }catch(err){ marcar($('loginId'),true); mensaje('msgLogin',err.message); }
 });
 
-/* ---------- Registro ---------- */
-$('formRegistro').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const v = {
-    nombre: $('nombre').value.trim(), apellido: $('apellido').value.trim(),
-    cedula: normalizar($('cedula').value), correo: $('correo').value.trim().toLowerCase()
-  };
-  const errores = {
-    nombre: !v.nombre, apellido: !v.apellido,
-    cedula: !CEDULA.test(v.cedula) || Acceso.cedulaExiste(v.cedula),
-    correo: !$('correo').validity.valid || !v.correo
-  };
-  Object.keys(errores).forEach((k) => marcar($(k), errores[k]));
-  if (errores.nombre || errores.apellido) return mensaje('msgRegistro', 'Completa tu nombre y apellido.');
-  if (!CEDULA.test(v.cedula)) return mensaje('msgRegistro', 'La cédula no tiene un formato válido. Ejemplo: 8-123-456.');
-  if (errores.cedula) return mensaje('msgRegistro', 'Esta cédula ya está registrada. Inicia sesión para continuar.');
-  if (errores.correo) return mensaje('msgRegistro', 'Escribe un correo electrónico válido.');
-
-  try {
-    const { codigoDemo } = Acceso.registrar(v);
-    pendiente = v;
-    $('msgRegistro').className = 'mensaje';
-    $('correoDestino').textContent = v.correo;
-    mostrarCodigoDemo(codigoDemo); enfriarReenvio(); $('codigo').value = ''; $('msgCodigo').className = 'mensaje';
-    mostrar('vistaCodigo');
-  } catch (err) { mensaje('msgRegistro', err.message); }
+$('formRegistro').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const v={nombre:$('nombre').value.trim(),apellido:$('apellido').value.trim(),cedula:normalizar($('cedula').value),correo:$('correo').value.trim().toLowerCase(),password:$('password').value};
+ const errores={nombre:!v.nombre,apellido:!v.apellido,cedula:!CEDULA.test(v.cedula),correo:!$('correo').validity.valid||!v.correo,password:v.password.length<8};
+ Object.keys(errores).forEach(k=>marcar($(k),errores[k]));
+ if(errores.nombre||errores.apellido)return mensaje('msgRegistro','Completa tu nombre y apellido.');
+ if(errores.cedula)return mensaje('msgRegistro','La cédula no tiene un formato válido. Ejemplo: 8-123-456.');
+ if(errores.correo)return mensaje('msgRegistro','Escribe un correo electrónico válido.');
+ if(errores.password)return mensaje('msgRegistro','La contraseña debe tener al menos 8 caracteres.');
+ try{
+   const d=await api('/api/auth/registro',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(v)});
+   pendiente=v; $('correoDestino').textContent=v.correo; mostrarCodigoDemo(d.codigoDemo); enfriarReenvio(); $('codigo').value=''; $('msgCodigo').className='mensaje'; mostrar('vistaCodigo');
+ }catch(err){mensaje('msgRegistro',err.message);}
 });
 
-/* ---------- Verificación y paso al formulario familiar ---------- */
-$('codigo').addEventListener('input', (e) => (e.target.value = e.target.value.replace(/\D/g, '')));
-
-$('formCodigo').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const codigo = $('codigo').value;
-  if (codigo.length !== 6) { marcar($('codigo'), true); return mensaje('msgCodigo', 'El código tiene 6 dígitos.'); }
-  try {
-    const u = Acceso.verificar(pendiente.cedula, codigo);
-    sessionStorage.setItem('senniaf.sesion', JSON.stringify(
-      { tipo: 'FAMILIA', id: u.cedula, nombre: `${u.nombre} ${u.apellido}`, rol: 'FAMILIA' }));
-    mensaje('msgCodigo', 'Correo verificado. Abriendo tu formulario…', 'exito');
-    setTimeout(() => (location.href = 'perfil.html'), 700);
-  } catch (err) { marcar($('codigo'), true); mensaje('msgCodigo', err.message); }
+$('codigo').addEventListener('input',e=>e.target.value=e.target.value.replace(/\D/g,''));
+$('formCodigo').addEventListener('submit',async e=>{
+ e.preventDefault(); const codigo=$('codigo').value; if(codigo.length!==6){marcar($('codigo'),true);return mensaje('msgCodigo','El código tiene 6 dígitos.');}
+ try{
+   const u=await api('/api/auth/verificar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cedula:pendiente.cedula,codigo})});
+   sessionStorage.setItem('senniaf.sesion',JSON.stringify(u)); mensaje('msgCodigo','Correo verificado. Abriendo tu formulario…','exito'); setTimeout(()=>location.href='perfil.html',700);
+ }catch(err){marcar($('codigo'),true);mensaje('msgCodigo',err.message);}
 });
-
-$('btnReenviar').addEventListener('click', () => {
-  try {
-    mostrarCodigoDemo(Acceso.reenviar(pendiente.cedula).codigoDemo);
-    mensaje('msgCodigo', 'Enviamos un código nuevo.', 'exito'); enfriarReenvio();
-  } catch (err) { mensaje('msgCodigo', err.message); }
-});
-
+$('btnReenviar').addEventListener('click',async()=>{try{const d=await api('/api/auth/reenviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cedula:pendiente.cedula})});mostrarCodigoDemo(d.codigoDemo);mensaje('msgCodigo','Se generó un código nuevo.','exito');enfriarReenvio();}catch(err){mensaje('msgCodigo',err.message);}});
 $('loginId').focus();
 </script>
 </body>
