@@ -4,13 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SENNIAF Match · Menú funcionario</title>
+<link rel="stylesheet" href="senniaf.css">
 <link rel="stylesheet" href="funcionario.css">
 </head>
 <body>
-<header>
-  <img src="img/logo-senniaf.jpg" alt="SENNIAF">
-  <div class="usuario"><span><strong id="nombre"></strong> <span class="rol" id="rol"></span></span><button class="salir" id="btnSalir">Cerrar sesión</button></div>
-</header>
+<header class="topbar"><div class="topbar-in">
+  <a class="topbar-marca" href="#"><img src="img/logo-senniaf.jpg" alt="SENNIAF"><span>SENNIAF Match</span></a>
+  <div class="usuario" id="usuario"></div>
+</div></header>
 <main>
   <section class="hero"><h1>Gestión de perfiles</h1><p>Selecciona qué deseas hacer con los perfiles de niños, niñas y adolescentes.</p></section>
   <div class="grid">
@@ -25,18 +26,17 @@
       <a class="boton" href="perfil.html">Ingresar nuevo</a>
     </section>
   </div>
-  <div class="mensaje" id="mensajeExito" hidden></div>
+  <div class="mensaje exito" id="mensajeExito" hidden></div>
 </main>
+<footer class="pie-pagina">Uso institucional · Datos protegidos</footer>
+<script src="senniaf.js"></script>
 <script>
-const sesion=JSON.parse(sessionStorage.getItem('senniaf.sesion')||'null');
-if(!sesion||sesion.tipo!=='FUNCIONARIO'){location.replace('index.html');}
-else{
- document.getElementById('nombre').textContent=sesion.nombre;
- document.getElementById('rol').textContent=sesion.rol==='PSICOLOGO'?'· Psicólogo':'· Trabajador social';
- const flash=sessionStorage.getItem('senniaf.flash');
- if(flash){const box=document.getElementById('mensajeExito');box.textContent=flash;box.hidden=false;sessionStorage.removeItem('senniaf.flash');}
+const sesion = Sesion.requerir(['TRABAJADOR_SOCIAL', 'PSICOLOGO']);
+if (sesion) {
+  Sesion.pintarCabecera(sesion);
+  const flash = sessionStorage.getItem('senniaf.flash');
+  if (flash) { const box = document.getElementById('mensajeExito'); box.textContent = flash; box.hidden = false; sessionStorage.removeItem('senniaf.flash'); }
 }
-document.getElementById('btnSalir').addEventListener('click',()=>{sessionStorage.removeItem('senniaf.sesion');location.href='index.html';});
 </script>
 </body>
 </html>

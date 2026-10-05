@@ -65,6 +65,13 @@ public class PerfilFamiliaService {
         return new PerfilFamiliaResponse(mensaje, codigoCaso, completo);
     }
 
+    /** Perfil que la familia ya registró con su cédula, si existe. */
+    public java.util.Optional<PerfilFamiliaResponse> consultarPorCedula(String cedula) {
+        return repositorio.buscarPorCedula(cedula == null ? "" : cedula.trim())
+                .map(p -> new PerfilFamiliaResponse(
+                        "Perfil encontrado", p.getCodigoCaso(), p.isPerfilCompleto()));
+    }
+
     private boolean calcularSiEstaCompleto(PerfilFamiliaRequest r) {
         boolean rangoEdadValido = r.getEdadMinimaAceptada() != null
                 && r.getEdadMaximaAceptada() != null

@@ -7,6 +7,7 @@ import com.senniaf.match.service.PerfilFamiliaService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -52,5 +53,25 @@ public class PerfilFamiliaController {
 
         PerfilFamiliaResponse response = service.registrarPerfil(request, usuarioId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Permite a la familia saber si ya completó su entrevista (200) o no
+     * (404). El inicio de sesión usa esto para decidir si la lleva al
+     * formulario o a la pantalla del motor de match.
+     */
+    @GetMapping("/mi-perfil")
+    public ResponseEntity<PerfilFamiliaResponse> consultarMiPerfil(
+            @RequestHeader("X-User-Role") String rol,
+            @RequestHeader("X-User-Id") String usuarioId) {
+
+        if (!ROLES_AUTORIZADOS.contains(rol)) {
+            throw new RolNoAutorizadoException(
+                    "El rol '" + rol + "' no está autorizado para consultar perfiles de familia");
+        }
+
+        return service.consultarPorCedula(usuarioId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

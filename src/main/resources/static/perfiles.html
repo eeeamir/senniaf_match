@@ -1,30 +1,49 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SENNIAF Match · Perfiles registrados</title>
+<link rel="stylesheet" href="senniaf.css">
 <link rel="stylesheet" href="perfiles.css">
 </head>
 <body>
-<header><img src="img/logo-senniaf.jpg" alt="SENNIAF"><div class="usuario"><span id="nombre"></span><button class="salir" id="btnSalir">Cerrar sesión</button></div></header>
+<header class="topbar"><div class="topbar-in">
+  <a class="topbar-marca" href="#"><img src="img/logo-senniaf.jpg" alt="SENNIAF"><span>SENNIAF Match</span></a>
+  <div class="usuario" id="usuario"></div>
+</div></header>
 <main>
- <div class="encabezado"><div><h1>Perfiles registrados</h1><p>Casos registrados por los funcionarios autorizados.</p></div><a class="volver" href="funcionario.html">← Volver al menú</a></div>
- <div id="estado" class="estado">Cargando perfiles…</div><div id="lista" class="lista"></div>
+  <section class="hero">
+    <a class="volver" href="funcionario.html">← Volver al menú</a>
+    <h1>Perfiles registrados</h1>
+    <p>Casos registrados por los funcionarios autorizados.</p>
+  </section>
+  <div id="estado" class="tarjeta estado">Cargando perfiles…</div>
+  <div id="lista" class="lista"></div>
 </main>
+<footer class="pie-pagina">Uso institucional · Datos protegidos</footer>
+<script src="senniaf.js"></script>
 <script>
-const sesion=JSON.parse(sessionStorage.getItem('senniaf.sesion')||'null');
-if(!sesion||sesion.tipo!=='FUNCIONARIO') location.replace('index.html');
-else {document.getElementById('nombre').textContent=sesion.nombre; cargar();}
-document.getElementById('btnSalir').addEventListener('click',()=>{sessionStorage.removeItem('senniaf.sesion');location.href='index.html';});
-async function cargar(){
- try{
-  const r=await fetch('/api/ninos',{headers:{'X-User-Role':sesion.rol,'X-User-Id':sesion.id}}); const datos=await r.json();
-  if(!r.ok) throw new Error(datos.mensaje||'No se pudieron consultar los perfiles.');
-  const lista=document.getElementById('lista'), estado=document.getElementById('estado');
-  if(!datos.length){estado.textContent='Todavía no hay perfiles registrados.';return;}
-  estado.hidden=true;
-  lista.innerHTML=datos.map(p=>`<article class="perfil"><div><h2>${p.codigoCaso}</h2><div class="datos"><span>Edad: ${p.edad??'—'}</span><span>Escolaridad: ${p.nivelEscolar??'—'}</span><span>Registrado por: ${p.registradoPor??'—'}</span></div>${p.alertaMedica?'<div class="alerta">⚠ Requiere revisión médica</div>':''}</div><span class="estadoCaso ${p.perfilCompleto?'':'incompleto'}">${p.perfilCompleto?'Completo':'Incompleto'}</span></article>`).join('');
- }catch(e){const estado=document.getElementById('estado');estado.textContent=e.message;estado.style.color='#9C4238';}
+const sesion = Sesion.requerir(['TRABAJADOR_SOCIAL', 'PSICOLOGO']);
+if (sesion) { Sesion.pintarCabecera(sesion); cargar(); }
+async function cargar() {
+  const estado = document.getElementById('estado');
+  try {
+    const r = await fetch('/api/ninos', { headers: { 'X-User-Role': sesion.rol, 'X-User-Id': sesion.id } });
+    const datos = await r.json();
+    if (!r.ok) throw new Error(datos.mensaje || 'No se pudieron consultar los perfiles.');
+    if (!datos.length) { estado.textContent = 'Todavía no hay perfiles registrados.'; return; }
+    estado.hidden = true;
+    document.getElementById('lista').innerHTML = datos.map(p => `
+      <article class="tarjeta perfil">
+        <div>
+          <h2>${p.codigoCaso}</h2>
+          <div class="datos"><span>Edad: ${p.edad ?? '—'}</span><span>Escolaridad: ${p.nivelEscolar ?? '—'}</span><span>Registrado por: ${p.registradoPor ?? '—'}</span></div>
+          ${p.alertaMedica ? '<div class="alerta">Requiere revisión médica</div>' : ''}
+        </div>
+        <span class="chip ${p.perfilCompleto ? 'exito' : 'aviso'}">${p.perfilCompleto ? 'Completo' : 'Incompleto'}</span>
+      </article>`).join('');
+  } catch (e) { estado.textContent = e.message; estado.classList.add('error'); }
 }
 </script>
 </body>

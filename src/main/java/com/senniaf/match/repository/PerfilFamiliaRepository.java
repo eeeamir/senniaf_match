@@ -37,6 +37,12 @@ public class PerfilFamiliaRepository {
         return perfiles.containsKey(codigoCaso);
     }
 
+    public java.util.Optional<PerfilFamilia> buscarPorCedula(String cedula) {
+        return perfiles.values().stream()
+                .filter(perfil -> cedula.equals(perfil.getRegistradoPor()))
+                .findFirst();
+    }
+
     public boolean existePorCedula(String cedula) {
         return perfiles.values().stream()
                 .anyMatch(perfil -> cedula.equals(perfil.getRegistradoPor()));

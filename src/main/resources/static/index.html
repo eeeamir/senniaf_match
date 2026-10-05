@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SENNIAF Match · Acceso</title>
+<link rel="stylesheet" href="senniaf.css">
 <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -30,7 +31,8 @@
       <form id="formLogin" novalidate>
         <label for="loginId">Cédula o ID de funcionario</label>
         <input id="loginId" autocomplete="username" placeholder="Ej. 8-123-456 o TS-001" required>
-        <button class="boton" type="submit">Iniciar sesión</button>
+        <p class="ayuda">Funcionarios: TS- trabajador social, PS- psicólogo, CM- comité.</p>
+        <button class="boton bloque" type="submit">Iniciar sesión</button>
         <div class="mensaje" id="msgLogin" role="alert"></div>
       </form>
       <p class="pie">¿Eres una familia y aún no tienes cuenta?
@@ -53,7 +55,7 @@
         <label for="correo">Correo electrónico</label>
         <input id="correo" type="email" autocomplete="email" placeholder="nombre@correo.com" required>
         <p class="ayuda">Te enviaremos un código de verificación.</p>
-        <button class="boton" type="submit">Enviar código</button>
+        <button class="boton bloque" type="submit">Enviar código</button>
         <div class="mensaje" id="msgRegistro" role="alert"></div>
       </form>
       <p class="pie">¿Ya tienes cuenta?
@@ -65,9 +67,9 @@
       <h1>Revisa tu correo</h1>
       <p class="sub">Escribe el código de 6 dígitos que enviamos a <strong id="correoDestino"></strong></p>
       <form id="formCodigo" novalidate>
-        <label for="codigo" class="sr" style="position:absolute;left:-9999px">Código de verificación</label>
+        <label for="codigo" class="sr">Código de verificación</label>
         <input id="codigo" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="······" required>
-        <button class="boton" type="submit">Verificar y continuar</button>
+        <button class="boton bloque" type="submit">Verificar y continuar</button>
         <div class="mensaje" id="msgCodigo" role="alert"></div>
         <div class="demo" id="avisoDemo" hidden>
           Modo demostración: aún no hay envío real de correos. Tu código es <strong id="codigoDemo"></strong>
@@ -81,6 +83,7 @@
   </main>
 </div>
 
+<script src="senniaf.js"></script>
 <script>
 /* =====================================================================
    CAPA DE ACCESO (SIMULADA)
@@ -133,7 +136,8 @@ const Acceso = (() => {
     },
     iniciarSesion(id) {
       if (FUNCIONARIO.test(id)) {
-        return { tipo: 'FUNCIONARIO', id, nombre: id, rol: id.startsWith('PS') ? 'PSICOLOGO' : 'TRABAJADOR_SOCIAL' };
+        const rol = id.startsWith('PS') ? 'PSICOLOGO' : id.startsWith('CM') ? 'COMITE' : 'TRABAJADOR_SOCIAL';
+        return { tipo: 'FUNCIONARIO', id, nombre: id, rol };
       }
       const u = leer().verificados[id];
       if (!u) falla('No encontramos esa cédula o ID. Si eres una familia nueva, regístrate primero.');
@@ -173,7 +177,7 @@ function enfriarReenvio() {
 }
 
 /* ---------- Inicio de sesión ---------- */
-$('formLogin').addEventListener('submit', (e) => {
+$('formLogin').addEventListener('submit', async (e) => {
   e.preventDefault();
   const input = $('loginId'), id = normalizar(input.value);
   marcar(input, !id);
@@ -181,7 +185,9 @@ $('formLogin').addEventListener('submit', (e) => {
   try {
     const sesion = Acceso.iniciarSesion(id);
     sessionStorage.setItem('senniaf.sesion', JSON.stringify(sesion));
-    location.href = sesion.tipo === 'FUNCIONARIO' ? 'funcionario.html' : 'perfil.html';
+    /* Familia con entrevista hecha → motor de match; sin entrevista → formulario. */
+    const destino = sesion.tipo === 'FAMILIA' ? await Sesion.destinoFamilia(sesion) : Sesion.inicio(sesion);
+    location.href = destino;
   } catch (err) { marcar(input, true); mensaje('msgLogin', err.message); }
 });
 

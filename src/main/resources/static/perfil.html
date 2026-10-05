@@ -6,6 +6,7 @@
 
 <title>SENNIAF Match · Registro de perfil</title>
 
+<link rel="stylesheet" href="senniaf.css">
 <link rel="stylesheet" href="perfil.css">
 </head>
 
@@ -13,80 +14,10 @@
 <body>
 
 
-<!-- =====================================================
-     BARRA DEL GOBIERNO
-     ===================================================== -->
-
-<div class="barra-gobierno">
-
-  <div class="contenido">
-
-    <span></span>
-
-    <span></span>
-
-  </div>
-
-</div>
-
-
-
-<!-- =====================================================
-     ENCABEZADO SENNIAF
-     ===================================================== -->
-
-<header class="encabezado">
-
-  <div class="encabezado-contenido">
-
-    <img
-      src="img/logo-senniaf.jpg"
-      alt="SENNIAF"
-      class="logo-senniaf"
-    >
-
-    <div class="separador"></div>
-
-    <div class="titulo-institucional">
-
-      <strong>
-        Secretaría Nacional de Niñez,
-        Adolescencia y Familia
-      </strong>
-
-      <span>
-        Sistema institucional de gestión de perfiles
-      </span>
-
-    </div>
-
-  </div>
-
-</header>
-
-
-
-<!-- =====================================================
-     BARRA DEL SISTEMA
-     ===================================================== -->
-
-<div class="franja-sistema">
-
-  <div class="franja-contenido">
-
-    <div class="nombre-sistema">
-      SENNIAF Match
-    </div>
-
-    <div class="modulo">
-      Registro de perfil
-    </div>
-
-  </div>
-
-</div>
-
-
+<header class="topbar"><div class="topbar-in">
+  <a class="topbar-marca" href="#"><img src="img/logo-senniaf.jpg" alt="SENNIAF"><span>SENNIAF Match</span></a>
+  <div class="usuario" id="usuario"></div>
+</div></header>
 
 <!-- =====================================================
      CONTENIDO PRINCIPAL
@@ -131,7 +62,7 @@
 
     <button
       type="button"
-      class="primario"
+      class="boton"
       id="btnContinuar"
       disabled
     >
@@ -144,12 +75,12 @@
 
     <div class="barra-pantalla">
       <span class="etiqueta-rol" id="etiquetaRolNino"></span>
-      <button type="button" class="enlace" id="btnCambiarRolNino">Cambiar de rol</button>
+      <button type="button" class="boton secundario chico" id="btnCambiarRolNino">Cambiar de rol</button>
     </div>
 
     <!-- CABECERA -->
 
-    <div class="cabecera-formulario">
+    <div class="hero">
 
       <div class="cabecera-superior">
 
@@ -625,7 +556,7 @@
 
         <button
           type="button"
-          class="enlace"
+          class="boton secundario chico"
           id="btnEjemplo"
         >
           Cargar datos de ejemplo
@@ -634,7 +565,7 @@
 
         <button
           type="submit"
-          class="primario"
+          class="boton"
           id="btnRegistrar"
         >
           Enviar entrevista
@@ -670,10 +601,10 @@
 
     <div class="barra-pantalla">
       <span class="etiqueta-rol">Familia adoptante</span>
-      <button type="button" class="enlace" id="btnCambiarRolFamilia">Cambiar de rol</button>
+      <button type="button" class="boton secundario chico" id="btnCambiarRolFamilia">Cambiar de rol</button>
     </div>
 
-    <div class="cabecera-formulario">
+    <div class="hero">
 
       <div class="cabecera-superior">
 
@@ -1121,11 +1052,11 @@
 
       <div class="acciones">
 
-        <button type="button" class="enlace" id="btnEjemploFamilia">
+        <button type="button" class="boton secundario chico" id="btnEjemploFamilia">
           Cargar datos de ejemplo
         </button>
 
-        <button type="submit" class="primario" id="btnRegistrarFamilia">
+        <button type="submit" class="boton" id="btnRegistrarFamilia">
           Enviar entrevista
         </button>
 
@@ -1145,36 +1076,7 @@
      PIE DE PÁGINA
      ===================================================== -->
 
-<footer>
-
-  <div class="footer-contenido">
-
-    <div>
-
-      <strong>
-        SENNIAF Match
-      </strong>
-
-      <br>
-
-      <span>
-        Sistema de apoyo para la gestión de compatibilidad familiar.
-      </span>
-
-    </div>
-
-
-    <div>
-
-      <span>
-        Uso institucional · Datos protegidos
-      </span>
-
-    </div>
-
-  </div>
-
-</footer>
+<footer class="pie-pagina">Uso institucional · Datos protegidos</footer>
 
 
 
@@ -1182,6 +1084,7 @@
      JAVASCRIPT
      ===================================================== -->
 
+<script src="senniaf.js"></script>
 <script>
 
 /* ===============================================
@@ -1598,12 +1501,20 @@ formularioFamilia.addEventListener('submit', async (evento) => {
 
     if (respuesta.ok) {
 
+      Sesion.marcarEntrevista(usuarioId);
       resultadoFamilia.className = 'resultado exito';
       resultadoFamilia.innerHTML =
-        `${datos.mensaje}
+        `<strong>Entrevista enviada correctamente.</strong><br>${datos.mensaje}
         · Código de caso:
         <span class="codigo">${datos.codigoCaso}</span>` +
-        (datos.perfilCompleto ? '' : ' · el perfil quedó marcado como incompleto.');
+        (datos.perfilCompleto ? '' : ' · el perfil quedó marcado como incompleto.') +
+        '<br><small>Abriendo tu motor de match…</small>';
+      setTimeout(() => { location.href = 'match.html'; }, 1600);
+
+    } else if (respuesta.status === 409) {
+
+      Sesion.marcarEntrevista(usuarioId);
+      location.href = 'match.html';
 
     } else if (respuesta.status === 403) {
 
@@ -1647,11 +1558,9 @@ formularioFamilia.addEventListener('submit', async (evento) => {
    SESIÓN (viene de index.html)
    =============================================== */
 
-const sesion = JSON.parse(sessionStorage.getItem('senniaf.sesion') || 'null');
+const sesion = Sesion.requerir(['FAMILIA', 'TRABAJADOR_SOCIAL', 'PSICOLOGO']);
 
-if (!sesion) {
-  location.replace('index.html');
-} else {
+if (sesion) {
   rolSeleccionado = sesion.rol;
   pantallaSelector.hidden = true;
 
@@ -1661,6 +1570,8 @@ if (!sesion) {
     c.value = sesion.id;
     c.readOnly = true;
     document.getElementById('btnCambiarRolFamilia').hidden = true;
+    /* Si ya hizo la entrevista, su pantalla es el motor de match. */
+    Sesion.destinoFamilia(sesion).then((d) => { if (d === 'match.html') location.replace(d); });
   } else {
     document.getElementById('etiquetaRolNino').textContent = NOMBRES_ROL[sesion.rol];
     pantallaNino.hidden = false;
@@ -1670,22 +1581,11 @@ if (!sesion) {
     document.getElementById('btnCambiarRolNino').hidden = true;
   }
 
-  const barra = document.querySelector('.barra-gobierno .contenido');
-  const enlaceMenu = sesion.tipo === 'FAMILIA'
-    ? ''
-    : '<a href="funcionario.html" style="color:#fff;margin-right:16px">Menú</a>';
-
-  barra.innerHTML =
-    `<span>${sesion.nombre}</span>` +
-    `<span>${enlaceMenu}<a href="#" id="salirSesion" style="color:#fff">Cerrar sesión</a></span>`;
-  document.getElementById('salirSesion').addEventListener('click', (e) => {
-    e.preventDefault();
-    sessionStorage.removeItem('senniaf.sesion');
-    location.href = 'index.html';
-  });
+  Sesion.pintarCabecera(sesion,
+    sesion.tipo === 'FAMILIA' ? '' : '<a class="enlace" href="funcionario.html">Menú</a>');
 }
 
 </script>
 
 </body>
-</html>
+</html>
