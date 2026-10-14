@@ -58,3 +58,22 @@ mvn clean test
 Si `mvn -version` sigue mostrando Java 26, el `JAVA_HOME` de la terminal aún apunta al JDK equivocado. Configúralo al directorio instalado del JDK 21, abre otra terminal y vuelve a comprobar.
 
 **Nota:** el cambio elimina el mocking inline del conjunto actual de tests, pero no implica que todas las dependencias de Spring Boot 3.3 estén verificadas bajo Java 26. Para una ejecución reproducible usa JDK 21.
+
+## Actualización: aceptación visible para la familia
+
+Cuando el Comité pulsa **Aceptar** sobre una familia candidata y guarda un motivo de al menos diez caracteres, el servidor registra la decisión `ACEPTADA` en la tabla `decisiones_comite` de PostgreSQL. Al ingresar con su propia cuenta, la familia verá un aviso verde **«¡Tu propuesta fue ACEPTADA!»** en `match.html`, la etapa final señalada como aceptada y, si está disponible, la fecha de la decisión. No se muestra el niño asociado, puntuaciones ni motivos internos.
+
+El estado se consulta de forma privada a través de `GET /api/familias/mi-perfil` usando el token de la familia autenticada; no se recibe una cédula arbitraria ni un código de familia en la URL. El endpoint ahora devuelve `estadoSolicitud` (`ACEPTADA`, `EN_REVISION`, `EN_ESPERA` o `INCOMPLETA`) y `fechaDecisionComite`, sin campos de información infantil. El navegador revisa el estado cada 20 segundos si la página sigue abierta, y también ofrece el botón **Actualizar estado**.
+
+**Cómo comprobarlo:**
+
+1. Ejecuta `docker compose up -d` y `mvn spring-boot:run`. No borres el volumen de PostgreSQL.
+2. Registra un perfil sintético completo de niño/a y uno de familia con usuarios distintos.
+3. Accede con `CM-001` al Comité, selecciona el caso infantil, elige la familia, pulsa **Aceptar**, redacta el motivo y guarda. Se muestra una confirmación en verde.
+4. Inicia sesión con la cédula de **esa misma familia**; en `match.html` debe aparecer **ACEPTADA**. Si ya estaba en pantalla, pulsa Actualizar estado o espera hasta 20 segundos.
+5. Accede como otra familia: su solicitud no debe aparecer aceptada. Verifica que ninguna familia pueda consultar perfiles de niños ni motivos internos.
+6. Opcional, en pgAdmin: `SELECT codigo_familia, decision, fecha FROM decisiones_comite ORDER BY fecha DESC;`
+
+Una familia con una propuesta previamente aceptada en otro caso deja de aparecer en nuevos rankings y el servidor rechaza intentar aceptarla en otro caso. La aceptación **no sustituye la resolución judicial de adopción**, ni requiere una migración adicional de base de datos porque se utilizan los registros de decisiones existentes. Sigue siendo un prototipo académico con datos sintéticos.
+
+Las pruebas nuevas cubren estado aceptado, pendiente y reevaluación; aislamiento por familia; permisos; persistencia lógica de la decisión; y exclusión de candidatas ya comprometidas. Ejecuta `mvn clean test` en JDK 21 para verificar las pruebas JUnit nuevas junto con las anteriores.

@@ -159,3 +159,26 @@ th { color: var(--suave); font-weight: 600; }
 .grid-pesos label{font-size:13px;font-weight:600;display:grid;gap:6px}
 .grid-pesos input{max-width:120px;border:1px solid var(--borde-campo);padding:10px;border-radius:10px}
 .familia details{margin:12px 0}.familia details li{margin:8px 0}
+
+/* Estado oficial que el servidor devuelve a la familia autenticada. */
+.boton-refrescar { margin-top: 20px; background: #fff; color: var(--azul-oscuro); border: 1px solid #fff; }
+.boton-refrescar:hover { background: var(--azul-tenue); }
+.estado-familiar { display: flex; gap: 18px; align-items: flex-start; padding: 26px 28px;
+    margin: 22px 0; border: 2px solid var(--azul-borde); border-radius: 18px;
+    background: var(--azul-tenue); }
+.estado-familiar.aprobado { border-color: var(--exito); background: var(--exito-fondo); }
+.estado-familiar.revision { border-color: var(--aviso-borde); background: var(--aviso-fondo); }
+.estado-familiar .estado-icono { display: grid; place-items: center; width: 52px; height: 52px;
+    flex: 0 0 52px; border-radius: 50%; background: var(--azul-oscuro); color: white;
+    font-size: 30px; font-weight: 700; }
+.estado-familiar.aprobado .estado-icono { background: var(--exito); }
+.estado-familiar.revision .estado-icono { background: var(--aviso); }
+.estado-familiar h2 { margin: 0 0 8px; font-size: 25px; color: var(--azul-oscuro); }
+.estado-familiar.aprobado h2 { color: var(--exito); }
+.estado-familiar p { margin: 8px 0 0; }
+.estado-familiar .estado-etiqueta { margin: 0 0 5px; font-size: 11px; letter-spacing: .08em;
+    font-weight: 800; color: var(--suave); }
+.estado-familiar .estado-aclaracion { margin-top: 14px; font-size: 13px; }
+@media (max-width: 600px) { .estado-familiar { padding: 20px 16px; gap: 12px; }
+    .estado-familiar .estado-icono { width: 40px; height: 40px; flex-basis: 40px; font-size: 24px; }
+    .estado-familiar h2 { font-size: 21px; } }

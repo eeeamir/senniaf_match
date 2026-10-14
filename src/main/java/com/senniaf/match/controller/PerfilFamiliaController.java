@@ -14,6 +14,9 @@ public class PerfilFamiliaController {
         Usuario u=auth.requerir(header,"FAMILIA");return ResponseEntity.status(201).body(service.registrarPerfil(r,u.getIdentificador()));
     }
     @GetMapping("/mi-perfil") public ResponseEntity<PerfilFamiliaResponse> miPerfil(@RequestHeader(value="Authorization",required=false) String header){
-        Usuario u=auth.requerir(header,"FAMILIA");return service.consultarPorCedula(u.getIdentificador()).map(ResponseEntity::ok).orElseGet(()->ResponseEntity.notFound().build());
+        Usuario u=auth.requerir(header,"FAMILIA");
+        java.util.Optional<PerfilFamiliaResponse> perfil=service.consultarPorCedula(u.getIdentificador());
+        if(perfil.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).cacheControl(CacheControl.noStore()).build();
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(perfil.get());
     }
 }

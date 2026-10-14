@@ -37,7 +37,7 @@ class PerfilFamiliaServiceTest {
         when(repo.count()).thenReturn(0L);
         when(repo.save(any(PerfilFamilia.class))).thenAnswer(i -> i.getArgument(0));
         when(repo.existsByRegistradoPor(anyString())).thenReturn(false);
-        service = new PerfilFamiliaService(repo);
+        service = new PerfilFamiliaService(repo, mock(com.senniaf.match.repository.DecisionComiteRepository.class));
     }
 
     @Test
@@ -58,7 +58,7 @@ class PerfilFamiliaServiceTest {
         when(repo.count()).thenReturn(0L);
         when(repo.save(any(PerfilFamilia.class))).thenAnswer(i -> i.getArgument(0));
         when(repo.existsByRegistradoPor("8-123-456")).thenReturn(false, true);
-        service = new PerfilFamiliaService(repo);
+        service = new PerfilFamiliaService(repo, mock(com.senniaf.match.repository.DecisionComiteRepository.class));
 
         PerfilFamiliaResponse primero = service.registrarPerfil(request, "8-123-456");
 

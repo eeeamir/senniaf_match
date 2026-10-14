@@ -43,7 +43,11 @@ public class ScoringService {
  public Caso ranking(String codigo){
     PerfilNino n=ninos.findByCodigoCasoAndEliminadoFalse(codigo).orElseThrow(()->new NoSuchElementException("Caso no encontrado."));
     ConfiguracionScoring pesos=pesos();
+    // Una familia que ya tiene una vinculación aceptada con otro caso no debe volver a proponerse.
+    Set<String> yaVinculadasAOtros=decisiones.findByDecision("ACEPTADA").stream()
+        .filter(d->!codigo.equals(d.getCodigoNino())).map(DecisionComite::getCodigoFamilia).collect(Collectors.toSet());
     List<Candidato> candidatos=n.isPerfilCompleto()?familias.findAll().stream().filter(PerfilFamilia::isPerfilCompleto)
+       .filter(f->!yaVinculadasAOtros.contains(f.getCodigoCaso()))
        .map(f->calcular(n,f,pesos)).sorted(Comparator.comparingInt(Candidato::total).reversed().thenComparing(Candidato::codigoFamilia)).toList():List.of();
     Long dias=n.getFechaDeclaratoria()==null?null:ChronoUnit.DAYS.between(n.getFechaDeclaratoria().toLocalDate(),LocalDate.now());
     List<String> necesidades=new ArrayList<>();
@@ -95,6 +99,8 @@ public class ScoringService {
       throw new IllegalArgumentException("Decisión no admitida.");
    if(motivo==null || motivo.trim().length()<10 || motivo.length()>2000)
       throw new IllegalArgumentException("Explica la decisión entre 10 y 2000 caracteres.");
+   if("ACEPTADA".equals(decision) && decisiones.existsByCodigoFamiliaAndDecisionAndCodigoNinoNot(familia,"ACEPTADA",codigo))
+      throw new IllegalStateException("Esta familia ya tiene una propuesta aceptada en otro caso.");
    Caso r=ranking(codigo);
    Candidato candidato=r.candidatos().stream().filter(c->c.codigoFamilia().equals(familia)).findFirst()
       .orElseThrow(()->new IllegalArgumentException("La familia no es elegible para este ranking (perfil incompleto o inexistente)."));

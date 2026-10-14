@@ -30,63 +30,123 @@ if (sesion) (sesion.rol === 'COMITE' ? vistaComite : vistaFamilia)();
    ===================================================================== */
 async function vistaFamilia() {
   Sesion.pintarCabecera(sesion);
+  let ultimoPerfil = null;
+  let consultando = false;
+  $('contenido').innerHTML = '<section class="tarjeta" role="status">Consultando el estado de tu solicitud...</section>';
 
-  let perfil = null;
-  try {
-    const r = await fetch('/api/familias/mi-perfil', { headers: Sesion.headers() });
-    if (r.status === 404) return location.replace('perfil.html');
-    if (r.ok) perfil = await r.json();
-  } catch (_) { /* sin conexión */ }
-  if (!perfil) {
-    perfil = { codigoCaso: '—', perfilCompleto: true };
+  function pintarEstado(perfil) {
+    const estadoSolicitud = perfil.estadoSolicitud || (perfil.perfilCompleto ? 'EN_ESPERA' : 'INCOMPLETA');
+    const aceptada = estadoSolicitud === 'ACEPTADA';
+    const enRevision = estadoSolicitud === 'EN_REVISION';
+    const fecha = perfil.fechaDecisionComite
+      ? new Date(perfil.fechaDecisionComite).toLocaleDateString('es-PA', { day: '2-digit', month: 'long', year: 'numeric' })
+      : null;
+    const pasos = [
+      ['Entrevista enviada', 'Recibimos la información de tu hogar.'],
+      ['Perfil completo', 'Tu entrevista tiene los datos necesarios para continuar.'],
+      ['Disponible para el análisis', 'El motor compara los perfiles completos para apoyar la revisión profesional.'],
+      ['Revisión del Comité', 'El Comité de Asignación Familiar analiza las propuestas de compatibilidad.'],
+      ['Propuesta de vinculación', aceptada
+        ? 'El Comité aceptó una propuesta de vinculación con tu familia.'
+        : 'Si se acepta una propuesta para tu familia, lo verás aquí y SENNIAF te indicará los siguientes pasos.']
+    ];
+    const actual = aceptada ? 4 : enRevision ? 3 : perfil.perfilCompleto ? 2 : 1;
+    const estado = (i) => (i < actual ? 'hecho' : i === actual ? 'actual' : 'pendiente');
+    const rotulo = { hecho: 'Completado', actual: 'Etapa actual', pendiente: 'Pendiente' };
+
+    $('contenido').innerHTML = `
+      <section class="hero">
+        <h1>Hola, ${esc((sesion.nombre || 'Familia').split(' ')[0])}</h1>
+        <p>Consulta aquí el estado de tu solicitud familiar. Los cambios del Comité se reflejan desde la base de datos.</p>
+        <button id="btnActualizarEstado" class="boton boton-refrescar" type="button">↻ Actualizar estado</button>
+      </section>
+
+      ${aceptada ? `
+        <section class="estado-familiar aprobado" role="status" aria-live="polite">
+          <span class="estado-icono" aria-hidden="true">✓</span>
+          <div>
+            <p class="estado-etiqueta">DECISIÓN DEL COMITÉ</p>
+            <h2>¡Tu propuesta fue ACEPTADA!</h2>
+            <p>El Comité de Asignación Familiar aceptó una propuesta de vinculación para tu familia${fecha ? ` el ${esc(fecha)}` : ''}.</p>
+            <p class="estado-aclaracion">Esta aceptación es una etapa del proceso y <strong>no significa que la adopción judicial esté finalizada.</strong> El equipo autorizado de SENNIAF te informará los siguientes pasos.</p>
+          </div>
+        </section>` : enRevision ? `
+        <section class="estado-familiar revision" role="status">
+          <span class="estado-icono" aria-hidden="true">↻</span>
+          <div><p class="estado-etiqueta">ESTADO DE TU SOLICITUD</p><h2>En revisión del Comité</h2>
+            <p>El Comité solicitó una reevaluación. Tu solicitud sigue en proceso y todavía no hay una propuesta aceptada.</p></div>
+        </section>` : `
+        <section class="estado-familiar pendiente" role="status">
+          <span class="estado-icono" aria-hidden="true">⌛</span>
+          <div><p class="estado-etiqueta">ESTADO DE TU SOLICITUD</p>
+            <h2>${perfil.perfilCompleto ? 'En espera de una decisión' : 'Entrevista incompleta'}</h2>
+            <p>${perfil.perfilCompleto
+              ? 'Tu entrevista está registrada. Si el Comité acepta una propuesta para tu familia, aparecerá aquí.'
+              : 'Tu perfil necesita información adicional antes de ingresar al análisis de compatibilidad.'}</p></div>
+        </section>`}
+
+      <section class="tarjeta">
+        <h2>Seguimiento de tu proceso</h2>
+        <ol class="etapas">${pasos.map(([titulo, descripcion], i) => `
+          <li class="${estado(i)}" ${i === actual ? 'aria-current="step"' : ''}>
+            <span class="marca-etapa">${i < actual || (aceptada && i === 4) ? '✓' : i + 1}</span>
+            <div><strong>${titulo}</strong>
+              <span class="chip ${i < actual || (aceptada && i === 4) ? 'exito' : i === actual ? '' : 'neutro'}">${aceptada && i === 4 ? 'ACEPTADA' : rotulo[estado(i)]}</span>
+              <p>${descripcion}</p>
+            </div>
+          </li>`).join('')}
+        </ol>
+        ${perfil.perfilCompleto ? '' : '<div class="mensaje aviso">Habla con tu trabajador social para completar la entrevista.</div>'}
+      </section>
+
+      <section class="tarjeta">
+        <h2>Tu entrevista</h2>
+        <p>Código de tu caso: <strong class="codigo">${esc(perfil.codigoCaso)}</strong>
+          <span class="chip ${perfil.perfilCompleto ? 'exito' : 'aviso'}">${perfil.perfilCompleto ? 'Completa' : 'Incompleta'}</span></p>
+        <p>El sistema no muestra información sobre niños, niñas ni otras familias. Si necesitas cambiar tus datos, consulta con tu trabajador social.</p>
+      </section>
+      <div class="mensaje aviso">La aceptación de una propuesta por el Comité no constituye una resolución judicial de adopción. Esta pantalla es informativa y utiliza datos de prueba durante el desarrollo.</div>`;
   }
 
-  const pasos = [
-    ['Entrevista enviada', 'Recibimos la información de tu hogar.'],
-    ['Perfil completo', 'Tu entrevista tiene lo necesario para ser considerada.'],
-    ['Disponible para ser considerada', 'Cuando se registre un niño, niña o adolescente, tu familia entra en el análisis de compatibilidad.'],
-    ['Revisión del Comité', 'El Comité de Asignación Familiar estudia las familias sugeridas y decide.'],
-    ['Vinculación', 'Si el Comité te elige, tu equipo SENNIAF te acompaña en los siguientes pasos.']
-  ];
-  const actual = perfil.perfilCompleto ? 2 : 1;
-  const estado = (i) => (i < actual ? 'hecho' : i === actual ? 'actual' : 'pendiente');
-  const rotulo = { hecho: 'Listo', actual: 'Estás aquí', pendiente: 'Más adelante' };
+  async function consultarEstado(mostrarError = false) {
+    if (consultando) return;
+    consultando = true;
+    try {
+      const r = await fetch('/api/familias/mi-perfil', { headers: Sesion.headers(), cache: 'no-store' });
+      if (r.status === 404) { location.replace('perfil.html'); return; }
+      if (r.status === 401) {
+        sessionStorage.removeItem('senniaf.sesion');
+        location.replace('index.html');
+        return;
+      }
+      if (!r.ok) throw new Error('No fue posible consultar el estado de tu solicitud.');
+      const perfil = await r.json();
+      if (!ultimoPerfil || JSON.stringify(ultimoPerfil) !== JSON.stringify(perfil)) {
+        ultimoPerfil = perfil;
+        pintarEstado(perfil);
+      }
+    } catch (e) {
+      if (!ultimoPerfil) {
+        $('contenido').innerHTML = `<section class="tarjeta"><h2>Estado temporalmente no disponible</h2>
+          <p>No pudimos consultar PostgreSQL en este momento. Vuelve a intentarlo. No se cambiará el estado de tu solicitud.</p>
+          <button class="boton" id="btnActualizarEstado" type="button">Reintentar</button></section>`;
+      } else if (mostrarError) {
+        alert('No se pudo actualizar el estado. Se mantiene el último resultado consultado.');
+      }
+    } finally {
+      consultando = false;
+    }
+  }
 
-  $('contenido').innerHTML = `
-    <section class="hero">
-      <h1>Hola, ${esc(sesion.nombre.split(' ')[0])}</h1>
-      <p>Gracias por compartir tu entrevista. Aquí puedes ver en qué etapa va tu proceso y cómo se toma la decisión.</p>
-    </section>
-
-    <section class="tarjeta">
-      <h2>En qué etapa estás</h2>
-      <ol class="etapas">${pasos.map(([t, d], i) => `
-        <li class="${estado(i)}" ${i === actual ? 'aria-current="step"' : ''}>
-          <span class="marca-etapa">${i < actual ? '✓' : i + 1}</span>
-          <div><strong>${t}</strong> <span class="chip ${i < actual ? 'exito' : i === actual ? '' : 'neutro'}">${rotulo[estado(i)]}</span>
-          <p>${d}</p></div>
-        </li>`).join('')}
-      </ol>
-      ${perfil.perfilCompleto ? '' : `<div class="mensaje aviso">Tu entrevista quedó incompleta, por eso todavía no entra al análisis de compatibilidad. Habla con tu trabajador social para completarla.</div>`}
-    </section>
-
-    <section class="tarjeta">
-      <h2>Cómo se decide</h2>
-      <ul class="puntos">
-        <li><strong>Primero, lo que el niño o la niña necesita.</strong> La compatibilidad se mide a partir de sus necesidades; tus preferencias se toman en cuenta, pero no deciden solas.</li>
-        <li><strong>Siempre decide una persona.</strong> El sistema ordena sugerencias y el Comité las revisa con criterio humano. Quedar de primera en una lista no garantiza ni descarta nada.</li>
-        <li><strong>Tu privacidad y la de los niños está protegida.</strong> No verás perfiles de niños, niñas ni de otras familias, y ellos tampoco verán el tuyo.</li>
-      </ul>
-    </section>
-
-    <section class="tarjeta">
-      <h2>Tu entrevista</h2>
-      <p>Código de caso: <strong class="codigo">${esc(perfil.codigoCaso)}</strong>
-         <span class="chip ${perfil.perfilCompleto ? 'exito' : 'aviso'}">${perfil.perfilCompleto ? 'Completa' : 'Incompleta'}</span></p>
-      <p>Si algo cambia en tu hogar, avísale a tu trabajador social para actualizar tus datos.</p>
-    </section>
-
-    <div class="mensaje aviso">La entrevista completa no significa idoneidad aprobada ni asignación. Las propuestas son evaluadas exclusivamente por el Comité; esta pantalla nunca muestra otras familias ni perfiles infantiles.</div>`;
+  $('contenido').addEventListener('click', e => {
+    if (e.target.closest('#btnActualizarEstado')) consultarEstado(true);
+  });
+  await consultarEstado();
+  // Si la familia sigue en esta pantalla mientras el Comité decide, el cambio aparece automáticamente.
+  const refresco = setInterval(() => {
+    if (!document.hidden) consultarEstado();
+  }, 20000);
+  window.addEventListener('pagehide', () => clearInterval(refresco), { once: true });
 }
 
 /* Comité: resultados reales del motor y decisiones guardadas en PostgreSQL. */
@@ -97,7 +157,7 @@ async function api(endpoint,opciones={}){
 }
 async function vistaComite(){
  Sesion.pintarCabecera(sesion);$('contenido').className='ancho';
- let casos=[],seleccionado=null,detalle=null,pesos=null,accion=null;
+ let casos=[],seleccionado=null,detalle=null,pesos=null,accion=null,confirmacion=null;
  const nombreDecision={ACEPTADA:'Aceptar',DESCARTADA:'Descartar',REEVALUAR:'Solicitar reevaluación'};
  async function inicio(){
   try{[casos,pesos]=await Promise.all([api('/api/scoring/casos'),api('/api/scoring/pesos')]);
@@ -112,6 +172,7 @@ async function vistaComite(){
   const cerrado=detalle?.decisiones.some(d=>d.decision==='ACEPTADA');
   $('contenido').innerHTML=`<section class="hero"><h1>Comité de Asignación Familiar</h1>
    <p>Priorización orientativa basada en necesidades y disposición familiar. El sistema no asigna adopciones.</p></section>
+   ${confirmacion ? `<div class="mensaje exito" role="status">${esc(confirmacion)}</div>` : ''}
    <section class="tarjeta"><h2>Criterios del motor · versión ${esc(pesos.version)}</h2>
     <p>Los pesos suman 100. Las circunstancias personales, trayectoria escolar, intereses y continuidad cultural quedan para análisis profesional, no para filtros automáticos.</p>
     <form id="formPesos"><div class="grid-pesos">${[['edad','Rango de edad'],['hermanos','Vínculos entre hermanos'],['salud','Acompañamiento de salud'],['apoyo','Red de apoyo'],['logistica','Disponibilidad logística']].map(([k,n])=>`<label>${n}<input name="${k}" type="number" min="0" max="100" required value="${esc(pesos[k])}"></label>`).join('')}</div>
@@ -131,13 +192,13 @@ async function vistaComite(){
  function tarjeta(f,indice,cerrado){
   const decision=ultimo(f.codigoFamilia);const definitiva=decision && decision.decision!=='REEVALUAR';
   const puede=!cerrado && !definitiva;
-  return `<article class="familia"><div class="familia-cab"><span class="puesto">${indice+1}</span>
+  return `<article class="familia ${decision?.decision==='ACEPTADA'?'aceptada':''}"><div class="familia-cab"><span class="puesto">${indice+1}</span>
   <div><h3>${esc(f.codigoFamilia)}</h3><span class="prov">Provincia: ${esc(f.provincia)}</span></div>
   <div class="puntaje"><strong>${f.total}</strong><small>de 100 · puntaje orientativo</small><div class="medidor"><i style="width:${f.total}%"></i></div></div></div>
   <details><summary>Ver criterios y explicaciones</summary><div class="tabla"><table><thead><tr><th>Criterio</th><th>Puntos</th><th>Justificación</th></tr></thead><tbody>
   ${f.factores.map(x=>`<tr><td>${esc(x.nombre)}</td><td>${x.puntos}/${x.maximo}</td><td>${esc(x.explicacion)}</td></tr>`).join('')}</tbody></table></div>
   <h4>Puntos que debe revisar el Comité</h4><ul>${f.alertas.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
-  ${decision?`<p class="decidido">Última decisión: <strong>${esc(decision.decision)}</strong> · ${esc(decision.motivo)}</p>`:''}
+  ${decision?`<p class="decidido">Última decisión: <strong>${esc(decision.decision)}</strong> · ${esc(decision.motivo)}</p>${decision.decision==='ACEPTADA'?'<p class="mensaje exito">✓ Propuesta aceptada. Esta familia verá el estado ACEPTADA al consultar su solicitud.</p>':''}`:''}
   ${puede?`<div class="fila-botones">${Object.keys(nombreDecision).map(k=>`<button type="button" class="boton ${k==='ACEPTADA'?'':'secundario'} chico" data-decision="${k}" data-familia="${esc(f.codigoFamilia)}">${nombreDecision[k]}</button>`).join('')}</div>`:cerrado?'<p class="ayuda">El caso ya tiene una vinculación aceptada.</p>':''}
   ${accion?.familia===f.codigoFamilia?`<form class="decision" id="formDecision"><label for="motivo">Fundamento de la decisión: ${esc(nombreDecision[accion.tipo])}</label>
     <textarea id="motivo" maxlength="2000" minlength="10" required placeholder="Describe por qué esta decisión protege las necesidades del niño o niña."></textarea>
@@ -146,7 +207,7 @@ async function vistaComite(){
  }
  $('contenido').addEventListener('click',async e=>{
   const cb=e.target.closest('[data-caso]'),dec=e.target.closest('[data-decision]');
-  if(cb){try{await abrir(cb.dataset.caso);}catch(err){alert(err.message);}return;}
+  if(cb){try{confirmacion=null;await abrir(cb.dataset.caso);}catch(err){alert(err.message);}return;}
   if(dec){accion={familia:dec.dataset.familia,tipo:dec.dataset.decision};pintar();return;}
   if(e.target.closest('#cancelarDecision')){accion=null;pintar();}
  });
@@ -160,7 +221,13 @@ async function vistaComite(){
    e.preventDefault();const motivo=$('motivo').value.trim();
    if(motivo.length<10){alert('El motivo debe tener al menos 10 caracteres.');return;}
    if(!confirm('¿Confirmar la decisión? Quedará registrada para el Comité.'))return;
-   try{await api('/api/scoring/casos/'+encodeURIComponent(seleccionado)+'/decisiones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({familia:accion.familia,decision:accion.tipo,motivo})});await abrir(seleccionado);}catch(err){alert(err.message);}
+   try{const familia=accion.familia,decision=accion.tipo;
+     await api('/api/scoring/casos/'+encodeURIComponent(seleccionado)+'/decisiones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({familia,decision,motivo})});
+     confirmacion=decision==='ACEPTADA'
+       ? `Propuesta ACEPTADA para ${familia}. La familia podrá consultar el estado desde su cuenta, sin acceder a información del niño o niña.`
+       : `Decisión ${decision} registrada correctamente para ${familia}.`;
+     await abrir(seleccionado);
+   }catch(err){alert(err.message);}
   }
  });
  await inicio();

@@ -45,4 +45,32 @@ class ScoringServiceTest {
   when(ninos.findByCodigoCasoAndEliminadoFalse("NNA-TEST")).thenReturn(Optional.of(n));
   assertTrue(scoring.ranking("NNA-TEST").candidatos().isEmpty());verify(familias,never()).findAll();
  }
+
+ @Test void familiaYaAceptadaEnOtroCasoNoVuelveAlRanking(){
+  when(ninos.findByCodigoCasoAndEliminadoFalse("NNA-TEST")).thenReturn(Optional.of(nino()));
+  DecisionComite d=new DecisionComite();d.setCodigoNino("NNA-OTRO");d.setCodigoFamilia("FAM-OCUPADA");
+  d.setDecision("ACEPTADA");
+  when(decisiones.findByDecision("ACEPTADA")).thenReturn(List.of(d));
+  when(familias.findAll()).thenReturn(List.of(familia("FAM-OCUPADA",true),familia("FAM-LIBRE",true)));
+  var r=scoring.ranking("NNA-TEST");
+  assertEquals(1,r.candidatos().size());
+  assertEquals("FAM-LIBRE",r.candidatos().get(0).codigoFamilia());
+ }
+ @Test void noPermiteAceptarLaMismaFamiliaParaOtroNino(){
+  when(decisiones.existsByCodigoFamiliaAndDecisionAndCodigoNinoNot("FAM-OCUPADA","ACEPTADA","NNA-TEST"))
+   .thenReturn(true);
+  var e=assertThrows(IllegalStateException.class,
+   ()->scoring.decidir("NNA-TEST","FAM-OCUPADA","ACEPTADA","Razón profesional suficiente","CM-001"));
+  assertTrue(e.getMessage().contains("otro caso"));
+  verify(decisiones,never()).save(any());
+ }
+ @Test void decisionAceptadaSeGuardaParaConsultaPosterior(){
+  when(ninos.findByCodigoCasoAndEliminadoFalse("NNA-TEST")).thenReturn(Optional.of(nino()));
+  when(familias.findAll()).thenReturn(List.of(familia("FAM-OK",true)));
+  when(decisiones.save(any(DecisionComite.class))).thenAnswer(inv->inv.getArgument(0));
+  DecisionComite d=scoring.decidir("NNA-TEST","FAM-OK","ACEPTADA","Se verificaron los apoyos familiares","CM-001");
+  assertEquals("ACEPTADA",d.getDecision());
+  assertEquals("FAM-OK",d.getCodigoFamilia());
+  verify(decisiones).save(d);
+ }
 }

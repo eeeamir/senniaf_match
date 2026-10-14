@@ -4,6 +4,9 @@ import com.senniaf.match.dto.PerfilFamiliaRequest;
 import com.senniaf.match.dto.PerfilFamiliaResponse;
 import com.senniaf.match.model.PerfilFamilia;
 import com.senniaf.match.repository.PerfilFamiliaRepository;
+import com.senniaf.match.repository.DecisionComiteRepository;
+import com.senniaf.match.model.DecisionComite;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,9 +16,11 @@ import java.util.List;
 public class PerfilFamiliaService {
 
     private final PerfilFamiliaRepository repositorio;
+    private final DecisionComiteRepository decisiones;
 
-    public PerfilFamiliaService(PerfilFamiliaRepository repositorio) {
+    public PerfilFamiliaService(PerfilFamiliaRepository repositorio, DecisionComiteRepository decisiones) {
         this.repositorio = repositorio;
+        this.decisiones = decisiones;
     }
 
     public synchronized PerfilFamiliaResponse registrarPerfil(PerfilFamiliaRequest request, String registradoPor) {
@@ -65,11 +70,29 @@ public class PerfilFamiliaService {
         return new PerfilFamiliaResponse(mensaje, codigoCaso, completo);
     }
 
-    /** Perfil que la familia ya registró con su cédula, si existe. */
+    /** Estado privado de la cuenta autenticada: se obtiene de las decisiones persistidas.
+     *  Nunca se entrega a la familia un código de niño, puntaje ni motivo interno.
+     */
+    @Transactional(readOnly = true)
     public java.util.Optional<PerfilFamiliaResponse> consultarPorCedula(String cedula) {
         return repositorio.findByRegistradoPor(cedula == null ? "" : cedula.trim())
-                .map(p -> new PerfilFamiliaResponse(
-                        "Perfil encontrado", p.getCodigoCaso(), p.isPerfilCompleto()));
+                .map(p -> {
+                    String estado = p.isPerfilCompleto() ? "EN_ESPERA" : "INCOMPLETA";
+                    java.time.LocalDateTime fechaAceptacion = null;
+                    java.util.Optional<DecisionComite> aceptada = decisiones
+                            .findFirstByCodigoFamiliaAndDecisionOrderByFechaDescIdDesc(p.getCodigoCaso(), "ACEPTADA");
+                    if (aceptada.isPresent()) {
+                        estado = "ACEPTADA";
+                        fechaAceptacion = aceptada.get().getFecha();
+                    } else if (p.isPerfilCompleto()) {
+                        // La reevaluación no es un rechazo de la solicitud familiar.
+                        boolean reevaluar = decisiones.findFirstByCodigoFamiliaOrderByFechaDescIdDesc(p.getCodigoCaso())
+                                .map(d -> "REEVALUAR".equals(d.getDecision())).orElse(false);
+                        if (reevaluar) estado = "EN_REVISION";
+                    }
+                    return new PerfilFamiliaResponse("Perfil encontrado", p.getCodigoCaso(),
+                            p.isPerfilCompleto(), estado, fechaAceptacion);
+                });
     }
 
     private synchronized String siguienteCodigoCaso() {

@@ -26,7 +26,7 @@ class PerfilFamiliaControllerTest {
    Usuario familia=new Usuario();familia.setRol("FAMILIA");familia.setIdentificador("8-123-456");
    Usuario trabajador=new Usuario();trabajador.setRol("TRABAJADOR_SOCIAL");trabajador.setIdentificador("TS-001");
    AutenticacionService auth=ServiciosDePrueba.autenticacion(java.util.Map.of("Bearer familia",familia,"Bearer ts",trabajador));
-   mvc=MockMvcBuilders.standaloneSetup(new PerfilFamiliaController(new PerfilFamiliaService(repo),auth))
+   mvc=MockMvcBuilders.standaloneSetup(new PerfilFamiliaController(new PerfilFamiliaService(repo, mock(com.senniaf.match.repository.DecisionComiteRepository.class)),auth))
     .setControllerAdvice(new GlobalExceptionHandler()).build();
  }
  @Test void familiaRegistra() throws Exception{
