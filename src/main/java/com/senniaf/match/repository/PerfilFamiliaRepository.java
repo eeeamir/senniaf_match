@@ -1,50 +1,12 @@
 package com.senniaf.match.repository;
 
 import com.senniaf.match.model.PerfilFamilia;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
-/**
- * Repositorio en memoria para el Sprint 3. Igual que
- * PerfilNinoRepository, es un punto de partida mientras se trabaja con
- * datos sintéticos; antes de manejar información real debe sustituirse
- * por persistencia real cifrada en reposo (sección 2.11).
- */
-@Repository
-public class PerfilFamiliaRepository {
-
-    private final Map<String, PerfilFamilia> perfiles = new ConcurrentHashMap<>();
-    private final AtomicInteger secuencia = new AtomicInteger(0);
-
-    public String siguienteCodigoCaso() {
-        int numero = secuencia.incrementAndGet();
-        return String.format("FAM-%03d", numero);
-    }
-
-    public PerfilFamilia guardar(PerfilFamilia perfil) {
-        perfiles.put(perfil.getCodigoCaso(), perfil);
-        return perfil;
-    }
-
-    public PerfilFamilia buscarPorCodigoCaso(String codigoCaso) {
-        return perfiles.get(codigoCaso);
-    }
-
-    public boolean existe(String codigoCaso) {
-        return perfiles.containsKey(codigoCaso);
-    }
-
-    public java.util.Optional<PerfilFamilia> buscarPorCedula(String cedula) {
-        return perfiles.values().stream()
-                .filter(perfil -> cedula.equals(perfil.getRegistradoPor()))
-                .findFirst();
-    }
-
-    public boolean existePorCedula(String cedula) {
-        return perfiles.values().stream()
-                .anyMatch(perfil -> cedula.equals(perfil.getRegistradoPor()));
-    }
+public interface PerfilFamiliaRepository extends JpaRepository<PerfilFamilia, Long> {
+    Optional<PerfilFamilia> findByCodigoCaso(String codigoCaso);
+    boolean existsByCodigoCaso(String codigoCaso);
+    Optional<PerfilFamilia> findByRegistradoPor(String cedula);
+    boolean existsByRegistradoPor(String cedula);
 }

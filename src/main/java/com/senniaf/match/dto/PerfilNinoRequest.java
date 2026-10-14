@@ -107,6 +107,9 @@ public class PerfilNinoRequest {
      * el diseño del Sprint 0 descarta explícitamente (ver 2.6).
      */
     private String contextoCultural;
+    private java.time.LocalDate fechaDeclaratoria;
+    public java.time.LocalDate getFechaDeclaratoria(){return fechaDeclaratoria;}
+    public void setFechaDeclaratoria(java.time.LocalDate fecha){this.fechaDeclaratoria=fecha;}
 
     public Integer getEdad() {
         return edad;

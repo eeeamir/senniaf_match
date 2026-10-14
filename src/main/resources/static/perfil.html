@@ -26,56 +26,13 @@
 <main>
 
 
-  <!-- =================================================
-       PANTALLA 0: SELECCIÓN DE ROL
-       ================================================= -->
-
-  <div class="pantalla-selector" id="pantallaSelector">
-
-    <h1>¿Con qué rol vas a ingresar?</h1>
-
-    <p>
-      SENNIAF Match muestra una pantalla distinta según el rol: la
-      familia completa su propia entrevista y nunca ve perfiles de
-      niños o niñas; el trabajador social y el psicólogo solo ven el
-      registro del niño o niña.
-    </p>
-
-    <div class="tarjetas-rol">
-
-      <div class="tarjeta-rol" data-rol="TRABAJADOR_SOCIAL">
-        <strong>Trabajador social</strong>
-        <span>Registra el perfil integral del niño o niña.</span>
-      </div>
-
-      <div class="tarjeta-rol" data-rol="PSICOLOGO">
-        <strong>Psicólogo</strong>
-        <span>Registra el perfil integral del niño o niña.</span>
-      </div>
-
-      <div class="tarjeta-rol" data-rol="FAMILIA">
-        <strong>Familia adoptante</strong>
-        <span>Completa la entrevista de idoneidad familiar.</span>
-      </div>
-
-    </div>
-
-    <button
-      type="button"
-      class="boton"
-      id="btnContinuar"
-      disabled
-    >
-      Continuar
-    </button>
-
-  </div>
+  <!-- La pantalla corresponde al rol autenticado: no hay selector de rol. -->
 
   <div id="pantallaNino" hidden>
 
     <div class="barra-pantalla">
       <span class="etiqueta-rol" id="etiquetaRolNino"></span>
-      <button type="button" class="boton secundario chico" id="btnCambiarRolNino">Cambiar de rol</button>
+
     </div>
 
     <!-- CABECERA -->
@@ -524,7 +481,10 @@
 
         <div class="campo ancho">
 
-          <label for="necesidadesApoyo">
+          <label for="fechaDeclaratoria">Fecha de declaratoria de adoptabilidad (opcional, para medir tiempos)</label>
+        <input type="date" id="fechaDeclaratoria" max="9999-12-31">
+        <p class="ayuda">Se usa únicamente para mostrar los días transcurridos hasta la propuesta de compatibilidad.</p>
+        <label for="necesidadesApoyo">
             Necesidades de apoyo en salud, desarrollo o aprendizaje
             <span class="req">*</span>
           </label>
@@ -601,7 +561,7 @@
 
     <div class="barra-pantalla">
       <span class="etiqueta-rol">Familia adoptante</span>
-      <button type="button" class="boton secundario chico" id="btnCambiarRolFamilia">Cambiar de rol</button>
+
     </div>
 
     <div class="hero">
@@ -1093,11 +1053,9 @@
 
 let rolSeleccionado = null;
 
-const pantallaSelector = document.getElementById('pantallaSelector');
 const pantallaNino = document.getElementById('pantallaNino');
 const pantallaFamilia = document.getElementById('pantallaFamilia');
 
-const btnContinuar = document.getElementById('btnContinuar');
 
 const formulario = document.getElementById('formulario');
 const resultado = document.getElementById('resultado');
@@ -1137,69 +1095,8 @@ function marcarValores(nombreGrupo, valores) {
 
 
 
-/* ===============================================
-   PANTALLA 0: SELECCIÓN DE ROL
-   (aquí se resuelve, en la propia navegación de la
-   aplicación, la regla de que la familia nunca ve
-   la pantalla de registro del niño/a, y viceversa)
-   =============================================== */
-
-const NOMBRES_ROL = {
-  TRABAJADOR_SOCIAL: 'Trabajador social',
-  PSICOLOGO: 'Psicólogo',
-  FAMILIA: 'Familia adoptante'
-};
-
-document.querySelectorAll('.tarjeta-rol').forEach((tarjeta) => {
-  tarjeta.addEventListener('click', () => {
-    document
-      .querySelectorAll('.tarjeta-rol')
-      .forEach((t) => t.classList.remove('activa'));
-
-    tarjeta.classList.add('activa');
-    rolSeleccionado = tarjeta.dataset.rol;
-    btnContinuar.disabled = false;
-  });
-});
-
-btnContinuar.addEventListener('click', () => {
-  if (!rolSeleccionado) {
-    return;
-  }
-
-  pantallaSelector.hidden = true;
-
-  if (rolSeleccionado === 'FAMILIA') {
-    pantallaFamilia.hidden = false;
-  } else {
-    document.getElementById('etiquetaRolNino').textContent =
-      NOMBRES_ROL[rolSeleccionado];
-    pantallaNino.hidden = false;
-  }
-});
-
-function volverASeleccionDeRol() {
-  pantallaNino.hidden = true;
-  pantallaFamilia.hidden = true;
-  pantallaSelector.hidden = false;
-
-  rolSeleccionado = null;
-  btnContinuar.disabled = true;
-
-  document
-    .querySelectorAll('.tarjeta-rol')
-    .forEach((t) => t.classList.remove('activa'));
-}
-
-document
-  .getElementById('btnCambiarRolNino')
-  .addEventListener('click', volverASeleccionDeRol);
-
-document
-  .getElementById('btnCambiarRolFamilia')
-  .addEventListener('click', volverASeleccionDeRol);
-
-
+/* El rol proviene exclusivamente de la sesión autenticada; no se selecciona en esta pantalla. */
+const NOMBRES_ROL = { TRABAJADOR_SOCIAL:'Trabajador social', PSICOLOGO:'Psicólogo', FAMILIA:'Familia adoptante' };
 
 /* ===============================================
    FORMULARIO DEL NIÑO/A
@@ -1315,27 +1212,25 @@ formulario.addEventListener('submit', async (evento) => {
       ? Number(document.getElementById('cantidadHermanos').value)
       : null,
     hermanosDetalle: document.getElementById('hermanosDetalle').value,
-    contextoCultural: document.getElementById('contextoCultural').value
+    contextoCultural: document.getElementById('contextoCultural').value,
+    fechaDeclaratoria: document.getElementById('fechaDeclaratoria').value || null
   };
 
   if (!formulario.checkValidity()) {
     formulario.reportValidity();
     btnRegistrar.disabled = false;
-    btnRegistrar.textContent = 'Enviar entrevista';
+    btnRegistrar.textContent = codigoEditar ? 'Guardar cambios' : 'Enviar entrevista';
     return;
   }
 
-  const usuarioId =
-    document.getElementById('idFuncionario').value.trim();
 
   try {
 
-    const respuesta = await fetch('/api/ninos', {
-      method: 'POST',
+    const respuesta = await fetch(codigoEditar?('/api/ninos/'+encodeURIComponent(codigoEditar)):'/api/ninos', {
+      method: codigoEditar?'PUT':'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-User-Role': rolSeleccionado,
-        'X-User-Id': usuarioId
+        ...Sesion.headers()
       },
       body: JSON.stringify(cuerpo)
     });
@@ -1346,7 +1241,7 @@ formulario.addEventListener('submit', async (evento) => {
 
       resultado.className = 'resultado exito';
       resultado.innerHTML =
-        `<strong>Entrevista enviada correctamente.</strong><br>` +
+        `<strong>${codigoEditar ? "Perfil actualizado" : "Entrevista enviada"} correctamente.</strong><br>` +
         `${datos.mensaje} · Código de caso: <span class="codigo">${datos.codigoCaso}</span>` +
         (datos.perfilCompleto ? '' : ' · El perfil quedó marcado como incompleto.') +
         (datos.alertaMedica ? ' · <strong>Alerta médica activa.</strong>' : '') +
@@ -1388,7 +1283,7 @@ formulario.addEventListener('submit', async (evento) => {
   } finally {
 
     btnRegistrar.disabled = false;
-    btnRegistrar.textContent = 'Enviar entrevista';
+    btnRegistrar.textContent = codigoEditar ? 'Guardar cambios' : 'Enviar entrevista';
 
   }
 
@@ -1482,8 +1377,6 @@ formularioFamilia.addEventListener('submit', async (evento) => {
     return;
   }
 
-  const usuarioId =
-    document.getElementById('cedulaFamilia').value.trim();
 
   try {
 
@@ -1491,8 +1384,7 @@ formularioFamilia.addEventListener('submit', async (evento) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-User-Role': 'FAMILIA',
-        'X-User-Id': usuarioId
+        ...Sesion.headers()
       },
       body: JSON.stringify(cuerpo)
     });
@@ -1501,7 +1393,6 @@ formularioFamilia.addEventListener('submit', async (evento) => {
 
     if (respuesta.ok) {
 
-      Sesion.marcarEntrevista(usuarioId);
       resultadoFamilia.className = 'resultado exito';
       resultadoFamilia.innerHTML =
         `<strong>Entrevista enviada correctamente.</strong><br>${datos.mensaje}
@@ -1513,7 +1404,6 @@ formularioFamilia.addEventListener('submit', async (evento) => {
 
     } else if (respuesta.status === 409) {
 
-      Sesion.marcarEntrevista(usuarioId);
       location.href = 'match.html';
 
     } else if (respuesta.status === 403) {
@@ -1559,17 +1449,31 @@ formularioFamilia.addEventListener('submit', async (evento) => {
    =============================================== */
 
 const sesion = Sesion.requerir(['FAMILIA', 'TRABAJADOR_SOCIAL', 'PSICOLOGO']);
+const codigoEditar = new URLSearchParams(location.search).get('editar');
+const camposNino = ['edad','nivelEscolar','gradoEscolar','rendimientoAcademico','habilidadesDetalle',
+ 'gustosDetalle','personalidadDetalle','alergiasDetalle','intoleranciaLactosa','condicionesSaludDetalle',
+ 'necesidadesApoyo','tieneHermanos','cantidadHermanos','hermanosDetalle','contextoCultural'];
+async function cargarEdicion(codigo) {
+  try {
+    const r=await fetch('/api/ninos/'+encodeURIComponent(codigo),{headers:Sesion.headers()});
+    const p=await r.json(); if(!r.ok) throw new Error(p.mensaje||'No se pudo abrir el perfil.');
+    camposNino.forEach(c => {const el=document.getElementById(c);if(el)el.value=p[c]??'';});
+    ['habilidades','gustos','personalidad','alergias','condicionesSalud'].forEach(c=>marcarValores(c,p[c]||[]));
+    const fecha=document.getElementById('fechaDeclaratoria');if(fecha)fecha.value=p.fechaDeclaratoria?.substring(0,10)||'';
+    btnRegistrar.textContent='Guardar cambios'; actualizarAvisoMedico();
+  } catch(e) { resultado.className='resultado error';resultado.textContent=e.message;btnRegistrar.disabled=true; }
+}
 
 if (sesion) {
   rolSeleccionado = sesion.rol;
-  pantallaSelector.hidden = true;
+
 
   if (sesion.tipo === 'FAMILIA') {
     pantallaFamilia.hidden = false;
     const c = document.getElementById('cedulaFamilia');
     c.value = sesion.id;
     c.readOnly = true;
-    document.getElementById('btnCambiarRolFamilia').hidden = true;
+
     /* Si ya hizo la entrevista, su pantalla es el motor de match. */
     Sesion.destinoFamilia(sesion).then((d) => { if (d === 'match.html') location.replace(d); });
   } else {
@@ -1578,7 +1482,8 @@ if (sesion) {
     const f = document.getElementById('idFuncionario');
     f.value = sesion.id;
     f.readOnly = true;
-    document.getElementById('btnCambiarRolNino').hidden = true;
+
+    if(codigoEditar) cargarEdicion(codigoEditar);
   }
 
   Sesion.pintarCabecera(sesion,
@@ -1588,4 +1493,4 @@ if (sesion) {
 </script>
 
 </body>
-</html>
+</html>

@@ -1,77 +1,19 @@
 package com.senniaf.match.controller;
-
-import com.senniaf.match.dto.PerfilFamiliaRequest;
-import com.senniaf.match.dto.PerfilFamiliaResponse;
-import com.senniaf.match.security.RolNoAutorizadoException;
-import com.senniaf.match.service.PerfilFamiliaService;
+import com.senniaf.match.dto.*;
+import com.senniaf.match.model.Usuario;
+import com.senniaf.match.service.*;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Set;
-
-/**
- * Módulo de perfil de idoneidad de la familia adoptante (PBI06/PBI07,
- * HU02). Solo el rol FAMILIA puede completar su propia entrevista; ni el
- * trabajador social, ni el psicólogo, ni el Comité crean este perfil por
- * la familia en este endpoint. Es, a propósito, la contraparte exacta de
- * PerfilNinoController: cada rol tiene un único endpoint de registro que
- * le corresponde y no puede usar el del otro.
- *
- * NOTA: mismo mecanismo simple de rol por cabecera (X-User-Role) usado en
- * PerfilNinoController; ver esa clase para el comentario sobre
- * reemplazarlo por autenticación real (Spring Security/JWT).
- */
-@RestController
-@RequestMapping("/api/familias")
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+@RestController @RequestMapping("/api/familias")
 public class PerfilFamiliaController {
-
-    private static final Set<String> ROLES_AUTORIZADOS = Set.of("FAMILIA");
-
     private final PerfilFamiliaService service;
-
-    public PerfilFamiliaController(PerfilFamiliaService service) {
-        this.service = service;
+    private final AutenticacionService auth;
+    public PerfilFamiliaController(PerfilFamiliaService service,AutenticacionService auth){this.service=service;this.auth=auth;}
+    @PostMapping public ResponseEntity<PerfilFamiliaResponse> registrar(@Valid @RequestBody PerfilFamiliaRequest r,@RequestHeader(value="Authorization",required=false) String header){
+        Usuario u=auth.requerir(header,"FAMILIA");return ResponseEntity.status(201).body(service.registrarPerfil(r,u.getIdentificador()));
     }
-
-    @PostMapping
-    public ResponseEntity<PerfilFamiliaResponse> registrarPerfil(
-            @Valid @RequestBody PerfilFamiliaRequest request,
-            @RequestHeader("X-User-Role") String rol,
-            @RequestHeader("X-User-Id") String usuarioId) {
-
-        if (!ROLES_AUTORIZADOS.contains(rol)) {
-            throw new RolNoAutorizadoException(
-                    "El rol '" + rol + "' no está autorizado para registrar perfiles de familia");
-        }
-
-        PerfilFamiliaResponse response = service.registrarPerfil(request, usuarioId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    /**
-     * Permite a la familia saber si ya completó su entrevista (200) o no
-     * (404). El inicio de sesión usa esto para decidir si la lleva al
-     * formulario o a la pantalla del motor de match.
-     */
-    @GetMapping("/mi-perfil")
-    public ResponseEntity<PerfilFamiliaResponse> consultarMiPerfil(
-            @RequestHeader("X-User-Role") String rol,
-            @RequestHeader("X-User-Id") String usuarioId) {
-
-        if (!ROLES_AUTORIZADOS.contains(rol)) {
-            throw new RolNoAutorizadoException(
-                    "El rol '" + rol + "' no está autorizado para consultar perfiles de familia");
-        }
-
-        return service.consultarPorCedula(usuarioId)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/mi-perfil") public ResponseEntity<PerfilFamiliaResponse> miPerfil(@RequestHeader(value="Authorization",required=false) String header){
+        Usuario u=auth.requerir(header,"FAMILIA");return service.consultarPorCedula(u.getIdentificador()).map(ResponseEntity::ok).orElseGet(()->ResponseEntity.notFound().build());
     }
 }

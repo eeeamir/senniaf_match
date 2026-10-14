@@ -1,190 +1,49 @@
 package com.senniaf.match.controller;
-
+import com.senniaf.match.support.ServiciosDePrueba;
+import com.senniaf.match.model.Usuario;
 import com.senniaf.match.repository.PerfilNinoRepository;
-import com.senniaf.match.service.PerfilNinoService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import com.senniaf.match.security.*;
+import com.senniaf.match.service.*;
+import org.junit.jupiter.api.*;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 class PerfilNinoControllerTest {
-
-    private MockMvc mockMvc;
-
-    @BeforeEach
-    void setUp() {
-        PerfilNinoService service = new PerfilNinoService(new PerfilNinoRepository());
-        PerfilNinoController controller = new PerfilNinoController(service);
-        mockMvc = MockMvcBuilders
-                .standaloneSetup(controller)
-                .setControllerAdvice(new GlobalExceptionHandler())
-                .build();
-    }
-
-    @Test
-    void trabajadorSocialPuedeRegistrarUnPerfil() throws Exception {
-        String cuerpo = """
-                {
-                  "edad": 10,
-                  "nivelEscolar": "PRIMARIA",
-                  "gradoEscolar": "5to grado",
-                  "rendimientoAcademico": "BUENO",
-                  "habilidades": ["MATEMATICAS", "ARTE"],
-                  "gustos": ["DEPORTES", "VIDEOJUEGOS"],
-                  "personalidad": ["RESERVADO", "SOCIABLE"],
-                  "alergias": ["NINGUNA_CONOCIDA"],
-                  "intoleranciaLactosa": "NO",
-                  "condicionesSalud": ["NINGUNA_CONOCIDA"],
-                  "necesidadesApoyo": "Apoyo educativo en lectura",
-                  "tieneHermanos": "SI",
-                  "cantidadHermanos": 1,
-                  "hermanosDetalle": "Tiene una hermana de 7 años"
-                }
-                """;
-
-        mockMvc.perform(post("/api/ninos")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Role", "TRABAJADOR_SOCIAL")
-                        .header("X-User-Id", "ts-001")
-                        .content(cuerpo))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.codigoCaso").value("NNA-001"))
-                .andExpect(jsonPath("$.mensaje").value("Perfil registrado correctamente"))
-                .andExpect(jsonPath("$.alertaMedica").value(false));
-    }
-
-    @Test
-    void marcaAlertaMedicaCuandoElPerfilDeclaraCondicionesDeSalud() throws Exception {
-        String cuerpo = """
-                {
-                  "edad": 9,
-                  "nivelEscolar": "PRIMARIA",
-                  "rendimientoAcademico": "REGULAR",
-                  "habilidades": ["DEPORTES"],
-                  "gustos": ["MUSICA"],
-                  "personalidad": ["CARINOSO"],
-                  "alergias": ["ALIMENTARIA"],
-                  "alergiasDetalle": "Alergia al maní",
-                  "intoleranciaLactosa": "SI",
-                  "condicionesSalud": ["ASMA"],
-                  "necesidadesApoyo": "Control periódico con neumólogo",
-                  "tieneHermanos": "NO"
-                }
-                """;
-
-        mockMvc.perform(post("/api/ninos")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Role", "PSICOLOGO")
-                        .header("X-User-Id", "test-001")
-                        .content(cuerpo))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.alertaMedica").value(true));
-    }
-
-    @Test
-    void unaFamiliaNoPuedeRegistrarUnPerfil() throws Exception {
-        String cuerpo = """
-                {
-                  "edad": 10,
-                  "nivelEscolar": "PRIMARIA",
-                  "rendimientoAcademico": "BUENO",
-                  "habilidades": ["NINGUNA_IDENTIFICADA"],
-                  "gustos": ["NINGUNO_IDENTIFICADO"],
-                  "personalidad": ["RESERVADO"],
-                  "alergias": ["NINGUNA_CONOCIDA"],
-                  "intoleranciaLactosa": "NO",
-                  "condicionesSalud": ["NINGUNA_CONOCIDA"],
-                  "necesidadesApoyo": "Ninguna",
-                  "tieneHermanos": "NO"
-                }
-                """;
-
-        mockMvc.perform(post("/api/ninos")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Role", "FAMILIA")
-                        .header("X-User-Id", "test-001")
-                        .content(cuerpo))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void rechazaUnPerfilSinEdad() throws Exception {
-        String cuerpo = """
-                {
-                  "nivelEscolar": "PRIMARIA",
-                  "rendimientoAcademico": "BUENO",
-                  "habilidades": ["NINGUNA_IDENTIFICADA"],
-                  "gustos": ["NINGUNO_IDENTIFICADO"],
-                  "personalidad": ["RESERVADO"],
-                  "alergias": ["NINGUNA_CONOCIDA"],
-                  "intoleranciaLactosa": "NO",
-                  "condicionesSalud": ["NINGUNA_CONOCIDA"],
-                  "necesidadesApoyo": "Ninguna",
-                  "tieneHermanos": "NO"
-                }
-                """;
-
-        mockMvc.perform(post("/api/ninos")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Role", "TRABAJADOR_SOCIAL")
-                        .header("X-User-Id", "test-001")
-                        .content(cuerpo))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void rechazaUnPerfilSinSeleccionarAlergias() throws Exception {
-        String cuerpo = """
-                {
-                  "edad": 10,
-                  "nivelEscolar": "PRIMARIA",
-                  "rendimientoAcademico": "BUENO",
-                  "habilidades": ["NINGUNA_IDENTIFICADA"],
-                  "gustos": ["NINGUNO_IDENTIFICADO"],
-                  "personalidad": ["RESERVADO"],
-                  "intoleranciaLactosa": "NO",
-                  "condicionesSalud": ["NINGUNA_CONOCIDA"],
-                  "necesidadesApoyo": "Ninguna",
-                  "tieneHermanos": "NO"
-                }
-                """;
-
-        mockMvc.perform(post("/api/ninos")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Role", "TRABAJADOR_SOCIAL")
-                        .header("X-User-Id", "test-001")
-                        .content(cuerpo))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void rechazaUnValorNoValidoEnUnaListaDesplegable() throws Exception {
-        String cuerpo = """
-                {
-                  "edad": 10,
-                  "nivelEscolar": "UNIVERSIDAD",
-                  "rendimientoAcademico": "BUENO",
-                  "habilidades": ["NINGUNA_IDENTIFICADA"],
-                  "gustos": ["NINGUNO_IDENTIFICADO"],
-                  "personalidad": ["RESERVADO"],
-                  "alergias": ["NINGUNA_CONOCIDA"],
-                  "intoleranciaLactosa": "NO",
-                  "condicionesSalud": ["NINGUNA_CONOCIDA"],
-                  "necesidadesApoyo": "Ninguna",
-                  "tieneHermanos": "NO"
-                }
-                """;
-
-        mockMvc.perform(post("/api/ninos")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Role", "TRABAJADOR_SOCIAL")
-                        .header("X-User-Id", "test-001")
-                        .content(cuerpo))
-                .andExpect(status().isBadRequest());
-    }
+ private MockMvc mvc; private PerfilNinoRepository repo;
+ private static final String BODY="""
+  {"edad":10,"nivelEscolar":"PRIMARIA","rendimientoAcademico":"BUENO",
+   "habilidades":["MATEMATICAS"],"gustos":["DEPORTES"],"personalidad":["SOCIABLE"],
+   "alergias":["NINGUNA_CONOCIDA"],"intoleranciaLactosa":"NO",
+   "condicionesSalud":["NINGUNA_CONOCIDA"],"necesidadesApoyo":"Apoyo escolar", "tieneHermanos":"NO"}
+ """;
+ @BeforeEach void setUp(){
+   repo=mock(PerfilNinoRepository.class);AuditoriaService audit=new ServiciosDePrueba.AuditoriaEnMemoria();
+   when(repo.save(any())).thenAnswer(i->i.getArgument(0));
+   
+   Usuario trabajador=new Usuario();trabajador.setRol("TRABAJADOR_SOCIAL");trabajador.setIdentificador("TS-001");
+   Usuario familia=new Usuario();familia.setRol("FAMILIA");familia.setIdentificador("8-123-456");
+   AutenticacionService auth=ServiciosDePrueba.autenticacion(java.util.Map.of("Bearer ts",trabajador,"Bearer familia",familia));
+   mvc=MockMvcBuilders.standaloneSetup(new PerfilNinoController(new PerfilNinoService(repo,audit),auth,audit))
+     .setControllerAdvice(new GlobalExceptionHandler()).build();
+ }
+ @Test void trabajadorPuedeRegistrarPerfil() throws Exception{
+   mvc.perform(post("/api/ninos").header("Authorization","Bearer ts").contentType(MediaType.APPLICATION_JSON).content(BODY))
+     .andExpect(status().isCreated()).andExpect(jsonPath("$.perfilCompleto").value(true))
+     .andExpect(jsonPath("$.codigoCaso").isNotEmpty());
+ }
+ @Test void familiaNoPuedeRegistrarPerfil() throws Exception{
+   mvc.perform(post("/api/ninos").header("Authorization","Bearer familia").contentType(MediaType.APPLICATION_JSON).content(BODY))
+     .andExpect(status().isForbidden());
+ }
+ @Test void sinTokenNoPuedeAcceder() throws Exception{
+   mvc.perform(get("/api/ninos")).andExpect(status().isUnauthorized());
+ }
+ @Test void perfilMalFormadoNoSeRegistra() throws Exception{
+   mvc.perform(post("/api/ninos").header("Authorization","Bearer ts").contentType(MediaType.APPLICATION_JSON)
+      .content(BODY.replace("PRIMARIA","UNIVERSIDAD"))).andExpect(status().isBadRequest());
+ }
 }

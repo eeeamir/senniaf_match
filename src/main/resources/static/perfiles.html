@@ -16,7 +16,7 @@
   <section class="hero">
     <a class="volver" href="funcionario.html">← Volver al menú</a>
     <h1>Perfiles registrados</h1>
-    <p>Casos registrados por los funcionarios autorizados.</p>
+    <p>Solo aparecen los casos que registraste. Puedes corregirlos o darlos de baja con confirmación.</p>
   </section>
   <div id="estado" class="tarjeta estado">Cargando perfiles…</div>
   <div id="lista" class="lista"></div>
@@ -25,26 +25,42 @@
 <script src="senniaf.js"></script>
 <script>
 const sesion = Sesion.requerir(['TRABAJADOR_SOCIAL', 'PSICOLOGO']);
-if (sesion) { Sesion.pintarCabecera(sesion); cargar(); }
-async function cargar() {
-  const estado = document.getElementById('estado');
-  try {
-    const r = await fetch('/api/ninos', { headers: { 'X-User-Role': sesion.rol, 'X-User-Id': sesion.id } });
-    const datos = await r.json();
-    if (!r.ok) throw new Error(datos.mensaje || 'No se pudieron consultar los perfiles.');
-    if (!datos.length) { estado.textContent = 'Todavía no hay perfiles registrados.'; return; }
-    estado.hidden = true;
-    document.getElementById('lista').innerHTML = datos.map(p => `
-      <article class="tarjeta perfil">
-        <div>
-          <h2>${p.codigoCaso}</h2>
-          <div class="datos"><span>Edad: ${p.edad ?? '—'}</span><span>Escolaridad: ${p.nivelEscolar ?? '—'}</span><span>Registrado por: ${p.registradoPor ?? '—'}</span></div>
-          ${p.alertaMedica ? '<div class="alerta">Requiere revisión médica</div>' : ''}
-        </div>
-        <span class="chip ${p.perfilCompleto ? 'exito' : 'aviso'}">${p.perfilCompleto ? 'Completo' : 'Incompleto'}</span>
-      </article>`).join('');
-  } catch (e) { estado.textContent = e.message; estado.classList.add('error'); }
+const esc = x => String(x??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+if(sesion){Sesion.pintarCabecera(sesion);cargar();}
+async function cargar(){
+ const estado=document.getElementById('estado');const lista=document.getElementById('lista');
+ estado.hidden=false;estado.textContent='Consultando casos…';lista.innerHTML='';
+ try{
+  const r=await fetch('/api/ninos',{headers:Sesion.headers()});const datos=await r.json();
+  if(!r.ok)throw Error(datos.mensaje||'No se pudo consultar.');
+  if(!datos.length){estado.textContent='Aún no has registrado perfiles.';return;}
+  estado.hidden=true;
+  lista.innerHTML=datos.map(p=>`<article class="tarjeta perfil">
+   <div><h2>${esc(p.codigoCaso)}</h2><div class="datos"><span>Edad: ${esc(p.edad)}</span>
+   <span>Escolaridad: ${esc(p.nivelEscolar)}</span><span>Responsable: ${esc(p.registradoPor)}</span></div>
+   ${p.alertaMedica?'<div class="alerta">Requiere revisión médica</div>':''}</div>
+   <div class="acciones-perfil"><span class="chip ${p.perfilCompleto?'exito':'aviso'}">${p.perfilCompleto?'Completo':'Incompleto'}</span>
+   <a class="boton chico" href="perfil.html?editar=${encodeURIComponent(p.codigoCaso)}">Editar</a>
+   <button class="boton secundario chico" type="button" data-eliminar="${esc(p.codigoCaso)}">Eliminar</button>
+   <button class="enlace" type="button" data-auditoria="${esc(p.codigoCaso)}">Ver auditoría</button></div>
+   </article>`).join('');
+ }catch(e){estado.hidden=false;estado.textContent=e.message;estado.classList.add('error');}
 }
+document.getElementById('lista').addEventListener('click',async e=>{
+ const borrar=e.target.closest('[data-eliminar]'),auditar=e.target.closest('[data-auditoria]');
+ if(borrar){const codigo=borrar.dataset.eliminar;
+   if(!confirm('¿Dar de baja el caso '+codigo+'? Dejará de verse y no participará en el scoring. Se conserva un registro de auditoría.'))return;
+   borrar.disabled=true;
+   try{const r=await fetch('/api/ninos/'+encodeURIComponent(codigo),{method:'DELETE',headers:Sesion.headers()});
+   if(!r.ok){const d=await r.json();throw Error(d.mensaje||'No se pudo eliminar.');}await cargar();}
+   catch(err){alert(err.message);borrar.disabled=false;}
+ }
+ if(auditar){const codigo=auditar.dataset.auditoria;
+   try{const r=await fetch('/api/ninos/'+encodeURIComponent(codigo)+'/auditoria',{headers:Sesion.headers()});const d=await r.json();
+    if(!r.ok)throw Error(d.mensaje);alert(d.map(x=>`${x.fecha} · ${x.accion} · ${x.actor}`).join('\n')||'Sin movimientos');}
+    catch(err){alert(err.message);}
+ }
+});
 </script>
 </body>
 </html>

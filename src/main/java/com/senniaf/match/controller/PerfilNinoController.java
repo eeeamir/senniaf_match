@@ -1,85 +1,33 @@
 package com.senniaf.match.controller;
-
-import com.senniaf.match.dto.PerfilNinoRequest;
-import com.senniaf.match.dto.PerfilNinoResponse;
-import com.senniaf.match.security.RolNoAutorizadoException;
-import com.senniaf.match.service.PerfilNinoService;
+import com.senniaf.match.dto.*;
+import com.senniaf.match.model.PerfilNino;
+import com.senniaf.match.model.Usuario;
+import com.senniaf.match.service.*;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Set;
-import java.util.List;
-import java.util.Map;
-import java.util.LinkedHashMap;
-
-/**
- * Módulo de perfil de niño/a (sección 2.12). Solo un trabajador social o
- * psicólogo puede crear el perfil; la familia nunca accede a este endpoint.
- *
- * NOTA: el rol se lee aquí de una cabecera HTTP simple (X-User-Role) solo
- * como continuación directa de la prueba de autorización por rol hecha en
- * el Sprint 1 con Burp Suite. Si el proyecto ya tiene (o va a tener) un
- * mecanismo real de autenticación (Spring Security, JWT, etc.), esta
- * verificación debe reemplazarse por ese mecanismo, por ejemplo con
- * @PreAuthorize("hasRole('TRABAJADOR_SOCIAL')").
- */
-@RestController
-@RequestMapping("/api/ninos")
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.*;
+import java.util.*;
+@RestController @RequestMapping("/api/ninos")
 public class PerfilNinoController {
-
-    private static final Set<String> ROLES_AUTORIZADOS = Set.of("TRABAJADOR_SOCIAL", "PSICOLOGO");
-
     private final PerfilNinoService service;
-
-    public PerfilNinoController(PerfilNinoService service) {
-        this.service = service;
+    private final AutenticacionService auth;
+    private final AuditoriaService auditoria;
+    public PerfilNinoController(PerfilNinoService service,AutenticacionService auth,AuditoriaService auditoria){this.service=service;this.auth=auth;this.auditoria=auditoria;}
+    private Usuario profesional(String header){return auth.requerir(header,"TRABAJADOR_SOCIAL","PSICOLOGO");}
+    @GetMapping public List<Map<String,Object>> listar(@RequestHeader(value="Authorization",required=false) String header){
+        Usuario u=profesional(header);
+        return service.listarPerfiles(u.getIdentificador()).stream().map(p->{
+          Map<String,Object> m=new LinkedHashMap<>();m.put("codigoCaso",p.getCodigoCaso());m.put("edad",p.getEdad());
+          m.put("nivelEscolar",p.getNivelEscolar());m.put("perfilCompleto",p.isPerfilCompleto());m.put("alertaMedica",p.isAlertaMedica());
+          m.put("fechaRegistro",p.getFechaRegistro());m.put("registradoPor",p.getRegistradoPor());return m;}).toList();
     }
-
-    @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> listarPerfiles(
-            @RequestHeader("X-User-Role") String rol) {
-
-        if (!ROLES_AUTORIZADOS.contains(rol)) {
-            throw new RolNoAutorizadoException(
-                    "El rol '" + rol + "' no está autorizado para consultar perfiles de niños o niñas");
-        }
-
-        List<Map<String, Object>> perfiles = service.listarPerfiles().stream()
-                .map(perfil -> {
-                    Map<String, Object> resumen = new LinkedHashMap<>();
-                    resumen.put("codigoCaso", perfil.getCodigoCaso());
-                    resumen.put("edad", perfil.getEdad());
-                    resumen.put("nivelEscolar", perfil.getNivelEscolar());
-                    resumen.put("perfilCompleto", perfil.isPerfilCompleto());
-                    resumen.put("alertaMedica", perfil.isAlertaMedica());
-                    resumen.put("fechaRegistro", perfil.getFechaRegistro());
-                    resumen.put("registradoPor", perfil.getRegistradoPor());
-                    return resumen;
-                })
-                .toList();
-
-        return ResponseEntity.ok(perfiles);
+    @GetMapping("/{codigo}") public PerfilNino consultar(@PathVariable String codigo,@RequestHeader(value="Authorization",required=false) String header){return service.consultar(codigo,profesional(header).getIdentificador());}
+    @GetMapping("/{codigo}/auditoria") public Object auditoria(@PathVariable String codigo,@RequestHeader(value="Authorization",required=false) String header){
+        Usuario u=profesional(header);service.consultar(codigo,u.getIdentificador());return auditoria.porCaso(codigo);
     }
-
-    @PostMapping
-    public ResponseEntity<PerfilNinoResponse> registrarPerfil(
-            @Valid @RequestBody PerfilNinoRequest request,
-            @RequestHeader("X-User-Role") String rol,
-            @RequestHeader("X-User-Id") String usuarioId) {
-
-        if (!ROLES_AUTORIZADOS.contains(rol)) {
-            throw new RolNoAutorizadoException(
-                    "El rol '" + rol + "' no está autorizado para registrar perfiles de niños o niñas");
-        }
-
-        PerfilNinoResponse response = service.registrarPerfil(request, usuarioId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @PostMapping public ResponseEntity<PerfilNinoResponse> registrar(@Valid @RequestBody PerfilNinoRequest request,@RequestHeader(value="Authorization",required=false) String header){
+        Usuario u=profesional(header);return ResponseEntity.status(201).body(service.registrarPerfil(request,u.getIdentificador()));
     }
+    @PutMapping("/{codigo}") public PerfilNinoResponse editar(@PathVariable String codigo,@Valid @RequestBody PerfilNinoRequest r,@RequestHeader(value="Authorization",required=false) String header){return service.editar(codigo,r,profesional(header).getIdentificador());}
+    @DeleteMapping("/{codigo}") public ResponseEntity<Void> eliminar(@PathVariable String codigo,@RequestHeader(value="Authorization",required=false) String header){service.eliminar(codigo,profesional(header).getIdentificador());return ResponseEntity.noContent().build();}
 }

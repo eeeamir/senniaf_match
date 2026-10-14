@@ -15,3 +15,7 @@
 @media (max-width: 650px) {
     .perfil { grid-template-columns: 1fr; }
 }
+
+.acciones-perfil {display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;max-width:340px}
+.acciones-perfil .chip{margin-right:4px}
+@media(max-width:650px){.acciones-perfil{justify-content:flex-start}}

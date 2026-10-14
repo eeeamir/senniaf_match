@@ -7,8 +7,11 @@ const ROLES = {
 };
 
 const Sesion = {
-  leer() { return JSON.parse(sessionStorage.getItem('senniaf.sesion') || 'null'); },
-  salir() { sessionStorage.removeItem('senniaf.sesion'); location.href = 'index.html'; },
+  leer() { try { return JSON.parse(sessionStorage.getItem('senniaf.sesion') || 'null'); } catch (_) { return null; } },
+  esc(x) {return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));},
+  headers(extra = {}) { const s = this.leer(); return { ...extra, ...(s?.token ? { Authorization: 'Bearer ' + s.token } : {}) }; },
+  async salir() { const s=this.leer(); if(s?.token) { try {await fetch('/api/auth/salir',{method:'POST',headers:this.headers()});}catch(_){} }
+    sessionStorage.removeItem('senniaf.sesion'); location.href='index.html'; },
 
   /* Pantalla de inicio de cada rol. */
   inicio(s) {
@@ -27,21 +30,19 @@ const Sesion = {
   /* Nombre, rol, enlaces opcionales y botón de salida en la cabecera. */
   pintarCabecera(s, enlaces = '') {
     document.getElementById('usuario').innerHTML =
-      `<span>${s.nombre}</span><span class="chip">${ROLES[s.rol]}</span>${enlaces}` +
+      `<span>${this.esc(s.nombre)}</span><span class="chip">${this.esc(ROLES[s.rol]||'')}</span>${enlaces}` +
       `<button class="enlace" id="btnSalir" type="button">Cerrar sesión</button>`;
     document.getElementById('btnSalir').addEventListener('click', () => Sesion.salir());
   },
 
-  /* Marca local de “ya completó su entrevista” (respaldo si el servidor no responde). */
-  marcarEntrevista(id) { localStorage.setItem('senniaf.entrevista.' + id, '1'); },
 
   /* A dónde debe ir una familia al iniciar sesión. */
   async destinoFamilia(s) {
     try {
-      const r = await fetch('/api/familias/mi-perfil', { headers: { 'X-User-Role': 'FAMILIA', 'X-User-Id': s.id } });
-      if (r.ok) { this.marcarEntrevista(s.id); return 'match.html'; }
+      const r = await fetch('/api/familias/mi-perfil', { headers: this.headers() });
+      if (r.ok) return 'match.html';
       if (r.status === 404) return 'perfil.html';
-    } catch (_) { /* sin conexión: se usa la marca local */ }
-    return localStorage.getItem('senniaf.entrevista.' + s.id) ? 'match.html' : 'perfil.html';
+    } catch (_) { /* sin conexión: no se asume que exista una entrevista */ }
+    return 'perfil.html';
   }
 };

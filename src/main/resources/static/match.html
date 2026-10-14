@@ -33,12 +33,11 @@ async function vistaFamilia() {
 
   let perfil = null;
   try {
-    const r = await fetch('/api/familias/mi-perfil', { headers: { 'X-User-Role': 'FAMILIA', 'X-User-Id': sesion.id } });
+    const r = await fetch('/api/familias/mi-perfil', { headers: Sesion.headers() });
     if (r.status === 404) return location.replace('perfil.html');
     if (r.ok) perfil = await r.json();
   } catch (_) { /* sin conexión */ }
   if (!perfil) {
-    if (!localStorage.getItem('senniaf.entrevista.' + sesion.id)) return location.replace('perfil.html');
     perfil = { codigoCaso: '—', perfilCompleto: true };
   }
 
@@ -87,162 +86,84 @@ async function vistaFamilia() {
       <p>Si algo cambia en tu hogar, avísale a tu trabajador social para actualizar tus datos.</p>
     </section>
 
-    <div class="mensaje aviso">Vista previa: el motor de match aún no está conectado. Las etapas posteriores se activarán cuando exista.</div>`;
+    <div class="mensaje aviso">La entrevista completa no significa idoneidad aprobada ni asignación. Las propuestas son evaluadas exclusivamente por el Comité; esta pantalla nunca muestra otras familias ni perfiles infantiles.</div>`;
 }
 
-/* =====================================================================
-   VISTA DEL COMITÉ DE ASIGNACIÓN FAMILIAR
-   DATOS DE EJEMPLO: no es el motor. `Motor.casos()` es el único punto
-   que habrá que reemplazar. Endpoints sugeridos:
-     GET  /api/match/casos                      → lista de casos con familias priorizadas
-     POST /api/match/casos/{codigo}/decisiones  {familia, decision, motivo}
-   Cada factor llega como [puntos, razón] y el total es la suma.
-   ===================================================================== */
-const FACTORES = {
-  edad:     { n: 'Rango de edad',        max: 20, origen: 'Preferencia de la familia' },
-  hermanos: { n: 'Vínculo con hermanos', max: 20, origen: 'Necesidad del niño o niña' },
-  salud:    { n: 'Cuidados de salud',    max: 25, origen: 'Necesidad del niño o niña' },
-  cercania: { n: 'Cercanía y servicios', max: 10, origen: 'Necesidad del niño o niña' },
-  apoyo:    { n: 'Red de apoyo',         max: 15, origen: 'Necesidad del niño o niña' },
-  cultura:  { n: 'Continuidad cultural', max: 10, origen: 'Necesidad del niño o niña' }
-};
-
-const Motor = {
-  casos: () => [
-    { codigo: 'NIN-001', edad: 7, escolar: 'Primaria',
-      necesidades: ['Asma persistente: control médico cada mes', 'Tiene 1 hermano; se busca mantener el vínculo', 'Apoyo escolar en lectura'],
-      familias: [
-        { codigo: 'FAM-004', provincia: 'Panamá', f: { edad: [20, 'Acepta de 5 a 9 años'], hermanos: [20, 'Dispuesta a acoger a los dos hermanos'], salud: [22, 'Puede acompañar el asma; pediatra cercano'], cercania: [10, 'A 20 min del hospital de referencia'], apoyo: [13, 'Abuelos y tía viven en el hogar'], cultura: [6, 'Sin cercanía cultural declarada'] } },
-        { codigo: 'FAM-002', provincia: 'Chiriquí', f: { edad: [20, 'Acepta de 4 a 8 años'], hermanos: [8, 'Prefiere un solo niño; abierta a conversar'], salud: [25, 'Enfermera en el hogar; conoce el asma'], cercania: [4, 'A 4 horas del control mensual'], apoyo: [15, 'Red amplia y estable'], cultura: [10, 'Comparte la comunidad de origen'] } },
-        { codigo: 'FAM-007', provincia: 'Panamá Oeste', f: { edad: [14, 'Prefiere de 3 a 6 años; el niño tiene 7'], hermanos: [20, 'Acoge a los dos hermanos'], salud: [12, 'Puede acompañar solo con apoyo externo'], cercania: [10, 'Cerca de un centro de salud'], apoyo: [9, 'Pareja sin familia cercana'], cultura: [8, 'Interés en mantener su idioma'] } }
-      ] },
-    { codigo: 'NIN-002', edad: 12, escolar: 'Premedia',
-      necesidades: ['Sin condiciones médicas relevantes', 'Necesita estabilidad escolar: conviene no cambiar de colegio', 'Tiene 1 hermana en su hogar de origen; contacto frecuente'],
-      familias: [
-        { codigo: 'FAM-005', provincia: 'Colón', f: { edad: [20, 'Acepta de 10 a 15 años'], hermanos: [16, 'Apoya contacto semanal con la hermana'], salud: [22, 'Sin requerimientos; seguro médico activo'], cercania: [8, 'Mismo corregimiento del colegio'], apoyo: [12, 'Madre sola con apoyo de hermanos'], cultura: [8, 'Mantiene tradiciones afines'] } },
-        { codigo: 'FAM-001', provincia: 'Coclé', f: { edad: [12, 'Prefiere de 6 a 10 años; él tiene 12'], hermanos: [18, 'Abierta a visitas y vacaciones juntas'], salud: [24, 'Sin requerimientos especiales'], cercania: [5, 'Implicaría cambio de colegio'], apoyo: [14, 'Familia extensa cercana'], cultura: [9, 'Interés en su historia local'] } },
-        { codigo: 'FAM-006', provincia: 'Panamá', f: { edad: [20, 'Acepta de 9 a 14 años'], hermanos: [10, 'Poco espacio para visitas frecuentes'], salud: [25, 'Sin requerimientos especiales'], cercania: [10, 'Puede mantener el mismo colegio'], apoyo: [7, 'Trabajo de tiempo completo, sin red'], cultura: [5, 'Sin cercanía cultural declarada'] } }
-      ] }
-  ]
-};
-
-const Decisiones = {
-  clave: 'senniaf.decisiones',
-  todas() { return JSON.parse(localStorage.getItem(this.clave) || '{}'); },
-  de(caso) { return this.todas()[caso] || []; },
-  registrar(caso, reg) { const d = this.todas(); (d[caso] = d[caso] || []).push(reg); localStorage.setItem(this.clave, JSON.stringify(d)); }
-};
-
-function vistaComite() {
-  Sesion.pintarCabecera(sesion);
-  $('contenido').className = 'ancho';
-  const casos = Motor.casos();
-  let casoActual = casos[0].codigo, abierto = null;   // abierto = { familia, tipo }
-
-  const puntaje = (fam) => Object.values(fam.f).reduce((s, [p]) => s + p, 0);
-  const nivel = (p) => (p >= 85 ? 'alta' : p >= 70 ? 'media' : 'baja');
-  const decisionDe = (caso, fam) => Decisiones.de(caso).filter((d) => d.familia === fam).pop();
-  const cerrado = (caso) => Decisiones.de(caso).some((d) => d.decision === 'ACEPTADA');
-
-  function razones(fam) {
-    const filas = Object.entries(fam.f).map(([k, [p, nota]]) => ({ k, p, nota, max: FACTORES[k].max, r: p / FACTORES[k].max }));
-    const orden = [...filas].sort((a, b) => b.r - a.r);
-    return { filas, aFavor: orden.filter((x) => x.r >= .75).slice(0, 2), atencion: [...orden].reverse().filter((x) => x.r < .6).slice(0, 2) };
+/* Comité: resultados reales del motor y decisiones guardadas en PostgreSQL. */
+async function api(endpoint,opciones={}){
+ const r=await fetch(endpoint,{...opciones,headers:Sesion.headers({...opciones.headers})});
+ const t=await r.text();let d={};try{d=t?JSON.parse(t):{};}catch(_){}
+ if(!r.ok)throw Error(d.mensaje||'No se pudo completar la operación.');return d;
+}
+async function vistaComite(){
+ Sesion.pintarCabecera(sesion);$('contenido').className='ancho';
+ let casos=[],seleccionado=null,detalle=null,pesos=null,accion=null;
+ const nombreDecision={ACEPTADA:'Aceptar',DESCARTADA:'Descartar',REEVALUAR:'Solicitar reevaluación'};
+ async function inicio(){
+  try{[casos,pesos]=await Promise.all([api('/api/scoring/casos'),api('/api/scoring/pesos')]);
+    seleccionado=casos[0]?.codigoCaso||null;await abrir(seleccionado);
+  }catch(e){$('contenido').innerHTML=`<div class="mensaje error">${esc(e.message)}</div>`;}
+ }
+ async function abrir(codigo){
+  seleccionado=codigo;accion=null;detalle=codigo?await api('/api/scoring/casos/'+encodeURIComponent(codigo)):null;pintar();
+ }
+ function ultimo(cod){return [...(detalle?.decisiones||[])].reverse().find(x=>x.codigoFamilia===cod);}
+ function pintar(){
+  const cerrado=detalle?.decisiones.some(d=>d.decision==='ACEPTADA');
+  $('contenido').innerHTML=`<section class="hero"><h1>Comité de Asignación Familiar</h1>
+   <p>Priorización orientativa basada en necesidades y disposición familiar. El sistema no asigna adopciones.</p></section>
+   <section class="tarjeta"><h2>Criterios del motor · versión ${esc(pesos.version)}</h2>
+    <p>Los pesos suman 100. Las circunstancias personales, trayectoria escolar, intereses y continuidad cultural quedan para análisis profesional, no para filtros automáticos.</p>
+    <form id="formPesos"><div class="grid-pesos">${[['edad','Rango de edad'],['hermanos','Vínculos entre hermanos'],['salud','Acompañamiento de salud'],['apoyo','Red de apoyo'],['logistica','Disponibilidad logística']].map(([k,n])=>`<label>${n}<input name="${k}" type="number" min="0" max="100" required value="${esc(pesos[k])}"></label>`).join('')}</div>
+    <button class="boton chico" type="submit">Guardar pesos</button><p class="ayuda">Solo el Comité puede modificar estos criterios; cada cambio queda auditado.</p></form></section>
+   ${!detalle?'<section class="tarjeta"><h2>Sin casos registrados</h2><p>Cuando un profesional registre un perfil, aquí aparecerá el caso. Solo se evaluarán perfiles completos.</p></section>':
+   `<div class="comite"><nav class="casos">${casos.map(c=>`<button type="button" class="caso" data-caso="${esc(c.codigoCaso)}" aria-pressed="${c.codigoCaso===seleccionado}"><strong>${esc(c.codigoCaso)}</strong><span>${esc(c.edad)} años</span><span class="chip ${c.perfilCompleto?'exito':'aviso'}">${c.perfilCompleto?'Completo':'Incompleto'}</span></button>`).join('')}</nav>
+     <div><section class="tarjeta caso-detalle" style="margin-top:0"><h2>${esc(detalle.codigoCaso)} · ${esc(detalle.edad)} años</h2>
+       <p>Tiempo desde la declaratoria: <strong>${detalle.diasDesdeDeclaratoria==null?'No registrada':esc(detalle.diasDesdeDeclaratoria)+' días'}</strong></p>
+       <h3>Información relevante para evaluación</h3><ul class="necesidades">${detalle.necesidades.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>
+       <p class="ayuda">La compatibilidad es un apoyo a la decisión humana, no una certificación de idoneidad ni una recomendación vinculante.</p></section>
+       ${!detalle.perfilCompleto?'<div class="mensaje aviso">Perfil incompleto: se excluye del scoring hasta que el profesional lo complete.</div>':
+       !detalle.candidatos.length?'<div class="mensaje aviso">No hay entrevistas familiares completas disponibles.</div>':
+       `<h2 class="subtitulo">Familias disponibles · orden orientativo</h2>${detalle.candidatos.map((f,i)=>tarjeta(f,i,cerrado)).join('')}`}
+       ${detalle.decisiones.length?`<section class="tarjeta"><h2>Decisiones registradas</h2><ul class="historial">${detalle.decisiones.map(d=>`<li>${esc(d.codigoFamilia)} · ${esc(d.decision)} · ${esc(d.actor)} · ${esc(d.fecha)} · ${esc(d.motivo)} (puntaje ${esc(d.puntaje)}, v${esc(d.versionScoring)})<details><summary>Factores guardados al decidir</summary><small>${esc(d.factoresSnapshot||'Sin desglose histórico')}</small></details></li>`).join('')}</ul></section>`:''}
+     </div></div>`}`;
+ }
+ function tarjeta(f,indice,cerrado){
+  const decision=ultimo(f.codigoFamilia);const definitiva=decision && decision.decision!=='REEVALUAR';
+  const puede=!cerrado && !definitiva;
+  return `<article class="familia"><div class="familia-cab"><span class="puesto">${indice+1}</span>
+  <div><h3>${esc(f.codigoFamilia)}</h3><span class="prov">Provincia: ${esc(f.provincia)}</span></div>
+  <div class="puntaje"><strong>${f.total}</strong><small>de 100 · puntaje orientativo</small><div class="medidor"><i style="width:${f.total}%"></i></div></div></div>
+  <details><summary>Ver criterios y explicaciones</summary><div class="tabla"><table><thead><tr><th>Criterio</th><th>Puntos</th><th>Justificación</th></tr></thead><tbody>
+  ${f.factores.map(x=>`<tr><td>${esc(x.nombre)}</td><td>${x.puntos}/${x.maximo}</td><td>${esc(x.explicacion)}</td></tr>`).join('')}</tbody></table></div>
+  <h4>Puntos que debe revisar el Comité</h4><ul>${f.alertas.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
+  ${decision?`<p class="decidido">Última decisión: <strong>${esc(decision.decision)}</strong> · ${esc(decision.motivo)}</p>`:''}
+  ${puede?`<div class="fila-botones">${Object.keys(nombreDecision).map(k=>`<button type="button" class="boton ${k==='ACEPTADA'?'':'secundario'} chico" data-decision="${k}" data-familia="${esc(f.codigoFamilia)}">${nombreDecision[k]}</button>`).join('')}</div>`:cerrado?'<p class="ayuda">El caso ya tiene una vinculación aceptada.</p>':''}
+  ${accion?.familia===f.codigoFamilia?`<form class="decision" id="formDecision"><label for="motivo">Fundamento de la decisión: ${esc(nombreDecision[accion.tipo])}</label>
+    <textarea id="motivo" maxlength="2000" minlength="10" required placeholder="Describe por qué esta decisión protege las necesidades del niño o niña."></textarea>
+    <div class="fila-botones"><button class="boton chico" type="submit">Guardar decisión</button><button type="button" class="boton secundario chico" id="cancelarDecision">Cancelar</button></div></form>`:''}
+  </article>`;
+ }
+ $('contenido').addEventListener('click',async e=>{
+  const cb=e.target.closest('[data-caso]'),dec=e.target.closest('[data-decision]');
+  if(cb){try{await abrir(cb.dataset.caso);}catch(err){alert(err.message);}return;}
+  if(dec){accion={familia:dec.dataset.familia,tipo:dec.dataset.decision};pintar();return;}
+  if(e.target.closest('#cancelarDecision')){accion=null;pintar();}
+ });
+ $('contenido').addEventListener('submit',async e=>{
+  if(e.target.id==='formPesos'){
+   e.preventDefault();const data=Object.fromEntries(new FormData(e.target).entries());
+   const v=Object.fromEntries(Object.entries(data).map(([k,n])=>[k,Number(n)]));
+   try{pesos=await api('/api/scoring/pesos',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(v)});await abrir(seleccionado);}catch(err){alert(err.message);}return;
   }
-  const item = (x) => `<li><strong>${FACTORES[x.k].n}</strong> <span class="pts">${x.p}/${x.max}</span><br>${esc(x.nota)}</li>`;
-
-  function tarjetaFamilia(caso, fam, puesto) {
-    const p = puntaje(fam), rz = razones(fam), dec = decisionDe(caso.codigo, fam.codigo), bloqueado = cerrado(caso.codigo) && !dec;
-    let pie;
-    if (dec) {
-      pie = `<p class="decidido"><span class="chip ${dec.decision === 'ACEPTADA' ? 'exito' : 'error'}">${dec.decision === 'ACEPTADA' ? 'Vinculación aceptada' : 'Rechazada'}</span> ${esc(dec.por)} · ${esc(dec.fecha)}<br>${esc(dec.motivo)}</p>`;
-    } else if (bloqueado) {
-      pie = `<p class="ayuda">Este caso ya tiene una vinculación aceptada.</p>`;
-    } else if (abierto && abierto.familia === fam.codigo) {
-      const acepta = abierto.tipo === 'ACEPTADA';
-      pie = `<form class="decision" data-familia="${fam.codigo}" data-tipo="${abierto.tipo}" novalidate>
-          <label for="motivo">Fundamento de la ${acepta ? 'aceptación' : 'decisión de rechazo'}</label>
-          <textarea id="motivo" required placeholder="Explica en qué necesidades del niño o niña se basa la decisión."></textarea>
-          <p class="ayuda">Queda registrado y ajusta los criterios del motor.</p>
-          <div class="mensaje error" id="errMotivo" role="alert"></div>
-          <div class="fila-botones"><button class="boton chico" type="submit">${acepta ? 'Registrar aceptación' : 'Registrar rechazo'}</button>
-          <button class="boton secundario chico" type="button" data-accion="cancelar">Cancelar</button></div></form>`;
-    } else {
-      pie = `<div class="fila-botones"><button class="boton chico" type="button" data-accion="decidir" data-tipo="ACEPTADA" data-familia="${fam.codigo}">Aceptar vinculación</button>
-        <button class="boton secundario chico" type="button" data-accion="decidir" data-tipo="RECHAZADA" data-familia="${fam.codigo}">Rechazar</button></div>`;
-    }
-    return `<article class="familia ${dec ? dec.decision.toLowerCase() : ''}">
-      <div class="familia-cab">
-        <span class="puesto" aria-label="Puesto ${puesto}">${puesto}</span>
-        <div><h3>${fam.codigo}</h3><span class="prov">${fam.provincia}</span></div>
-        <div class="puntaje"><strong>${p}</strong><small>de 100 · compatibilidad ${nivel(p)}</small>
-          <div class="medidor"><i style="width:${p}%"></i></div></div>
-      </div>
-      <div class="razones">
-        <div><h4>A favor</h4><ul>${rz.aFavor.map(item).join('') || '<li>Sin factores destacados.</li>'}</ul></div>
-        <div><h4>Para considerar</h4><ul>${rz.atencion.map(item).join('') || '<li>Sin puntos de atención.</li>'}</ul></div>
-      </div>
-      <details><summary>Ver el desglose completo</summary>
-        <div class="tabla"><table><thead><tr><th>Factor</th><th>Se basa en</th><th>Puntos</th><th>Razón</th></tr></thead><tbody>
-          ${rz.filas.map((x) => `<tr><td>${FACTORES[x.k].n}</td><td>${FACTORES[x.k].origen}</td>
-            <td><span class="mini"><i style="width:${x.r * 100}%"></i></span> ${x.p}/${x.max}</td><td>${esc(x.nota)}</td></tr>`).join('')}
-        </tbody></table></div></details>
-      <div class="familia-pie">${pie}</div>
-    </article>`;
+  if(e.target.id==='formDecision'){
+   e.preventDefault();const motivo=$('motivo').value.trim();
+   if(motivo.length<10){alert('El motivo debe tener al menos 10 caracteres.');return;}
+   if(!confirm('¿Confirmar la decisión? Quedará registrada para el Comité.'))return;
+   try{await api('/api/scoring/casos/'+encodeURIComponent(seleccionado)+'/decisiones',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({familia:accion.familia,decision:accion.tipo,motivo})});await abrir(seleccionado);}catch(err){alert(err.message);}
   }
-
-  function pintar() {
-    const caso = casos.find((c) => c.codigo === casoActual);
-    const lista = [...caso.familias].sort((a, b) => puntaje(b) - puntaje(a));
-    const hist = Decisiones.de(caso.codigo);
-    $('contenido').innerHTML = `
-      <section class="hero">
-        <h1>Comité de Asignación Familiar</h1>
-        <p>Familias ordenadas por compatibilidad para cada caso, con la razón de cada puntaje. La decisión parte de las necesidades del niño, niña o adolescente, no solo de lo que las familias prefieren.</p>
-      </section>
-      <div class="mensaje aviso">Vista previa con datos de ejemplo: el motor de match aún no está conectado.</div>
-      <div class="comite">
-        <nav class="casos" aria-label="Casos para la sesión">${casos.map((c) => `
-          <button type="button" class="caso" data-accion="caso" data-codigo="${c.codigo}" aria-pressed="${c.codigo === casoActual}">
-            <strong>${c.codigo}</strong><span>${c.edad} años · ${c.escolar}</span>
-            <span class="chip ${cerrado(c.codigo) ? 'exito' : 'aviso'}">${cerrado(c.codigo) ? 'Decidido' : 'Pendiente'}</span></button>`).join('')}
-        </nav>
-        <div>
-          <section class="tarjeta caso-detalle" style="margin-top:0">
-            <h2>${caso.codigo} · ${caso.edad} años · ${caso.escolar}</h2>
-            <p>Necesidades que guían la decisión:</p>
-            <ul class="necesidades">${caso.necesidades.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
-          </section>
-          <h2 class="subtitulo">Familias sugeridas, de mayor a menor compatibilidad</h2>
-          ${lista.map((f, i) => tarjetaFamilia(caso, f, i + 1)).join('')}
-          ${hist.length ? `<section class="tarjeta"><h2>Registro de decisiones</h2><ul class="historial">${hist.map((d) =>
-            `<li><strong>${d.familia}</strong> · ${d.decision === 'ACEPTADA' ? 'Aceptada' : 'Rechazada'} · ${esc(d.por)} · ${esc(d.fecha)}<br>${esc(d.motivo)}</li>`).join('')}</ul></section>` : ''}
-        </div>
-      </div>`;
-    const m = $('motivo'); if (m) m.focus();
-  }
-
-  $('contenido').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-accion]'); if (!b) return;
-    const a = b.dataset.accion;
-    if (a === 'caso') { casoActual = b.dataset.codigo; abierto = null; }
-    else if (a === 'decidir') abierto = { familia: b.dataset.familia, tipo: b.dataset.tipo };
-    else if (a === 'cancelar') abierto = null;
-    pintar();
-  });
-
-  $('contenido').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const f = e.target, motivo = $('motivo').value.trim();
-    if (motivo.length < 10) { $('errMotivo').textContent = 'Escribe el fundamento de la decisión (mínimo 10 caracteres).'; return; }
-    Decisiones.registrar(casoActual, {
-      familia: f.dataset.familia, decision: f.dataset.tipo, motivo, por: sesion.id,
-      fecha: new Date().toLocaleString('es-PA', { dateStyle: 'medium', timeStyle: 'short' })
-    });
-    abierto = null; pintar();
-  });
-
-  pintar();
+ });
+ await inicio();
 }
 </script>
 </body>

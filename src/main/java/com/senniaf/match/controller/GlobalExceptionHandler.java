@@ -1,6 +1,7 @@
 package com.senniaf.match.controller;
 
 import com.senniaf.match.security.RolNoAutorizadoException;
+import com.senniaf.match.security.AccesoNoAutorizadoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -52,6 +53,16 @@ public class GlobalExceptionHandler {
         Map<String, Object> cuerpo = new LinkedHashMap<>();
         cuerpo.put("mensaje", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cuerpo);
+    }
+
+    @ExceptionHandler(AccesoNoAutorizadoException.class)
+    public ResponseEntity<Map<String,Object>> manejarSesion(AccesoNoAutorizadoException ex){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("mensaje", ex.getMessage()));
+    }
+
+    @ExceptionHandler(java.util.NoSuchElementException.class)
+    public ResponseEntity<Map<String,Object>> manejarNoEncontrado(java.util.NoSuchElementException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("mensaje", ex.getMessage()));
     }
 
     @ExceptionHandler(RolNoAutorizadoException.class)

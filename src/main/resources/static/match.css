@@ -154,3 +154,8 @@ th { color: var(--suave); font-weight: 600; }
     .puntaje { grid-column: 1 / -1; }
     .razones { grid-template-columns: 1fr; }
 }
+
+.grid-pesos {display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin:16px 0}
+.grid-pesos label{font-size:13px;font-weight:600;display:grid;gap:6px}
+.grid-pesos input{max-width:120px;border:1px solid var(--borde-campo);padding:10px;border-radius:10px}
+.familia details{margin:12px 0}.familia details li{margin:8px 0}
