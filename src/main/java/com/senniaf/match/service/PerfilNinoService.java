@@ -80,11 +80,14 @@ public class PerfilNinoService {
     }
 
     public List<PerfilNino> listarPerfiles(String actor) {
-        return repositorio.findAll().stream()
-                .filter(p -> !p.isBajaLogica() && actor.equals(p.getRegistradoPor()))
-                .sorted(Comparator.comparing(PerfilNino::getFechaRegistro).reversed())
-                .toList();
-    }
+    return repositorio.findAll().stream()
+            .filter(p -> !p.isBajaLogica() && actor.equals(p.getRegistradoPor()))
+            .sorted(Comparator.comparing(
+                    PerfilNino::getFechaRegistro,
+                    Comparator.nullsLast(Comparator.reverseOrder())
+            ))
+            .toList();
+}
 
     public PerfilNino propio(String codigo, String actor) {
         PerfilNino p = repositorio.findByCodigoCaso(codigo)

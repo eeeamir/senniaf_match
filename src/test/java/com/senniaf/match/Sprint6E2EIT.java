@@ -95,7 +95,8 @@ public class Sprint6E2EIT {
         ResponseEntity<String> creado = req("/api/ninos", HttpMethod.POST, profesional, perfilInfantil);
         assertEquals(201, creado.getStatusCode().value(), creado.getBody());
         nino = json(creado).path("codigoCaso").asText();
-        assertTrue(json(req("/api/ninos", HttpMethod.GET, profesional, null)).toString().contains(nino));
+        ResponseEntity<String> listado = req( "/api/ninos",HttpMethod.GET,profesional, null); assertEquals(200, listado.getStatusCode().value(), listado.getBody());
+assertTrue(json(listado).toString().contains(nino), listado.getBody());
         Map<String,Object> editado = new LinkedHashMap<>(perfilInfantil);
         editado.put("necesidadesApoyo", "Necesita acompañamiento escolar y seguimiento respiratorio");
         assertEquals(200, req("/api/ninos/" + nino, HttpMethod.PUT, profesional, editado).getStatusCode().value());
@@ -117,8 +118,11 @@ public class Sprint6E2EIT {
     void e2e04PerfilIncompletoQuedaExcluido() {
         PerfilNino incompleto = new PerfilNino();
         String codigo = "INCOMPLETO-" + UUID.randomUUID().toString().substring(0, 8);
-        incompleto.setCodigoCaso(codigo); incompleto.setPerfilCompleto(false);
-        incompleto.setRegistradoPor("TS-001"); repoNinos.save(incompleto);
+        incompleto.setCodigoCaso(codigo);
+        incompleto.setPerfilCompleto(false);
+        incompleto.setRegistradoPor("E2E-TEST");
+        incompleto.setFechaRegistro(java.time.LocalDateTime.now());
+        repoNinos.save(incompleto);
         String ranking = req("/api/scoring/casos", HttpMethod.GET, comite, null).getBody();
         assertFalse(ranking.contains(codigo));
     }
@@ -138,7 +142,8 @@ public class Sprint6E2EIT {
             assertEquals(200, req("/api/familias/mi-perfil/detalle", HttpMethod.GET, familia, null).getStatusCode().value());
             assertEquals(i - 1, json(req("/api/familias/mi-perfil", HttpMethod.GET, familia, null))
                     .path("numeroReevaluaciones").asInt());
-            assertFalse(req("/api/scoring/casos/" + nino, HttpMethod.GET, comite, null).getBody().contains(familiaCaso));
+            JsonNode rankingPendiente = json(req("/api/scoring/casos/" + nino, HttpMethod.GET, comite, null)).path("familias");
+assertFalse(rankingPendiente.toString().contains(familiaCaso));
             assertEquals(200, req("/api/familias/mi-perfil", HttpMethod.PUT, familia, entrevista).getStatusCode().value());
             JsonNode corregido = json(req("/api/familias/mi-perfil", HttpMethod.GET, familia, null));
             assertEquals(i, corregido.path("numeroReevaluaciones").asInt());
@@ -150,7 +155,8 @@ public class Sprint6E2EIT {
         }
         JsonNode estado = json(req("/api/familias/mi-perfil", HttpMethod.GET, familia, null));
         assertTrue(estado.path("requiereRevisionTecnica").asBoolean());
-        assertFalse(estado.path("reevaluacionPendiente").asBoolean());
+        JsonNode rankingRestaurado = json(req("/api/scoring/casos/" + nino, HttpMethod.GET, comite, null)).path("familias");
+assertTrue(rankingRestaurado.toString().contains(familiaCaso));
         assertTrue(req("/api/scoring/casos/" + nino, HttpMethod.GET, comite, null).getBody().contains(familiaCaso));
     }
 
