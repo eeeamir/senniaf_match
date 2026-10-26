@@ -36,7 +36,7 @@ body {
 .marca > *:not(svg) { position: relative; }
 
 .placa {
-    background: #fff;
+    background: #a7c5d6;
     border-radius: var(--r-tarjeta);
     padding: 14px 20px;
     box-shadow: 0 10px 30px rgba(0, 40, 90, .25);

@@ -6,10 +6,11 @@
 <title>SENNIAF Match · Perfiles registrados</title>
 <link rel="stylesheet" href="senniaf.css">
 <link rel="stylesheet" href="perfiles.css">
+<link rel="stylesheet" href="calendly-theme.css">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
-  <a class="topbar-marca" href="#"><img src="img/logo-senniaf.jpg" alt="SENNIAF"><span>SENNIAF Match</span></a>
+  <a class="topbar-marca" href="#"><img src="img/logo.png" alt="SENNIAF"><span></span></a>
   <div class="usuario" id="usuario"></div>
 </div></header>
 <main>
@@ -29,7 +30,7 @@ if (sesion) { Sesion.pintarCabecera(sesion); cargar(); }
 async function cargar() {
   const estado = document.getElementById('estado');
   try {
-    const r = await fetch('/api/ninos', { headers: { 'X-User-Role': sesion.rol, 'X-User-Id': sesion.id } });
+    const r = await fetch('/api/ninos', { headers: Sesion.encabezados() });
     const datos = await r.json();
     if (!r.ok) throw new Error(datos.mensaje || 'No se pudieron consultar los perfiles.');
     if (!datos.length) { estado.textContent = 'Todavía no hay perfiles registrados.'; return; }
@@ -40,11 +41,29 @@ async function cargar() {
           <h2>${p.codigoCaso}</h2>
           <div class="datos"><span>Edad: ${p.edad ?? '—'}</span><span>Escolaridad: ${p.nivelEscolar ?? '—'}</span><span>Registrado por: ${p.registradoPor ?? '—'}</span></div>
           ${p.alertaMedica ? '<div class="alerta">Requiere revisión médica</div>' : ''}
+          <div class="acciones-perfil"><a class="boton chico" href="perfil.html?editar=${encodeURIComponent(p.codigoCaso)}">Editar</a>
+            <button class="boton secundario chico" type="button" data-baja="${p.codigoCaso}">Dar de baja</button>
+            <button class="boton secundario chico" type="button" data-auditoria="${p.codigoCaso}">Auditoría</button></div>
         </div>
         <span class="chip ${p.perfilCompleto ? 'exito' : 'aviso'}">${p.perfilCompleto ? 'Completo' : 'Incompleto'}</span>
       </article>`).join('');
   } catch (e) { estado.textContent = e.message; estado.classList.add('error'); }
 }
+document.getElementById('lista').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-baja],button[data-auditoria]'); if (!b) return;
+  const codigo = b.dataset.baja || b.dataset.auditoria;
+  if (b.dataset.baja) {
+    if (!confirm(`¿Dar de baja el caso ${codigo}? Se conservará una auditoría y no aparecerá en el ranking.`)) return;
+    const r = await fetch(`/api/ninos/${encodeURIComponent(codigo)}`, { method:'DELETE', headers:Sesion.encabezados() });
+    if (!r.ok) { alert((await r.json()).mensaje); return; }
+    await cargar();
+  } else {
+    const r = await fetch(`/api/ninos/${encodeURIComponent(codigo)}/auditoria`, { headers:Sesion.encabezados() });
+    if (!r.ok) { alert((await r.json()).mensaje); return; }
+    const eventos = await r.json();
+    alert(eventos.map(ev => `${ev.fecha} · ${ev.accion} · ${ev.actor}`).join('\n') || 'Sin eventos');
+  }
+});
 </script>
 </body>
 </html>

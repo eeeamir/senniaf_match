@@ -14,7 +14,8 @@ public class UsuarioService {
     private static final int MAX_INTENTOS = 5;
     private final UsuarioRepository repo;
     private final PasswordEncoder encoder;
-    public UsuarioService(UsuarioRepository repo, PasswordEncoder encoder){this.repo=repo;this.encoder=encoder;}
+    private final SesionAccesoService sesiones;
+    public UsuarioService(UsuarioRepository repo, PasswordEncoder encoder, SesionAccesoService sesiones){this.repo=repo;this.encoder=encoder;this.sesiones=sesiones;}
 
     public Map<String,Object> registrar(RegistroUsuarioRequest r){
         String cedula=r.getCedula().trim().toUpperCase(), correo=r.getCorreo().trim().toLowerCase();
@@ -50,7 +51,7 @@ public class UsuarioService {
     private Usuario usuarioFamilia(String cedula){return repo.findByCedula(cedula.trim().toUpperCase()).orElseThrow(()->new IllegalArgumentException("No encontramos esa cédula. Regístrate primero."));}
     private Map<String,Object> sesion(Usuario u){
         String nombre=(u.getNombre()==null?u.getIdentificador():u.getNombre()+" "+(u.getApellido()==null?"":u.getApellido())).trim();
-        return Map.of("tipo",u.getRol().equals("FAMILIA")?"FAMILIA":"FUNCIONARIO","id",u.getIdentificador(),"nombre",nombre,"rol",u.getRol());
+        return Map.of("tipo",u.getRol().equals("FAMILIA")?"FAMILIA":"FUNCIONARIO","id",u.getIdentificador(),"nombre",nombre,"rol",u.getRol(),"token",sesiones.crear(u));
     }
     private String nuevoCodigo(){return String.format("%06d",new Random().nextInt(1_000_000));}
 }

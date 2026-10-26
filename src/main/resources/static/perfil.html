@@ -8,6 +8,7 @@
 
 <link rel="stylesheet" href="senniaf.css">
 <link rel="stylesheet" href="perfil.css">
+<link rel="stylesheet" href="calendly-theme.css">
 </head>
 
 
@@ -15,7 +16,7 @@
 
 
 <header class="topbar"><div class="topbar-in">
-  <a class="topbar-marca" href="#"><img src="img/logo-senniaf.jpg" alt="SENNIAF"><span>SENNIAF Match</span></a>
+  <a class="topbar-marca" href="#"><img src="img/logo.png" alt="SENNIAF"><span></span></a>
   <div class="usuario" id="usuario"></div>
 </div></header>
 
@@ -75,12 +76,13 @@
 
     <div class="barra-pantalla">
       <span class="etiqueta-rol" id="etiquetaRolNino"></span>
-      <button type="button" class="boton secundario chico" id="btnCambiarRolNino">Cambiar de rol</button>
     </div>
 
     <!-- CABECERA -->
 
     <div class="hero">
+
+      <a class="volver" href="funcionario.html">← Volver al menú</a>
 
       <div class="cabecera-superior">
 
@@ -606,6 +608,8 @@
 
     <div class="hero">
 
+      <a class="volver" id="volverSeguimientoFamilia" href="match.html" hidden>← Volver al seguimiento</a>
+
       <div class="cabecera-superior">
 
         <div>
@@ -1106,6 +1110,8 @@ const btnRegistrar = document.getElementById('btnRegistrar');
 const formularioFamilia = document.getElementById('formularioFamilia');
 const resultadoFamilia = document.getElementById('resultadoFamilia');
 const btnRegistrarFamilia = document.getElementById('btnRegistrarFamilia');
+const modoCorreccionFamilia = new URLSearchParams(location.search).get('reevaluacion') === '1';
+const textoEnviarFamilia = modoCorreccionFamilia ? 'Enviar entrevista corregida' : 'Enviar entrevista';
 
 
 
@@ -1190,10 +1196,6 @@ function volverASeleccionDeRol() {
     .querySelectorAll('.tarjeta-rol')
     .forEach((t) => t.classList.remove('activa'));
 }
-
-document
-  .getElementById('btnCambiarRolNino')
-  .addEventListener('click', volverASeleccionDeRol);
 
 document
   .getElementById('btnCambiarRolFamilia')
@@ -1330,12 +1332,12 @@ formulario.addEventListener('submit', async (evento) => {
 
   try {
 
-    const respuesta = await fetch('/api/ninos', {
-      method: 'POST',
+    const editarCodigo = new URLSearchParams(location.search).get('editar');
+    const respuesta = await fetch(editarCodigo ? `/api/ninos/${encodeURIComponent(editarCodigo)}` : '/api/ninos', {
+      method: editarCodigo ? 'PUT' : 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-User-Role': rolSeleccionado,
-        'X-User-Id': usuarioId
+        ...Sesion.encabezados()
       },
       body: JSON.stringify(cuerpo)
     });
@@ -1478,7 +1480,7 @@ formularioFamilia.addEventListener('submit', async (evento) => {
   if (!formularioFamilia.checkValidity()) {
     formularioFamilia.reportValidity();
     btnRegistrarFamilia.disabled = false;
-    btnRegistrarFamilia.textContent = 'Enviar entrevista';
+    btnRegistrarFamilia.textContent = textoEnviarFamilia;
     return;
   }
 
@@ -1487,12 +1489,11 @@ formularioFamilia.addEventListener('submit', async (evento) => {
 
   try {
 
-    const respuesta = await fetch('/api/familias', {
-      method: 'POST',
+    const respuesta = await fetch(modoCorreccionFamilia ? '/api/familias/mi-perfil' : '/api/familias', {
+      method: modoCorreccionFamilia ? 'PUT' : 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-User-Role': 'FAMILIA',
-        'X-User-Id': usuarioId
+        ...Sesion.encabezados()
       },
       body: JSON.stringify(cuerpo)
     });
@@ -1546,7 +1547,7 @@ formularioFamilia.addEventListener('submit', async (evento) => {
   } finally {
 
     btnRegistrarFamilia.disabled = false;
-    btnRegistrarFamilia.textContent = 'Enviar entrevista';
+    btnRegistrarFamilia.textContent = textoEnviarFamilia;
 
   }
 
@@ -1568,19 +1569,47 @@ if (sesion) {
     c.value = sesion.id;
     c.readOnly = true;
     document.getElementById('btnCambiarRolFamilia').hidden = true;
-    /* Si ya hizo la entrevista, su pantalla es el motor de match. */
-    Sesion.destinoFamilia(sesion).then((d) => { if (d === 'match.html') location.replace(d); });
+    /* Se permite reabrir la entrevista propia cuando el Comité solicita reevaluación. */
+    if (modoCorreccionFamilia) {
+      document.getElementById('volverSeguimientoFamilia').hidden = false;
+      btnRegistrarFamilia.textContent = textoEnviarFamilia;
+      btnRegistrarFamilia.disabled = true;
+      fetch('/api/familias/mi-perfil/detalle', { headers: Sesion.encabezados() })
+        .then(r => { if (!r.ok) throw new Error('No encontramos tu entrevista'); return r.json(); })
+        .then(p => {
+          ['tipoFamilia','notaEstructuraHogar','notaRedApoyo','provincia','disponibilidadViaje',
+           'notaDistancia','edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad',
+           'disposicionHermanos','notaHermanos','notaCondicionesSalud','continuidadCultural'].forEach(k => {
+            const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
+          });
+          ['redApoyo','condicionesPuedeAcompanarHoy','condicionesConApoyo'].forEach(k => marcarValores(k, p[k] || []));
+          btnRegistrarFamilia.disabled = false;
+        }).catch(e => {
+          resultadoFamilia.className = 'resultado error';
+          resultadoFamilia.textContent = 'No se pudo recuperar tu entrevista: ' + e.message;
+        });
+    } else Sesion.destinoFamilia(sesion).then((d) => { if (d === 'match.html') location.replace(d); });
   } else {
     document.getElementById('etiquetaRolNino').textContent = NOMBRES_ROL[sesion.rol];
     pantallaNino.hidden = false;
     const f = document.getElementById('idFuncionario');
     f.value = sesion.id;
     f.readOnly = true;
-    document.getElementById('btnCambiarRolNino').hidden = true;
+    const editarCodigo = new URLSearchParams(location.search).get('editar');
+    if (editarCodigo) fetch(`/api/ninos/${encodeURIComponent(editarCodigo)}`, { headers: Sesion.encabezados() })
+      .then(r => { if (!r.ok) throw new Error('No se puede editar ese caso'); return r.json(); })
+      .then(p => {
+        ['edad','nivelEscolar','gradoEscolar','rendimientoAcademico','habilidadesDetalle',
+          'gustosDetalle','personalidadDetalle','tieneHermanos','cantidadHermanos','hermanosDetalle',
+          'contextoCultural','alergiasDetalle','intoleranciaLactosa','condicionesSaludDetalle','necesidadesApoyo'].forEach(k => {
+            const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
+          });
+        ['habilidades','gustos','personalidad','alergias','condicionesSalud'].forEach(k => marcarValores(k, p[k] || []));
+        btnRegistrar.textContent = 'Guardar correcciones';
+      }).catch(e => { resultado.textContent = e.message; });
   }
 
-  Sesion.pintarCabecera(sesion,
-    sesion.tipo === 'FAMILIA' ? '' : '<a class="enlace" href="funcionario.html">Menú</a>');
+  Sesion.pintarCabecera(sesion);
 }
 
 </script>

@@ -6,10 +6,11 @@
 <title>SENNIAF Match · Motor de match</title>
 <link rel="stylesheet" href="senniaf.css">
 <link rel="stylesheet" href="match.css">
+<link rel="stylesheet" href="calendly-theme.css">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
-  <a class="topbar-marca" href="#"><img src="img/logo-senniaf.jpg" alt="SENNIAF"><span>SENNIAF Match</span></a>
+  <a class="topbar-marca" href="#"><img src="img/logo.png" alt="SENNIAF"><span></span></a>
   <div class="usuario" id="usuario"></div>
 </div></header>
 <main id="contenido"></main>
@@ -33,12 +34,14 @@ async function vistaFamilia() {
 
   let perfil = null;
   try {
-    const r = await fetch('/api/familias/mi-perfil', { headers: { 'X-User-Role': 'FAMILIA', 'X-User-Id': sesion.id } });
+    const r = await fetch('/api/familias/mi-perfil', { headers: Sesion.encabezados() });
     if (r.status === 404) return location.replace('perfil.html');
+    if (r.status === 401) return Sesion.salir();
     if (r.ok) perfil = await r.json();
-  } catch (_) { /* sin conexión */ }
+  } catch (_) { /* error de red */ }
   if (!perfil) {
-    perfil = { codigoCaso: '—', perfilCompleto: true };
+    $('contenido').innerHTML = '<div class="mensaje error">No se pudo cargar tu entrevista. Comprueba la conexión e inicia sesión de nuevo.</div>';
+    return;
   }
 
   const pasos = [
@@ -48,7 +51,7 @@ async function vistaFamilia() {
     ['Revisión del Comité', 'El Comité de Asignación Familiar estudia las familias sugeridas y decide.'],
     ['Vinculación', 'Si el Comité te elige, tu equipo SENNIAF te acompaña en los siguientes pasos.']
   ];
-  const actual = perfil.perfilCompleto ? 2 : 1;
+  const actual = perfil.reevaluacionPendiente ? 1 : (perfil.perfilCompleto ? 2 : 1);
   const estado = (i) => (i < actual ? 'hecho' : i === actual ? 'actual' : 'pendiente');
   const rotulo = { hecho: 'Listo', actual: 'Estás aquí', pendiente: 'Más adelante' };
 
@@ -67,7 +70,8 @@ async function vistaFamilia() {
           <p>${d}</p></div>
         </li>`).join('')}
       </ol>
-      ${perfil.perfilCompleto ? '' : `<div class="mensaje aviso">Tu entrevista quedó incompleta, por eso todavía no entra al análisis de compatibilidad. Habla con tu trabajador social para completarla.</div>`}
+      ${perfil.reevaluacionPendiente ? `<div class="mensaje aviso">El Comité pidió que revises tu entrevista. El equipo técnico puede orientarte sobre los ajustes necesarios. <a class="boton chico" href="perfil.html?reevaluacion=1">Corregir entrevista</a></div>` : ''}
+      ${perfil.perfilCompleto ? '' : `<div class="mensaje aviso">Tu entrevista quedó incompleta; todavía no participa en el análisis. <a href="perfil.html?reevaluacion=1">Completar información</a></div>`}
     </section>
 
     <section class="tarjeta">
@@ -83,92 +87,72 @@ async function vistaFamilia() {
       <h2>Tu entrevista</h2>
       <p>Código de caso: <strong class="codigo">${esc(perfil.codigoCaso)}</strong>
          <span class="chip ${perfil.perfilCompleto ? 'exito' : 'aviso'}">${perfil.perfilCompleto ? 'Completa' : 'Incompleta'}</span></p>
-      <p>Si algo cambia en tu hogar, avísale a tu trabajador social para actualizar tus datos.</p>
+      <p>Reevaluaciones completadas: <strong>${Number(perfil.numeroReevaluaciones || 0)}</strong>. Puedes <a href="perfil.html?reevaluacion=1">actualizar tu entrevista</a> cuando cambie tu situación.</p>
+      ${perfil.requiereRevisionTecnica ? '<div class="mensaje aviso">Tu expediente requiere seguimiento del equipo técnico. No es una sanción ni implica pérdida automática de idoneidad.</div>' : ''}
     </section>
 
-    <div class="mensaje aviso">Vista previa: el motor de match aún no está conectado. Las etapas posteriores se activarán cuando exista.</div>`;
+    <div class="mensaje aviso">El análisis es orientativo; SENNIAF y el Comité deben validar cada etapa conforme al procedimiento legal.</div>`;
 }
 
 /* =====================================================================
    VISTA DEL COMITÉ DE ASIGNACIÓN FAMILIAR
-   DATOS DE EJEMPLO: no es el motor. `Motor.casos()` es el único punto
-   que habrá que reemplazar. Endpoints sugeridos:
-     GET  /api/match/casos                      → lista de casos con familias priorizadas
-     POST /api/match/casos/{codigo}/decisiones  {familia, decision, motivo}
+   El ranking y las decisiones provienen del backend con PostgreSQL.
    Cada factor llega como [puntos, razón] y el total es la suma.
    ===================================================================== */
 const FACTORES = {
-  edad:     { n: 'Rango de edad',        max: 20, origen: 'Preferencia de la familia' },
-  hermanos: { n: 'Vínculo con hermanos', max: 20, origen: 'Necesidad del niño o niña' },
-  salud:    { n: 'Cuidados de salud',    max: 25, origen: 'Necesidad del niño o niña' },
-  cercania: { n: 'Cercanía y servicios', max: 10, origen: 'Necesidad del niño o niña' },
-  apoyo:    { n: 'Red de apoyo',         max: 15, origen: 'Necesidad del niño o niña' },
-  cultura:  { n: 'Continuidad cultural', max: 10, origen: 'Necesidad del niño o niña' }
+  edad:     { n: 'Rango de edad', max: 20, origen: 'Preferencia declarada' },
+  hermanos: { n: 'Vínculos entre hermanos', max: 25, origen: 'Necesidad del niño o niña' },
+  salud:    { n: 'Salud y desarrollo', max: 35, origen: 'Capacidad declarada y necesidades' },
+  apoyo:    { n: 'Red de apoyo', max: 15, origen: 'Declaración de la familia' },
+  logistica:{ n: 'Logística', max: 5, origen: 'Disponibilidad para visitas' }
 };
 
-const Motor = {
-  casos: () => [
-    { codigo: 'NIN-001', edad: 7, escolar: 'Primaria',
-      necesidades: ['Asma persistente: control médico cada mes', 'Tiene 1 hermano; se busca mantener el vínculo', 'Apoyo escolar en lectura'],
-      familias: [
-        { codigo: 'FAM-004', provincia: 'Panamá', f: { edad: [20, 'Acepta de 5 a 9 años'], hermanos: [20, 'Dispuesta a acoger a los dos hermanos'], salud: [22, 'Puede acompañar el asma; pediatra cercano'], cercania: [10, 'A 20 min del hospital de referencia'], apoyo: [13, 'Abuelos y tía viven en el hogar'], cultura: [6, 'Sin cercanía cultural declarada'] } },
-        { codigo: 'FAM-002', provincia: 'Chiriquí', f: { edad: [20, 'Acepta de 4 a 8 años'], hermanos: [8, 'Prefiere un solo niño; abierta a conversar'], salud: [25, 'Enfermera en el hogar; conoce el asma'], cercania: [4, 'A 4 horas del control mensual'], apoyo: [15, 'Red amplia y estable'], cultura: [10, 'Comparte la comunidad de origen'] } },
-        { codigo: 'FAM-007', provincia: 'Panamá Oeste', f: { edad: [14, 'Prefiere de 3 a 6 años; el niño tiene 7'], hermanos: [20, 'Acoge a los dos hermanos'], salud: [12, 'Puede acompañar solo con apoyo externo'], cercania: [10, 'Cerca de un centro de salud'], apoyo: [9, 'Pareja sin familia cercana'], cultura: [8, 'Interés en mantener su idioma'] } }
-      ] },
-    { codigo: 'NIN-002', edad: 12, escolar: 'Premedia',
-      necesidades: ['Sin condiciones médicas relevantes', 'Necesita estabilidad escolar: conviene no cambiar de colegio', 'Tiene 1 hermana en su hogar de origen; contacto frecuente'],
-      familias: [
-        { codigo: 'FAM-005', provincia: 'Colón', f: { edad: [20, 'Acepta de 10 a 15 años'], hermanos: [16, 'Apoya contacto semanal con la hermana'], salud: [22, 'Sin requerimientos; seguro médico activo'], cercania: [8, 'Mismo corregimiento del colegio'], apoyo: [12, 'Madre sola con apoyo de hermanos'], cultura: [8, 'Mantiene tradiciones afines'] } },
-        { codigo: 'FAM-001', provincia: 'Coclé', f: { edad: [12, 'Prefiere de 6 a 10 años; él tiene 12'], hermanos: [18, 'Abierta a visitas y vacaciones juntas'], salud: [24, 'Sin requerimientos especiales'], cercania: [5, 'Implicaría cambio de colegio'], apoyo: [14, 'Familia extensa cercana'], cultura: [9, 'Interés en su historia local'] } },
-        { codigo: 'FAM-006', provincia: 'Panamá', f: { edad: [20, 'Acepta de 9 a 14 años'], hermanos: [10, 'Poco espacio para visitas frecuentes'], salud: [25, 'Sin requerimientos especiales'], cercania: [10, 'Puede mantener el mismo colegio'], apoyo: [7, 'Trabajo de tiempo completo, sin red'], cultura: [5, 'Sin cercanía cultural declarada'] } }
-      ] }
-  ]
-};
-
-const Decisiones = {
-  clave: 'senniaf.decisiones',
-  todas() { return JSON.parse(localStorage.getItem(this.clave) || '{}'); },
-  de(caso) { return this.todas()[caso] || []; },
-  registrar(caso, reg) { const d = this.todas(); (d[caso] = d[caso] || []).push(reg); localStorage.setItem(this.clave, JSON.stringify(d)); }
-};
-
-function vistaComite() {
+async function vistaComite() {
   Sesion.pintarCabecera(sesion);
   $('contenido').className = 'ancho';
-  const casos = Motor.casos();
-  let casoActual = casos[0].codigo, abierto = null;   // abierto = { familia, tipo }
+  let casos = [], pesos = null, casoActual = null, abierto = null;
+  const Decisiones = { de(c) { return casos.find(x => x.codigo === c)?.historial || []; } };
 
-  const puntaje = (fam) => Object.values(fam.f).reduce((s, [p]) => s + p, 0);
+  async function cargarCasos() {
+    const [casosRespuesta, pesosRespuesta] = await Promise.all([
+      fetch('/api/scoring/casos', { headers: Sesion.encabezados() }),
+      fetch('/api/scoring/pesos', { headers: Sesion.encabezados() })
+    ]);
+    if (!casosRespuesta.ok || !pesosRespuesta.ok) throw new Error('No fue posible consultar el motor. Comprueba tu sesión y PostgreSQL.');
+    casos = await casosRespuesta.json(); pesos = await pesosRespuesta.json();
+    if (!casos.find(c => c.codigo === casoActual)) casoActual = casos[0]?.codigo || null;
+  }
+
+  const puntaje = (fam) => fam.puntaje;
   const nivel = (p) => (p >= 85 ? 'alta' : p >= 70 ? 'media' : 'baja');
   const decisionDe = (caso, fam) => Decisiones.de(caso).filter((d) => d.familia === fam).pop();
   const cerrado = (caso) => Decisiones.de(caso).some((d) => d.decision === 'ACEPTADA');
 
   function razones(fam) {
-    const filas = Object.entries(fam.f).map(([k, [p, nota]]) => ({ k, p, nota, max: FACTORES[k].max, r: p / FACTORES[k].max }));
+    const filas = Object.entries(fam.f).map(([k, [p, nota]]) => ({ k, p, nota, max: pesos[k], r: pesos[k] ? p / pesos[k] : 1 }));
     const orden = [...filas].sort((a, b) => b.r - a.r);
     return { filas, aFavor: orden.filter((x) => x.r >= .75).slice(0, 2), atencion: [...orden].reverse().filter((x) => x.r < .6).slice(0, 2) };
   }
   const item = (x) => `<li><strong>${FACTORES[x.k].n}</strong> <span class="pts">${x.p}/${x.max}</span><br>${esc(x.nota)}</li>`;
 
   function tarjetaFamilia(caso, fam, puesto) {
-    const p = puntaje(fam), rz = razones(fam), dec = decisionDe(caso.codigo, fam.codigo), bloqueado = cerrado(caso.codigo) && !dec;
+    const p = puntaje(fam), rz = razones(fam), dec = decisionDe(caso.codigo, fam.codigo), bloqueado = cerrado(caso.codigo);
     let pie;
-    if (dec) {
-      pie = `<p class="decidido"><span class="chip ${dec.decision === 'ACEPTADA' ? 'exito' : 'error'}">${dec.decision === 'ACEPTADA' ? 'Vinculación aceptada' : 'Rechazada'}</span> ${esc(dec.por)} · ${esc(dec.fecha)}<br>${esc(dec.motivo)}</p>`;
-    } else if (bloqueado) {
+    if (bloqueado) {
       pie = `<p class="ayuda">Este caso ya tiene una vinculación aceptada.</p>`;
     } else if (abierto && abierto.familia === fam.codigo) {
       const acepta = abierto.tipo === 'ACEPTADA';
       pie = `<form class="decision" data-familia="${fam.codigo}" data-tipo="${abierto.tipo}" novalidate>
-          <label for="motivo">Fundamento de la ${acepta ? 'aceptación' : 'decisión de rechazo'}</label>
+          <label for="motivo">Fundamento de la decisión</label>
           <textarea id="motivo" required placeholder="Explica en qué necesidades del niño o niña se basa la decisión."></textarea>
-          <p class="ayuda">Queda registrado y ajusta los criterios del motor.</p>
+          <p class="ayuda">La decisión queda auditada. Solicitar reevaluación permite corregir la entrevista familiar, sin imponer sanción automática.</p>
           <div class="mensaje error" id="errMotivo" role="alert"></div>
-          <div class="fila-botones"><button class="boton chico" type="submit">${acepta ? 'Registrar aceptación' : 'Registrar rechazo'}</button>
+          <div class="fila-botones"><button class="boton chico" type="submit">Registrar decisión</button>
           <button class="boton secundario chico" type="button" data-accion="cancelar">Cancelar</button></div></form>`;
     } else {
-      pie = `<div class="fila-botones"><button class="boton chico" type="button" data-accion="decidir" data-tipo="ACEPTADA" data-familia="${fam.codigo}">Aceptar vinculación</button>
-        <button class="boton secundario chico" type="button" data-accion="decidir" data-tipo="RECHAZADA" data-familia="${fam.codigo}">Rechazar</button></div>`;
+      pie = `<div class="fila-botones"><button class="boton chico" type="button" data-accion="decidir" data-tipo="ACEPTADA" data-familia="${fam.codigo}">Aceptar propuesta</button>
+        <button class="boton secundario chico" type="button" data-accion="decidir" data-tipo="DESCARTADA" data-familia="${fam.codigo}">Descartar</button>
+        <button class="boton secundario chico" type="button" data-accion="decidir" data-tipo="REEVALUACION" data-familia="${fam.codigo}">Solicitar reevaluación</button></div>`;
     }
     return `<article class="familia ${dec ? dec.decision.toLowerCase() : ''}">
       <div class="familia-cab">
@@ -177,6 +161,8 @@ function vistaComite() {
         <div class="puntaje"><strong>${p}</strong><small>de 100 · compatibilidad ${nivel(p)}</small>
           <div class="medidor"><i style="width:${p}%"></i></div></div>
       </div>
+      ${fam.alertaRevisionTecnica ? '<div class="mensaje aviso">Tres o más reevaluaciones: avisar al equipo técnico para seguimiento humano. Sin penalización automática.</div>' : ''}
+      ${dec ? `<p class="ayuda">Última decisión: ${esc(dec.decision)} · ${esc(dec.fecha)}</p>` : ''}
       <div class="razones">
         <div><h4>A favor</h4><ul>${rz.aFavor.map(item).join('') || '<li>Sin factores destacados.</li>'}</ul></div>
         <div><h4>Para considerar</h4><ul>${rz.atencion.map(item).join('') || '<li>Sin puntos de atención.</li>'}</ul></div>
@@ -192,6 +178,12 @@ function vistaComite() {
 
   function pintar() {
     const caso = casos.find((c) => c.codigo === casoActual);
+    if (!caso) {
+      $('contenido').innerHTML = `<section class="hero"><h1>Comité de Asignación Familiar</h1></section>
+        <div class="mensaje aviso">No hay casos infantiles completos disponibles para el ranking. Registra un perfil y completa su información.</div>
+        ${controlesPesos()}`;
+      return;
+    }
     const lista = [...caso.familias].sort((a, b) => puntaje(b) - puntaje(a));
     const hist = Decisiones.de(caso.codigo);
     $('contenido').innerHTML = `
@@ -199,7 +191,7 @@ function vistaComite() {
         <h1>Comité de Asignación Familiar</h1>
         <p>Familias ordenadas por compatibilidad para cada caso, con la razón de cada puntaje. La decisión parte de las necesidades del niño, niña o adolescente, no solo de lo que las familias prefieren.</p>
       </section>
-      <div class="mensaje aviso">Vista previa con datos de ejemplo: el motor de match aún no está conectado.</div>
+      ${controlesPesos()}
       <div class="comite">
         <nav class="casos" aria-label="Casos para la sesión">${casos.map((c) => `
           <button type="button" class="caso" data-accion="caso" data-codigo="${c.codigo}" aria-pressed="${c.codigo === casoActual}">
@@ -213,12 +205,21 @@ function vistaComite() {
             <ul class="necesidades">${caso.necesidades.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
           </section>
           <h2 class="subtitulo">Familias sugeridas, de mayor a menor compatibilidad</h2>
-          ${lista.map((f, i) => tarjetaFamilia(caso, f, i + 1)).join('')}
+          ${lista.length ? lista.map((f, i) => tarjetaFamilia(caso, f, i + 1)).join('') : '<div class="mensaje aviso">No hay familias completas y disponibles para este caso.</div>'}
           ${hist.length ? `<section class="tarjeta"><h2>Registro de decisiones</h2><ul class="historial">${hist.map((d) =>
-            `<li><strong>${d.familia}</strong> · ${d.decision === 'ACEPTADA' ? 'Aceptada' : 'Rechazada'} · ${esc(d.por)} · ${esc(d.fecha)}<br>${esc(d.motivo)}</li>`).join('')}</ul></section>` : ''}
+            `<li><strong>${esc(d.familia)}</strong> · ${esc(d.decision)} · ${esc(d.por)} · ${esc(d.fecha)} · ${d.puntaje} puntos, pesos v${d.versionPesos}<br>${esc(d.motivo)}</li>`).join('')}</ul></section>` : ''}
         </div>
       </div>`;
     const m = $('motivo'); if (m) m.focus();
+  }
+
+  function controlesPesos() {
+    return `<section class="tarjeta"><h2>Pesos del motor · versión ${pesos.version}</h2>
+      <p class="ayuda">Configuración académica. El Comité debe revisar las recomendaciones y no asignar automáticamente.</p>
+      <form id="formPesos" class="pesos-grid">${Object.entries(FACTORES).map(([k,v]) => `
+        <label>${v.n}<input type="number" name="${k}" min="0" max="100" required value="${pesos[k]}"></label>`).join('')}
+        <button class="boton chico" type="submit">Guardar pesos</button></form>
+      <p class="ayuda" id="pesoEstado">Total: ${['edad','hermanos','salud','apoyo','logistica'].reduce((sum,k)=>sum+pesos[k],0)} puntos</p></section>`;
   }
 
   $('contenido').addEventListener('click', (e) => {
@@ -230,18 +231,33 @@ function vistaComite() {
     pintar();
   });
 
-  $('contenido').addEventListener('submit', (e) => {
+  $('contenido').addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (e.target.id === 'formPesos') {
+      const cambios = Object.fromEntries([...new FormData(e.target)].map(([k,v]) => [k, Number(v)]));
+      const mensaje = $('pesoEstado');
+      if (Object.values(cambios).reduce((a,b)=>a+b,0) !== 100) { mensaje.textContent = 'La suma debe ser exactamente 100.'; return; }
+      try {
+        const r = await fetch('/api/scoring/pesos', { method:'PUT', headers:Sesion.encabezados({'Content-Type':'application/json'}), body:JSON.stringify(cambios) });
+        if (!r.ok) throw new Error((await r.json()).mensaje);
+        await cargarCasos(); pintar();
+      } catch(error) { mensaje.textContent = error.message; }
+      return;
+    }
     const f = e.target, motivo = $('motivo').value.trim();
     if (motivo.length < 10) { $('errMotivo').textContent = 'Escribe el fundamento de la decisión (mínimo 10 caracteres).'; return; }
-    Decisiones.registrar(casoActual, {
-      familia: f.dataset.familia, decision: f.dataset.tipo, motivo, por: sesion.id,
-      fecha: new Date().toLocaleString('es-PA', { dateStyle: 'medium', timeStyle: 'short' })
-    });
-    abierto = null; pintar();
+    try {
+      const r = await fetch(`/api/scoring/casos/${encodeURIComponent(casoActual)}/decisiones`, {
+        method:'POST', headers:Sesion.encabezados({'Content-Type':'application/json'}),
+        body:JSON.stringify({familia:f.dataset.familia, decision:f.dataset.tipo, motivo})
+      });
+      if (!r.ok) throw new Error((await r.json()).mensaje || 'No se guardó la decisión');
+      abierto = null; await cargarCasos(); pintar();
+    } catch(error) { $('errMotivo').textContent = error.message; }
   });
 
-  pintar();
+  try { await cargarCasos(); pintar(); }
+  catch(error) { $('contenido').innerHTML = `<div class="mensaje error">${esc(error.message)}</div>`; }
 }
 </script>
 </body>

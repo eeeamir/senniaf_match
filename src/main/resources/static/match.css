@@ -142,6 +142,9 @@ th { color: var(--suave); font-weight: 600; }
 .decision label { margin-bottom: 6px; }
 .decision .mensaje { margin-top: 10px; }
 .decision .fila-botones { margin-top: 12px; }
+.pesos-grid { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-top: 12px; }
+.pesos-grid label { width: 145px; font-size: 13px; }
+.pesos-grid input { width: 100%; padding: 8px; margin-top: 6px; }
 
 .historial { margin: 10px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--suave); }
 .historial li { padding: 10px 0; border-bottom: 1px solid var(--borde); }
@@ -153,4 +156,8 @@ th { color: var(--suave); font-weight: 600; }
     .familia-cab { grid-template-columns: auto 1fr; }
     .puntaje { grid-column: 1 / -1; }
     .razones { grid-template-columns: 1fr; }
+}
+
+.topbar .usuario > span:first-child:not(.chip) {
+    display: none;
 }

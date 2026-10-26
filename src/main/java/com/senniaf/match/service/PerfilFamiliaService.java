@@ -5,6 +5,7 @@ import com.senniaf.match.dto.PerfilFamiliaResponse;
 import com.senniaf.match.model.PerfilFamilia;
 import com.senniaf.match.repository.PerfilFamiliaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,6 +35,51 @@ public class PerfilFamiliaService {
 
         PerfilFamilia perfil = new PerfilFamilia();
         perfil.setCodigoCaso(codigoCaso);
+        copiarDatos(perfil, request);
+        perfil.setRegistradoPor(cedula);
+        perfil.setFechaRegistro(LocalDateTime.now());
+
+        boolean completo = calcularSiEstaCompleto(request);
+        perfil.setPerfilCompleto(completo);
+
+        repositorio.save(perfil);
+
+        String mensaje = completo
+                ? "Perfil registrado correctamente"
+                : "Perfil registrado, pero está incompleto: no se incluirá en el motor de match hasta completarse";
+
+        return respuesta(perfil, mensaje);
+    }
+
+    /** La familia corrige su propia entrevista sin crear una segunda ficha ni borrar el historial. */
+    @Transactional
+    public PerfilFamiliaResponse actualizarPropio(PerfilFamiliaRequest request, String cedula) {
+        PerfilFamilia perfil = repositorio.findByRegistradoPor(cedula)
+                .orElseThrow(() -> new IllegalArgumentException("Todavía no existe una entrevista para modificar"));
+        copiarDatos(perfil, request);
+        boolean completo = calcularSiEstaCompleto(request);
+        perfil.setPerfilCompleto(completo);
+        // Abrir o abandonar el formulario nunca cuenta. Una solicitud pendiente
+        // cuenta una sola vez al recibirse la corrección completa y válida.
+        if (perfil.isReevaluacionPendiente() && completo) {
+            perfil.setNumeroReevaluaciones(perfil.getNumeroReevaluaciones() + 1);
+            perfil.setReevaluacionPendiente(false);
+        }
+        repositorio.save(perfil);
+        return respuesta(perfil, perfil.isPerfilCompleto() ? "Entrevista actualizada para revisión del Comité"
+                : "Los cambios se guardaron, pero la entrevista sigue incompleta y requiere corrección");
+    }
+
+    public java.util.Optional<PerfilFamilia> consultarDetallePropio(String cedula) {
+        return repositorio.findByRegistradoPor(cedula == null ? "" : cedula.trim());
+    }
+
+    private PerfilFamiliaResponse respuesta(PerfilFamilia p, String mensaje) {
+        return new PerfilFamiliaResponse(mensaje, p.getCodigoCaso(), p.isPerfilCompleto(),
+                p.isReevaluacionPendiente(), p.getNumeroReevaluaciones());
+    }
+
+    private void copiarDatos(PerfilFamilia perfil, PerfilFamiliaRequest request) {
         perfil.setTipoFamilia(request.getTipoFamilia());
         perfil.setNotaEstructuraHogar(request.getNotaEstructuraHogar());
         perfil.setRedApoyo(request.getRedApoyo());
@@ -50,26 +96,12 @@ public class PerfilFamiliaService {
         perfil.setCondicionesConApoyo(request.getCondicionesConApoyo());
         perfil.setNotaCondicionesSalud(request.getNotaCondicionesSalud());
         perfil.setContinuidadCultural(request.getContinuidadCultural());
-        perfil.setRegistradoPor(cedula);
-        perfil.setFechaRegistro(LocalDateTime.now());
-
-        boolean completo = calcularSiEstaCompleto(request);
-        perfil.setPerfilCompleto(completo);
-
-        repositorio.save(perfil);
-
-        String mensaje = completo
-                ? "Perfil registrado correctamente"
-                : "Perfil registrado, pero está incompleto: no se incluirá en el motor de match hasta completarse";
-
-        return new PerfilFamiliaResponse(mensaje, codigoCaso, completo);
     }
 
     /** Perfil que la familia ya registró con su cédula, si existe. */
     public java.util.Optional<PerfilFamiliaResponse> consultarPorCedula(String cedula) {
         return repositorio.findByRegistradoPor(cedula == null ? "" : cedula.trim())
-                .map(p -> new PerfilFamiliaResponse(
-                        "Perfil encontrado", p.getCodigoCaso(), p.isPerfilCompleto()));
+                .map(p -> respuesta(p, "Perfil encontrado"));
     }
 
     private synchronized String siguienteCodigoCaso() {

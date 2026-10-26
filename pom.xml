@@ -9,7 +9,7 @@
     <version>0.1.0</version>
     <packaging>jar</packaging>
     <name>senniaf-match</name>
-    <description>Sprint 2 - Registro del perfil integral del nino/a (SENNIAF Match)</description>
+    <description>Sprint 6 - Validacion integral del motor de compatibilidad SENNIAF</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -60,4 +60,16 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>e2e</id>
+            <build><plugins><plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions><execution><goals>
+                    <goal>integration-test</goal><goal>verify</goal>
+                </goals></execution></executions>
+            </plugin></plugins></build>
+        </profile>
+    </profiles>
 </project>

@@ -3,10 +3,13 @@ package com.senniaf.match.service;
 import com.senniaf.match.dto.PerfilNinoRequest;
 import com.senniaf.match.dto.PerfilNinoResponse;
 import com.senniaf.match.model.PerfilNino;
+import com.senniaf.match.model.EventoCaso;
 import com.senniaf.match.model.enums.Alergia;
 import com.senniaf.match.model.enums.CondicionSalud;
 import com.senniaf.match.model.enums.RespuestaSiNoNoSabe;
 import com.senniaf.match.repository.PerfilNinoRepository;
+import com.senniaf.match.repository.EventoCasoRepository;
+import com.senniaf.match.security.RolNoAutorizadoException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,9 +20,15 @@ import java.util.Comparator;
 public class PerfilNinoService {
 
     private final PerfilNinoRepository repositorio;
+    private final EventoCasoRepository auditoria;
 
     public PerfilNinoService(PerfilNinoRepository repositorio) {
-        this.repositorio = repositorio;
+        this(repositorio, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public PerfilNinoService(PerfilNinoRepository repositorio, EventoCasoRepository auditoria) {
+        this.repositorio = repositorio; this.auditoria = auditoria;
     }
 
     public PerfilNinoResponse registrarPerfil(PerfilNinoRequest request, String registradoPor) {
@@ -27,6 +36,27 @@ public class PerfilNinoService {
 
         PerfilNino perfil = new PerfilNino();
         perfil.setCodigoCaso(codigoCaso);
+        copiarDatos(perfil, request);
+        perfil.setRegistradoPor(registradoPor);
+        perfil.setFechaRegistro(LocalDateTime.now());
+
+        boolean completo = calcularSiEstaCompleto(request);
+        perfil.setPerfilCompleto(completo);
+
+        boolean alertaMedica = calcularAlertaMedica(request);
+        perfil.setAlertaMedica(alertaMedica);
+
+        repositorio.save(perfil);
+        auditar(codigoCaso, registradoPor, "CREACION");
+
+        String mensaje = completo
+                ? "Perfil registrado correctamente"
+                : "Perfil registrado, pero está incompleto: no se incluirá en el motor de match hasta completarse";
+        if (alertaMedica) mensaje += ". Este perfil requiere atención y revisión médica por el Comité.";
+        return new PerfilNinoResponse(mensaje, codigoCaso, completo, alertaMedica);
+    }
+
+    private void copiarDatos(PerfilNino perfil, PerfilNinoRequest request) {
         perfil.setEdad(request.getEdad());
         perfil.setNivelEscolar(request.getNivelEscolar());
         perfil.setGradoEscolar(request.getGradoEscolar());
@@ -47,36 +77,49 @@ public class PerfilNinoService {
         perfil.setCantidadHermanos(request.getCantidadHermanos());
         perfil.setHermanosDetalle(request.getHermanosDetalle());
         perfil.setContextoCultural(request.getContextoCultural());
-        perfil.setRegistradoPor(registradoPor);
-        perfil.setFechaRegistro(LocalDateTime.now());
-
-        boolean completo = calcularSiEstaCompleto(request);
-        perfil.setPerfilCompleto(completo);
-
-        boolean alertaMedica = calcularAlertaMedica(request);
-        perfil.setAlertaMedica(alertaMedica);
-
-        repositorio.save(perfil);
-
-        // Comportamiento esperado según 2.4: un perfil incompleto no se
-        // rechaza, pero queda marcado para que el motor de scoring lo
-        // excluya del ranking hasta que se complete.
-        String mensaje = completo
-                ? "Perfil registrado correctamente"
-                : "Perfil registrado, pero está incompleto: no se incluirá en el motor de match hasta completarse";
-
-        if (alertaMedica) {
-            mensaje += ". El perfil declara alergias, condiciones de salud o intolerancias "
-                    + "que el Comité debe revisar con atención.";
-        }
-
-        return new PerfilNinoResponse(mensaje, codigoCaso, completo, alertaMedica);
     }
 
-    public List<PerfilNino> listarPerfiles() {
+    public List<PerfilNino> listarPerfiles(String actor) {
         return repositorio.findAll().stream()
+                .filter(p -> !p.isBajaLogica() && actor.equals(p.getRegistradoPor()))
                 .sorted(Comparator.comparing(PerfilNino::getFechaRegistro).reversed())
                 .toList();
+    }
+
+    public PerfilNino propio(String codigo, String actor) {
+        PerfilNino p = repositorio.findByCodigoCaso(codigo)
+                .orElseThrow(() -> new IllegalArgumentException("El caso no existe"));
+        if (p.isBajaLogica() || !actor.equals(p.getRegistradoPor()))
+            throw new RolNoAutorizadoException("No puedes consultar o modificar un caso ajeno o dado de baja");
+        return p;
+    }
+
+    public PerfilNinoResponse actualizar(String codigo, String actor, PerfilNinoRequest request) {
+        PerfilNino p = propio(codigo, actor);
+        copiarDatos(p, request);
+        p.setPerfilCompleto(calcularSiEstaCompleto(request));
+        p.setAlertaMedica(calcularAlertaMedica(request));
+        repositorio.save(p);
+        auditar(codigo, actor, "EDICION");
+        return new PerfilNinoResponse("Perfil actualizado correctamente", codigo, p.isPerfilCompleto(), p.isAlertaMedica());
+    }
+
+    public void darDeBaja(String codigo, String actor) {
+        PerfilNino p = propio(codigo, actor);
+        p.setBajaLogica(true);
+        repositorio.save(p);
+        auditar(codigo, actor, "BAJA_LOGICA");
+    }
+
+    public List<EventoCaso> historial(String codigo, String actor) {
+        propio(codigo, actor);
+        return auditoria == null ? List.of() : auditoria.findByCodigoCasoOrderByFechaAsc(codigo);
+    }
+
+    private void auditar(String codigo, String actor, String accion) {
+        if (auditoria == null) return; // soporte a pruebas unitarias antiguas sin repositorio de auditoría
+        EventoCaso e = new EventoCaso(); e.setCodigoCaso(codigo); e.setActor(actor);
+        e.setAccion(accion); e.setFecha(LocalDateTime.now()); auditoria.save(e);
     }
 
     private synchronized String siguienteCodigoCaso() {

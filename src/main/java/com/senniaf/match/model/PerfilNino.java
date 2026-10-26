@@ -46,6 +46,7 @@ public class PerfilNino {
     private LocalDateTime fechaRegistro;
     private boolean perfilCompleto;
     private boolean alertaMedica;
+    private boolean bajaLogica;
 
     public Long getId(){return id;} public void setId(Long id){this.id=id;}
     public String getCodigoCaso(){return codigoCaso;} public void setCodigoCaso(String v){codigoCaso=v;}
@@ -73,4 +74,5 @@ public class PerfilNino {
     public LocalDateTime getFechaRegistro(){return fechaRegistro;} public void setFechaRegistro(LocalDateTime v){fechaRegistro=v;}
     public boolean isPerfilCompleto(){return perfilCompleto;} public void setPerfilCompleto(boolean v){perfilCompleto=v;}
     public boolean isAlertaMedica(){return alertaMedica;} public void setAlertaMedica(boolean v){alertaMedica=v;}
+    public boolean isBajaLogica(){return bajaLogica;} public void setBajaLogica(boolean v){bajaLogica=v;}
 }

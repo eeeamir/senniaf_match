@@ -15,3 +15,9 @@
 @media (max-width: 650px) {
     .perfil { grid-template-columns: 1fr; }
 }
+ .acciones-perfil { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+
+.topbar .usuario > span:first-child:not(.chip) {
+    display: none;
+}

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,5 +74,21 @@ public class PerfilFamiliaController {
         return service.consultarPorCedula(usuarioId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/mi-perfil/detalle")
+    public ResponseEntity<?> detalle(@RequestHeader("X-User-Role") String rol,
+                                     @RequestHeader("X-User-Id") String id) {
+        if (!"FAMILIA".equals(rol)) throw new RolNoAutorizadoException("Solo la familia puede consultar su entrevista");
+        return service.consultarDetallePropio(id).map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/mi-perfil")
+    public PerfilFamiliaResponse corregir(@Valid @RequestBody PerfilFamiliaRequest request,
+                                           @RequestHeader("X-User-Role") String rol,
+                                           @RequestHeader("X-User-Id") String id) {
+        if (!"FAMILIA".equals(rol)) throw new RolNoAutorizadoException("Solo la familia puede corregir su entrevista");
+        return service.actualizarPropio(request, id);
     }
 }

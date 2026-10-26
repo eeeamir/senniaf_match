@@ -32,9 +32,11 @@ public class PerfilFamilia {
     @Column(name="condicion") private List<CondicionSalud> condicionesConApoyo;
     @Column(length=2000) private String notaCondicionesSalud;
     @Column(length=2000) private String continuidadCultural;
-    @Column(name="registrado_por", nullable=false) private String registradoPor;
+    @Column(name="registrado_por", nullable=false, unique=true) private String registradoPor;
     private LocalDateTime fechaRegistro;
     private boolean perfilCompleto;
+    private boolean reevaluacionPendiente;
+    private int numeroReevaluaciones;
 
     public Long getId(){return id;} public void setId(Long v){id=v;}
     public String getCodigoCaso(){return codigoCaso;} public void setCodigoCaso(String v){codigoCaso=v;}
@@ -57,4 +59,6 @@ public class PerfilFamilia {
     public String getRegistradoPor(){return registradoPor;} public void setRegistradoPor(String v){registradoPor=v;}
     public LocalDateTime getFechaRegistro(){return fechaRegistro;} public void setFechaRegistro(LocalDateTime v){fechaRegistro=v;}
     public boolean isPerfilCompleto(){return perfilCompleto;} public void setPerfilCompleto(boolean v){perfilCompleto=v;}
+    public boolean isReevaluacionPendiente(){return reevaluacionPendiente;} public void setReevaluacionPendiente(boolean v){reevaluacionPendiente=v;}
+    public int getNumeroReevaluaciones(){return numeroReevaluaciones;} public void setNumeroReevaluaciones(int v){numeroReevaluaciones=v;}
 }

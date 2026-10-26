@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,14 +47,15 @@ public class PerfilNinoController {
 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> listarPerfiles(
-            @RequestHeader("X-User-Role") String rol) {
+            @RequestHeader("X-User-Role") String rol,
+            @RequestHeader("X-User-Id") String usuario) {
 
         if (!ROLES_AUTORIZADOS.contains(rol)) {
             throw new RolNoAutorizadoException(
                     "El rol '" + rol + "' no está autorizado para consultar perfiles de niños o niñas");
         }
 
-        List<Map<String, Object>> perfiles = service.listarPerfiles().stream()
+        List<Map<String, Object>> perfiles = service.listarPerfiles(usuario).stream()
                 .map(perfil -> {
                     Map<String, Object> resumen = new LinkedHashMap<>();
                     resumen.put("codigoCaso", perfil.getCodigoCaso());
@@ -81,5 +85,31 @@ public class PerfilNinoController {
 
         PerfilNinoResponse response = service.registrarPerfil(request, usuarioId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    private void comprobarProfesional(String rol) {
+        if (!ROLES_AUTORIZADOS.contains(rol)) throw new RolNoAutorizadoException("Solo profesionales autorizados");
+    }
+
+    @GetMapping("/{codigo}")
+    public com.senniaf.match.model.PerfilNino detalle(@PathVariable String codigo,
+                      @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
+        comprobarProfesional(rol); return service.propio(codigo, actor);
+    }
+    @GetMapping("/{codigo}/auditoria")
+    public java.util.List<com.senniaf.match.model.EventoCaso> auditoria(@PathVariable String codigo,
+                      @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
+        comprobarProfesional(rol); return service.historial(codigo, actor);
+    }
+    @PutMapping("/{codigo}")
+    public PerfilNinoResponse editar(@PathVariable String codigo, @Valid @RequestBody PerfilNinoRequest r,
+                    @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
+        comprobarProfesional(rol); return service.actualizar(codigo, actor, r);
+    }
+    @DeleteMapping("/{codigo}")
+    public Map<String, String> baja(@PathVariable String codigo,
+                    @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
+        comprobarProfesional(rol); service.darDeBaja(codigo, actor);
+        return Map.of("mensaje", "Caso dado de baja; se conserva auditoría");
     }
 }

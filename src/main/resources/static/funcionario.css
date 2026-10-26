@@ -9,3 +9,7 @@
 @media (max-width: 700px) {
     .grid { grid-template-columns: 1fr; }
 }
+
+.topbar .usuario > span:first-child:not(.chip) {
+    display: none;
+}

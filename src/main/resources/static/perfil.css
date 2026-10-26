@@ -3,6 +3,9 @@
 #pantallaNino .hero,
 #pantallaFamilia .hero { margin-bottom: 20px; }
 
+/* El enlace para volver solo se muestra al corregir una entrevista ya registrada. */
+#volverSeguimientoFamilia[hidden] { display: none; }
+
 form { display: flex; flex-direction: column; gap: 20px; }
 
 /* ---------- Selector de rol ---------- */
@@ -143,4 +146,34 @@ section.grupo h2::before {
     .acciones { flex-direction: column-reverse; align-items: stretch; }
     .acciones > div { margin-left: 0 !important; flex-direction: column-reverse; }
     .acciones .boton { width: 100%; }
+}
+
+/* Ocultar identificación del profesional,
+   ya que fue verificado durante el login */
+#formulario > section.grupo:first-child {
+    display: none;
+}
+
+#pantallaNino .barra-pantalla {
+    display: none;
+}
+
+.topbar .usuario > span:first-child:not(.chip) {
+    display: none;
+}
+
+
+/* Ocultar botón Cambiar de rol de la familia adoptante */
+#pantallaFamilia #btnCambiarRolFamilia {
+    display: none;
+}
+
+/* Ocultar etiqueta Familia adoptante y barra de cambio de rol */
+#pantallaFamilia .barra-pantalla {
+    display: none;
+}
+
+/* Ocultar identificación de la persona solicitante */
+#formularioFamilia > section.grupo:first-child {
+    display: none;
 }
