@@ -22,36 +22,54 @@ const $ = (id) => document.getElementById(id);
 const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 const sesion = Sesion.requerir(['FAMILIA', 'COMITE']);
-if (sesion) (sesion.rol === 'COMITE' ? vistaComite : vistaFamilia)();
+if (sesion) {
+  if (sesion.rol === 'COMITE') {
+    vistaComite();
+  } else {
+    vistaFamilia();
+    // Mostrar las decisiones del Comité sin cerrar la sesión familiar.
+    setInterval(() => { if (!document.hidden) vistaFamilia(); }, 15000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) vistaFamilia();
+    });
+  }
+}
 
 /* =====================================================================
    VISTA DE LA FAMILIA
    La familia ve en qué etapa va su proceso y cómo se decide. Nunca ve
    puntajes, ni perfiles de niños o niñas, ni a otras familias.
    ===================================================================== */
+let ultimaVersionVistaFamilia = null;
 async function vistaFamilia() {
   Sesion.pintarCabecera(sesion);
 
   let perfil = null;
   try {
-    const r = await fetch('/api/familias/mi-perfil', { headers: Sesion.encabezados() });
+    const r = await fetch('/api/familias/mi-perfil', { headers: Sesion.encabezados(), cache: 'no-store' });
     if (r.status === 404) return location.replace('perfil.html');
     if (r.status === 401) return Sesion.salir();
     if (r.ok) perfil = await r.json();
   } catch (_) { /* error de red */ }
   if (!perfil) {
     $('contenido').innerHTML = '<div class="mensaje error">No se pudo cargar tu entrevista. Comprueba la conexión e inicia sesión de nuevo.</div>';
+    ultimaVersionVistaFamilia = null;
     return;
   }
+
+  const version = JSON.stringify([perfil.codigoCaso, perfil.perfilCompleto,
+    perfil.reevaluacionPendiente, perfil.numeroReevaluaciones, perfil.vinculacionAceptada]);
+  if (version === ultimaVersionVistaFamilia) return;
+  ultimaVersionVistaFamilia = version;
 
   const pasos = [
     ['Entrevista enviada', 'Recibimos la información de tu hogar.'],
     ['Perfil completo', 'Tu entrevista tiene lo necesario para ser considerada.'],
     ['Disponible para ser considerada', 'Cuando se registre un niño, niña o adolescente, tu familia entra en el análisis de compatibilidad.'],
     ['Revisión del Comité', 'El Comité de Asignación Familiar estudia las familias sugeridas y decide.'],
-    ['Vinculación', 'Si el Comité te elige, tu equipo SENNIAF te acompaña en los siguientes pasos.']
+    ['Propuesta de vinculación', 'Si el Comité acepta la propuesta, el equipo SENNIAF te orientará sobre los siguientes pasos.']
   ];
-  const actual = perfil.reevaluacionPendiente ? 1 : (perfil.perfilCompleto ? 2 : 1);
+  const actual = perfil.vinculacionAceptada ? 4 : (perfil.reevaluacionPendiente ? 1 : (perfil.perfilCompleto ? 2 : 1));
   const estado = (i) => (i < actual ? 'hecho' : i === actual ? 'actual' : 'pendiente');
   const rotulo = { hecho: 'Listo', actual: 'Estás aquí', pendiente: 'Más adelante' };
 
@@ -63,6 +81,7 @@ async function vistaFamilia() {
 
     <section class="tarjeta">
       <h2>En qué etapa estás</h2>
+      ${perfil.vinculacionAceptada ? `<div class="mensaje exito" role="status"><strong>¡Tu propuesta fue aceptada por el Comité de Asignación Familiar!</strong><p>Tu caso pasó a la etapa de vinculación. El equipo SENNIAF te orientará sobre el proceso y los próximos pasos. Esta decisión no constituye por sí sola una adopción legal definitiva.</p></div>` : ''}
       <ol class="etapas">${pasos.map(([t, d], i) => `
         <li class="${estado(i)}" ${i === actual ? 'aria-current="step"' : ''}>
           <span class="marca-etapa">${i < actual ? '✓' : i + 1}</span>
@@ -70,6 +89,7 @@ async function vistaFamilia() {
           <p>${d}</p></div>
         </li>`).join('')}
       </ol>
+      <p class="ayuda">El estado se actualiza automáticamente mientras tengas abierta esta pantalla.</p>
       ${perfil.reevaluacionPendiente ? `<div class="mensaje aviso">El Comité pidió que revises tu entrevista. El equipo técnico puede orientarte sobre los ajustes necesarios. <a class="boton chico" href="perfil.html?reevaluacion=1">Corregir entrevista</a></div>` : ''}
       ${perfil.perfilCompleto ? '' : `<div class="mensaje aviso">Tu entrevista quedó incompleta; todavía no participa en el análisis. <a href="perfil.html?reevaluacion=1">Completar información</a></div>`}
     </section>

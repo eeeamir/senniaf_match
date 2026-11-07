@@ -3,6 +3,7 @@ package com.senniaf.match.service;
 import com.senniaf.match.dto.PerfilFamiliaRequest;
 import com.senniaf.match.dto.PerfilFamiliaResponse;
 import com.senniaf.match.model.PerfilFamilia;
+import com.senniaf.match.repository.DecisionComiteRepository;
 import com.senniaf.match.repository.PerfilFamiliaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,9 +15,11 @@ import java.util.List;
 public class PerfilFamiliaService {
 
     private final PerfilFamiliaRepository repositorio;
+    private final DecisionComiteRepository decisiones;
 
-    public PerfilFamiliaService(PerfilFamiliaRepository repositorio) {
+    public PerfilFamiliaService(PerfilFamiliaRepository repositorio, DecisionComiteRepository decisiones) {
         this.repositorio = repositorio;
+        this.decisiones = decisiones;
     }
 
     public synchronized PerfilFamiliaResponse registrarPerfil(PerfilFamiliaRequest request, String registradoPor) {
@@ -75,8 +78,11 @@ public class PerfilFamiliaService {
     }
 
     private PerfilFamiliaResponse respuesta(PerfilFamilia p, String mensaje) {
+        // La aprobación ya está persistida por el Comité: se consulta por el
+        // código del perfil autenticado, sin duplicar estados que se desincronicen.
+        boolean vinculacionAceptada = decisiones.existsByCodigoFamiliaAndDecision(p.getCodigoCaso(), "ACEPTADA");
         return new PerfilFamiliaResponse(mensaje, p.getCodigoCaso(), p.isPerfilCompleto(),
-                p.isReevaluacionPendiente(), p.getNumeroReevaluaciones());
+                p.isReevaluacionPendiente(), p.getNumeroReevaluaciones(), vinculacionAceptada);
     }
 
     private void copiarDatos(PerfilFamilia perfil, PerfilFamiliaRequest request) {

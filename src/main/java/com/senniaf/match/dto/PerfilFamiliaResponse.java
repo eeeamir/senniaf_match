@@ -16,17 +16,24 @@ public class PerfilFamiliaResponse {
     private final boolean perfilCompleto;
     private final boolean reevaluacionPendiente;
     private final int numeroReevaluaciones;
+    private final boolean vinculacionAceptada;
 
     public PerfilFamiliaResponse(String mensaje, String codigoCaso, boolean perfilCompleto) {
         this(mensaje, codigoCaso, perfilCompleto, false, 0);
     }
 
     public PerfilFamiliaResponse(String mensaje, String codigoCaso, boolean perfilCompleto, boolean pendiente, int numero) {
+        this(mensaje, codigoCaso, perfilCompleto, pendiente, numero, false);
+    }
+
+    public PerfilFamiliaResponse(String mensaje, String codigoCaso, boolean perfilCompleto,
+                                boolean pendiente, int numero, boolean vinculacionAceptada) {
         this.mensaje = mensaje;
         this.codigoCaso = codigoCaso;
         this.perfilCompleto = perfilCompleto;
         this.reevaluacionPendiente = pendiente;
         this.numeroReevaluaciones = numero;
+        this.vinculacionAceptada = vinculacionAceptada;
     }
 
     public String getMensaje() {
@@ -42,5 +49,7 @@ public class PerfilFamiliaResponse {
     }
     public boolean isReevaluacionPendiente() { return reevaluacionPendiente; }
     public int getNumeroReevaluaciones() { return numeroReevaluaciones; }
+    /** Solo se informa la aceptación del caso propio, sin datos de niños ni de otras familias. */
+    public boolean isVinculacionAceptada() { return vinculacionAceptada; }
     public boolean isRequiereRevisionTecnica() { return numeroReevaluaciones >= 3; }
 }

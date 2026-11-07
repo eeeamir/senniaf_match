@@ -7,4 +7,5 @@ import java.util.List;
 public interface DecisionComiteRepository extends JpaRepository<DecisionComite, Long> {
     List<DecisionComite> findByCodigoNinoOrderByFechaAsc(String codigoNino);
     boolean existsByCodigoNinoAndDecision(String codigoNino, String decision);
+    boolean existsByCodigoFamiliaAndDecision(String codigoFamilia, String decision);
 }

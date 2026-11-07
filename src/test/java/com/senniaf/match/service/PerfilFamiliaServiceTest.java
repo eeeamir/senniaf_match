@@ -10,6 +10,7 @@ import com.senniaf.match.model.enums.FuenteApoyo;
 import com.senniaf.match.model.enums.ProvinciaPanama;
 import com.senniaf.match.model.enums.TipoFamilia;
 import com.senniaf.match.repository.PerfilFamiliaRepository;
+import com.senniaf.match.repository.DecisionComiteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +39,7 @@ class PerfilFamiliaServiceTest {
         when(repo.count()).thenReturn(0L);
         when(repo.save(any(PerfilFamilia.class))).thenAnswer(i -> i.getArgument(0));
         when(repo.existsByRegistradoPor(anyString())).thenReturn(false);
-        service = new PerfilFamiliaService(repo);
+        service = new PerfilFamiliaService(repo, mock(DecisionComiteRepository.class));
     }
 
     @Test
@@ -59,7 +60,7 @@ class PerfilFamiliaServiceTest {
         when(repo.count()).thenReturn(0L);
         when(repo.save(any(PerfilFamilia.class))).thenAnswer(i -> i.getArgument(0));
         when(repo.existsByRegistradoPor("8-123-456")).thenReturn(false, true);
-        service = new PerfilFamiliaService(repo);
+        service = new PerfilFamiliaService(repo, mock(DecisionComiteRepository.class));
 
         PerfilFamiliaResponse primero = service.registrarPerfil(request, "8-123-456");
 
@@ -113,7 +114,7 @@ class PerfilFamiliaServiceTest {
         perfil.setReevaluacionPendiente(true);
         when(repo.findByRegistradoPor("8-123-456")).thenReturn(Optional.of(perfil));
         when(repo.save(any(PerfilFamilia.class))).thenAnswer(i -> i.getArgument(0));
-        PerfilFamiliaService servicio = new PerfilFamiliaService(repo);
+        PerfilFamiliaService servicio = new PerfilFamiliaService(repo, mock(DecisionComiteRepository.class));
 
         // Abrir el formulario y consultar el perfil no ejecuta actualizarPropio.
         assertEquals(0, perfil.getNumeroReevaluaciones());
@@ -136,7 +137,7 @@ class PerfilFamiliaServiceTest {
         perfil.setCodigoCaso("FAM-002");
         perfil.setReevaluacionPendiente(true);
         when(repo.findByRegistradoPor("8-456-789")).thenReturn(Optional.of(perfil));
-        PerfilFamiliaService servicio = new PerfilFamiliaService(repo);
+        PerfilFamiliaService servicio = new PerfilFamiliaService(repo, mock(DecisionComiteRepository.class));
 
         PerfilFamiliaRequest incompleta = perfilCompleto();
         incompleta.setEdadMinimaAceptada(12);
@@ -146,6 +147,28 @@ class PerfilFamiliaServiceTest {
         assertEquals(0, respuesta.getNumeroReevaluaciones());
         assertTrue(respuesta.isReevaluacionPendiente());
         assertFalse(respuesta.isPerfilCompleto());
+    }
+
+    @Test
+    void reflejaLaAceptacionSoloEnLaFamiliaCorrespondiente() {
+        PerfilFamiliaRepository repo = mock(PerfilFamiliaRepository.class);
+        DecisionComiteRepository decisiones = mock(DecisionComiteRepository.class);
+        PerfilFamilia elegida = new PerfilFamilia();
+        elegida.setCodigoCaso("FAM-001");
+        elegida.setPerfilCompleto(true);
+        PerfilFamilia otra = new PerfilFamilia();
+        otra.setCodigoCaso("FAM-002");
+        otra.setPerfilCompleto(true);
+        when(repo.findByRegistradoPor("8-111-111")).thenReturn(Optional.of(elegida));
+        when(repo.findByRegistradoPor("8-222-222")).thenReturn(Optional.of(otra));
+        when(decisiones.existsByCodigoFamiliaAndDecision("FAM-001", "ACEPTADA"))
+                .thenReturn(false, true);
+
+        PerfilFamiliaService servicio = new PerfilFamiliaService(repo, decisiones);
+        assertFalse(servicio.consultarPorCedula("8-111-111").orElseThrow().isVinculacionAceptada());
+        assertTrue(servicio.consultarPorCedula("8-111-111").orElseThrow().isVinculacionAceptada());
+        assertFalse(servicio.consultarPorCedula("8-222-222").orElseThrow().isVinculacionAceptada());
+        verify(decisiones).existsByCodigoFamiliaAndDecision("FAM-002", "ACEPTADA");
     }
 
     private PerfilFamiliaRequest perfilCompleto() {

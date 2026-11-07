@@ -1,6 +1,7 @@
 package com.senniaf.match.controller;
 
 import com.senniaf.match.repository.PerfilFamiliaRepository;
+import com.senniaf.match.repository.DecisionComiteRepository;
 import com.senniaf.match.service.PerfilFamiliaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,8 @@ class PerfilFamiliaControllerTest {
 
     @BeforeEach
     void setUp() {
-        PerfilFamiliaService service = new PerfilFamiliaService(mock(PerfilFamiliaRepository.class));
+        PerfilFamiliaService service = new PerfilFamiliaService(
+                mock(PerfilFamiliaRepository.class), mock(DecisionComiteRepository.class));
         PerfilFamiliaController controller = new PerfilFamiliaController(service);
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
