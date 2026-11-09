@@ -29,6 +29,7 @@ Requiere Java 21 (compilación compatible con Java 17), Maven y PostgreSQL 16.
 
 No utilizar `clean` sobre el directorio de un servicio local en ejecución. No reemplazar volúmenes existentes ni copiar la base local sobre Azure.
 
+- [Guía de integración, acceso técnico y matriz de pruebas](docs/GUIA_INTEGRACION_SPRINT7_SENNIAF_MATCH.md)
 - [Estado y alcance del Sprint 7](docs/ACTA_CIERRE_SPRINT7.md)
 - [Reglas y correcciones de seguridad](docs/SPRINT7_CORRECCIONES_F01_F13.md)
 - [Operación, respaldo, actualización y HTTPS](deploy/azure/README.md)

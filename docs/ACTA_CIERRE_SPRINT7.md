@@ -13,7 +13,7 @@ Fecha: 9 de noviembre de 2026, Panamá. Este documento describe el código entre
 
 ## Evidencia y límites
 
-La versión remota consultada corresponde al JAR `senniaf-match-contexto-psicologico-20261109`, SHA256 `03ff841f71c789623150389fa29d216dd094ef11a48f83dfbf0a49bd6f0e3f00`. La publicación anterior comprobó arranque, conexión JDBC, servicios y coincidencia de recursos HTTPS. Los respaldos y evidencias detalladas permanecen privados; no se incluyen bases ni narraciones clínicas en Git.
+La versión remota consultada corresponde al JAR `senniaf-match-cierre-sprint7-20261109`, SHA256 `33921e268adaafd12c646e45eaef8eea85a0213bcea66c5fd42421b31a77e5c3`. La publicación anterior comprobó arranque, conexión JDBC, servicios y coincidencia de recursos HTTPS. Los respaldos y evidencias detalladas permanecen privados; no se incluyen bases ni narraciones clínicas en Git.
 
 La lectura del 9 de noviembre confirmó campos revisados completos en los perfiles académicos existentes y ausencia de las etiquetas genéricas señaladas en el informe psicológico vigente. Los antecedentes se preservaron. Persisten un expediente con responsables sin cuentas correspondientes y sin evaluación, y contexto profesional estructurado aún no rellenado en el informe vigente. No se inventaron registros para completar estas situaciones.
 
@@ -23,8 +23,10 @@ En esta publicación se compila sin ejecutar pruebas. La revisión visual y los 
 
 ## Documentación
 
+La [guía única de integración y continuidad](GUIA_INTEGRACION_SPRINT7_SENNIAF_MATCH.md) incorpora los criterios del DOCX, acceso desde otro equipo, matriz manual y operación. El cierre final añade el ejemplo psicológico sin guardado automático; los estados de aceptación manual permanecen pendientes.
+
 - [Operación y actualización](../deploy/azure/README.md)
 - [Reglas de seguridad e integridad](SPRINT7_CORRECCIONES_F01_F13.md)
 - [Preparación local](../README-BASE-DATOS.md)
 
-Los informes provisionales fueron archivados fuera del repositorio. Se conservan sus originales y la copia del trabajo anterior a la limpieza. No hubo cambios en Azure durante la organización de GitHub.
+Los informes provisionales fueron archivados fuera del repositorio. Se conservan sus originales y la copia del trabajo anterior a la limpieza. El cierre final publicó el botón psicológico mediante el procedimiento existente. Se comprobaron servicios, JDBC, recursos HTTPS y 17 tablas/37 filas idénticas antes y después; sin migraciones ni cargas de datos. Las pruebas manuales siguen pendientes.
