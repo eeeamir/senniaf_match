@@ -58,7 +58,7 @@
       <section class="pro-form-bloque"><h3><span data-icono="salud"></span>Diagnóstico profesional</h3><label><input type="checkbox" id="sinDiagnostico" checked> No se establece diagnóstico</label><fieldset data-diagnostico-formal hidden disabled><legend>Diagnóstico formal opcional</legend><p id="ayudaDiagnostico">Regístralo solo cuando exista sustento profesional. Puedes incluir una descripción complementaria.</p><textarea id="diagnosticoProfesional" aria-describedby="ayudaDiagnostico" maxlength="5000" rows="4" aria-label="Diagnóstico y descripción complementaria"></textarea></fieldset></section>
       <section class="pro-form-bloque pro-contexto-evaluacion"><h3><span data-icono="personas"></span>Necesidades de acompañamiento</h3><p>Selecciona los apoyos identificados. Estas opciones no establecen diagnósticos.</p><fieldset class="pro-areas"><legend>Apoyos necesarios</legend><div id="apoyosEvaluacion" class="pro-opciones-contexto"></div></fieldset><fieldset id="otroApoyoContexto" hidden disabled><legend>Otro apoyo</legend><label for="otroApoyo">Especifica el apoyo necesario</label><textarea id="otroApoyo" maxlength="2000" rows="3"></textarea></fieldset><label for="detalleAcompanamiento">Necesidad, contexto y orientaciones</label><textarea id="detalleAcompanamiento" maxlength="5000" rows="4"></textarea></section>
       <section class="pro-form-bloque"><h3><span data-icono="salud"></span>Recomendaciones profesionales</h3><label for="recomendacionesPsicologicas">Orientaciones y apoyos</label><p id="ayudaRecomendaciones">Indica las orientaciones y apoyos recomendados para el seguimiento y bienestar del niño, niña o adolescente</p><textarea id="recomendacionesPsicologicas" aria-describedby="ayudaRecomendaciones" required maxlength="5000" rows="4"></textarea></section>
-      <div class="pro-acciones"><button class="boton secundario" id="cancelarCorreccion" type="button">Cancelar</button><button class="boton" id="guardarEvaluacion" type="submit">Guardar evaluación</button></div>
+      <div class="pro-acciones"><button class="boton secundario" id="cancelarCorreccion" type="button">Cancelar</button><button class="boton secundario" id="cargarEjemploPsicologico" type="button">Cargar datos de ejemplo</button><button class="boton" id="guardarEvaluacion" type="submit">Guardar evaluación</button></div>
     </form>
 
   </section>
@@ -192,6 +192,13 @@ async function cargarEvaluaciones() {
 
   } catch (e) { Profesionales.mensaje(estado,e.message,'error'); }
 }
+document.getElementById('cargarEjemploPsicologico').addEventListener('click',()=>{
+ const form=document.getElementById('formEvaluacion');
+ const tieneRespuestas=[...form.querySelectorAll('textarea,input')].some(c=>c.id!=='sinDiagnostico'&&!['hidden','submit','button'].includes(c.type)&&(c.type==='checkbox'?c.checked:Boolean(c.value.trim())));
+ const cargar=()=>{ContextoPsicologico.cargarEjemplo();Profesionales.mensaje(document.getElementById('estadoEvaluaciones'),'Datos de ejemplo cargados. Revisa el contenido y guarda la evaluación solo cuando corresponda.','aviso');};
+ if(tieneRespuestas)Profesionales.confirmar('¿Cargar datos de ejemplo?','Se reemplazarán las respuestas de este formulario. No se guardará ningún cambio hasta que pulses Guardar evaluación.',cargar);
+ else cargar();
+});
 document.getElementById('formEvaluacion').addEventListener('submit', async e => {
   e.preventDefault();
   ContextoPsicologico.actualizar();
