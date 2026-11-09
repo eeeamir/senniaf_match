@@ -6,6 +6,9 @@ import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> findByIdentificador(String identificador);
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select u from Usuario u where u.cedula=:cedula and u.rol='FAMILIA'")
+    Optional<Usuario> bloquearPorCedula(@org.springframework.data.repository.query.Param("cedula") String cedula);
     Optional<Usuario> findByCedula(String cedula);
     Optional<Usuario> findByCorreoIgnoreCase(String correo);
     boolean existsByCedula(String cedula);

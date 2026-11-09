@@ -42,7 +42,8 @@ public class SesionAccesoService {
 
     @org.springframework.transaction.annotation.Transactional
     public void cerrar(String authorization) {
-        if (authorization != null && authorization.startsWith("Bearer "))
+        if (authorization != null && authorization.startsWith("Bearer ")
+                && authorization.substring(7).trim().matches("[A-Za-z0-9_-]{43}"))
             repository.deleteByTokenHash(hash(authorization.substring(7).trim()));
     }
 

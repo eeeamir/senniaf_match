@@ -41,7 +41,9 @@
         <label for="loginId">Cédula o ID de funcionario</label>
         <input id="loginId" autocomplete="username" placeholder="Ej. 8-123-456 o TS-001" required>
         <label for="loginPassword">Contraseña</label>
-        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Tu contraseña" required>
+        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Tu contraseña" required aria-describedby="avisoCopiaPassword">
+        <button type="button" class="enlace" id="mostrarPassword" aria-pressed="false">Mostrar contraseña</button>
+        <p class="ayuda" id="avisoCopiaPassword" role="status" hidden></p>
         
         <button class="boton bloque" type="submit">Iniciar sesión</button>
         <div class="mensaje" id="msgLogin" role="alert"></div>
@@ -145,7 +147,20 @@ $('formCodigo').addEventListener('submit',async e=>{
    sessionStorage.setItem('senniaf.sesion',JSON.stringify(u)); mensaje('msgCodigo','Correo verificado. Abriendo tu formulario…','exito'); setTimeout(()=>location.href='perfil.html',700);
  }catch(err){marcar($('codigo'),true);mensaje('msgCodigo',err.message);}
 });
-$('btnReenviar').addEventListener('click',async()=>{try{const d=await api('/api/auth/reenviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cedula:pendiente.cedula})});mostrarCodigoDemo(d.codigoDemo);mensaje('msgCodigo','Se generó un código nuevo.','exito');enfriarReenvio();}catch(err){mensaje('msgCodigo',err.message);}});
+$('btnReenviar').addEventListener('click',async()=>{try{const d=await api('/api/auth/reenviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cedula:pendiente.cedula})});mostrarCodigoDemo(d.codigoDemo);mensaje('msgCodigo',d.mensaje || 'Se envió un código nuevo.','exito');enfriarReenvio();}catch(err){mensaje('msgCodigo',err.message);}});
+const passwordAcceso=$('loginPassword'),avisoCopia=$('avisoCopiaPassword');
+function advertirCopia(valor) {
+ const extra=/\p{Cc}|\p{Cf}/u.test(valor)||/^\s|\s$/u.test(valor)||valor.normalize('NFKC')!==valor;
+ avisoCopia.hidden=!extra;
+ avisoCopia.textContent=extra?'El texto contiene espacios en los extremos, saltos de línea o caracteres con otra representación. Copia solo la contraseña, sin etiquetas ni comillas añadidas; puedes mostrarla para revisarla. No la modificamos automáticamente.':'';
+}
+passwordAcceso.addEventListener('input',()=>advertirCopia(passwordAcceso.value));
+passwordAcceso.addEventListener('paste',evento=>{
+ // Inspección local: algunos navegadores eliminan los saltos antes del evento input.
+ const texto=evento.clipboardData?.getData('text');
+ if(texto!=null)setTimeout(()=>advertirCopia(texto),0);
+});
+$('mostrarPassword').addEventListener('click',()=>{const visible=passwordAcceso.type==='password';passwordAcceso.type=visible?'text':'password';$('mostrarPassword').textContent=visible?'Ocultar contraseña':'Mostrar contraseña';$('mostrarPassword').setAttribute('aria-pressed',String(visible));});
 $('loginId').focus();
 </script>
 </body>

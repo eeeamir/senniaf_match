@@ -21,9 +21,17 @@ public class SesionFiltro extends OncePerRequestFilter {
     private final SesionAccesoService sesiones;
     public SesionFiltro(SesionAccesoService sesiones) { this.sesiones = sesiones; }
 
+    private static final Set<String> RUTAS_PUBLICAS_AUTH = Set.of(
+            "/api/auth/registro", "/api/auth/verificar", "/api/auth/reenviar",
+            "/api/auth/login", "/api/auth/logout");
+
     @Override protected boolean shouldNotFilter(HttpServletRequest req) {
-        String path = req.getRequestURI();
-        return !path.startsWith("/api/") || path.startsWith("/api/auth/");
+        // Tomcat ya resolvió el contexto, la codificación y los parámetros de ruta.
+        // La URI original puede representar el mismo controlador de otra manera.
+        String path = req.getPathInfo();
+        if (path == null) path = req.getServletPath();
+        boolean api = path.equals("/api") || path.startsWith("/api/");
+        return !api || RUTAS_PUBLICAS_AUTH.contains(path);
     }
 
     @Override protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,

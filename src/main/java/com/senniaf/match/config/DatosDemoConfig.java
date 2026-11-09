@@ -13,9 +13,14 @@ import java.time.LocalDateTime;
 @Configuration
 public class DatosDemoConfig {
     @Bean
-    CommandLineRunner crearFuncionariosDemo(UsuarioRepository repo, PasswordEncoder encoder,
-                                             @Value("${SENNIAF_DEMO_PASSWORD:Cambio123!}") String password) {
+    CommandLineRunner crearFuncionariosDemo(UsuarioRepository repo, PasswordEncoder encoder, com.senniaf.match.repository.PesosScoringRepository pesos,
+                                             @Value("${SENNIAF_DEMO_PASSWORD:}") String password,
+                                             @Value("${senniaf.demo.habilitado:false}") boolean habilitado) {
         return args -> {
+            pesos.inicializarSiFalta();
+            if(!habilitado) return;
+            if(password.length()<16 || password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length>72)
+                throw new IllegalStateException("La configuración de cuentas ficticias requiere una contraseña explícita de 16 a 72 bytes");
             crear(repo, encoder, password, "TS-001", "Trabajador", "Social", "ts001@senniaf.demo", "TRABAJADOR_SOCIAL");
             crear(repo, encoder, password, "PS-014", "Psicólogo", "Demo", "ps014@senniaf.demo", "PSICOLOGO");
             crear(repo, encoder, password, "CM-001", "Comité", "Demo", "cm001@senniaf.demo", "COMITE");
