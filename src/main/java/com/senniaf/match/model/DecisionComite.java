@@ -15,7 +15,9 @@ public class DecisionComite {
     private LocalDateTime fecha;
     private int puntaje;
     private int versionPesos;
+    @Column(length = 12000) private String contextoScoring;
 
+    public String getContextoScoring(){return contextoScoring;} public void setContextoScoring(String v){contextoScoring=v;}
     public Long getId(){return id;}
     public String getCodigoNino(){return codigoNino;} public void setCodigoNino(String v){codigoNino=v;}
     public String getCodigoFamilia(){return codigoFamilia;} public void setCodigoFamilia(String v){codigoFamilia=v;}

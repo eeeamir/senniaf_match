@@ -10,10 +10,12 @@ public class EventoCaso {
     private String codigoCaso;
     private String actor;
     private String accion;
+    @Column(columnDefinition="text") private String descripcion;
     private LocalDateTime fecha;
     public Long getId(){return id;}
     public String getCodigoCaso(){return codigoCaso;} public void setCodigoCaso(String v){codigoCaso=v;}
     public String getActor(){return actor;} public void setActor(String v){actor=v;}
     public String getAccion(){return accion;} public void setAccion(String v){accion=v;}
+    public String getDescripcion(){return descripcion;} public void setDescripcion(String v){descripcion=v;}
     public LocalDateTime getFecha(){return fecha;} public void setFecha(LocalDateTime v){fecha=v;}
 }

@@ -23,13 +23,36 @@ public class ScoringController {
     public Map<String, Object> caso(@RequestHeader("X-User-Role") String rol, @PathVariable String codigo) {
         comite(rol); return scoring.caso(codigo);
     }
+    @GetMapping("/casos/{codigo}/historial")
+    public List<Map<String,Object>> historial(@RequestHeader("X-User-Role") String rol, @PathVariable String codigo) {
+        comite(rol); return scoring.historial(codigo);
+    }
+    @GetMapping("/familias/{codigo}/expediente")
+    public com.senniaf.match.model.PerfilFamilia expedienteFamilia(@RequestHeader("X-User-Role") String rol,
+                                                                 @PathVariable String codigo) {
+        comite(rol); return scoring.consultarExpedienteFamilia(codigo);
+    }
     @GetMapping("/pesos")
     public PesosScoring pesos(@RequestHeader("X-User-Role") String rol) {
         comite(rol); return scoring.pesos();
     }
     @PutMapping("/pesos")
-    public PesosScoring pesos(@RequestHeader("X-User-Role") String rol, @RequestBody Map<String, Integer> valores) {
-        comite(rol); return scoring.actualizarPesos(valores);
+    public PesosScoring pesos(@RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor, @RequestBody Map<String, Object> valores) {
+        comite(rol);
+        if(valores==null || !(valores.get("justificacion") instanceof String justificacion)
+                || !(valores.get("versionEsperada") instanceof Integer version))
+            throw new IllegalArgumentException("Confirma los criterios e indica la justificación del cambio");
+        Map<String,Integer> enteros = new java.util.LinkedHashMap<>();
+        valores.forEach((k,v) -> {
+            if(k.equals("justificacion") || k.equals("versionEsperada"))return;
+            if (!(v instanceof Integer)) throw new IllegalArgumentException("Los pesos deben ser números enteros, sin decimales ni texto");
+            enteros.put(k,(Integer)v);
+        });
+        return scoring.actualizarPesos(enteros,actor,justificacion,version);
+    }
+    @GetMapping("/pesos/historial")
+    public List<Map<String,Object>> historialPesos(@RequestHeader("X-User-Role") String rol) {
+        comite(rol); return scoring.historialPesos();
     }
     public record DecisionRequest(String familia, String decision, String motivo) {}
     @PostMapping("/casos/{codigo}/decisiones")

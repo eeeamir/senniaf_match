@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,17 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashMap;
 
-/**
- * Módulo de perfil de niño/a (sección 2.12). Solo un trabajador social o
- * psicólogo puede crear el perfil; la familia nunca accede a este endpoint.
- *
- * NOTA: el rol se lee aquí de una cabecera HTTP simple (X-User-Role) solo
- * como continuación directa de la prueba de autorización por rol hecha en
- * el Sprint 1 con Burp Suite. Si el proyecto ya tiene (o va a tener) un
- * mecanismo real de autenticación (Spring Security, JWT, etc.), esta
- * verificación debe reemplazarse por ese mecanismo, por ejemplo con
- * @PreAuthorize("hasRole('TRABAJADOR_SOCIAL')").
- */
+/** Identidad y rol provienen de SesionFiltro; la responsabilidad se verifica en el servidor. */
 @RestController
 @RequestMapping("/api/ninos")
 public class PerfilNinoController {
@@ -40,22 +31,28 @@ public class PerfilNinoController {
     private static final Set<String> ROLES_AUTORIZADOS = Set.of("TRABAJADOR_SOCIAL", "PSICOLOGO");
 
     private final PerfilNinoService service;
+    private final com.senniaf.match.service.HistorialCasoService historial;
 
     public PerfilNinoController(PerfilNinoService service) {
-        this.service = service;
+        this(service,null);
+    }
+    @org.springframework.beans.factory.annotation.Autowired
+    public PerfilNinoController(PerfilNinoService service,com.senniaf.match.service.HistorialCasoService historial) {
+        this.service=service;this.historial=historial;
     }
 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> listarPerfiles(
             @RequestHeader("X-User-Role") String rol,
-            @RequestHeader("X-User-Id") String usuario) {
+            @RequestHeader("X-User-Id") String usuario,
+            @RequestParam(defaultValue="false") boolean incluirInactivos) {
 
-        if (!ROLES_AUTORIZADOS.contains(rol)) {
+        if (!ROLES_AUTORIZADOS.contains(rol) && !"COMITE".equals(rol)) {
             throw new RolNoAutorizadoException(
                     "El rol '" + rol + "' no está autorizado para consultar perfiles de niños o niñas");
         }
 
-        List<Map<String, Object>> perfiles = service.listarPerfiles(usuario).stream()
+        List<Map<String, Object>> perfiles = service.listarPerfiles(usuario, rol, incluirInactivos).stream()
                 .map(perfil -> {
                     Map<String, Object> resumen = new LinkedHashMap<>();
                     resumen.put("codigoCaso", perfil.getCodigoCaso());
@@ -65,6 +62,11 @@ public class PerfilNinoController {
                     resumen.put("alertaMedica", perfil.isAlertaMedica());
                     resumen.put("fechaRegistro", perfil.getFechaRegistro());
                     resumen.put("registradoPor", perfil.getRegistradoPor());
+                    resumen.put("trabajadorSocialAsignado", perfil.getTrabajadorSocialAsignado());
+                    resumen.put("psicologoAsignado", perfil.getPsicologoAsignado());
+                    resumen.put("bajaLogica", perfil.isBajaLogica());
+                    resumen.put("cierrePorAdopcion", perfil.isCierrePorAdopcion());
+                    resumen.put("solicitudesPendientes", service.numeroSolicitudesPendientes(perfil));
                     return resumen;
                 })
                 .toList();
@@ -78,7 +80,7 @@ public class PerfilNinoController {
             @RequestHeader("X-User-Role") String rol,
             @RequestHeader("X-User-Id") String usuarioId) {
 
-        if (!ROLES_AUTORIZADOS.contains(rol)) {
+        if (!"TRABAJADOR_SOCIAL".equals(rol)) {
             throw new RolNoAutorizadoException(
                     "El rol '" + rol + "' no está autorizado para registrar perfiles de niños o niñas");
         }
@@ -88,28 +90,77 @@ public class PerfilNinoController {
     }
 
     private void comprobarProfesional(String rol) {
-        if (!ROLES_AUTORIZADOS.contains(rol)) throw new RolNoAutorizadoException("Solo profesionales autorizados");
+        if (!ROLES_AUTORIZADOS.contains(rol) && !"COMITE".equals(rol)) throw new RolNoAutorizadoException("Solo profesionales autorizados o Comité");
     }
 
     @GetMapping("/{codigo}")
     public com.senniaf.match.model.PerfilNino detalle(@PathVariable String codigo,
                       @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
-        comprobarProfesional(rol); return service.propio(codigo, actor);
+        comprobarProfesional(rol); return service.consultarExpediente(codigo, actor, rol);
     }
     @GetMapping("/{codigo}/auditoria")
-    public java.util.List<com.senniaf.match.model.EventoCaso> auditoria(@PathVariable String codigo,
+    public java.util.List<?> auditoria(@PathVariable String codigo,
                       @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
-        comprobarProfesional(rol); return service.historial(codigo, actor);
+        comprobarProfesional(rol); var eventos=service.historial(codigo, actor, rol);
+        return historial==null?eventos:historial.consultar(codigo,eventos);
     }
     @PutMapping("/{codigo}")
     public PerfilNinoResponse editar(@PathVariable String codigo, @Valid @RequestBody PerfilNinoRequest r,
                     @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
-        comprobarProfesional(rol); return service.actualizar(codigo, actor, r);
+        comprobarTrabajoSocial(rol); return service.actualizar(codigo, actor, r);
     }
     @DeleteMapping("/{codigo}")
     public Map<String, String> baja(@PathVariable String codigo,
                     @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
-        comprobarProfesional(rol); service.darDeBaja(codigo, actor);
-        return Map.of("mensaje", "Caso dado de baja; se conserva auditoría");
+        throw new RolNoAutorizadoException("La baja directa no está permitida. Solicita la desactivación para revisión del Comité.");
+    }
+    private void comprobarTrabajoSocial(String rol) {
+        if (!"TRABAJADOR_SOCIAL".equals(rol))
+            throw new RolNoAutorizadoException("Solo trabajo social puede registrar o modificar el perfil infantil");
+    }
+
+    @GetMapping("/{codigo}/evaluaciones-psicologicas")
+    public List<com.senniaf.match.dto.EvaluacionPsicologicaResponse> evaluaciones(@PathVariable String codigo,
+                    @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
+        return service.consultarEvaluaciones(codigo, actor, rol);
+    }
+
+    @PostMapping("/{codigo}/evaluaciones-psicologicas")
+    public ResponseEntity<com.senniaf.match.dto.EvaluacionPsicologicaResponse> evaluar(@PathVariable String codigo,
+                    @Valid @RequestBody com.senniaf.match.dto.EvaluacionPsicologicaRequest request,
+                    @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.registrarEvaluacion(codigo, actor, rol, request));
+    }
+
+    @PutMapping("/{codigo}/evaluaciones-psicologicas/{id}")
+    public com.senniaf.match.dto.EvaluacionPsicologicaResponse corregirEvaluacion(@PathVariable String codigo, @PathVariable Long id,
+            @Valid @RequestBody com.senniaf.match.dto.EvaluacionPsicologicaRequest request,
+            @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
+        return service.corregirEvaluacion(codigo,id,actor,rol,request);
+    }
+
+    @GetMapping("/solicitudes-estado/pendientes")
+    public List<com.senniaf.match.dto.SolicitudEstadoResponse> pendientes(@RequestHeader("X-User-Role") String rol) {
+        return service.solicitudesPendientes(rol);
+    }
+
+    @GetMapping("/{codigo}/solicitudes-estado")
+    public List<com.senniaf.match.dto.SolicitudEstadoResponse> solicitudes(@PathVariable String codigo,
+            @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
+        return service.consultarSolicitudes(codigo, actor, rol);
+    }
+
+    @PostMapping("/{codigo}/solicitudes-estado")
+    public ResponseEntity<com.senniaf.match.dto.SolicitudEstadoResponse> solicitar(@PathVariable String codigo,
+            @Valid @RequestBody com.senniaf.match.dto.SolicitudEstadoRequest request,
+            @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.solicitarCambioEstado(codigo, actor, rol, request));
+    }
+
+    @PostMapping("/solicitudes-estado/{id}/resolucion")
+    public com.senniaf.match.dto.SolicitudEstadoResponse resolver(@PathVariable Long id,
+            @Valid @RequestBody com.senniaf.match.dto.ResolverSolicitudRequest request,
+            @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
+        return service.resolverSolicitud(id, actor, rol, request);
     }
 }

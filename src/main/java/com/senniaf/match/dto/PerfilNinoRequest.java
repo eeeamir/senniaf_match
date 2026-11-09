@@ -10,6 +10,10 @@ import com.senniaf.match.model.enums.RendimientoAcademico;
 import com.senniaf.match.model.enums.RespuestaSiNoNoSabe;
 import com.senniaf.match.model.enums.SiNo;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -42,9 +46,20 @@ import java.util.List;
  */
 public class PerfilNinoRequest {
 
+    private String numeroExpedienteInstitucional;
+    public String getNumeroExpedienteInstitucional() { return numeroExpedienteInstitucional; }
+    public void setNumeroExpedienteInstitucional(String valor) { this.numeroExpedienteInstitucional=valor; }
+
+    /** Campo legado para compatibilidad de clientes anteriores; ya no se exige ni concede permisos. */
+    private Boolean asignacionInstitucionalConfirmada;
+
+    public Boolean getAsignacionInstitucionalConfirmada() { return asignacionInstitucionalConfirmada; }
+    public void setAsignacionInstitucionalConfirmada(Boolean valor) { this.asignacionInstitucionalConfirmada = valor; }
+
     @NotNull(message = "La edad es obligatoria")
     @Min(value = 0, message = "La edad no puede ser negativa")
     @Max(value = 17, message = "La edad debe corresponder a un menor de edad")
+    @JsonDeserialize(using=EnteroEstricto.class)
     private Integer edad;
 
     @NotNull(message = "El nivel escolar es obligatorio")
@@ -55,48 +70,57 @@ public class PerfilNinoRequest {
      * Texto libre y opcional: es un detalle informativo, no un criterio
      * de comparación del motor de match.
      */
+    @Size(max=255, message="Utiliza hasta 255 caracteres")
     private String gradoEscolar;
 
     @NotNull(message = "El rendimiento académico es obligatorio")
     private RendimientoAcademico rendimientoAcademico;
 
     @NotEmpty(message = "Seleccione al menos un área de habilidad (o 'Ninguna identificada')")
-    private List<AreaHabilidad> habilidades;
+    private List<@NotNull AreaHabilidad> habilidades;
 
+    @Size(max=255, message="Utiliza hasta 255 caracteres")
     private String habilidadesDetalle;
 
     @NotEmpty(message = "Seleccione al menos un interés (o 'Ninguno identificado')")
-    private List<Interes> gustos;
+    private List<@NotNull Interes> gustos;
 
+    @Size(max=255, message="Utiliza hasta 255 caracteres")
     private String gustosDetalle;
 
     @NotEmpty(message = "Seleccione al menos un rasgo de personalidad")
-    private List<RasgoPersonalidad> personalidad;
+    private List<@NotNull RasgoPersonalidad> personalidad;
 
+    @Size(max=255, message="Utiliza hasta 255 caracteres")
     private String personalidadDetalle;
 
     @NotEmpty(message = "Indique alergias conocidas (o 'Ninguna conocida')")
-    private List<Alergia> alergias;
+    private List<@NotNull Alergia> alergias;
 
+    @Size(max=255, message="Utiliza hasta 255 caracteres")
     private String alergiasDetalle;
 
     @NotNull(message = "Indique si el niño o niña es intolerante a la lactosa")
     private RespuestaSiNoNoSabe intoleranciaLactosa;
 
     @NotEmpty(message = "Indique condiciones de salud conocidas (o 'Ninguna conocida')")
-    private List<CondicionSalud> condicionesSalud;
+    private List<@NotNull CondicionSalud> condicionesSalud;
 
+    @Size(max=255, message="Utiliza hasta 255 caracteres")
     private String condicionesSaludDetalle;
 
     @NotBlank(message = "Las necesidades de apoyo del niño o niña son obligatorias")
+    @Size(max=2000, message="Utiliza hasta 2000 caracteres")
     private String necesidadesApoyo;
 
     @NotNull(message = "Indique si el niño o niña tiene hermanos")
     private SiNo tieneHermanos;
 
     @Min(value = 0, message = "La cantidad de hermanos no puede ser negativa")
+    @JsonDeserialize(using=EnteroEstricto.class)
     private Integer cantidadHermanos;
 
+    @Size(max=255, message="Utiliza hasta 255 caracteres")
     private String hermanosDetalle;
 
     /**
@@ -106,6 +130,7 @@ public class PerfilNinoRequest {
      * cerrada lo transformaría en un filtro de características, algo que
      * el diseño del Sprint 0 descarta explícitamente (ver 2.6).
      */
+    @Size(max=2000, message="Utiliza hasta 2000 caracteres")
     private String contextoCultural;
 
     public Integer getEdad() {
@@ -266,5 +291,39 @@ public class PerfilNinoRequest {
 
     public void setContextoCultural(String contextoCultural) {
         this.contextoCultural = contextoCultural;
+    }
+
+    @JsonIgnore @AssertTrue(message="Revisa las habilidades: selecciona opciones coherentes y describe «Otra»")
+    public boolean isHabilidadesCoherentes() { return seleccionValida(habilidades, "NINGUNA_IDENTIFICADA", "OTRA", habilidadesDetalle); }
+    @JsonIgnore @AssertTrue(message="Revisa los gustos: selecciona opciones coherentes y describe «Otro»")
+    public boolean isGustosCoherentes() { return seleccionValida(gustos, "NINGUNO_IDENTIFICADO", "OTRO", gustosDetalle); }
+    @JsonIgnore @AssertTrue(message="Describe la opción «Otro» de personalidad")
+    public boolean isPersonalidadCoherente() { return seleccionValida(personalidad, null, "OTRO", personalidadDetalle); }
+    @JsonIgnore @AssertTrue(message="Revisa las alergias: selecciona opciones coherentes y describe «Otra»")
+    public boolean isAlergiasCoherentes() { return seleccionValida(alergias, "NINGUNA_CONOCIDA", "OTRA", alergiasDetalle)
+            && (alergias == null || !alergias.contains(Alergia.ALIMENTARIA) || alergiasDetalle != null && !alergiasDetalle.isBlank()); }
+    @JsonIgnore @AssertTrue(message="Revisa las condiciones de salud y describe «Otra» cuando corresponda")
+    public boolean isCondicionesSaludCoherentes() { return seleccionValida(condicionesSalud, "NINGUNA_CONOCIDA", "OTRA", condicionesSaludDetalle); }
+    @JsonIgnore @AssertTrue(message="Revisa la cantidad de hermanos: indica al menos uno si seleccionaste «Sí» y cero o vacío si seleccionaste «No»")
+    public boolean isHermanosCoherentes() {
+        return tieneHermanos == null || (tieneHermanos == SiNo.SI
+                ? cantidadHermanos != null && cantidadHermanos > 0 : cantidadHermanos == null || cantidadHermanos == 0);
+    }
+    private boolean seleccionValida(List<? extends Enum<?>> opciones, String neutra, String otra, String detalle) {
+        if (opciones == null || opciones.isEmpty()) return true; // @NotEmpty conserva el mensaje del campo.
+        if (opciones.stream().anyMatch(java.util.Objects::isNull)) return false;
+        if (neutra != null && opciones.stream().anyMatch(v -> neutra.equals(v.name())) && opciones.size() > 1) return false;
+        return opciones.stream().noneMatch(v -> otra.equals(v.name())) || detalle != null && !detalle.isBlank();
+    }
+
+    /** Evita truncar silenciosamente edades o cantidades decimales recibidas por JSON. */
+    public static class EnteroEstricto extends com.fasterxml.jackson.databind.JsonDeserializer<Integer> {
+        @Override
+        public Integer deserialize(com.fasterxml.jackson.core.JsonParser parser,
+                com.fasterxml.jackson.databind.DeserializationContext contexto) throws java.io.IOException {
+            if (!parser.hasToken(com.fasterxml.jackson.core.JsonToken.VALUE_NUMBER_INT))
+                return (Integer) contexto.handleUnexpectedToken(Integer.class, parser);
+            return parser.getIntValue();
+        }
     }
 }

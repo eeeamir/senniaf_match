@@ -6,11 +6,21 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "perfiles_nino", uniqueConstraints = @UniqueConstraint(name = "uk_nino_codigo", columnNames = "codigo_caso"))
+@Table(name = "perfiles_nino", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_nino_codigo", columnNames = "codigo_caso"),
+    @UniqueConstraint(name = "uk_nino_expediente_institucional", columnNames = "numero_expediente_institucional")
+})
 public class PerfilNino {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name="codigo_caso", nullable=false, unique=true, length=20) private String codigoCaso;
+    @Column(name="numero_expediente_institucional", length=100)
+    private String numeroExpedienteInstitucional;
+    public String getNumeroExpedienteInstitucional() { return numeroExpedienteInstitucional; }
+    public void setNumeroExpedienteInstitucional(String valor) { this.numeroExpedienteInstitucional=valor; }
+    @Column(nullable = false) private boolean cierrePorAdopcion;
+    public boolean isCierrePorAdopcion() { return cierrePorAdopcion; }
+    public void setCierrePorAdopcion(boolean valor) { cierrePorAdopcion = valor; }
     private Integer edad;
     @Enumerated(EnumType.STRING) private NivelEscolar nivelEscolar;
     private String gradoEscolar;
@@ -43,6 +53,8 @@ public class PerfilNino {
     private String hermanosDetalle;
     @Column(length=2000) private String contextoCultural;
     private String registradoPor;
+    @Column(length=40) private String trabajadorSocialAsignado;
+    @Column(length=40) private String psicologoAsignado;
     private LocalDateTime fechaRegistro;
     private boolean perfilCompleto;
     private boolean alertaMedica;
@@ -71,6 +83,11 @@ public class PerfilNino {
     public String getHermanosDetalle(){return hermanosDetalle;} public void setHermanosDetalle(String v){hermanosDetalle=v;}
     public String getContextoCultural(){return contextoCultural;} public void setContextoCultural(String v){contextoCultural=v;}
     public String getRegistradoPor(){return registradoPor;} public void setRegistradoPor(String v){registradoPor=v;}
+    public String getTrabajadorSocialAsignado(){return trabajadorSocialAsignado;}
+    public void setTrabajadorSocialAsignado(String v){trabajadorSocialAsignado=v;}
+    public String getPsicologoAsignado(){return psicologoAsignado;}
+    public void setPsicologoAsignado(String v){psicologoAsignado=v;}
+    @com.fasterxml.jackson.databind.annotation.JsonSerialize(using=com.senniaf.match.web.FechaConZonaSerializer.class)
     public LocalDateTime getFechaRegistro(){return fechaRegistro;} public void setFechaRegistro(LocalDateTime v){fechaRegistro=v;}
     public boolean isPerfilCompleto(){return perfilCompleto;} public void setPerfilCompleto(boolean v){perfilCompleto=v;}
     public boolean isAlertaMedica(){return alertaMedica;} public void setAlertaMedica(boolean v){alertaMedica=v;}
