@@ -263,3 +263,16 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
 }
+
+/* Estados de visibilidad reales, incluidos controles de rol. */
+[hidden] { display: none !important; }
+.avisos-globales { max-width:1100px; margin:20px auto; }
+.detalle-nav { display:flex; flex-wrap:wrap; gap:12px; margin:16px 0; }
+.detalle-datos { display:grid; grid-template-columns:minmax(150px,1fr) minmax(0,2fr); gap:10px 20px; }
+.detalle-datos dt, .detalle-datos dd { margin:0; }
+.detalle-datos dd { white-space:pre-wrap; overflow-wrap:anywhere; }
+.detalle-grupo { padding:14px 0; border-bottom:1px solid var(--borde); }
+.detalle-grupo summary { cursor:pointer; font-weight:700; }
+.estado-resumen { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+.evaluacion .acciones-perfil { margin-top:16px; }
+@media(max-width:650px) { .detalle-datos { grid-template-columns:1fr; gap:4px; } .detalle-datos dd { margin-bottom:12px; } .avisos-globales { margin:12px; } }

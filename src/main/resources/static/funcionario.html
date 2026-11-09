@@ -1,47 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SENNIAF Match · Menú funcionario</title>
-<link rel="stylesheet" href="senniaf.css">
-<link rel="stylesheet" href="funcionario.css">
-<link rel="stylesheet" href="calendly-theme.css">
-</head>
-<body>
-<header class="topbar"><div class="topbar-in">
-  <a class="topbar-marca" href="#"><img src="img/logo.png" alt="SENNIAF"><span></span></a>
-  <div class="usuario" id="usuario"></div>
-</div></header>
-<main>
-  <section class="hero"><h1>Gestión de perfiles</h1><p>Selecciona qué deseas hacer con los perfiles de niños, niñas y adolescentes.</p></section>
-  <div class="grid">
-    <section class="tarjeta">
-      <span class="modulo-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 10h8M8 14h5M16 4v16"/></svg></span>
-      <span class="modulo-etiqueta">Consulta y seguimiento</span>
-      <h2>Ver perfiles registrados</h2>
-      <p>Consulta los perfiles que ya fueron registrados en el sistema.</p>
-      <a class="boton" href="perfiles.html">Ver perfiles</a>
-    </section>
-    <section class="tarjeta">
-      <span class="modulo-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg></span>
-      <span class="modulo-etiqueta">Nueva entrevista</span>
-      <h2>Ingresar nuevo perfil</h2>
-      <p>Completa la entrevista y registra un nuevo perfil integral.</p>
-      <a class="boton" href="perfil.html">Ingresar nuevo</a>
-    </section>
-  </div>
-  <div class="mensaje exito" id="mensajeExito" hidden></div>
-</main>
-<footer class="pie-pagina">Uso institucional · Datos protegidos</footer>
-<script src="senniaf.js"></script>
-<script>
-const sesion = Sesion.requerir(['TRABAJADOR_SOCIAL', 'PSICOLOGO']);
-if (sesion) {
-  Sesion.pintarCabecera(sesion);
-  const flash = sessionStorage.getItem('senniaf.flash');
-  if (flash) { const box = document.getElementById('mensajeExito'); box.textContent = flash; box.hidden = false; sessionStorage.removeItem('senniaf.flash'); }
+<link rel="preload" as="image" href="img/logo.png"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SENNIAF Match · Inicio</title>
+<link rel="stylesheet" href="senniaf.css"><link rel="stylesheet" href="funcionario.css"><link rel="stylesheet" href="calendly-theme.css"><link rel="stylesheet" href="profesionales.css"></head>
+<body><header class="topbar"><div class="topbar-in"><a class="topbar-marca" href="funcionario.html"><img fetchpriority="high" decoding="sync" width="235" height="49" src="img/logo.png" alt="SENNIAF Match"><span></span></a><div class="usuario" id="usuario"></div></div></header>
+<main id="inicioProfesional"><div id="estadoInicio" role="status"></div></main><footer class="pie-pagina">SENNIAF Match · Proyecto académico</footer>
+<script src="senniaf.js"></script><script src="profesionales.js"></script><script>
+const sesion=Sesion.requerir(['TRABAJADOR_SOCIAL','PSICOLOGO']);
+if(sesion){
+  Profesionales.iniciar(sesion,'inicio');const social=sesion.rol==='TRABAJADOR_SOCIAL',icono=nombre=>Profesionales.icono(nombre);
+  document.getElementById('inicioProfesional').innerHTML=Profesionales.encabezado('Te damos la bienvenida',social?'Consulta los expedientes a tu cargo o registra un nuevo perfil infantil.':'Consulta tus expedientes asignados y continúa con las evaluaciones psicológicas.',social?'personas':'psicologia')+`
+    <div class="pro-dashboard"><section class="tarjeta pro-modulo"><span class="pro-simbolo">${icono('carpeta')}</span><h2>Mis expedientes</h2><p>${social?'Consulta y actualiza los perfiles infantiles a tu cargo.':'Revisa los casos que tienes asignados y abre sus evaluaciones.'}</p><a class="boton" href="perfiles.html">Ver expedientes ${icono('flecha')}</a></section>
+    <section class="tarjeta pro-modulo ${social?'verde':'violeta'}"><span class="pro-simbolo">${icono(social?'nuevo':'psicologia')}</span><h2>${social?'Registrar perfil':'Información psicológica'}</h2><p>${social?'Completa la información de un niño, niña o adolescente.':'Registra una evaluación desde el expediente correspondiente.'}</p><a class="boton ${social?'verde':''}" href="${social?'perfil.html':'perfiles.html'}">${social?'Registrar perfil':'Abrir un expediente'} ${icono('flecha')}</a></section></div>
+    <section id="expedientesRecientes" hidden><h2 class="pro-subtitulo">Acceso rápido</h2><div class="tarjeta"><div class="pro-fila-titulo"><div><h2>Expedientes recientes</h2><p>Accede directamente a un expediente.</p></div><a class="boton secundario chico" href="perfiles.html">Ver todos ${icono('flecha')}</a></div><div id="listaRecientes"></div></div></section><p id="estadoInicio" role="status"></p>`;
+  const flash=sessionStorage.getItem('senniaf.flash');if(flash){document.getElementById('estadoInicio').textContent=flash;sessionStorage.removeItem('senniaf.flash');}
+  fetch('/api/ninos',{headers:Sesion.encabezados()}).then(async r=>{if(!r.ok)throw new Error('No se pudieron cargar los expedientes recientes.');return r.json();}).then(datos=>{
+    const recientes=[...datos].sort((a,b)=>String(b.fechaRegistro||'').localeCompare(String(a.fechaRegistro||''))).slice(0,3);if(!recientes.length)return;
+    document.getElementById('expedientesRecientes').hidden=false;document.getElementById('listaRecientes').innerHTML=recientes.map(p=>`<article class="pro-reciente"><span class="pro-simbolo">${icono('carpeta')}</span><div><strong>${limpiarHtml(p.codigoCaso)}</strong><p>${social?'Información del expediente':'Información psicológica'}</p></div><a class="boton secundario chico" href="perfiles.html?caso=${encodeURIComponent(p.codigoCaso)}${social?'':'#panelEvaluaciones'}">Abrir ${icono('flecha')}</a></article>`).join('');
+  }).catch(e=>document.getElementById('estadoInicio').textContent=e.message);
 }
-</script>
-</body>
-</html>
+</script></body></html>
