@@ -1,58 +1,40 @@
-# SENNIAF Match - Sprint 6
+# SENNIAF Match — Sprint 7
 
-Prototipo académico de compatibilidad de perfiles en procesos de adopción. **No es un sistema oficial de SENNIAF y no decide adopciones.** Usar solo datos sintéticos.
+Prototipo académico para el análisis de compatibilidad en procesos de adopción. **No es un sistema oficial de SENNIAF ni decide adopciones.** Utilizar exclusivamente información sintética.
 
-## Diseño visual adaptado
+Demostración: https://senniafmatch.westus2.cloudapp.azure.com/
 
-Se aplicó la referencia `DESIGN.md` entregada por el equipo, inspirada en el lenguaje visual de Calendly, sin utilizar marcas, componentes ni servicios de terceros:
+## Funciones
 
-- Azul marino `#0b3558` para texto, azul de acción `#006bff`, fondo `#f8f9fb` y tarjetas blancas.
-- Bordes finos `#d4e0ed`, tarjetas de 24 px, campos y botones de 8 px, sombras de tinte azul.
-- Pantalla de acceso editorial con recorrido informativo, paneles institucionales y formularios responsivos.
-- Estilos coherentes en `index.html`, `funcionario.html`, `perfiles.html`, `perfil.html` y `match.html`.
-- CSS compartido `calendly-theme.css` y estilos específicos de inicio `calendly-login.css`.
+- **Trabajo social:** registrar, consultar y editar expedientes propios; solicitar retiro o reactivación sin alterar automáticamente su participación en Match.
+- **Psicología:** consultar casos asignados, registrar y actualizar evaluaciones mediante versiones, métodos, instrumentos, valoración, diagnóstico opcional y acompañamiento.
+- **Comité:** consultar expedientes, analizar compatibilidad, registrar decisiones justificadas, resolver solicitudes y ajustar los cinco pesos con auditoría y control de versión.
+- **Familia adoptante:** registrar y actualizar su entrevista, completar reevaluaciones y consultar etapas, historial propio y propuestas aceptadas, con actualización periódica.
 
-Se utiliza la pila de fuentes Manrope / Inter / Segoe UI, con alternativas del sistema para que la interfaz funcione también sin conexión. Los cambios visuales no alteran las rutas HTTP, los permisos ni los procedimientos del Sprint 6.
+La identidad y los permisos se validan en el servidor. Los informes y actuaciones anteriores se conservan; la exclusión del Match no elimina el seguimiento autorizado. Los hallazgos clínicos no se convierten automáticamente en diagnósticos ni modifican el algoritmo.
 
-## Requisitos
+## Ejecutar y mantener
 
-- JDK 21 recomendado (código compatible con Java 17).
-- Maven 3.8 o superior.
-- PostgreSQL 16 con Docker Compose.
+Requiere Java 21 (compilación compatible con Java 17), Maven y PostgreSQL 16.
 
-## Puesta en marcha
+1. Consultar [configuración local de PostgreSQL](README-BASE-DATOS.md).
+2. Configurar las variables privadas a partir de `.env.example`; no versionar `.env`.
+3. Compilar sin pruebas cuando corresponda:
 
-```bash
-docker compose up -d
-mvn clean test
-mvn clean verify -Pe2e
-mvn spring-boot:run
-```
+   ```bash
+   mvn -B -Dmaven.test.skip=true package
+   ```
 
-Abrir `http://localhost:8080`. El proyecto usa PostgreSQL en `localhost:5432` por defecto.
+4. Con el esquema preparado y las variables exportadas: `mvn spring-boot:run`.
 
-| Usuario de demostración | ID | Contraseña inicial |
-| --- | --- | --- |
-| Trabajador social | `TS-001` | `Cambio123!` |
-| Psicólogo | `PS-014` | `Cambio123!` |
-| Comité | `CM-001` | `Cambio123!` |
+No utilizar `clean` sobre el directorio de un servicio local en ejecución. No reemplazar volúmenes existentes ni copiar la base local sobre Azure.
 
-La variable `SENNIAF_DEMO_PASSWORD` cambia la contraseña de estos usuarios antes de su creación. El registro de familias muestra un código de verificación en pantalla porque **no está conectado a un servicio de correo real**.
+- [Estado y alcance del Sprint 7](docs/ACTA_CIERRE_SPRINT7.md)
+- [Reglas y correcciones de seguridad](docs/SPRINT7_CORRECCIONES_F01_F13.md)
+- [Operación, respaldo, actualización y HTTPS](deploy/azure/README.md)
+- [Guía histórica de validación del Sprint 6](docs/Sprint6_VALIDACION.md)
+- [Diseño anterior conservado como antecedente](docs/DISENO_INTERFAZ.md)
 
-## Qué incorpora el Sprint 6
+Las pruebas históricas y el aporte remoto del equipo permanecen en `src/test`. Las ampliaciones de pruebas y evidencias privadas de trabajo del Sprint 7 no se publican. La suite histórica requiere revisión por el equipo frente a los contratos actuales; no se presenta esta entrega como una ejecución de pruebas aprobada. GitHub Actions conserva su configuración; esta publicación utiliza `[skip ci]` por instrucción de no ejecutar pruebas.
 
-- Profesionales: registro, consulta de casos propios, edición, baja lógica y auditoría.
-- Familias: una entrevista por cédula; posibilidad de corregirla sin crear otro expediente.
-- Comité: ranking de cinco factores, pesos configurables que suman 100, decisiones motivadas y trazabilidad PostgreSQL.
-- Reevaluación: pausa temporal en el ranking y actualización familiar. Desde la tercera solicitud se presenta un **aviso de seguimiento humano, sin penalización automática**.
-- Seguridad: sesiones aleatorias de ocho horas, hash SHA-256 del token en la base de datos y autorización validada por el servidor, sin confiar en cabeceras de identidad enviadas por el navegador.
-
-Pesos académicos iniciales: salud 35, vínculos entre hermanos 25, edad 20, apoyo 15 y logística 5. Nunca sustituyen el criterio humano o la idoneidad legal.
-
-## Pruebas y evidencias
-
-- `src/test/java/com/senniaf/match/Sprint6E2EIT.java` contiene ocho escenarios HTTP + PostgreSQL.
-- `.github/workflows/maven.yml` configura JDK 21, PostgreSQL 16 y reportes de Maven.
-- `docs/Sprint6_VALIDACION.md` explica las pruebas, las cinco comprobaciones de Burp Repeater y las evidencias que hay que anexar.
-
-Los resultados de Burp, GitHub Actions y los tiempos de respuesta se deben obtener mediante ejecuciones reales. La aplicación no está lista para datos institucionales.
+No hay contraseñas públicas de demostración. Los datos y respaldos de Azure, sesiones, secretos SMTP y claves SSH permanecen fuera del repositorio.

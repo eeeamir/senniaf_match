@@ -1,0 +1,10 @@
+[Unit]
+Description=Copia PostgreSQL ficticio SENNIAF a Blob privado
+After=postgresql.service network-online.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/senniaf/respaldo.sh
+User=root
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true

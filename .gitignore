@@ -1,2 +1,34 @@
 target/
 *.class
+# Credenciales y respaldos locales no deben publicarse.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.dump
+*.p12
+*.jks
+.local-backups/
+
+# Artefactos, sesiones y configuraciones privadas de operación.
+*.log
+*.zip
+*.bak
+*.pfx
+*.crt
+*.cer
+*.keystore
+*.jks
+*.p12
+*.p7b
+*.pgpass
+.pgpass
+.azure/
+.ssh/
+**/smtp-real.env
+**/remoto.env
+**/cuentas-demo.json
+# Cargas privadas: no forman parte del esquema ni del procedimiento de actualización.
+deploy/azure/sql/003-cuentas-ficticias.sql.example
+deploy/azure/sql/004-expediente-ficticio.sql

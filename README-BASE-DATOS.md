@@ -1,58 +1,43 @@
-# SENNIAF Match - Base de datos PostgreSQL
+# PostgreSQL: preparación local y conservación de datos
 
-## 1. Iniciar PostgreSQL
+## Bases independientes
 
-Requiere Docker Desktop.
+Docker Compose utiliza `senniaf_match` y el volumen persistente `senniaf_pgdata`. La demostración de Azure utiliza `senniaf_demo`. Tener las mismas tablas no implica compartir registros; no existe sincronización automática. No importar bases de auditoría como si fueran la base original del equipo.
+
+## Configuración local
+
+1. Copiar `.env.example` a `.env` y establecer una contraseña local privada.
+2. Exportar las variables en la terminal WSL antes de iniciar Spring Boot:
+
+   ```bash
+   set -a
+   source .env
+   set +a
+   docker compose up -d
+   ```
+
+PostgreSQL se publica solo en `127.0.0.1:5432`. El volumen se conserva entre arranques. Cambiar `DB_PASSWORD` no cambia la contraseña de un volumen ya inicializado: utilizar sus credenciales vigentes y no recrearlo para resolver autenticación.
+
+## Esquema
+
+La configuración habitual usa `ddl-auto=validate`: comprueba el esquema, sin crearlo ni migrarlo automáticamente. Para una base **nueva y vacía**, el esquema SQL sin datos está en `deploy/azure/sql/001-esquema-inicial.sql`. Aplicar después, en orden, `005-cierre-adopcion.sql` y los cambios 006, 007 y 008 de `deploy/azure/sql/propuestas/`. El nombre histórico de esa carpeta no implica que estén pendientes en Azure: ya están aplicados allí.
+
+Ejemplo de aplicación local sobre una base nueva:
 
 ```bash
-docker compose up -d
+docker compose exec -T postgres psql -U postgres -d senniaf_match -v ON_ERROR_STOP=1 < deploy/azure/sql/001-esquema-inicial.sql
 ```
 
-Esto crea:
-- Base de datos: `senniaf_match`
-- Usuario: `postgres`
-- Contraseña de desarrollo: `postgres`
-- Puerto: `5432`
+Revisar cada cambio antes de aplicarlo. En una base existente, comprobar el esquema y respaldar primero; no ejecutar el esquema inicial ni restaurar encima. El script `002-permisos.sql` corresponde a la cuenta técnica remota y no debe aplicarse indiscriminadamente al desarrollo local.
 
-## 2. Ejecutar Spring Boot
+## Cuentas y registro
 
-```bash
-mvn spring-boot:run
-```
+Las cuentas de demostración están desactivadas por defecto. En una base local sintética pueden habilitarse expresamente con `SENNIAF_DEMO_HABILITADO=true` y `SENNIAF_DEMO_PASSWORD` privada de al menos 16 caracteres y hasta 72 bytes. No se distribuyen contraseñas ni copias de usuarios remotos.
 
-Spring Boot crea/actualiza las tablas mediante JPA/Hibernate (`ddl-auto=update`).
+El registro familiar público y SMTP están cerrados por defecto. Para habilitarlos se requiere configurar remitente y transporte, verificar el envío y mantener los controles de vencimiento, intentos y reenvíos. El código no devuelve códigos de verificación en el entorno remoto.
 
-## 3. Datos de funcionarios para la demo
+Las asignaciones de profesionales se reflejan desde datos existentes; los cuatro roles no pueden reasignar responsables ni crear roles institucionales mediante registro público.
 
-Al iniciar por primera vez se crean si no existen:
+## Respaldos
 
-- `TS-001` -> `TRABAJADOR_SOCIAL`
-- `PS-014` -> `PSICOLOGO`
-- `CM-001` -> `COMITE`
-
-Contraseña de desarrollo: `Cambio123!`
-
-Se puede cambiar con la variable de entorno `SENNIAF_DEMO_PASSWORD`.
-
-## 4. Familias
-
-El registro de familia ahora guarda en PostgreSQL:
-
-- nombre
-- apellido
-- cédula
-- correo
-- hash BCrypt de contraseña
-- estado de verificación
-- código de verificación temporal (también almacenado como hash)
-- rol
-
-La contraseña original nunca se guarda.
-
-## 5. Perfiles
-
-Los perfiles de niños y familias también se guardan en PostgreSQL. Las listas de habilidades, gustos, personalidad, alergias, condiciones de salud y redes de apoyo usan tablas auxiliares generadas por JPA.
-
-## 6. Importante
-
-Esta configuración es para desarrollo/demostración. Para producción se deben usar credenciales fuera del repositorio, HTTPS, control de acceso real, gestión de sesiones/tokens, backups y una política de protección de datos adecuada.
+Conservar los respaldos fuera de Git y verificar su integridad. No usar `docker compose down -v`, reiniciar la base o importar datos por una limpieza del repositorio. Los procedimientos de operación remota están en [deploy/azure/README.md](deploy/azure/README.md).
