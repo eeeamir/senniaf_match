@@ -18,16 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Set;
 
 /**
- * Módulo de perfil de idoneidad de la familia adoptante (PBI06/PBI07,
- * HU02). Solo el rol FAMILIA puede completar su propia entrevista; ni el
- * trabajador social, ni el psicólogo, ni el Comité crean este perfil por
- * la familia en este endpoint. Es, a propósito, la contraparte exacta de
- * PerfilNinoController: cada rol tiene un único endpoint de registro que
- * le corresponde y no puede usar el del otro.
- *
- * NOTA: mismo mecanismo simple de rol por cabecera (X-User-Role) usado en
- * PerfilNinoController; ver esa clase para el comentario sobre
- * reemplazarlo por autenticación real (Spring Security/JWT).
+ * Registra, consulta y actualiza únicamente la entrevista de la familia autenticada.
+ * SesionFiltro obtiene identidad y rol de la sesión y sustituye las cabeceras del cliente.
+ * El servicio conserva el mismo expediente y cuenta una reevaluación solo al completarla.
  */
 @RestController
 @RequestMapping("/api/familias")

@@ -14,9 +14,16 @@ import java.util.List;
 public class PerfilFamiliaService {
 
     private final PerfilFamiliaRepository repositorio;
+    private final com.senniaf.match.repository.EventoCasoRepository auditoria;
+    private final com.senniaf.match.repository.DecisionComiteRepository decisiones;
 
     public PerfilFamiliaService(PerfilFamiliaRepository repositorio) {
-        this.repositorio = repositorio;
+        this(repositorio,null);
+    }
+    public PerfilFamiliaService(PerfilFamiliaRepository repositorio, com.senniaf.match.repository.DecisionComiteRepository decisiones) {this(repositorio,decisiones,null);}
+    @org.springframework.beans.factory.annotation.Autowired
+    public PerfilFamiliaService(PerfilFamiliaRepository repositorio, com.senniaf.match.repository.DecisionComiteRepository decisiones,com.senniaf.match.repository.EventoCasoRepository auditoria) {
+        this.repositorio=repositorio;this.decisiones=decisiones;this.auditoria=auditoria;
     }
 
     public synchronized PerfilFamiliaResponse registrarPerfil(PerfilFamiliaRequest request, String registradoPor) {
@@ -51,11 +58,12 @@ public class PerfilFamiliaService {
         return respuesta(perfil, mensaje);
     }
 
-    /** La familia corrige su propia entrevista sin crear una segunda ficha ni borrar el historial. */
+    /** La familia actualiza su entrevista propia; una revisión solicitada se contabiliza al completarse. */
     @Transactional
     public PerfilFamiliaResponse actualizarPropio(PerfilFamiliaRequest request, String cedula) {
         PerfilFamilia perfil = repositorio.findByRegistradoPor(cedula)
                 .orElseThrow(() -> new IllegalArgumentException("Todavía no existe una entrevista para modificar"));
+        var antes=datosAuditoria(perfil);
         copiarDatos(perfil, request);
         boolean completo = calcularSiEstaCompleto(request);
         perfil.setPerfilCompleto(completo);
@@ -66,6 +74,7 @@ public class PerfilFamiliaService {
             perfil.setReevaluacionPendiente(false);
         }
         repositorio.save(perfil);
+        auditarCorreccion(perfil,cedula,antes);
         return respuesta(perfil, perfil.isPerfilCompleto() ? "Entrevista actualizada para revisión del Comité"
                 : "Los cambios se guardaron, pero la entrevista sigue incompleta y requiere corrección");
     }
@@ -75,8 +84,46 @@ public class PerfilFamiliaService {
     }
 
     private PerfilFamiliaResponse respuesta(PerfilFamilia p, String mensaje) {
-        return new PerfilFamiliaResponse(mensaje, p.getCodigoCaso(), p.isPerfilCompleto(),
-                p.isReevaluacionPendiente(), p.getNumeroReevaluaciones());
+        var respuesta=new PerfilFamiliaResponse(mensaje, p.getCodigoCaso(), p.isPerfilCompleto(),
+                p.isReevaluacionPendiente(), p.getNumeroReevaluaciones(), decisiones!=null && decisiones.existsByCodigoFamiliaAndDecision(p.getCodigoCaso(),"ACEPTADA"));
+        var actividad=new java.util.ArrayList<java.util.Map<String,Object>>();
+        if(p.getFechaRegistro()!=null)actividad.add(actividad("Entrevista registrada","Se recibió la información de tu hogar.",p.getFechaRegistro()));
+        if(decisiones!=null)for(var d:decisiones.findByCodigoFamiliaOrderByFechaAsc(p.getCodigoCaso())) {
+            if(d.getFecha()==null)continue;
+            if("ACEPTADA".equals(d.getDecision()))actividad.add(actividad("Propuesta aceptada","El equipo SENNIAF te orientará sobre los siguientes pasos.",d.getFecha()));
+            else if("REEVALUACION".equals(d.getDecision()))actividad.add(actividad("Revisión de entrevista solicitada","Se solicitó ampliar la información de la entrevista.",d.getFecha()));
+        }
+        if(auditoria!=null)for(var e:auditoria.findByCodigoCasoOrderByFechaAsc(p.getCodigoCaso())) {
+            if(e.getFecha()!=null && "CORRECCION_ENTREVISTA".equals(e.getAccion()))actividad.add(actividad(tituloCorreccion(e.getDescripcion()),"Se recibió una actualización de tu entrevista.",e.getFecha()));
+            if(e.getFecha()!=null && "CONTENIDO_ACADEMICO_ACTUALIZADO".equals(e.getAccion()))actividad.add(actividad("Información del hogar actualizada","Se completó la descripción del hogar conservando las respuestas de la entrevista.",e.getFecha()));
+        }
+        actividad.sort(java.util.Comparator.comparing(a->a.get("fecha").toString()));
+        respuesta.setActividad(actividad);return respuesta;
+    }
+
+    private String tituloCorreccion(String descripcion) {
+        try {
+            var datos=new com.fasterxml.jackson.databind.ObjectMapper().readTree(descripcion);
+            return "REEVALUACION".equals(datos.path("tipo").asText())?"Corrección por reevaluación recibida":"ACTUALIZACION".equals(datos.path("tipo").asText())?"Entrevista actualizada":"Entrevista corregida";
+        }catch(com.fasterxml.jackson.core.JsonProcessingException | IllegalArgumentException error){return "Entrevista corregida";}
+    }
+    private java.util.Map<String,Object> actividad(String titulo,String descripcion,LocalDateTime fecha) {
+        return java.util.Map.of("titulo",titulo,"descripcion",descripcion,"fecha",fecha.atZone(java.time.ZoneId.systemDefault()).toOffsetDateTime());
+    }
+
+    private java.util.Map<String,Object> datosAuditoria(PerfilFamilia p) {
+        var m=new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules();
+        java.util.Map<String,Object> datos=m.convertValue(p,new com.fasterxml.jackson.core.type.TypeReference<java.util.Map<String,Object>>(){});
+        datos.keySet().removeAll(java.util.Set.of("id","registradoPor","fechaRegistro","codigoCaso"));return datos;
+    }
+    private void auditarCorreccion(PerfilFamilia p,String actor,java.util.Map<String,Object> antes) {
+        if(auditoria==null)return;
+        var cambios=new java.util.LinkedHashMap<String,Object>();
+        datosAuditoria(p).forEach((k,v)->{if(!java.util.Objects.equals(antes.get(k),v)){var c=new java.util.LinkedHashMap<String,Object>();c.put("anterior",antes.get(k));c.put("nuevo",v);cambios.put(k,c);}});
+        var e=new com.senniaf.match.model.EventoCaso();e.setCodigoCaso(p.getCodigoCaso());e.setActor(actor);e.setFecha(LocalDateTime.now());e.setAccion("CORRECCION_ENTREVISTA");
+        try{e.setDescripcion(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(java.util.Map.of("rol","FAMILIA","resumen","Se actualizó la entrevista familiar.","tipo",Boolean.TRUE.equals(antes.get("reevaluacionPendiente"))?"REEVALUACION":"ACTUALIZACION","cambios",cambios)));}
+        catch(com.fasterxml.jackson.core.JsonProcessingException error){throw new IllegalStateException("No se pudo conservar la corrección",error);}
+        auditoria.save(e);
     }
 
     private void copiarDatos(PerfilFamilia perfil, PerfilFamiliaRequest request) {

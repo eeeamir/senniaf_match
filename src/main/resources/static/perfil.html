@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<link rel="preload" as="image" href="img/logo.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -9,6 +10,7 @@
 <link rel="stylesheet" href="senniaf.css">
 <link rel="stylesheet" href="perfil.css">
 <link rel="stylesheet" href="calendly-theme.css">
+<link rel="stylesheet" href="profesionales.css">
 </head>
 
 
@@ -16,7 +18,7 @@
 
 
 <header class="topbar"><div class="topbar-in">
-  <a class="topbar-marca" href="#"><img src="img/logo.png" alt="SENNIAF"><span></span></a>
+  <a class="topbar-marca" href="#"><img fetchpriority="high" decoding="sync" width="235" height="49" src="img/logo.png" alt="SENNIAF"><span></span></a>
   <div class="usuario" id="usuario"></div>
 </div></header>
 
@@ -111,7 +113,8 @@
 
     <form id="formulario" novalidate>
 
-      <section class="grupo">
+
+    <section class="grupo">
 
         <h2>Identificación del profesional</h2>
 
@@ -120,7 +123,7 @@
           <div class="campo">
 
             <label for="idFuncionario">
-              ID de funcionario <span class="req">*</span>
+              Profesional responsable <span class="req">*</span>
             </label>
 
             <input
@@ -134,8 +137,7 @@
             >
 
             <div class="ayuda">
-              Obligatoria para identificar al trabajador social o psicólogo
-              que registra el perfil.
+              Se registra automáticamente con tu sesión.
             </div>
 
           </div>
@@ -556,6 +558,7 @@
 
       <div style="display:flex; gap:10px; margin-left:auto;">
 
+        <a class="boton secundario" href="perfiles.html">Cancelar</a>
         <button
           type="button"
           class="boton secundario chico"
@@ -570,7 +573,7 @@
           class="boton"
           id="btnRegistrar"
         >
-          Enviar entrevista
+          Guardar perfil
         </button>
 
       </div>
@@ -1056,6 +1059,7 @@
 
       <div class="acciones">
 
+        <button type="button" class="boton secundario" id="cancelarEdicionFamilia" hidden>Cancelar</button>
         <button type="button" class="boton secundario chico" id="btnEjemploFamilia">
           Cargar datos de ejemplo
         </button>
@@ -1089,6 +1093,7 @@
      ===================================================== -->
 
 <script src="senniaf.js"></script>
+<script src="profesionales.js"></script>
 <script>
 
 /* ===============================================
@@ -1111,7 +1116,13 @@ const formularioFamilia = document.getElementById('formularioFamilia');
 const resultadoFamilia = document.getElementById('resultadoFamilia');
 const btnRegistrarFamilia = document.getElementById('btnRegistrarFamilia');
 const modoCorreccionFamilia = new URLSearchParams(location.search).get('reevaluacion') === '1';
-const textoEnviarFamilia = modoCorreccionFamilia ? 'Enviar entrevista corregida' : 'Enviar entrevista';
+let textoEnviarFamilia = modoCorreccionFamilia ? 'Guardar cambios' : 'Enviar entrevista';
+document.getElementById('cancelarEdicionFamilia').hidden=!modoCorreccionFamilia;
+document.getElementById('cancelarEdicionFamilia').addEventListener('click',()=>{
+ const volver=()=>{location.href='match.html?vista=entrevista';};
+ if(Profesionales.formulariosPendientes().includes(formularioFamilia))Profesionales.confirmar('¿Descartar cambios sin guardar?','Las modificaciones de este formulario no se guardarán. Tu entrevista registrada se conservará.',volver);
+ else volver();
+});
 
 
 
@@ -1244,10 +1255,13 @@ document
    DATOS DE EJEMPLO: NIÑO/A
    =============================================== */
 
-document
-  .getElementById('btnEjemplo')
-  .addEventListener('click', () => {
-
+function cargarEjemploInfantil() {
+  // Solo cambia controles del formulario; no realiza solicitudes al servidor.
+  if(!Profesionales.formulariosBase.has(formulario))Profesionales.marcarGuardado(formulario);
+  const profesional=document.getElementById('idFuncionario').value;
+  formulario.reset();document.getElementById('idFuncionario').value=profesional;
+  formulario.querySelectorAll('.pro-error-campo').forEach(e=>e.textContent='');
+  formulario.querySelectorAll('[aria-invalid]').forEach(e=>e.setAttribute('aria-invalid','false'));
     document.getElementById('edad').value = 10;
     document.getElementById('nivelEscolar').value = 'PRIMARIA';
     document.getElementById('gradoEscolar').value = '5to grado';
@@ -1258,7 +1272,7 @@ document
       'Muestra facilidad para el dibujo técnico';
 
     marcarValores('gustos', ['DEPORTES', 'VIDEOJUEGOS']);
-    document.getElementById('gustosDetalle').value = 'Fútbol y dibujar';
+    document.getElementById('gustosDetalle').value = 'Fútbol y videojuegos cooperativos';
 
     marcarValores('personalidad', ['RESERVADO', 'SOCIABLE']);
     document.getElementById('personalidadDetalle').value =
@@ -1275,10 +1289,19 @@ document
     document.getElementById('necesidadesApoyo').value =
       'Apoyo educativo en lectura';
 
+    document.getElementById('alergiasDetalle').value='No se reportan alergias conocidas en la entrevista de demostración.';
+    document.getElementById('condicionesSaludDetalle').value='Se mantiene el seguimiento preventivo habitual de salud.';
+    document.getElementById('contextoCultural').value='Participa en actividades de su comunidad y disfruta compartir relatos y celebraciones locales.';
+    formulario.querySelectorAll('input,select,textarea').forEach(c=>c.dispatchEvent(new Event('change',{bubbles:true})));
     actualizarAvisoMedico();
 
-  });
 
+}
+document.getElementById('btnEjemplo').addEventListener('click',()=>{
+  const tieneDatos=[...formulario.querySelectorAll('input,select,textarea')].some(c=>c.id!=='idFuncionario' && c.type!=='hidden' && (c.type==='checkbox'?c.checked:Boolean(c.value.trim())));
+  if(tieneDatos)Profesionales.confirmar('¿Cargar datos de ejemplo?','Se reemplazarán las respuestas de este formulario. Revisa los datos antes de guardar.',cargarEjemploInfantil);
+  else cargarEjemploInfantil();
+});
 
 
 /* ===============================================
@@ -1321,9 +1344,10 @@ formulario.addEventListener('submit', async (evento) => {
   };
 
   if (!formulario.checkValidity()) {
+    formulario.querySelectorAll(':invalid').forEach(c=>c.closest('details')?.setAttribute('open',''));
     formulario.reportValidity();
     btnRegistrar.disabled = false;
-    btnRegistrar.textContent = 'Enviar entrevista';
+    btnRegistrar.textContent = 'Guardar perfil';
     return;
   }
 
@@ -1345,17 +1369,18 @@ formulario.addEventListener('submit', async (evento) => {
     const datos = await respuesta.json();
 
     if (respuesta.ok) {
-
+      Profesionales.marcarGuardado(formulario);
       resultado.className = 'resultado exito';
       resultado.innerHTML =
         `<strong>Entrevista enviada correctamente.</strong><br>` +
         `${datos.mensaje} · Código de caso: <span class="codigo">${datos.codigoCaso}</span>` +
         (datos.perfilCompleto ? '' : ' · El perfil quedó marcado como incompleto.') +
         (datos.alertaMedica ? ' · <strong>Alerta médica activa.</strong>' : '') +
-        '<br><small>Regresando al menú de funcionario…</small>';
+        '<br><small>Volviendo a Mis expedientes…</small>';
 
+      if (!editarCodigo) sessionStorage.setItem('senniaf.flash', datos.mensaje);
       setTimeout(() => {
-        location.href = 'funcionario.html';
+        location.href = 'perfiles.html';
       }, 1600);
 
     } else if (respuesta.status === 403) {
@@ -1370,8 +1395,9 @@ formulario.addEventListener('submit', async (evento) => {
       let texto = datos.mensaje || 'No se pudo registrar el perfil.';
 
       if (datos.errores) {
+        Profesionales.erroresServidor(datos.errores);
         const detalles = Object.entries(datos.errores).map(
-          ([campo, msg]) => `${campo}: ${msg}`
+          ([campo, msg]) => limpiarHtml(msg)
         );
         texto += '<ul>' + detalles.map((d) => `<li>${d}</li>`).join('') + '</ul>';
       }
@@ -1385,12 +1411,12 @@ formulario.addEventListener('submit', async (evento) => {
     resultado.className = 'resultado error';
     resultado.textContent =
       'No se pudo conectar con el servidor. ' +
-      'Verifica que la aplicación esté corriendo en el puerto 8080.';
+      'Revisa tu conexión e inténtalo de nuevo.';
 
   } finally {
 
     btnRegistrar.disabled = false;
-    btnRegistrar.textContent = 'Enviar entrevista';
+    btnRegistrar.textContent = 'Guardar perfil';
 
   }
 
@@ -1402,10 +1428,8 @@ formulario.addEventListener('submit', async (evento) => {
    DATOS DE EJEMPLO: FAMILIA
    =============================================== */
 
-document
-  .getElementById('btnEjemploFamilia')
-  .addEventListener('click', () => {
-
+function cargarEjemploFamilia(){
+ if(!Profesionales.formulariosBase.has(formularioFamilia))Profesionales.marcarGuardado(formularioFamilia);
     document.getElementById('tipoFamilia').value = 'PAREJA';
     document.getElementById('notaEstructuraHogar').value =
       'Vivimos juntos hace 8 años, sin otros hijos en casa';
@@ -1436,9 +1460,14 @@ document
     document.getElementById('continuidadCultural').value =
       'Tenemos raíces indígenas y nos gustaría preservarlas';
 
-  });
 
-
+ formularioFamilia.querySelectorAll('input,select,textarea').forEach(c=>c.dispatchEvent(new Event('change',{bubbles:true})));
+}
+document.getElementById('btnEjemploFamilia').addEventListener('click',()=>{
+ const respondido=[...formularioFamilia.querySelectorAll('input,select,textarea')].some(c=>c.id!=='cedulaFamilia'&&!['hidden','button','submit'].includes(c.type)&&(c.type==='checkbox'||c.type==='radio'?c.checked:Boolean(c.value.trim())));
+ if(respondido)Profesionales.confirmar('¿Cargar datos de ejemplo?','Se reemplazarán las respuestas de este formulario. La entrevista registrada no cambiará hasta que guardes.',cargarEjemploFamilia);
+ else cargarEjemploFamilia();
+});
 
 /* ===============================================
    REGISTRO DEL PERFIL DE LA FAMILIA
@@ -1501,7 +1530,7 @@ formularioFamilia.addEventListener('submit', async (evento) => {
     const datos = await respuesta.json();
 
     if (respuesta.ok) {
-
+      Profesionales.marcarGuardado(formularioFamilia);
       resultadoFamilia.className = 'resultado exito';
       resultadoFamilia.innerHTML =
         `<strong>Entrevista enviada correctamente.</strong><br>${datos.mensaje}
@@ -1542,7 +1571,7 @@ formularioFamilia.addEventListener('submit', async (evento) => {
     resultadoFamilia.className = 'resultado error';
     resultadoFamilia.textContent =
       'No se pudo conectar con el servidor. ' +
-      'Verifica que la aplicación esté corriendo en el puerto 8080.';
+      'Revisa tu conexión e inténtalo de nuevo.';
 
   } finally {
 
@@ -1557,7 +1586,7 @@ formularioFamilia.addEventListener('submit', async (evento) => {
    SESIÓN (viene de index.html)
    =============================================== */
 
-const sesion = Sesion.requerir(['FAMILIA', 'TRABAJADOR_SOCIAL', 'PSICOLOGO']);
+const sesion = Sesion.requerir(['FAMILIA', 'TRABAJADOR_SOCIAL']);
 
 if (sesion) {
   rolSeleccionado = sesion.rol;
@@ -1577,12 +1606,15 @@ if (sesion) {
       fetch('/api/familias/mi-perfil/detalle', { headers: Sesion.encabezados() })
         .then(r => { if (!r.ok) throw new Error('No encontramos tu entrevista'); return r.json(); })
         .then(p => {
+          textoEnviarFamilia=p.reevaluacionPendiente?'Enviar correcciones':'Guardar cambios';
+          btnRegistrarFamilia.textContent=textoEnviarFamilia;
           ['tipoFamilia','notaEstructuraHogar','notaRedApoyo','provincia','disponibilidadViaje',
            'notaDistancia','edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad',
            'disposicionHermanos','notaHermanos','notaCondicionesSalud','continuidadCultural'].forEach(k => {
             const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
           });
           ['redApoyo','condicionesPuedeAcompanarHoy','condicionesConApoyo'].forEach(k => marcarValores(k, p[k] || []));
+          Profesionales.marcarGuardado(formularioFamilia);
           btnRegistrarFamilia.disabled = false;
         }).catch(e => {
           resultadoFamilia.className = 'resultado error';
@@ -1606,10 +1638,15 @@ if (sesion) {
           });
         ['habilidades','gustos','personalidad','alergias','condicionesSalud'].forEach(k => marcarValores(k, p[k] || []));
         btnRegistrar.textContent = 'Guardar correcciones';
+        Profesionales.marcarGuardado(formulario);
       }).catch(e => { resultado.textContent = e.message; });
   }
 
   Sesion.pintarCabecera(sesion);
+  if (sesion.rol === 'TRABAJADOR_SOCIAL') {
+    Profesionales.iniciar(sesion,sesion.rol==='FAMILIA'?'entrevista':'registro');
+    Profesionales.organizarFormulario();
+  } else if(sesion.rol==='FAMILIA'){Profesionales.iniciar(sesion,'entrevista');}
 }
 
 </script>
