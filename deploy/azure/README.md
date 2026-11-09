@@ -72,7 +72,7 @@ SMTP ya funciona con Brevo. Se conserva el registro y la verificación originale
 
 ## Costos y continuidad hasta el 25 de diciembre
 
-El objetivo vigente es **USD 65 en total** hasta terminar el 25 de diciembre de 2026. Proyección conservadora de toda la infraestructura existente: USD 59,02/48 días; con margen del 10 %, USD 64,92. [Configuración, pruebas y pendientes](../../docs/PBI27_CONTINUIDAD_AZURE.md).
+El objetivo vigente es **USD 65 en total** hasta terminar el 25 de diciembre de 2026. Proyección histórica documentada para toda la infraestructura existente: USD 59,02/48 días; con margen del 10 %, USD 64,92. [Configuración, pruebas y pendientes](../../docs/ACTA_CIERRE_SPRINT7.md).
 
 Se reutilizó el presupuesto `SENNIAF-PBI27-42` (identificador histórico), cuyo importe actual es USD 65 y período anual con vencimiento el 26 de diciembre a las 00:00 de Panamá; no se reinicia mensualmente. Avisos de costo USD 40/50/60 y previsión USD 50/60, mediante el correo de la cuenta Azure en `ag-senniaf-continuidad`. El usuario confirmó recepción del alta y de la alerta real de reinicio. Azure registró el disparo y la ejecución del grupo. La función de pruebas sintéticas no está disponible en esta oferta Students.
 

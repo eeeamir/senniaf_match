@@ -194,4 +194,24 @@ assertTrue(rankingRestaurado.toString().contains(familiaCaso));
         System.out.println("SPRINT6_LATENCIA_RANKING_MS p50=" + tiempos.get(7)
                 + " p95=" + tiempos.get(14) + " n=15 entorno=CI/datos_sinteticos");
     }
+
+    @Test @Order(9)
+    void e2e09AceptacionDelComiteSeReflejaEnLaFamiliaSinRevelarDatosInfantiles() {
+        JsonNode antes = json(req("/api/familias/mi-perfil", HttpMethod.GET, familia, null));
+        assertFalse(antes.path("vinculacionAceptada").asBoolean());
+
+        ResponseEntity<String> aceptacion = req("/api/scoring/casos/" + nino + "/decisiones",
+                HttpMethod.POST, comite,
+                Map.of("familia", familiaCaso, "decision", "ACEPTADA",
+                       "motivo", "El Comité aprobó la propuesta de vinculación después de revisar el caso"));
+        assertEquals(200, aceptacion.getStatusCode().value(), aceptacion.getBody());
+
+        ResponseEntity<String> consulta = req("/api/familias/mi-perfil", HttpMethod.GET, familia, null);
+        assertEquals(200, consulta.getStatusCode().value());
+        assertTrue(json(consulta).path("vinculacionAceptada").asBoolean());
+        assertFalse(consulta.getBody().contains(nino), "La familia no puede ver la identidad del niño");
+        assertFalse(consulta.getBody().contains("puntaje"), "No se debe exponer el ranking");
+        assertEquals(403, req("/api/familias/mi-perfil", HttpMethod.GET, comite, null)
+                .getStatusCode().value(), "El Comité no consulta entrevistas de familias por este endpoint");
+    }
 }

@@ -50,6 +50,7 @@ public class PerfilFamiliaResponse {
     }
     public boolean isReevaluacionPendiente() { return reevaluacionPendiente; }
     public int getNumeroReevaluaciones() { return numeroReevaluaciones; }
+    /** Solo informa la aceptación del caso propio, sin datos infantiles ni de otras familias. */
     public boolean isVinculacionAceptada() { return vinculacionAceptada; }
     public boolean isRequiereRevisionTecnica() { return numeroReevaluaciones >= 3; }
 }
