@@ -44,7 +44,7 @@ public class UsuarioService {
         String identificador=tipo.identificador(numero), correo=r.getCorreo().strip().toLowerCase(Locale.ROOT);
         if(repo.existsByTipoDocumentoAndNumeroDocumentoIgnoreCase(tipo,numero) || repo.existsByCedula(numero)
                 || repo.findByIdentificador(identificador).isPresent() || repo.findByIdentificador(numero).isPresent())
-            throw new com.senniaf.match.web.CampoInvalidoException("numeroDocumento","Este documento ya está registrado. Inicia sesión con tu documento o correo.",true);
+            throw new com.senniaf.match.web.CampoInvalidoException("numeroDocumento","Este documento ya está registrado. Inicia sesión con tu documento de identidad.",true);
         if(repo.existsByCorreoIgnoreCase(correo))
             throw new com.senniaf.match.web.CampoInvalidoException("correo","Este correo ya está registrado. Inicia sesión para continuar.",true);
         String codigo=nuevoCodigo();
@@ -91,11 +91,10 @@ public class UsuarioService {
         passwordValida(r.getPassword());
         String clave="login:"+r.getIdentificador().strip().toUpperCase(Locale.ROOT);
         if(!limites.admitir(clave,10,900000)) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS,"Demasiados intentos. Inténtalo más tarde");
-        Usuario u=repo.findByIdentificador(r.getIdentificador().trim().toUpperCase(Locale.ROOT)).orElse(null);
+        Usuario u=r.getIdentificador().contains("@")?null:repo.findByIdentificador(r.getIdentificador().trim().toUpperCase(Locale.ROOT)).orElse(null);
         if(u==null && !r.getIdentificador().contains("@")) u=repo.findByIdentificador("PAS-"+r.getIdentificador().strip().toUpperCase(Locale.ROOT)).orElse(null);
-        if(u==null) u=repo.findByCorreoIgnoreCase(r.getIdentificador().strip()).orElse(null);
         boolean coincide=encoder.matches(r.getPassword(),u==null?hashInexistente:u.getPasswordHash());
-        if(u==null || !coincide) throw new IllegalArgumentException("Documento, correo, ID o contraseña incorrectos.");
+        if(u==null || !coincide) throw new IllegalArgumentException("Documento de identidad, ID institucional o contraseña incorrectos.");
         if(!u.isVerificado()) throw new IllegalArgumentException("Debes verificar tu correo antes de iniciar sesión.");
         limites.limpiar(clave);return sesion(u);
     }
