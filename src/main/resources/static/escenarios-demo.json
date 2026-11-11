@@ -1,6 +1,7 @@
 {
   "nino": [
     {
+      "unidadEdad": "ANIOS",
       "edad": 2,
       "nivelEscolar": "NO_ESCOLARIZADO",
       "gradoEscolar": "No aplica",
@@ -36,6 +37,7 @@
       "contextoCultural": ""
     },
     {
+      "unidadEdad": "ANIOS",
       "edad": 10,
       "nivelEscolar": "PRIMARIA",
       "gradoEscolar": "5to grado",
@@ -71,6 +73,7 @@
       "contextoCultural": ""
     },
     {
+      "unidadEdad": "ANIOS",
       "edad": 15,
       "nivelEscolar": "MEDIA",
       "gradoEscolar": "10mo grado",
@@ -106,6 +109,7 @@
       "contextoCultural": ""
     },
     {
+      "unidadEdad": "ANIOS",
       "edad": 4,
       "nivelEscolar": "INICIAL",
       "gradoEscolar": "Prejardín",
@@ -141,6 +145,7 @@
       "contextoCultural": ""
     },
     {
+      "unidadEdad": "ANIOS",
       "edad": 7,
       "nivelEscolar": "PRIMARIA",
       "gradoEscolar": "2do grado",
@@ -175,6 +180,7 @@
       "contextoCultural": ""
     },
     {
+      "unidadEdad": "ANIOS",
       "edad": 12,
       "nivelEscolar": "PREMEDIA",
       "gradoEscolar": "7mo grado",
@@ -210,6 +216,7 @@
       "contextoCultural": ""
     },
     {
+      "unidadEdad": "ANIOS",
       "edad": 16,
       "nivelEscolar": "OTRO",
       "gradoEscolar": "Programa flexible de formación técnica",
@@ -245,6 +252,7 @@
       "contextoCultural": ""
     },
     {
+      "unidadEdad": "ANIOS",
       "edad": 1,
       "nivelEscolar": "NO_ESCOLARIZADO",
       "gradoEscolar": "No aplica",
@@ -276,6 +284,105 @@
       "tieneHermanos": "NO",
       "cantidadHermanos": 0,
       "hermanosDetalle": "",
+      "contextoCultural": ""
+    },
+    {
+      "unidadEdad": "MESES",
+      "edad": 0,
+      "nivelEscolar": "NO_ESCOLARIZADO",
+      "gradoEscolar": "No aplica",
+      "rendimientoAcademico": "NO_APLICA",
+      "habilidades": [
+        "AUN_NO_EVALUADO"
+      ],
+      "habilidadesDetalle": "Se requiere observar las respuestas y el desarrollo de acuerdo con su edad, sin anticipar habilidades.",
+      "gustos": [
+        "AUN_NO_EVALUADO"
+      ],
+      "gustosDetalle": "Los intereses aún no han sido evaluados.",
+      "personalidad": [
+        "AUN_NO_EVALUADO"
+      ],
+      "personalidadDetalle": "No se atribuyen rasgos estables de personalidad a esta edad.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "Sin alergias conocidas en los antecedentes simulados disponibles.",
+      "intoleranciaLactosa": "NO_SABE",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "No se documentan condiciones específicas. Mantener controles de desarrollo.",
+      "necesidadesApoyo": "Acompañamiento de las figuras de cuidado, alimentación y descanso adecuados a su etapa, y seguimiento pediátrico.",
+      "tieneHermanos": "NO_SABE",
+      "cantidadHermanos": null,
+      "hermanosDetalle": "Aún no se ha confirmado si tiene hermanos.",
+      "contextoCultural": ""
+    },
+    {
+      "unidadEdad": "MESES",
+      "edad": 6,
+      "nivelEscolar": "NO_ESCOLARIZADO",
+      "gradoEscolar": "No aplica",
+      "rendimientoAcademico": "NO_APLICA",
+      "habilidades": [
+        "AUN_NO_EVALUADO"
+      ],
+      "habilidadesDetalle": "Se requiere observar las respuestas y el desarrollo de acuerdo con su edad, sin anticipar habilidades.",
+      "gustos": [
+        "AUN_NO_EVALUADO"
+      ],
+      "gustosDetalle": "Los intereses aún no han sido evaluados.",
+      "personalidad": [
+        "AUN_NO_EVALUADO"
+      ],
+      "personalidadDetalle": "No se atribuyen rasgos estables de personalidad a esta edad.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "Sin alergias conocidas en los antecedentes simulados disponibles.",
+      "intoleranciaLactosa": "NO_SABE",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "No se documentan condiciones específicas. Mantener controles de desarrollo.",
+      "necesidadesApoyo": "Acompañamiento de las figuras de cuidado, alimentación y descanso adecuados a su etapa, y seguimiento pediátrico.",
+      "tieneHermanos": "NO_SABE",
+      "cantidadHermanos": null,
+      "hermanosDetalle": "Aún no se ha confirmado si tiene hermanos.",
+      "contextoCultural": ""
+    },
+    {
+      "unidadEdad": "MESES",
+      "edad": 11,
+      "nivelEscolar": "NO_ESCOLARIZADO",
+      "gradoEscolar": "No aplica",
+      "rendimientoAcademico": "NO_APLICA",
+      "habilidades": [
+        "AUN_NO_EVALUADO"
+      ],
+      "habilidadesDetalle": "Se requiere observar las respuestas y el desarrollo de acuerdo con su edad, sin anticipar habilidades.",
+      "gustos": [
+        "AUN_NO_EVALUADO"
+      ],
+      "gustosDetalle": "Los intereses aún no han sido evaluados.",
+      "personalidad": [
+        "AUN_NO_EVALUADO"
+      ],
+      "personalidadDetalle": "No se atribuyen rasgos estables de personalidad a esta edad.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "Sin alergias conocidas en los antecedentes simulados disponibles.",
+      "intoleranciaLactosa": "NO_SABE",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "No se documentan condiciones específicas. Mantener controles de desarrollo.",
+      "necesidadesApoyo": "Acompañamiento de las figuras de cuidado, alimentación y descanso adecuados a su etapa, y seguimiento pediátrico.",
+      "tieneHermanos": "NO_SABE",
+      "cantidadHermanos": null,
+      "hermanosDetalle": "Aún no se ha confirmado si tiene hermanos.",
       "contextoCultural": ""
     }
   ],

@@ -22,6 +22,10 @@ public class PerfilNino {
     public boolean isCierrePorAdopcion() { return cierrePorAdopcion; }
     public void setCierrePorAdopcion(boolean valor) { cierrePorAdopcion = valor; }
     private Integer edad;
+    @Enumerated(EnumType.STRING) @Column(length=10) private UnidadEdad unidadEdad;
+    // NULL en registros anteriores significa años; nunca supone meses exactos.
+    public UnidadEdad getUnidadEdad(){return unidadEdad == null ? UnidadEdad.ANIOS : unidadEdad;}
+    public void setUnidadEdad(UnidadEdad v){unidadEdad=v;}
     @Enumerated(EnumType.STRING) private NivelEscolar nivelEscolar;
     private String gradoEscolar;
     @Enumerated(EnumType.STRING) private RendimientoAcademico rendimientoAcademico;

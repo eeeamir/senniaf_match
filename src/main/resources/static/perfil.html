@@ -171,14 +171,14 @@
             Edad <span class="req">*</span>
           </label>
 
-          <input
-            id="edad"
-            name="edad"
-            type="number"
-            min="0"
-            max="17"
-            required
-          >
+          <div class="edad-controles">
+            <input id="edad" name="edad" type="number" min="1" max="17" step="1" aria-describedby="ayudaEdadHistorica" required>
+            <select id="unidadEdad" name="unidadEdad" aria-label="Unidad de edad" required>
+              <option value="ANIOS">Años</option>
+              <option value="MESES">Meses</option>
+            </select>
+          </div>
+          <span id="ayudaEdadHistorica" class="ayuda" hidden>El expediente conserva una edad menor de un año sin meses registrados. Puedes mantenerla o indicar los meses si dispones de esa información.</span>
 
         </div>
 
@@ -389,7 +389,7 @@
             <option value="">Seleccione…</option>
             <option value="SI">Sí</option>
             <option value="NO">No</option>
-            <option value="NO_SABE">No se sabe / pendiente</option>
+            <option value="NO_SABE">Aún no se ha confirmado</option>
           </select>
 
         </div>
@@ -406,7 +406,8 @@
             name="cantidadHermanos"
             type="number"
             min="0"
-            placeholder="1"
+            step="1"
+            disabled
           >
 
         </div>
@@ -1269,6 +1270,7 @@ async function cargarEjemploInfantil() {
   const ejemplo=await EjemplosDemo.siguiente('nino');
   const profesional=document.getElementById('idFuncionario').value;
   formulario.reset();document.getElementById('idFuncionario').value=profesional;
+  delete document.getElementById('edad').dataset.historicaSinMeses;document.getElementById('ayudaEdadHistorica').hidden=true;
   EjemplosDemo.aplicar(formulario,ejemplo);
   ReglasPerfil.refrescarNino(ejemplo.gradoEscolar);
   actualizarAvisoMedico();
@@ -1277,7 +1279,7 @@ async function cargarEjemploInfantil() {
  } catch(e){resultado.className='resultado error';resultado.textContent=e.message;}finally{boton.disabled=false;}
 }
 document.getElementById('btnEjemplo').addEventListener('click',()=>{
-  const tieneDatos=[...formulario.querySelectorAll('input,select,textarea')].some(c=>c.id!=='idFuncionario' && c.type!=='hidden' && (c.type==='checkbox'?c.checked:Boolean(c.value.trim())));
+  const tieneDatos=[...formulario.querySelectorAll('input,select,textarea')].some(c=>!['idFuncionario','unidadEdad'].includes(c.id) && c.type!=='hidden' && (c.type==='checkbox'?c.checked:Boolean(c.value.trim())));
   if(tieneDatos)Profesionales.confirmar('¿Cargar datos de ejemplo?','Se reemplazarán las respuestas de este formulario. Revisa los datos antes de guardar.',cargarEjemploInfantil);
   else cargarEjemploInfantil();
 });
@@ -1299,7 +1301,8 @@ formulario.addEventListener('submit', async (evento) => {
   btnRegistrar.textContent = 'Registrando…';
 
   const cuerpo = {
-    edad: Number(document.getElementById('edad').value),
+    edad: document.getElementById('edad').value === '' ? null : Number(document.getElementById('edad').value),
+    unidadEdad: document.getElementById('unidadEdad').value,
     nivelEscolar: document.getElementById('nivelEscolar').value,
     gradoEscolar: document.getElementById('gradoEscolar').value,
     rendimientoAcademico: document.getElementById('rendimientoAcademico').value || null,
@@ -1588,12 +1591,15 @@ if (sesion) {
     if (editarCodigo) fetch(`/api/ninos/${encodeURIComponent(editarCodigo)}`, { headers: Sesion.encabezados() })
       .then(r => { if (!r.ok) throw new Error('No se puede editar ese caso'); return r.json(); })
       .then(p => {
-        ['edad','nivelEscolar','gradoEscolar','rendimientoAcademico','habilidadesDetalle',
+        ['edad','unidadEdad','nivelEscolar','gradoEscolar','rendimientoAcademico','habilidadesDetalle',
           'gustosDetalle','personalidadDetalle','tieneHermanos','cantidadHermanos','hermanosDetalle',
           'contextoCultural','alergiasDetalle','intoleranciaLactosa','condicionesSaludDetalle','necesidadesApoyo'].forEach(k => {
             const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
           });
         ['habilidades','gustos','personalidad','alergias','condicionesSalud'].forEach(k => marcarValores(k, p[k] || []));
+        document.getElementById('unidadEdad').value=p.unidadEdad||'ANIOS';
+        document.getElementById('edad').dataset.historicaSinMeses=String(p.edad===0&&p.unidadEdad!=='MESES');
+        document.getElementById('ayudaEdadHistorica').hidden=p.edad!==0||p.unidadEdad==='MESES';
         ReglasPerfil.refrescarNino(p.gradoEscolar);
         actualizarAvisoMedico();
         btnRegistrar.textContent = 'Guardar correcciones';

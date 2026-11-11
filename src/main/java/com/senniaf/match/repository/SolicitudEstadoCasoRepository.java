@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface SolicitudEstadoCasoRepository extends JpaRepository<SolicitudEstadoCaso, Long> {
     long countByExpedienteIdAndEstado(Long id, SolicitudEstadoCaso.Estado estado);
+    List<SolicitudEstadoCaso> findByExpedienteIdAndEstado(Long id, SolicitudEstadoCaso.Estado estado);
     List<SolicitudEstadoCaso> findByEstadoOrderByFechaSolicitudAscIdAsc(SolicitudEstadoCaso.Estado estado);
     boolean existsByExpedienteIdAndEstado(Long id, SolicitudEstadoCaso.Estado estado);
     List<SolicitudEstadoCaso> findByExpedienteCodigoCasoOrderByFechaSolicitudDescIdDesc(String codigo);

@@ -182,6 +182,15 @@ section.grupo h2::before {
 #formularioFamilia .fila { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px 24px; }
 #formularioFamilia .campo { min-width: 0; gap: 10px; }
 #formularioFamilia .campo > label { line-height: 1.6; }
+
+/* Igualar el espacio de las dos preguntas para alinear sus selectores. */
+#formularioFamilia label[for="provincia"],
+#formularioFamilia label[for="disponibilidadViaje"] {
+    flex-grow: 1;
+}
+
+/* La pregunta y el selector de hermanos ocupan toda la fila. */
+#formularioFamilia .campo:has(> #disposicionHermanos) { grid-column: 1 / -1; }
 #formularioFamilia textarea { min-height: 96px; width: 100%; }
 .grupo-checks { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(220px,100%),1fr)); gap: 10px 16px; }
 .grupo-checks label.opcion-check { white-space: normal; align-items: flex-start; line-height: 1.5; padding: 6px 0; }
@@ -189,3 +198,7 @@ section.grupo h2::before {
 .campo [hidden], .campo[hidden] { display: none !important; }
 input:disabled,select:disabled { background: #f1f5f9; color: #53677d; opacity: 1; }
 @media(max-width:700px) { #formularioFamilia .fila { grid-template-columns: minmax(0,1fr); gap: 20px; } }
+
+/* Un valor y su unidad, dentro del mismo campo de edad. */
+#formulario .edad-controles { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
+#formulario .edad-controles > :is(input,select) { width: 100%; min-width: 0; }

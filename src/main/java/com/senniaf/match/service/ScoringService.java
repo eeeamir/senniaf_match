@@ -92,6 +92,7 @@ public class ScoringService {
                         .reversed().thenComparing(m -> (String)m.get("codigo"))).toList();
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("codigo", n.getCodigoCaso()); result.put("edad", n.getEdad());
+        result.put("unidadEdad", n.getUnidadEdad());
         result.put("escolar", n.getNivelEscolar() == null ? "Sin indicar" : n.getNivelEscolar().name());
         List<String> necesidades = new ArrayList<>();
         necesidades.add(n.getNecesidadesApoyo() == null ? "Evaluar apoyos" : n.getNecesidadesApoyo());
@@ -120,7 +121,10 @@ public class ScoringService {
         Map<String, String> estados = new LinkedHashMap<>();
         boolean edadConocida = n.getEdad() != null && f.getEdadMinimaAceptada() != null && f.getEdadMaximaAceptada() != null
                 && f.getEdadMinimaAceptada() <= f.getEdadMaximaAceptada();
-        boolean edadDentro = edadConocida && n.getEdad() >= f.getEdadMinimaAceptada() && n.getEdad() <= f.getEdadMaximaAceptada();
+        // El rango familiar se expresa en años cumplidos; todos los menores de un año
+        // pertenecen al tramo 0, sin sustituir su edad ni inventar precisión histórica.
+        int aniosCumplidos = n.getEdad() == null ? -1 : n.getUnidadEdad() == com.senniaf.match.model.enums.UnidadEdad.MESES ? 0 : n.getEdad();
+        boolean edadDentro = edadConocida && aniosCumplidos >= f.getEdadMinimaAceptada() && aniosCumplidos <= f.getEdadMaximaAceptada();
         int edad = edadDentro ? p.getEdad() : 0;
         factor(factores, estados, "edad", edad, edadConocida ? "EVALUADO" : "DESCONOCIDO",
                 !edadConocida ? "Información de edad o rango no disponible" : edadDentro ? "Edad dentro del rango declarado" : "Edad fuera del rango declarado");
@@ -233,6 +237,7 @@ public class ScoringService {
         contexto.put("pesoEvaluado", calculo.get("pesoEvaluado"));
         contexto.put("pesos", valoresPesos(p)); contexto.put("factores",calculo.get("f"));
         contexto.put("edadNino",n.getEdad()); contexto.put("edadMinimaFamilia",f.getEdadMinimaAceptada());
+        contexto.put("unidadEdadNino",n.getUnidadEdad());
         contexto.put("edadMaximaFamilia",f.getEdadMaximaAceptada()); contexto.put("version",p.getVersion());
         d.setContextoScoring(codificar(contexto));
         decisiones.save(d);

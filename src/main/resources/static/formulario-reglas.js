@@ -22,6 +22,7 @@ const ReglasPerfil = {
         if(['alergias','condicionesSalud'].includes(nombre)&&typeof actualizarAvisoMedico==='function')actualizarAvisoMedico();
       });
     });
+    ['edad','unidadEdad'].forEach(id=>document.getElementById(id).addEventListener('input',()=>this.actualizarEdad()));
     document.getElementById('nivelEscolar').addEventListener('change',()=>this.refrescarNino(''));
     document.getElementById('gradoEscolarSeleccion').addEventListener('change',()=>this.actualizarGrado());
     document.getElementById('gradoEscolarOtro').addEventListener('input',()=>this.actualizarGrado());
@@ -47,7 +48,15 @@ const ReglasPerfil = {
       detalle.setCustomValidity(detalle.required&&!detalle.value.trim()?'Explica la opción seleccionada.':'');
     }
   },
+  actualizarEdad() {
+    const edad=document.getElementById('edad'),meses=document.getElementById('unidadEdad').value==='MESES',nivel=document.getElementById('nivelEscolar');
+    const historica=edad.dataset.historicaSinMeses==='true'&&!meses;
+    edad.min=meses||historica?'0':'1';edad.max=meses?'11':'17';edad.step='1';
+    edad.setCustomValidity(edad.value!==''&&(!Number.isInteger(Number(edad.value))||Number(edad.value)<Number(edad.min)||Number(edad.value)>Number(edad.max))?(meses?'Indica de 0 a 11 meses.':'Indica de 1 a 17 años.'):'');
+    nivel.setCustomValidity(meses&&nivel.value&&!['NO_ESCOLARIZADO','INFORMACION_NO_DISPONIBLE'].includes(nivel.value)?'Para menores de un año, indica «No escolarizado» o «Información no disponible».':'');
+  },
   refrescarNino(gradoGuardado) {
+    this.actualizarEdad();
     const nivel=document.getElementById('nivelEscolar').value,grado=document.getElementById('gradoEscolar'),selector=document.getElementById('gradoEscolarSeleccion');
     const previo=gradoGuardado===undefined?grado.value:gradoGuardado||'';
     if(gradoGuardado==='')document.getElementById('gradoEscolarOtro').value='';

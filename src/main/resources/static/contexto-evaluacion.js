@@ -39,13 +39,13 @@ const ContextoPsicologico={
   const ejemplo=await EjemplosDemo.siguiente('psicologico');
   const form=document.getElementById('formEvaluacion');
   if(!Profesionales.formulariosBase.has(form))Profesionales.marcarGuardado(form);
-  const edad=expediente.edad;
+  const edad=expediente.unidadEdad==='MESES'?0:expediente.edad;
   const etapa=edad<6?'Observar el juego, la comunicación, la exploración y la respuesta a las figuras de cuidado, de acuerdo con su etapa de desarrollo.':edad<12?'Explorar sus actividades de juego, las relaciones con pares y la experiencia escolar de acuerdo con el nivel registrado.':'Dar espacio a su participación, sus intereses, la autonomía progresiva y las expectativas sobre los cambios de cuidado.';
   const escolar=expediente.nivelEscolar==='NO_ESCOLARIZADO'?'El expediente indica que no está escolarizado; no corresponde atribuirle rendimiento académico.':`Escolaridad registrada: ${Profesionales.etiqueta(expediente.nivelEscolar)}. No se presume un nivel por la edad.`;
   const hermanos=expediente.tieneHermanos==='SI'?`El expediente registra ${expediente.cantidadHermanos??'una cantidad pendiente de confirmar de'} hermanos; revisar los vínculos y las orientaciones autorizadas.`:expediente.tieneHermanos==='NO'?'El expediente indica que no tiene hermanos.':'La información sobre hermanos está pendiente; debe verificarse antes de extraer conclusiones.';
   const apoyo=expediente.necesidadesApoyo||'Completar con el equipo la información sobre apoyos requeridos.';
   const valores={
-   evaluacionPsicologica:`Ejemplo para ${expediente.codigoCaso}, de ${edad} años. Se propone revisar los siguientes aspectos: ${ejemplo.foco}. ${etapa} ${escolar}`,
+   evaluacionPsicologica:`Ejemplo para ${expediente.codigoCaso}, de ${Profesionales.edad(expediente)}. Se propone revisar los siguientes aspectos: ${ejemplo.foco}. ${etapa} ${escolar}`,
    observacionesPsicologicas:`Revisar las respuestas durante actividades cotidianas y diferenciar la conducta observada de su interpretación. ${hermanos} Las observaciones de este ejemplo deben ajustarse a lo efectivamente registrado por el profesional.`,
    hallazgosProfesionales:`La información del expediente orienta la revisión de ${ejemplo.foco}. Necesidades de apoyo documentadas: ${apoyo} No se infieren diagnósticos ni antecedentes adicionales a partir de estos datos.`,
    recomendacionesPsicologicas:`${ejemplo.orientacion} ${etapa} Coordinar las orientaciones con el seguimiento social y de salud ya documentado.`

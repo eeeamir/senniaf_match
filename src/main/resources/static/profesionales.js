@@ -43,6 +43,12 @@ const Profesionales = {
     const etiquetas={NO_APLICA:'No aplica',NO_EVALUADO:'No evaluado',AUN_NO_EVALUADO:'Aún no evaluado',INFORMACION_INSUFICIENTE:'Información insuficiente',INFORMACION_NO_DISPONIBLE:'Información no disponible',NINGUNA_DE_LAS_ANTERIORES:'Ninguna de las anteriores',SI:'Sí',NO:'No',NO_SABE:'No se sabe',NINGUNA_CONOCIDA:'Ninguna conocida',NINGUNA_IDENTIFICADA:'Ninguna identificada',NINGUNO_IDENTIFICADO:'Ninguno identificado',TEA:'TEA (autismo)',TDAH:'TDAH',DESACTIVACION:'Desactivación',REACTIVACION:'Reactivación',PENDIENTE:'Pendiente',APROBADA:'Aprobada',RECHAZADA:'Rechazada',ACEPTADA:'Propuesta aceptada',DESCARTADA:'Propuesta descartada',REEVALUACION:'Reevaluación solicitada'};
     return etiquetas[valor] || String(valor).toLocaleLowerCase('es').replaceAll('_',' ').replace(/^./,c=>c.toLocaleUpperCase('es'));
   },
+  edad(p) {
+    if(p.edad==null)return 'Sin información';
+    if(p.unidadEdad!=='MESES'&&Number(p.edad)===0)return 'Menor de un año (meses no registrados)';
+    const unidad=p.unidadEdad==='MESES'?(Number(p.edad)===1?'mes':'meses'):(Number(p.edad)===1?'año':'años');
+    return `${p.edad} ${unidad}`;
+  },
   estado(p) { return p.cierrePorAdopcion?'Cierre por adopción':p.bajaLogica?'Fuera del Match':p.perfilCompleto?'Disponible para análisis':'Pendiente de información'; },
   encabezado(titulo,texto,icono='carpeta') {
     return `<section class="hero"><h1>${limpiarHtml(titulo)}</h1><p>${limpiarHtml(texto)}</p><span class="pro-hero-icono" aria-hidden="true">${this.icono(icono)}</span></section>`;
@@ -138,7 +144,7 @@ const Profesionales = {
   },
   errorCampo(campo,mensaje) { CamposFormulario.error(campo,mensaje); },
   validarFormulario(form) { return CamposFormulario.revisar(form); },
-  erroresServidor(errores) {const campos={habilidadesCoherentes:'habilidadesDetalle',gustosCoherentes:'gustosDetalle',personalidadCoherente:'personalidadDetalle',alergiasCoherentes:'alergiasDetalle',condicionesSaludCoherentes:'condicionesSaludDetalle',hermanosCoherentes:'cantidadHermanos',escolaridadCoherente:'rendimientoAcademico',hogarCoherente:'especificacionHogar',redApoyoCoherente:'notaRedApoyo',rangoEdadCoherente:'edadMaximaAceptada',disposicionHermanosCoherente:'notaHermanos',capacidadesCoherentes:'notaCondicionesSalud'};Object.entries(errores||{}).forEach(([id,mensaje])=>{const c=document.getElementById(campos[id]||id);if(c)this.errorCampo(c,mensaje);});},
+  erroresServidor(errores) {const campos={edadCoherente:'edad',habilidadesCoherentes:'habilidadesDetalle',gustosCoherentes:'gustosDetalle',personalidadCoherente:'personalidadDetalle',alergiasCoherentes:'alergiasDetalle',condicionesSaludCoherentes:'condicionesSaludDetalle',hermanosCoherentes:'cantidadHermanos',escolaridadCoherente:'rendimientoAcademico',hogarCoherente:'especificacionHogar',redApoyoCoherente:'notaRedApoyo',rangoEdadCoherente:'edadMaximaAceptada',disposicionHermanosCoherente:'notaHermanos',capacidadesCoherentes:'notaCondicionesSalud'};Object.entries(errores||{}).forEach(([id,mensaje])=>{const c=document.getElementById(campos[id]||id);if(c)this.errorCampo(c,mensaje);});},
   organizarFormulario() {
     const form=document.getElementById('formulario');if(!form)return;
     const iconos=['persona','escuela','estrella','personas','salud'];

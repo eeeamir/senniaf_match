@@ -57,6 +57,7 @@ public class PerfilNinoController {
                     Map<String, Object> resumen = new LinkedHashMap<>();
                     resumen.put("codigoCaso", perfil.getCodigoCaso());
                     resumen.put("edad", perfil.getEdad());
+                    resumen.put("unidadEdad", perfil.getUnidadEdad());
                     resumen.put("nivelEscolar", perfil.getNivelEscolar());
                     resumen.put("perfilCompleto", perfil.isPerfilCompleto());
                     resumen.put("alertaMedica", perfil.isAlertaMedica());
@@ -66,7 +67,9 @@ public class PerfilNinoController {
                     resumen.put("psicologoAsignado", perfil.getPsicologoAsignado());
                     resumen.put("bajaLogica", perfil.isBajaLogica());
                     resumen.put("cierrePorAdopcion", perfil.isCierrePorAdopcion());
-                    resumen.put("solicitudesPendientes", service.numeroSolicitudesPendientes(perfil));
+                    var pendientes=service.resumenSolicitudesPendientes(perfil);
+                    resumen.put("solicitudesPendientes", pendientes.size());
+                    resumen.put("solicitudesPendientesDetalle", pendientes);
                     return resumen;
                 })
                 .toList();

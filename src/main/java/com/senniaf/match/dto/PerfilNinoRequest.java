@@ -62,6 +62,22 @@ public class PerfilNinoRequest {
     @JsonDeserialize(using=EnteroEstricto.class)
     private Integer edad;
 
+    @NotNull(message="Selecciona la unidad de edad")
+    private com.senniaf.match.model.enums.UnidadEdad unidadEdad = com.senniaf.match.model.enums.UnidadEdad.ANIOS;
+    public com.senniaf.match.model.enums.UnidadEdad getUnidadEdad() { return unidadEdad; }
+    public void setUnidadEdad(com.senniaf.match.model.enums.UnidadEdad valor) { unidadEdad=valor; }
+
+    @JsonIgnore @AssertTrue(message="Indica de 1 a 17 años o de 0 a 11 meses, según la unidad seleccionada")
+    public boolean isEdadCoherente() {
+        // El servicio permite 0 años únicamente si conserva ese dato histórico
+        // del mismo expediente; las altas siguen exigiendo la unidad y su rango.
+        return edad == null || unidadEdad == null || unidadEdad.admite(edad) || esEdadHistoricaSinMeses();
+    }
+    @JsonIgnore
+    public boolean esEdadHistoricaSinMeses() {
+        return Integer.valueOf(0).equals(edad) && unidadEdad == com.senniaf.match.model.enums.UnidadEdad.ANIOS;
+    }
+
     @NotNull(message = "El nivel escolar es obligatorio")
     private NivelEscolar nivelEscolar;
 
@@ -303,9 +319,11 @@ public class PerfilNinoRequest {
             && (alergias == null || !alergias.contains(Alergia.ALIMENTARIA) || alergiasDetalle != null && !alergiasDetalle.isBlank()); }
     @JsonIgnore @AssertTrue(message="Revisa las condiciones de salud y describe «Otra» cuando corresponda")
     public boolean isCondicionesSaludCoherentes() { return seleccionValida(condicionesSalud, "NINGUNA_CONOCIDA", "OTRA", condicionesSaludDetalle); }
-    @JsonIgnore @AssertTrue(message="Indica el rendimiento cuando corresponda; para un niño no escolarizado utiliza «No aplica»")
+    @JsonIgnore @AssertTrue(message="Revisa el nivel y el rendimiento escolar; para menores de un año indica «No escolarizado» o «Información no disponible», y para un niño no escolarizado utiliza «No aplica»")
     public boolean isEscolaridadCoherente() {
         if (nivelEscolar == null) return true;
+        if (unidadEdad == com.senniaf.match.model.enums.UnidadEdad.MESES
+                && nivelEscolar != NivelEscolar.NO_ESCOLARIZADO && nivelEscolar != NivelEscolar.INFORMACION_NO_DISPONIBLE) return false;
         if (nivelEscolar == NivelEscolar.NO_ESCOLARIZADO)
             return (rendimientoAcademico == null || rendimientoAcademico == RendimientoAcademico.NO_APLICA)
                     && (gradoEscolar == null || gradoEscolar.isBlank() || "No aplica".equalsIgnoreCase(gradoEscolar.strip()));
@@ -315,7 +333,7 @@ public class PerfilNinoRequest {
         return rendimientoAcademico != null && rendimientoAcademico != RendimientoAcademico.NO_APLICA
                 && (nivelEscolar != NivelEscolar.OTRO || gradoEscolar != null && !gradoEscolar.isBlank());
     }
-    @JsonIgnore @AssertTrue(message="Revisa la cantidad de hermanos: indica al menos uno si seleccionaste «Sí» y cero o vacío si seleccionaste «No»; si no se sabe, deja la cantidad vacía")
+    @JsonIgnore @AssertTrue(message="Indica al menos un hermano si seleccionaste «Sí»; si seleccionaste «No», indica cero o deja vacío; si aún no se ha confirmado, deja la cantidad vacía")
     public boolean isHermanosCoherentes() {
         if (tieneHermanos == SiNo.SI) return cantidadHermanos != null && cantidadHermanos > 0;
         if (tieneHermanos == SiNo.NO) return cantidadHermanos == null || cantidadHermanos == 0;
@@ -333,6 +351,11 @@ public class PerfilNinoRequest {
 
     /** Las llamadas internas y la carga de demostración conservan las mismas reglas de coherencia. */
     public void validarCoherencia() {
+        validarCoherencia(false);
+    }
+    public void validarCoherencia(boolean conservarEdadHistorica) {
+        if (unidadEdad == null || !(unidadEdad.admite(edad) || conservarEdadHistorica && esEdadHistoricaSinMeses()))
+            throw new com.senniaf.match.web.CampoInvalidoException("edad","Indica de 1 a 17 años o de 0 a 11 meses, según la unidad seleccionada",false);
         if (!isEscolaridadCoherente() || !isHermanosCoherentes() || !isHabilidadesCoherentes()
                 || !isGustosCoherentes() || !isPersonalidadCoherente() || !isAlergiasCoherentes() || !isCondicionesSaludCoherentes())
             throw new IllegalArgumentException("Revisa la escolaridad, los hermanos y las selecciones excluyentes; explica las opciones «Otro»");
