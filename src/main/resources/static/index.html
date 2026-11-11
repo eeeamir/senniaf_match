@@ -36,12 +36,12 @@
     <!-- INICIO DE SESIÓN -->
     <section class="vista" id="vistaLogin">
       <h1>Bienvenido</h1>
-      <p class="sub">Ingresa con tu cédula o tu ID de funcionario</p>
+      <p class="sub">Ingresa con tu documento, correo o ID de funcionario</p>
       <form id="formLogin" novalidate>
-        <label for="loginId">Cédula o ID de funcionario</label>
-        <input id="loginId" autocomplete="username" placeholder="Ej. 8-123-456 o TS-001" required>
+        <label for="loginId">Documento, correo o ID de funcionario</label>
+        <input id="loginId" autocomplete="username" placeholder="Documento, correo o TS-001" maxlength="160" required>
         <label for="loginPassword">Contraseña</label>
-        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Tu contraseña" required aria-describedby="avisoCopiaPassword">
+        <input id="loginPassword" type="password" maxlength="72" autocomplete="current-password" placeholder="Tu contraseña" required aria-describedby="avisoCopiaPassword">
         <button type="button" class="enlace" id="mostrarPassword" aria-pressed="false">Mostrar contraseña</button>
         <p class="ayuda" id="avisoCopiaPassword" role="status" hidden></p>
         
@@ -55,20 +55,28 @@
     <!-- REGISTRO -->
     <section class="vista" id="vistaRegistro" hidden>
       <h1>Crea tu cuenta</h1>
-      <p class="sub">Para familias que desean iniciar el proceso</p>
+      <p class="sub">Para familias que desean iniciar el proceso. El registro de acceso es distinto de la evaluación de idoneidad.</p>
       <form id="formRegistro" novalidate>
         <div class="dos">
           <div><label for="nombre">Nombre</label>
-            <input id="nombre" autocomplete="given-name" required></div>
+            <input id="nombre" autocomplete="given-name" maxlength="80" required></div>
           <div><label for="apellido">Apellido</label>
-            <input id="apellido" autocomplete="family-name" required></div>
+            <input id="apellido" autocomplete="family-name" maxlength="80" required></div>
         </div>
-        <label for="cedula">Cédula</label>
-        <input id="cedula" placeholder="Ej. 8-123-456" required>
+        <label for="tipoDocumento">Tipo de documento</label>
+        <select id="tipoDocumento" required>
+          <option value="">Selecciona…</option>
+          <option value="CEDULA_PANAMENA">Cédula panameña</option>
+          <option value="CEDULA_RESIDENTE">Cédula de extranjero residente</option>
+          <option value="PASAPORTE">Pasaporte</option>
+        </select>
+        <label for="numeroDocumento">Número de documento</label>
+        <input id="numeroDocumento" maxlength="30" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Selecciona el tipo de documento" aria-describedby="ayudaDocumento" required>
+        <span id="ayudaDocumento" class="ayuda">Selecciona el tipo para consultar un ejemplo.</span>
         <label for="correo">Correo electrónico</label>
-        <input id="correo" type="email" autocomplete="email" placeholder="nombre@correo.com" required>
+        <input id="correo" type="email" maxlength="160" autocomplete="email" placeholder="nombre@correo.com" required>
         <label for="password">Contraseña</label>
-        <input id="password" type="password" autocomplete="new-password" minlength="8" placeholder="Mínimo 8 caracteres" required>
+        <input id="password" type="password" maxlength="72" autocomplete="new-password" minlength="8" placeholder="Mínimo 8 caracteres" required>
         
         <button class="boton bloque" type="submit">Enviar código</button>
         <div class="mensaje" id="msgRegistro" role="alert"></div>
@@ -98,56 +106,70 @@
   </main>
 </div>
 
+<footer class="pie-pagina">© 2026 SENNIAF Match · Proyecto académico</footer>
+
 <script src="senniaf.js"></script>
 <script>
-const FUNCIONARIO = /^[A-Z]{2,3}-\d{2,}$/;
-const CEDULA = /^(PE|E|N|\d{1,2}(AV|PI)?)-\d{1,4}-\d{1,6}$/;
+const DOCUMENTOS = {
+ CEDULA_PANAMENA:{formato:/^(?:(?:1[0-3]|[1-9])(?:AV|PI)?-\d{1,4}-\d{1,6}|(?:PE|P|N)-\d{1,4}-\d{1,6})$/,ejemplo:'Ej. 8-123-456',ayuda:'Incluye los guiones. También se admiten las series PE, P, N, AV y PI.'},
+ CEDULA_RESIDENTE:{formato:/^E-\d{1,4}-\d{1,8}$/,ejemplo:'Ej. E-8-123456',ayuda:'Escribe el prefijo E y los bloques separados por guiones.'},
+ PASAPORTE:{formato:/^[A-Z0-9]{3,30}$/,ejemplo:'Ej. PA1234567',ayuda:'Entre 3 y 30 letras o números, sin espacios ni guiones.'}
+};
+const NOMBRE=/^[\p{L}][\p{L}\p{M} .'‘’·‐‑-]*$/u;
 const $ = (id) => document.getElementById(id);
-const normalizar = (v) => v.trim().toUpperCase().replace(/\s+/g, '');
+const normalizar = (v) => v.trim().toUpperCase();
 const mostrar = (id) => { document.querySelectorAll('.vista').forEach(v => v.hidden = v.id !== id); const i=$(id).querySelector('input'); if(i)i.focus(); };
 const mensaje = (id,texto,tipo='error') => { $(id).className='mensaje '+tipo; $(id).textContent=texto; };
-const marcar = (input,malo) => input.setAttribute('aria-invalid', malo?'true':'false');
+const marcar = (input,malo) => CamposFormulario.error(input,malo?'Revisa este dato.':'');
+document.querySelectorAll('form').forEach(f=>CamposFormulario.iniciar(f));
+$('tipoDocumento').addEventListener('change',()=>{const d=DOCUMENTOS[$('tipoDocumento').value];$('numeroDocumento').placeholder=d?.ejemplo||'Selecciona el tipo de documento';$('ayudaDocumento').textContent=d?.ayuda||'Selecciona el tipo para consultar un ejemplo.';CamposFormulario.error($('numeroDocumento'),'');});
 document.querySelectorAll('[data-ir]').forEach(b=>b.addEventListener('click',()=>mostrar(b.dataset.ir)));
 
 let pendiente=null, temporizador=null;
 function mostrarCodigoDemo(codigo){ $('codigoDemo').textContent=codigo || 'Enviado por correo'; $('avisoDemo').hidden=!codigo; }
 function enfriarReenvio(){ let s=30,b=$('btnReenviar'); b.disabled=true; clearInterval(temporizador); temporizador=setInterval(()=>{b.textContent=s>0?`Reenviar código (${s--}s)`:'Reenviar código';if(s<0){b.disabled=false;clearInterval(temporizador);}},1000); }
-async function api(url,options){ const r=await fetch(url,options); let d={}; try{d=await r.json();}catch(_){ } if(!r.ok) throw new Error(d.mensaje || 'No se pudo completar la operación.'); return d; }
+async function api(url,options){ const r=await fetch(url,options); let d={}; try{d=await r.json();}catch(_){ } if(!r.ok){const error=new Error(d.mensaje || 'No se pudo completar la operación.');error.errores=d.errores;throw error;} return d; }
 
 $('formLogin').addEventListener('submit',async e=>{
- e.preventDefault(); const id=normalizar($('loginId').value), password=$('loginPassword').value;
- if(!id||!password) return mensaje('msgLogin','Escribe tu cédula/ID y contraseña.');
+ e.preventDefault(); const form=e.currentTarget; if(form.querySelector('[type=submit]').disabled)return; const id=normalizar($('loginId').value), password=$('loginPassword').value;
+ if(!CamposFormulario.revisar(form))return;
+ if(new TextEncoder().encode(password).length>72){CamposFormulario.error($('loginPassword'),'La contraseña admite hasta 72 bytes. Revisa el texto copiado.');return;}
+ const boton=form.querySelector('[type=submit]');boton.disabled=true;
  try{
    const sesion=await api('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identificador:id,password})});
    sessionStorage.setItem('senniaf.sesion',JSON.stringify(sesion));
    const destino=sesion.tipo==='FAMILIA'?await Sesion.destinoFamilia(sesion):Sesion.inicio(sesion); location.href=destino;
- }catch(err){ marcar($('loginId'),true); mensaje('msgLogin',err.message); }
+ }catch(err){ CamposFormulario.servidor(form,err.errores,{identificador:'loginId',password:'loginPassword'});mensaje('msgLogin',err.message); }finally{boton.disabled=false;}
 });
 
 $('formRegistro').addEventListener('submit',async e=>{
- e.preventDefault();
- const v={nombre:$('nombre').value.trim(),apellido:$('apellido').value.trim(),cedula:normalizar($('cedula').value),correo:$('correo').value.trim().toLowerCase(),password:$('password').value};
- const errores={nombre:!v.nombre,apellido:!v.apellido,cedula:!CEDULA.test(v.cedula),correo:!$('correo').validity.valid||!v.correo,password:v.password.length<8};
- Object.keys(errores).forEach(k=>marcar($(k),errores[k]));
- if(errores.nombre||errores.apellido)return mensaje('msgRegistro','Completa tu nombre y apellido.');
- if(errores.cedula)return mensaje('msgRegistro','La cédula no tiene un formato válido. Ejemplo: 8-123-456.');
- if(errores.correo)return mensaje('msgRegistro','Escribe un correo electrónico válido.');
- if(errores.password)return mensaje('msgRegistro','La contraseña debe tener al menos 8 caracteres.');
+ e.preventDefault(); const form=e.currentTarget; if(form.querySelector('[type=submit]').disabled)return;
+ const v={nombre:$('nombre').value.normalize('NFC').trim(),apellido:$('apellido').value.normalize('NFC').trim(),tipoDocumento:$('tipoDocumento').value,numeroDocumento:normalizar($('numeroDocumento').value),correo:$('correo').value.trim().toLowerCase(),password:$('password').value};
+ if(!CamposFormulario.revisar(form))return;
+ const errores={};
+ for(const campo of ['nombre','apellido'])if(!NOMBRE.test(v[campo]))errores[campo]='Usa letras, espacios, tildes, apóstrofos o guiones; no números.';
+ const documento=DOCUMENTOS[v.tipoDocumento];
+ if(!documento)errores.tipoDocumento='Selecciona el tipo de documento.';
+ else if(!documento.formato.test(v.numeroDocumento))errores.numeroDocumento='Revisa el formato. '+documento.ejemplo+'. '+documento.ayuda;
+ if(new TextEncoder().encode(v.password).length>72)errores.password='La contraseña admite hasta 72 bytes; utiliza una combinación más corta.';
+ if(Object.keys(errores).length){CamposFormulario.servidor(form,errores);return mensaje('msgRegistro','Revisa los campos señalados para continuar.');}
+ const boton=form.querySelector('[type=submit]');boton.disabled=true;
  try{
    const d=await api('/api/auth/registro',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(v)});
-   pendiente=v; $('correoDestino').textContent=v.correo; mostrarCodigoDemo(d.codigoDemo); enfriarReenvio(); $('codigo').value=''; $('msgCodigo').className='mensaje'; mostrar('vistaCodigo');
- }catch(err){mensaje('msgRegistro',err.message);}
+   pendiente={identificador:d.identificador||v.numeroDocumento}; $('correoDestino').textContent=v.correo; mostrarCodigoDemo(d.codigoDemo); enfriarReenvio(); $('codigo').value=''; $('msgCodigo').className='mensaje'; mostrar('vistaCodigo');
+ }catch(err){CamposFormulario.servidor(form,err.errores,{documentoValido:'numeroDocumento',cedula:'numeroDocumento'});mensaje('msgRegistro',err.message);}finally{boton.disabled=false;}
 });
 
 $('codigo').addEventListener('input',e=>e.target.value=e.target.value.replace(/\D/g,''));
 $('formCodigo').addEventListener('submit',async e=>{
- e.preventDefault(); const codigo=$('codigo').value; if(codigo.length!==6){marcar($('codigo'),true);return mensaje('msgCodigo','El código tiene 6 dígitos.');}
+ e.preventDefault(); const form=e.currentTarget; if(form.querySelector('[type=submit]').disabled)return; if(!pendiente){mostrar('vistaRegistro');return mensaje('msgRegistro','Completa el registro para recibir un código.');} const codigo=$('codigo').value; if(!/^[0-9]{6}$/.test(codigo)){CamposFormulario.error($('codigo'),'Escribe los seis dígitos del código.');return mensaje('msgCodigo','El código tiene 6 dígitos.');}
+ const boton=form.querySelector('[type=submit]');boton.disabled=true;
  try{
-   const u=await api('/api/auth/verificar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cedula:pendiente.cedula,codigo})});
+   const u=await api('/api/auth/verificar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cedula:pendiente.identificador,codigo})});
    sessionStorage.setItem('senniaf.sesion',JSON.stringify(u)); mensaje('msgCodigo','Correo verificado. Abriendo tu formulario…','exito'); setTimeout(()=>location.href='perfil.html',700);
- }catch(err){marcar($('codigo'),true);mensaje('msgCodigo',err.message);}
+ }catch(err){marcar($('codigo'),true);mensaje('msgCodigo',err.message);}finally{boton.disabled=false;}
 });
-$('btnReenviar').addEventListener('click',async()=>{try{const d=await api('/api/auth/reenviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cedula:pendiente.cedula})});mostrarCodigoDemo(d.codigoDemo);mensaje('msgCodigo',d.mensaje || 'Se envió un código nuevo.','exito');enfriarReenvio();}catch(err){mensaje('msgCodigo',err.message);}});
+$('btnReenviar').addEventListener('click',async()=>{if(!pendiente||$('btnReenviar').disabled)return;$('btnReenviar').disabled=true;try{const d=await api('/api/auth/reenviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cedula:pendiente.identificador})});mostrarCodigoDemo(d.codigoDemo);mensaje('msgCodigo',d.mensaje || 'Se envió un código nuevo.','exito');enfriarReenvio();}catch(err){$('btnReenviar').disabled=false;mensaje('msgCodigo',err.message);}});
 const passwordAcceso=$('loginPassword'),avisoCopia=$('avisoCopiaPassword');
 function advertirCopia(valor) {
  const extra=/\p{Cc}|\p{Cf}/u.test(valor)||/^\s|\s$/u.test(valor)||valor.normalize('NFKC')!==valor;

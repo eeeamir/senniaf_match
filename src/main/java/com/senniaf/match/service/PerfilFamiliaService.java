@@ -33,12 +33,12 @@ public class PerfilFamiliaService {
         String cedula = registradoPor == null ? "" : registradoPor.trim();
 
         if (cedula.isBlank()) {
-            throw new IllegalArgumentException("La cédula del responsable es obligatoria");
+            throw new IllegalArgumentException("El identificador de la persona responsable es obligatorio");
         }
 
         if (repositorio.existsByRegistradoPor(cedula)) {
             throw new IllegalStateException(
-                    "Ya existe un caso de familia registrado con la cédula " + cedula);
+                    "Ya existe un caso de familia registrado con el identificador " + cedula);
         }
 
         String codigoCaso = siguienteCodigoCaso();

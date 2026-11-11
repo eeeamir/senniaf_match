@@ -268,3 +268,9 @@ body {
   .panel { padding-inline: 20px; }
   .vista .dos { grid-template-columns: 1fr; }
 }
+
+body { row-gap: 18px; }
+body > .pie-pagina { width: 100%; padding: 12px 16px; border: 0; background: transparent; font-size: 11px; text-align: center; }
+
+.vista form select { min-height: 46px; width: 100%; }
+#ayudaDocumento { display: block; margin-top: 6px; font-size: 12px; line-height: 1.5; }

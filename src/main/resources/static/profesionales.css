@@ -26,7 +26,7 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .pro-modal-cabecera{display:flex;gap:15px;align-items:center;margin-bottom:16px}.pro-modal-cabecera .pro-simbolo{width:48px;height:48px}.pro-modal-cabecera h2{margin:0;font-size:23px}.pro-modal-contexto{padding:13px 16px;border-radius:13px;background:#f0f6ff;font-size:13px;margin:18px 0}.pro-ajuste-fila{display:grid;grid-template-columns:38px 1fr 100px;gap:12px;align-items:center;padding:12px 0;border-top:1px solid #e4edf9}.pro-ajuste-fila .pro-simbolo{width:36px;height:36px;border-radius:10px}.pro-ajuste-fila input{width:100%;text-align:right}.pro-ajuste-total{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#eff6ff;border-radius:11px;margin:12px 0}.pro-ajuste-total.invalido{background:#fff0f0;color:#ad3545}.pro-resumen-pesos{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:18px}.pro-resumen-pesos th,.pro-resumen-pesos td{padding:8px;border-bottom:1px solid #e3ebf7;text-align:left}
 @media(max-width:760px){.profesional .topbar-in{padding-left:12px}.profesional .topbar-marca{flex-basis:160px}.profesional .topbar-marca img{height:auto;width:160px}.pro-demostracion{display:none}.profesional #formEvaluacion{grid-template-columns:1fr}.pro-informe{padding:16px}.pro-informe-cabecera{align-items:start;flex-wrap:wrap}.pro-cambio-valores{grid-template-columns:1fr}.pro-ajuste-fila{grid-template-columns:32px 1fr 75px;gap:9px}}
 
-.profesional .pie-pagina{display:none}
+.profesional .pie-pagina{display:block}
 
 /* Evita que el buscador fuerce el ancho de su contenedor en pantallas pequeñas. */
 .profesional .pro-buscar{min-width:0;box-sizing:border-box}.profesional .pro-buscar input{flex:1 1 0;width:0}.pro-informe-cabecera h3{display:flex;align-items:center;gap:9px}.pro-informe-cabecera h3 .pro-icono{flex-shrink:0}
@@ -57,3 +57,14 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .profesional #formularioFamilia .grupo-checks { grid-template-columns: repeat(auto-fit,minmax(min(220px,100%),1fr)); gap: 12px; }
 .profesional #formularioFamilia .grupo-checks label { align-items: flex-start; padding: 13px; line-height: 1.5; }
 @media(max-width:420px) { .profesional .grupo-checks { grid-template-columns: minmax(0,1fr); } }
+
+/* Las tarjetas cerradas conservan su altura sin estirarse con la tarjeta vecina. */
+.pro-expedientes-completos { align-items: start; }
+.pro-expedientes-completos > .detalle-grupo { align-self: start; min-width: 0; }
+.profesional .detalle-datos .detalle-con-icono dt { display: flex; align-items: center; gap: 7px; }
+.profesional .detalle-datos .detalle-con-icono dt .pro-icono { width: 16px; height: 16px; flex: 0 0 16px; }
+.profesional .detalle-datos .detalle-con-icono dd { margin-left: 23px; }
+.pro-dialogo .pro-motivo input[type="radio"] { appearance: auto; width: 16px; height: 16px; min-height: 0; flex: 0 0 16px; padding: 0; margin: 2px 0 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; }
+.pro-dialogo .pro-motivo input[type="radio"]:focus-visible { outline: 2px solid #347bd5; outline-offset: 3px; }
+.familia-nota-propuesta { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--suave); line-height: 1.6; }
+.familia-nota-propuesta .pro-icono { width: 16px; height: 16px; flex: 0 0 16px; margin-top: 2px; }

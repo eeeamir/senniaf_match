@@ -8,6 +8,59 @@ const ROLES = {
 const limpiarHtml = (valor) => String(valor ?? '').replace(/[&<>"']/g,
   c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+/* Mensajes junto al control; conserva las respuestas y las descripciones accesibles. */
+const CamposFormulario = {
+  error(campo,mensaje) {
+    if(!campo)return;
+    const grupo=campo.closest('.campo')||campo.parentElement;
+    const id='error-'+(campo.id||campo.closest('[data-grupo]')?.dataset.grupo||campo.name);
+    let aviso=document.getElementById(id);
+    if(!aviso){aviso=document.createElement('span');aviso.id=id;aviso.className='campo-error pro-error-campo';aviso.setAttribute('role','alert');
+      if(campo.closest('.campo'))grupo.append(aviso);else campo.insertAdjacentElement('afterend',aviso);}
+    aviso.textContent=mensaje||'';aviso.hidden=!mensaje;
+    campo.setAttribute('aria-invalid',String(Boolean(mensaje)));
+    const descripciones=new Set((campo.getAttribute('aria-describedby')||'').split(/\s+/).filter(Boolean));
+    if(mensaje)descripciones.add(id);else descripciones.delete(id);
+    if(descripciones.size)campo.setAttribute('aria-describedby',[...descripciones].join(' '));else campo.removeAttribute('aria-describedby');
+    if(mensaje)campo.closest('details')?.setAttribute('open','');
+  },
+  iniciar(form) {
+    if(!form||form.dataset.camposPreparados)return;form.dataset.camposPreparados='true';
+    form.addEventListener('invalid',e=>this.error(e.target,e.target.validationMessage),true);
+    form.addEventListener('input',e=>{const c=e.target;if(!c.matches('input,textarea,select'))return;
+      if(c.dataset.errorBasico){c.setCustomValidity('');delete c.dataset.errorBasico;}
+      this.error(c,'');});
+    form.addEventListener('change',e=>{if(e.target.matches('input,textarea,select'))this.error(e.target,'');});
+  },
+  revisar(form) {
+    this.iniciar(form);
+    form.querySelectorAll('input,textarea,select').forEach(c=>{
+      if(c.disabled||['checkbox','radio','hidden','button','submit'].includes(c.type))return;
+      if(c.dataset.errorBasico){c.setCustomValidity('');delete c.dataset.errorBasico;}
+      let error='';
+      if(c.required&&!c.value.trim())error=c.validity.badInput?'Escribe un número válido.':'Completa este campo.';
+      else if(c.type==='number'&&c.value!==''){
+        if(c.validity.rangeUnderflow)error='Usa un valor igual o mayor que '+c.min+'.';
+        else if(c.validity.rangeOverflow)error='Usa un valor igual o menor que '+c.max+'.';
+        else if(!/^[0-9]+$/.test(c.value))error='Usa un número entero, sin letras ni decimales.';
+      }
+      if(error){c.setCustomValidity(error);c.dataset.errorBasico='true';}
+      else if(c.validity.valid)this.error(c,'');
+    });
+    const valido=form.checkValidity();
+    if(!valido)form.reportValidity();
+    return valido;
+  },
+  servidor(form,errores,mapeo={}) {
+    let primero=null;
+    Object.entries(errores||{}).forEach(([id,mensaje])=>{
+      const c=document.getElementById(mapeo[id]||id);
+      if(c&&form.contains(c)){this.error(c,mensaje);primero=primero||c;}
+    });
+    primero?.focus();
+  }
+};
+
 const FACTORES = {
   edad:     { n: 'Rango de edad', max: 20, origen: 'Preferencia declarada' },
   hermanos: { n: 'Vínculos entre hermanos', max: 25, origen: 'Necesidad del niño o niña' },

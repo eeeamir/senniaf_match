@@ -672,15 +672,15 @@
           <div class="campo">
 
             <label for="cedulaFamilia">
-              Cédula del responsable <span class="req">*</span>
+              Documento o identificador del responsable <span class="req">*</span>
             </label>
 
             <input
               id="cedulaFamilia"
               name="cedulaFamilia"
               type="text"
-              inputmode="numeric"
-              maxlength="20"
+              inputmode="text"
+              maxlength="40"
               placeholder="Ej. 8-123-456"
               required
             >
@@ -1089,7 +1089,7 @@
      PIE DE PÁGINA
      ===================================================== -->
 
-<footer class="pie-pagina">Uso institucional · Datos protegidos</footer>
+<footer class="pie-pagina">© 2026 SENNIAF Match · Proyecto académico</footer>
 
 
 
@@ -1323,7 +1323,7 @@ formulario.addEventListener('submit', async (evento) => {
     contextoCultural: document.getElementById('contextoCultural').value
   };
 
-  if (!formulario.checkValidity()) {
+  if (!Profesionales.validarFormulario(formulario)) {
     formulario.querySelectorAll(':invalid').forEach(c=>c.closest('details')?.setAttribute('open',''));
     formulario.reportValidity();
     btnRegistrar.disabled = false;
@@ -1465,7 +1465,7 @@ formularioFamilia.addEventListener('submit', async (evento) => {
     notaCondicionesSalud: document.getElementById('notaCondicionesSalud').value,
   };
 
-  if (!formularioFamilia.checkValidity()) {
+  if (!Profesionales.validarFormulario(formularioFamilia)) {
     formularioFamilia.reportValidity();
     btnRegistrarFamilia.disabled = false;
     btnRegistrarFamilia.textContent = textoEnviarFamilia;
@@ -1498,10 +1498,6 @@ formularioFamilia.addEventListener('submit', async (evento) => {
         (datos.perfilCompleto ? '' : ' · el perfil quedó marcado como incompleto.') +
         '<br><small>Abriendo tu motor de match…</small>';
       setTimeout(() => { location.href = 'match.html'; }, 1600);
-
-    } else if (respuesta.status === 409) {
-
-      location.href = 'match.html';
 
     } else if (respuesta.status === 403) {
 

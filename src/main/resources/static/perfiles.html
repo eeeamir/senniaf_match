@@ -86,7 +86,7 @@
 
   <section id="panelAuditoria" class="tarjeta" hidden><h2>Historial de cambios</h2><ul id="historialCaso"></ul></section>
 </main>
-<footer class="pie-pagina">Uso institucional · Datos protegidos</footer>
+<footer class="pie-pagina">© 2026 SENNIAF Match · Proyecto académico</footer>
 
 <script src="senniaf.js"></script>
 <script src="profesionales.js"></script>
@@ -204,7 +204,7 @@ document.getElementById('cargarEjemploPsicologico').addEventListener('click',()=
 document.getElementById('formEvaluacion').addEventListener('submit', async e => {
   e.preventDefault();
   ContextoPsicologico.actualizar();
-  if(!e.currentTarget.reportValidity())return;
+  if(!Profesionales.validarFormulario(e.currentTarget))return;
   const boton = document.getElementById('guardarEvaluacion');
   const estado = document.getElementById('estadoEvaluaciones');
   boton.disabled = true;
@@ -231,8 +231,8 @@ document.getElementById('formEvaluacion').addEventListener('submit', async e => 
 });
 
 const CAMPOS_NINO = {
-  numeroExpedienteInstitucional: 'Referencia del expediente',
-  codigoCaso:'Código de caso', edad:'Edad', nivelEscolar:'Nivel escolar', gradoEscolar:'Grado escolar',
+  numeroExpedienteInstitucional: 'Número de expediente institucional',
+  codigoCaso:'Código del expediente', edad:'Edad', nivelEscolar:'Nivel escolar', gradoEscolar:'Grado escolar',
   rendimientoAcademico:'Rendimiento académico', habilidades:'Habilidades', habilidadesDetalle:'Detalle de habilidades',
   gustos:'Intereses', gustosDetalle:'Detalle de intereses', personalidad:'Rasgos de personalidad', personalidadDetalle:'Detalle de personalidad',
   alergias:'Alergias', alergiasDetalle:'Detalle de alergias', intoleranciaLactosa:'Intolerancia a la lactosa',
@@ -243,7 +243,7 @@ const CAMPOS_NINO = {
   perfilCompleto:'Perfil completo', alertaMedica:'Alerta médica', bajaLogica:'Excluido del Match (seguimiento permitido)'
 };
 const CAMPOS_FAMILIA = {
-  codigoCaso:'Código de caso', tipoFamilia:'Estructura familiar', especificacionHogar:'Composición del hogar (otra)', notaEstructuraHogar:'Notas del hogar', redApoyo:'Red de apoyo',
+  codigoCaso:'Código del expediente', tipoFamilia:'Estructura familiar', especificacionHogar:'Composición del hogar (otra)', notaEstructuraHogar:'Notas del hogar', redApoyo:'Red de apoyo',
   notaRedApoyo:'Notas de apoyo', provincia:'Provincia', disponibilidadViaje:'Disponibilidad de viaje', notaDistancia:'Notas de distancia',
   edadMinimaAceptada:'Edad mínima', edadMaximaAceptada:'Edad máxima', notaRangoEdad:'Notas del rango de edad',
   disposicionHermanos:'Disposición a hermanos', notaHermanos:'Notas de hermanos', condicionesPuedeAcompanarHoy:'Salud: apoyo actual',
@@ -251,6 +251,7 @@ const CAMPOS_FAMILIA = {
   registradoPor:'Responsable familiar', fechaRegistro:'Fecha de registro', perfilCompleto:'Entrevista completa',
   reevaluacionPendiente:'Reevaluación pendiente', numeroReevaluaciones:'Reevaluaciones completadas'
 };
+const ICONOS_REGISTRO = {codigoCaso:'carpeta',numeroExpedienteInstitucional:'carpeta',registradoPor:'persona',fechaRegistro:'calendario',trabajadorSocialAsignado:'credencial',psicologoAsignado:'psicologia'};
 function detalleCampos(datos, campos) {
   return '<dl class="detalle-datos">' + Object.entries(campos).filter(([k])=>k!=='especificacionHogar'||datos.tipoFamilia==='OTRA').map(([k, titulo]) => {
     let valor = datos[k];
@@ -260,7 +261,7 @@ function detalleCampos(datos, campos) {
     if (Array.isArray(valor)) valor = valor.length?valor.map(v=>Profesionales.etiqueta(v)).join(', '):['condicionesPuedeAcompanarHoy','condicionesConApoyo'].includes(k)?'Sin condiciones específicas declaradas':'Sin opciones registradas';
     if (k==='fechaRegistro' && valor) valor=Profesionales.fecha(valor);
     if (typeof valor==='string' && /^[A-Z_]+$/.test(valor)) valor=Profesionales.etiqueta(valor);
-    return `<div><dt>${limpiarHtml(titulo)}</dt><dd>${limpiarHtml(valor == null || valor === '' ? 'Sin información' : String(valor))}</dd></div>`;
+    return `<div${ICONOS_REGISTRO[k]?' class="detalle-con-icono"':''}><dt>${ICONOS_REGISTRO[k]?Profesionales.icono(ICONOS_REGISTRO[k]):''}${limpiarHtml(titulo)}</dt><dd>${limpiarHtml(valor == null || valor === '' ? 'Sin información' : String(valor))}</dd></div>`;
   }).join('') + '</dl>';
 }
 async function leerApi(ruta, opciones = {}) {
@@ -351,13 +352,17 @@ document.getElementById('historialSolicitudes').addEventListener('click',e=>{
   const boton=e.target.closest('[data-resolver]');if(!boton)return;
   const s=solicitudesDelCaso.find(s=>String(s.id)===boton.dataset.resolver);if(!s)return;
   const aprobar=boton.dataset.aprobar==='si',adopcion=s.categoria==='ADOPCION_FORMALIZADA',reactivar=s.tipo==='REACTIVACION';
-  const opciones=!aprobar?[
+  const opciones=adopcion&&!aprobar?[
+    ['INFORMACION_INSUFICIENTE','Falta información o documentación para aprobar el cierre.','Después de revisar la solicitud, se determinó que falta información o documentación para confirmar la adopción formalizada. Por este motivo, no se aprueba el cierre de participación y el expediente conserva su estado actual'],
+    ['NO_PROCEDE','La solicitud no corresponde al estado actual del expediente.','Al revisar la solicitud y el expediente, se identificó que su estado actual no permite tramitar el cierre solicitado. Por ello, se rechaza la solicitud y se mantiene el estado del expediente'],
+    ['OTRO','Otro motivo.','']
+  ]:!aprobar?[
     ['INFORMACION_INSUFICIENTE','Información insuficiente','La documentación disponible no permite autorizar el cambio solicitado. El expediente conserva su estado y se recomienda completar la información.'],
     ['NO_PROCEDE','La solicitud no procede en el estado actual','Después de revisar el estado del expediente y la solicitud, no se considera procedente el cambio. Se conserva el estado actual para su seguimiento.'],
     ['OTRO','Otro','']
   ]:adopcion?[
-    ['DOCUMENTACION','Formalización documentada','Se revisó la documentación de la adopción formalizada y se autoriza el cierre de participación en el Match. Se conserva el historial y no procede una reactivación ordinaria.'],
-    ['OTRO','Otro','']
+    ['DOCUMENTACION','Se verificó la documentación de la adopción.','Se revisó la documentación que confirma la adopción formalizada. Por este motivo, se aprueba el cierre de participación del expediente en SENNIAF Match. El historial se conservará y no procederá su reactivación ordinaria'],
+    ['OTRO','Otro motivo.','']
   ]:reactivar?[
     ['REVISION_COMPLETADA','Revisión del expediente completada','Se completó la revisión del expediente y se autoriza su reactivación para el análisis de compatibilidad, sujeta al cumplimiento de los requisitos del sistema.'],
     ['CONDICIONES_RESTABLECIDAS','Condiciones de participación restablecidas','La información revisada permite autorizar la reactivación del expediente, al haberse restablecido las condiciones para participar en el análisis de compatibilidad.'],
@@ -368,7 +373,8 @@ document.getElementById('historialSolicitudes').addEventListener('click',e=>{
     ['OTRO','Otro','']
   ];
   const confirmacion=!aprobar?'¿Estás seguro de que deseas rechazar esta solicitud? El estado del expediente se mantendrá sin cambios.':adopcion?'¿Deseas cerrar la participación de este expediente por adopción formalizada? Se conservará el historial y no se permitirá una reactivación ordinaria.':reactivar?'¿Deseas reactivar este expediente? Volverá a estar disponible para el análisis de compatibilidad, siempre que cumpla los requisitos del sistema.':'¿Estás seguro de que deseas desactivar este expediente? Dejará de participar en nuevas propuestas de compatibilidad hasta que se autorice su reactivación.';
-  Profesionales.justificar({titulo:aprobar?'Aprobar solicitud':'Rechazar solicitud',contexto:s.codigoCaso+' · '+(adopcion?'Cierre por adopción formalizada':Profesionales.etiqueta(s.tipo)),opciones,confirmacion,
+  Profesionales.justificar({titulo:adopcion?(aprobar?'Aprobar solicitud de cierre':'Rechazar solicitud de cierre'):(aprobar?'Aprobar solicitud':'Rechazar solicitud'),
+    ...(adopcion?{instruccion:aprobar?'Selecciona el motivo de aprobación':'Selecciona el motivo de rechazo',textoRevisar:aprobar?'Revisar aprobación':'Revisar rechazo',tituloConfirmacion:aprobar?'Confirmar aprobación':'Confirmar rechazo',textoConfirmar:aprobar?'Confirmar aprobación':'Confirmar rechazo',ayuda:aprobar?'Puedes editar la justificación. Antes de aprobar, verifica la documentación que confirma la adopción, también si eliges «Otro motivo».':'Puedes editar la justificación. Si eliges «Otro motivo», escribe tu propia explicación.'}:{}),contexto:s.codigoCaso+' · '+(adopcion?'Cierre por adopción formalizada':Profesionales.etiqueta(s.tipo)),opciones,confirmacion,
     alConfirmar:motivo=>leerApi(`/api/ninos/solicitudes-estado/${s.id}/resolucion`,{method:'POST',body:JSON.stringify({aprobar,motivo})}),
     alGuardar:async datos=>{try{await cargarCaso();Profesionales.mensaje(document.getElementById('mensajeEstado'),datos.estado==='APROBADA'?(adopcion?'Cierre por adopción formalizada registrado.':reactivar?'Solicitud aprobada. El expediente fue reactivado.':'Solicitud aprobada. El expediente fue desactivado temporalmente.'):'Solicitud rechazada. El estado del expediente se conserva.','exito');}catch(error){Profesionales.mensaje(document.getElementById('mensajeEstado'),'La resolución se guardó. Recarga el expediente para consultar su estado actualizado.','aviso');}}
   });
@@ -408,16 +414,16 @@ const GRUPOS_NINO = {
  'Habilidades, gustos y personalidad':['habilidades','habilidadesDetalle','gustos','gustosDetalle','personalidad','personalidadDetalle'],
  'Hermanos y contexto familiar':['tieneHermanos','cantidadHermanos','hermanosDetalle','contextoCultural'],
  'Salud y necesidades de apoyo':['alergias','alergiasDetalle','intoleranciaLactosa','condicionesSalud','condicionesSaludDetalle','necesidadesApoyo','alertaMedica'],
- 'Registro y profesionales responsables':['numeroExpedienteInstitucional','registradoPor','fechaRegistro','trabajadorSocialAsignado','psicologoAsignado']
+ 'Registro y profesionales responsables':['codigoCaso','numeroExpedienteInstitucional','registradoPor','fechaRegistro','trabajadorSocialAsignado','psicologoAsignado']
 };
 const GRUPOS_FAMILIA = {
  'Hogar y red de apoyo':['tipoFamilia','especificacionHogar','notaEstructuraHogar','redApoyo','notaRedApoyo'],
  'Preferencias consideradas por el Match':['edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad','disposicionHermanos','notaHermanos'],
  'Salud y logística':['condicionesPuedeAcompanarHoy','condicionesConApoyo','notaCondicionesSalud','provincia','disponibilidadViaje','notaDistancia'],
- 'Registro y seguimiento':['registradoPor','fechaRegistro','perfilCompleto','reevaluacionPendiente','numeroReevaluaciones']
+ 'Registro y seguimiento':['codigoCaso','registradoPor','fechaRegistro','perfilCompleto','reevaluacionPendiente','numeroReevaluaciones']
 };
 function detalleSecciones(datos,campos,grupos) {
- return Object.entries(grupos).map(([titulo,keys],i)=>`<details class="detalle-grupo" ${i===0?'open':''}><summary>${Profesionales.icono(i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
+ return Object.entries(grupos).map(([titulo,keys],i)=>`<details class="detalle-grupo"><summary>${Profesionales.icono(i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
  detalleCampos(datos,Object.fromEntries(keys.map(k=>[k,campos[k]])))+'</details>').join('');
 }
 function pintarResumen(p){

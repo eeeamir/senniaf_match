@@ -94,7 +94,7 @@ const Comite = {
     const actualizarTotal=()=>{const total=[...new FormData(form).values()].reduce((s,v)=>s+Number(v),0);document.getElementById('sumaPesos').textContent=total+' / 100';document.getElementById('totalPesos').classList.toggle('invalido',total!==100);};
     form.addEventListener('input',actualizarTotal);form.addEventListener('reset',()=>setTimeout(actualizarTotal,0));actualizarTotal();
     form.addEventListener('submit',e=>{
-      e.preventDefault();const cambios=Object.fromEntries([...new FormData(form)].map(([k,v])=>[k,Number(v)])),estado=document.getElementById('pesoEstado');
+      e.preventDefault();if(!CamposFormulario.revisar(form))return;const cambios=Object.fromEntries([...new FormData(form)].map(([k,v])=>[k,Number(v)])),estado=document.getElementById('pesoEstado');
       if(Object.values(cambios).some(v=>!Number.isInteger(v)||v<0||v>100)||Object.values(cambios).reduce((a,b)=>a+b,0)!==100){estado.textContent='Usa números enteros de 0 a 100 que sumen exactamente 100.';return;}
       if(Object.keys(FACTORES).every(k=>cambios[k]===pesos[k])){estado.textContent='No hay cambios por guardar.';return;}
       const dialogo=document.createElement('dialog');dialogo.className='pro-dialogo';dialogo.setAttribute('aria-labelledby','tituloPesos');

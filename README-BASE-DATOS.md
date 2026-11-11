@@ -20,7 +20,7 @@ PostgreSQL se publica solo en `127.0.0.1:5432`. El volumen se conserva entre arr
 
 ## Esquema
 
-La configuración habitual usa `ddl-auto=validate`: comprueba el esquema, sin crearlo ni migrarlo automáticamente. Para una base **nueva y vacía**, el esquema SQL sin datos está en `deploy/azure/sql/001-esquema-inicial.sql`. Aplicar después, en orden, `005-cierre-adopcion.sql` y los cambios 006, 007 y 008 de `deploy/azure/sql/propuestas/`. El nombre histórico de esa carpeta no implica que estén pendientes en Azure: ya están aplicados allí.
+La configuración habitual usa `ddl-auto=validate`: comprueba el esquema, sin crearlo ni migrarlo automáticamente. Para una base **nueva y vacía**, el esquema SQL sin datos está en `deploy/azure/sql/001-esquema-inicial.sql`. Aplicar después, en orden, `005-cierre-adopcion.sql`, los cambios 006, 007 y 008 de `deploy/azure/sql/propuestas/`, y las migraciones 009 y 010 de `deploy/azure/sql/`. El nombre histórico de la carpeta `propuestas` no implica que sus cambios 006–008 estén pendientes en Azure: ya están aplicados allí.
 
 Ejemplo de aplicación local sobre una base nueva:
 
@@ -59,3 +59,9 @@ El destino está fijado a `senniaf_demo`; la operación usa bloqueo y una transa
 Esta carga no despliega código, no migra el esquema, no modifica pesos y no crea decisiones del Comité. Mantiene compatibilidad con el JAR anterior: primera infancia se describe mediante las opciones abiertas y el rendimiento no aplicable queda nulo. El código corregido reconoce ese dato y lo presenta o guarda como «No aplica». Las observaciones de las evaluaciones son simuladas y no establecen diagnósticos.
 
 Los nuevos expedientes de la carga reciben trabajo social y psicología según el menor número de casos asignados, sin cambiar responsables anteriores. Para aplicar esa misma asignación a nuevas altas interactivas en un entorno de demostración, configurar expresamente `SENNIAF_DEMO_ASIGNACION_AUTOMATICA=true` al operar la versión corregida. Está desactivada por defecto y no representa una política institucional.
+
+## Propuesta local de documentos de identidad — pendiente de autorización
+
+La ampliación del registro distingue cédula panameña, cédula de extranjero residente y pasaporte. La migración [010-documentos-identidad.sql](deploy/azure/sql/010-documentos-identidad.sql) añade únicamente `tipo_documento` y `numero_documento`, ambos opcionales para los usuarios anteriores, y un índice único por tipo y número normalizado. No contiene actualizaciones ni elimina datos; conserva cédulas, identificadores, contraseñas, sesiones y relaciones existentes. La aplicación consulta también los datos heredados para impedir registros duplicados.
+
+**La migración fue autorizada para esta publicación y validada dos veces en PostgreSQL 16 aislado. Antes de iniciar la versión ampliada contra una base existente, verificar un respaldo y aplicarla expresamente.** No se ejecuta automáticamente al iniciar la aplicación; el estado del despliegue remoto se documenta en [deploy/azure/README.md](deploy/azure/README.md). Los pasaportes nuevos usan un identificador interno `PAS-<número>` y admiten acceso por su número o correo; las credenciales anteriores no se convierten ni se restablecen. El registro de acceso no determina la idoneidad legal para adoptar.

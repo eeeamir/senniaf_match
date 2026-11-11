@@ -34,27 +34,40 @@ public class UsuarioService {
     }
     private void passwordValida(String password) {
         if(password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length>72)
-            throw new IllegalArgumentException("La contraseña no puede exceder 72 bytes UTF-8");
+            throw new com.senniaf.match.web.CampoInvalidoException("password","La contraseña no puede exceder 72 bytes UTF-8",false);
     }
 
     @Transactional
     public Map<String,Object> registrar(RegistroUsuarioRequest r){
-        registroDisponible(); passwordValida(r.getPassword());
-        String cedula=r.getCedula().trim().toUpperCase(Locale.ROOT), correo=r.getCorreo().trim().toLowerCase(Locale.ROOT);
-        if(repo.existsByCedula(cedula)) throw new IllegalStateException("Esta cédula ya está registrada. Inicia sesión para continuar.");
-        if(repo.existsByCorreoIgnoreCase(correo)) throw new IllegalStateException("Este correo ya está registrado. Inicia sesión para continuar.");
+        registroDisponible(); r.validar(); passwordValida(r.getPassword());
+        var tipo=r.tipoEfectivo(); String numero=r.numeroNormalizado();
+        String identificador=tipo.identificador(numero), correo=r.getCorreo().strip().toLowerCase(Locale.ROOT);
+        if(repo.existsByTipoDocumentoAndNumeroDocumentoIgnoreCase(tipo,numero) || repo.existsByCedula(numero)
+                || repo.findByIdentificador(identificador).isPresent() || repo.findByIdentificador(numero).isPresent())
+            throw new com.senniaf.match.web.CampoInvalidoException("numeroDocumento","Este documento ya está registrado. Inicia sesión con tu documento o correo.",true);
+        if(repo.existsByCorreoIgnoreCase(correo))
+            throw new com.senniaf.match.web.CampoInvalidoException("correo","Este correo ya está registrado. Inicia sesión para continuar.",true);
         String codigo=nuevoCodigo();
-        Usuario u=new Usuario(); u.setIdentificador(cedula); u.setNombre(r.getNombre().trim()); u.setApellido(r.getApellido().trim());
-        u.setCedula(cedula); u.setCorreo(correo); u.setPasswordHash(encoder.encode(r.getPassword())); u.setRol("FAMILIA");
+        Usuario u=new Usuario(); u.setIdentificador(identificador); u.setNombre(r.getNombre()); u.setApellido(r.getApellido());
+        u.setTipoDocumento(tipo);u.setNumeroDocumento(numero);
+        u.setCedula(tipo==com.senniaf.match.model.enums.TipoDocumento.PASAPORTE?null:numero);
+        u.setCorreo(correo); u.setPasswordHash(encoder.encode(r.getPassword())); u.setRol("FAMILIA");
         u.setVerificado(false); u.setCodigoVerificacionHash(encoder.encode(codigo)); u.setCodigoExpira(LocalDateTime.now().plusMinutes(10));
-        u.setIntentosVerificacion(0); u.setFechaCreacion(LocalDateTime.now()); repo.save(u);
+        u.setIntentosVerificacion(0); u.setFechaCreacion(LocalDateTime.now());
+        try { repo.saveAndFlush(u); }
+        catch(org.springframework.dao.DataIntegrityViolationException conflicto) {
+            String detalle=conflicto.getMostSpecificCause().getMessage();
+            boolean esCorreo=detalle!=null && detalle.contains("uk_usuario_correo");
+            throw new com.senniaf.match.web.CampoInvalidoException(esCorreo?"correo":"numeroDocumento",
+                    esCorreo?"Este correo ya está registrado. Inicia sesión para continuar.":"Este documento ya está registrado. Inicia sesión para continuar.",true);
+        }
         Map<String,Object> respuesta=entregarCodigo(u,codigo);
-        respuesta.put("correo",u.getCorreo());return respuesta;
+        respuesta.put("correo",u.getCorreo());respuesta.put("identificador",u.getIdentificador());return respuesta;
     }
     @Transactional
     public Map<String,Object> reenviar(String cedula){
         registroDisponible();
-        if(cedula==null || cedula.isBlank() || cedula.length()>30) throw new IllegalArgumentException("Indica una referencia de cuenta válida");
+        if(cedula==null || cedula.isBlank() || cedula.length()>40) throw new IllegalArgumentException("Indica una referencia de cuenta válida");
         Usuario u=usuarioFamilia(cedula);
         if(u.isVerificado()) throw new IllegalStateException("La cuenta ya está verificada. Inicia sesión para continuar");
         if(!limites.admitir("codigo:"+u.getId(),3,900000)) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS,"Espera antes de solicitar otro código");
@@ -79,9 +92,10 @@ public class UsuarioService {
         String clave="login:"+r.getIdentificador().strip().toUpperCase(Locale.ROOT);
         if(!limites.admitir(clave,10,900000)) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS,"Demasiados intentos. Inténtalo más tarde");
         Usuario u=repo.findByIdentificador(r.getIdentificador().trim().toUpperCase(Locale.ROOT)).orElse(null);
-        if(u==null) u=repo.findByCorreoIgnoreCase(r.getIdentificador().trim()).orElse(null);
+        if(u==null && !r.getIdentificador().contains("@")) u=repo.findByIdentificador("PAS-"+r.getIdentificador().strip().toUpperCase(Locale.ROOT)).orElse(null);
+        if(u==null) u=repo.findByCorreoIgnoreCase(r.getIdentificador().strip()).orElse(null);
         boolean coincide=encoder.matches(r.getPassword(),u==null?hashInexistente:u.getPasswordHash());
-        if(u==null || !coincide) throw new IllegalArgumentException("Cédula, correo, ID o contraseña incorrectos.");
+        if(u==null || !coincide) throw new IllegalArgumentException("Documento, correo, ID o contraseña incorrectos.");
         if(!u.isVerificado()) throw new IllegalArgumentException("Debes verificar tu correo antes de iniciar sesión.");
         limites.limpiar(clave);return sesion(u);
     }
@@ -95,7 +109,13 @@ public class UsuarioService {
         } else throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,"El correo no está disponible");
         return respuesta;
     }
-    private Usuario usuarioFamilia(String cedula){return repo.bloquearPorCedula(cedula.trim().toUpperCase(Locale.ROOT)).orElseThrow(()->new IllegalArgumentException("No encontramos esa cédula. Regístrate primero."));}
+    private Usuario usuarioFamilia(String referencia){
+        String id=referencia.strip().toUpperCase(Locale.ROOT);
+        var u=repo.bloquearPorIdentificador(id);
+        if(u.isEmpty()&&!id.startsWith("PAS-"))u=repo.bloquearPorIdentificador("PAS-"+id);
+        if(u.isEmpty())u=repo.bloquearPorCedula(id);
+        return u.orElseThrow(()->new IllegalArgumentException("No encontramos esa cuenta. Revisa el documento o regístrate primero."));
+    }
     private Map<String,Object> sesion(Usuario u){
         String nombre=(u.getNombre()==null?u.getIdentificador():u.getNombre()+" "+(u.getApellido()==null?"":u.getApellido())).trim();
         return Map.of("tipo",u.getRol().equals("FAMILIA")?"FAMILIA":"FUNCIONARIO","id",u.getIdentificador(),"nombre",nombre,"rol",u.getRol(),"token",sesiones.crear(u));

@@ -17,6 +17,8 @@ const Profesionales = {
       escuela:'m2 9 10-5 10 5-10 5z M6 12v5c4 3 8 3 12 0v-5 M22 9v7',
       calendario:'M5 5h14v16H5z M8 2v6M16 2v6M5 10h14', flecha:'M4 12h16M15 7l5 5-5 5',
       comprobar:'m5 12 4 4L19 6', cerrar:'m6 6 12 12M6 18 12-12', criterios:'M4 6h16v15H4z M9 6V3h6v3',
+      informacion:'M12 11v6 M12 7h.01 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',
+      credencial:'M4 5h16v16H4z M9 5V2h6v3 M10 11a2 2 0 1 0-4 0 2 2 0 0 0 4 0 M5 17c0-4 6-4 6 0 M14 10h3M14 14h3',
       persona:'M5 21v-3a7 7 0 0 1 14 0v3 M16 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0'
     };
     return `<svg class="pro-icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${trazos[nombre] || trazos.informe}"/></svg>`;
@@ -70,6 +72,7 @@ const Profesionales = {
     dialogo.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('salir')}</span><h2 id="tituloSalir">Cerrar sesión</h2></div><p>¿Estás seguro de que deseas cerrar sesión?</p><p class="ayuda">Podrás volver a ingresar cuando lo necesites.</p><p id="avisoSalidaSinGuardar" class="pro-aviso-sin-guardar" hidden></p><div class="pro-acciones"><button type="button" class="boton secundario" id="proCancelarSalida">Cancelar</button><button type="button" class="boton" id="proConfirmarSalida">${this.icono('salir')}Cerrar sesión</button></div>`;
     document.body.append(dialogo);
     this.prepararProteccionFormularios();
+    document.querySelectorAll('form').forEach(form=>CamposFormulario.iniciar(form));
     document.getElementById('proSalir').addEventListener('click',()=>{
       const aviso=dialogo.querySelector('#avisoSalidaSinGuardar'),pendientes=this.formulariosPendientes();
       aviso.hidden=!pendientes.length;
@@ -79,7 +82,6 @@ const Profesionales = {
     document.getElementById('proCancelarSalida').addEventListener('click',()=>dialogo.close());
     document.getElementById('proConfirmarSalida').addEventListener('click',async()=>{const boton=document.getElementById('proConfirmarSalida');boton.disabled=true;await Sesion.salir();});
     this.decorarHero(s.rol==='PSICOLOGO'?'psicologia':'carpeta');
-    document.querySelector('.pie-pagina')?.remove();
     const aviso=document.createElement('span');aviso.className='pro-demostracion';aviso.textContent='Datos de demostración';document.getElementById('usuario').prepend(aviso);
   },
   mensaje(elemento,texto,tipo='aviso'){
@@ -99,25 +101,26 @@ const Profesionales = {
     d.innerHTML=`<h2 id="tituloConfirmacion">${limpiarHtml(titulo)}</h2><p>${limpiarHtml(texto)}</p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="button" class="boton" data-confirmar>Continuar</button></div>`;
     document.body.append(d);d.addEventListener('close',()=>d.remove(),{once:true});d.querySelector('[data-cancelar]').addEventListener('click',()=>d.close());d.querySelector('[data-confirmar]').addEventListener('click',()=>{d.close();accion();});d.showModal();
   },
-  justificar({titulo,contexto,opciones,confirmacion,alConfirmar,alGuardar}) {
+  justificar({titulo,contexto,opciones,confirmacion,alConfirmar,alGuardar,instruccion='Selecciona un motivo',textoRevisar='Revisar y confirmar',tituloConfirmacion='Confirmar acción',textoConfirmar='Confirmar',ayuda='Puedes editar completamente la justificación. Para «Otro», escribe tu propia explicación.'}) {
     const d=document.createElement('dialog');d.className='pro-dialogo pro-dialogo-decision';d.setAttribute('aria-label',titulo);
-    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('solicitudes')}</span><h2>${limpiarHtml(titulo)}</h2></div><p class="pro-modal-contexto">${limpiarHtml(contexto)}</p><form><fieldset class="pro-motivos"><legend>Selecciona un motivo</legend>${opciones.map(([valor,nombre])=>`<label class="pro-motivo"><input type="radio" name="motivoDecision" value="${limpiarHtml(valor)}" required><span>${limpiarHtml(nombre)}</span></label>`).join('')}</fieldset><label>Justificación<textarea name="justificacion" required minlength="10" maxlength="1850" rows="5" placeholder="Selecciona un motivo para ver la sugerencia editable."></textarea></label><p class="ayuda">Puedes editar completamente la justificación. Para «Otro», escribe tu propia explicación.</p><p data-error role="alert"></p><div class="pro-acciones"><button class="boton secundario" type="button" data-cancelar>Cancelar</button><button class="boton" type="submit">Revisar y confirmar</button></div></form>`;
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('solicitudes')}</span><h2>${limpiarHtml(titulo)}</h2></div><p class="pro-modal-contexto">${limpiarHtml(contexto)}</p><form><fieldset class="pro-motivos"><legend>${limpiarHtml(instruccion)}</legend>${opciones.map(([valor,nombre])=>`<label class="pro-motivo"><input type="radio" name="motivoDecision" value="${limpiarHtml(valor)}" required><span>${limpiarHtml(nombre)}</span></label>`).join('')}</fieldset><label>Justificación<textarea name="justificacion" required minlength="10" maxlength="1850" rows="5" placeholder="Selecciona un motivo para ver la sugerencia editable."></textarea></label><p class="ayuda">${limpiarHtml(ayuda)}</p><p data-error role="alert"></p><div class="pro-acciones"><button class="boton secundario" type="button" data-cancelar>Cancelar</button><button class="boton" type="submit">${limpiarHtml(textoRevisar)}</button></div></form>`;
     document.body.append(d);
     const form=d.querySelector('form'),texto=d.querySelector('textarea'),boton=d.querySelector('[type=submit]');
+    CamposFormulario.iniciar(form);
     let guardando=false;
     d.querySelector('[data-cancelar]').addEventListener('click',()=>d.close());
     d.addEventListener('cancel',e=>{if(guardando)e.preventDefault();});
     d.addEventListener('close',()=>d.remove(),{once:true});
-    form.addEventListener('change',e=>{if(e.target.name==='motivoDecision'){texto.value=opciones.find(o=>o[0]===e.target.value)?.[2]||'';texto.setCustomValidity('');texto.placeholder=e.target.value==='OTRO'?'Explica tu decisión con tus propias palabras.':'Puedes modificar esta sugerencia.';}});
+    form.addEventListener('change',e=>{if(e.target.name==='motivoDecision'){texto.value=opciones.find(o=>o[0]===e.target.value)?.[2]||'';texto.setCustomValidity('');CamposFormulario.error(texto,'');texto.placeholder=e.target.value==='OTRO'?'Explica tu decisión con tus propias palabras.':'Puedes modificar esta sugerencia.';}});
     texto.addEventListener('input',()=>texto.setCustomValidity(''));
     form.addEventListener('submit',e=>{
       e.preventDefault();if(guardando)return;
       texto.setCustomValidity(texto.value.trim().length<10?'Escribe una justificación de al menos 10 caracteres.':'');
       if(!form.reportValidity())return;
       const motivo=opciones.find(o=>o[0]===form.elements.motivoDecision.value);
-      const justificacion=`${motivo[1]}: ${texto.value.trim()}`;
-      const confirmar=document.createElement('dialog');confirmar.className='pro-dialogo';confirmar.setAttribute('aria-label','Confirmar acción');
-      confirmar.innerHTML=`<h2>Confirmar acción</h2><p>${limpiarHtml(confirmacion)}</p><div class="pro-acciones"><button class="boton secundario" type="button" data-volver>Volver</button><button class="boton" type="button" data-confirmar>Confirmar</button></div>`;
+      const justificacion=`${motivo[1].replace(/\.$/,'')}: ${texto.value.trim()}`;
+      const confirmar=document.createElement('dialog');confirmar.className='pro-dialogo';confirmar.setAttribute('aria-label',tituloConfirmacion);
+      confirmar.innerHTML=`<h2>${limpiarHtml(tituloConfirmacion)}</h2><p>${limpiarHtml(confirmacion)}</p><div class="pro-acciones"><button class="boton secundario" type="button" data-volver>Volver</button><button class="boton" type="button" data-confirmar>${limpiarHtml(textoConfirmar)}</button></div>`;
       document.body.append(confirmar);boton.disabled=true;
       confirmar.addEventListener('close',()=>{confirmar.remove();if(!guardando)boton.disabled=false;},{once:true});
       confirmar.querySelector('[data-volver]').onclick=()=>confirmar.close();
@@ -133,12 +136,8 @@ const Profesionales = {
     });
     d.showModal();
   },
-  errorCampo(campo,mensaje) {
-    const grupo=campo.closest('.campo')||campo.parentElement;let aviso=grupo.querySelector('.pro-error-campo');
-    if(!aviso){aviso=document.createElement('span');aviso.className='pro-error-campo';aviso.id='error-'+(campo.id||campo.closest('[data-grupo]')?.dataset.grupo||campo.name);aviso.setAttribute('role','alert');grupo.append(aviso);}
-    aviso.textContent=mensaje||'';campo.setAttribute('aria-invalid',String(Boolean(mensaje)));campo.setAttribute('aria-describedby',aviso.id);
-    if(mensaje)campo.closest('details')?.setAttribute('open','');
-  },
+  errorCampo(campo,mensaje) { CamposFormulario.error(campo,mensaje); },
+  validarFormulario(form) { return CamposFormulario.revisar(form); },
   erroresServidor(errores) {const campos={habilidadesCoherentes:'habilidadesDetalle',gustosCoherentes:'gustosDetalle',personalidadCoherente:'personalidadDetalle',alergiasCoherentes:'alergiasDetalle',condicionesSaludCoherentes:'condicionesSaludDetalle',hermanosCoherentes:'cantidadHermanos',escolaridadCoherente:'rendimientoAcademico',hogarCoherente:'especificacionHogar',redApoyoCoherente:'notaRedApoyo',rangoEdadCoherente:'edadMaximaAceptada',disposicionHermanosCoherente:'notaHermanos',capacidadesCoherentes:'notaCondicionesSalud'};Object.entries(errores||{}).forEach(([id,mensaje])=>{const c=document.getElementById(campos[id]||id);if(c)this.errorCampo(c,mensaje);});},
   organizarFormulario() {
     const form=document.getElementById('formulario');if(!form)return;

@@ -16,7 +16,7 @@ public class AuthController {
     public AuthController(UsuarioService service, SesionAccesoService sesiones){this.service=service;this.sesiones=sesiones;}
     @PostMapping("/registro") public ResponseEntity<Map<String,Object>> registro(@Valid @RequestBody RegistroUsuarioRequest r){return ResponseEntity.status(HttpStatus.CREATED).body(service.registrar(r));}
     @PostMapping("/verificar") public ResponseEntity<Map<String,Object>> verificar(@Valid @RequestBody VerificarCodigoRequest r){return ResponseEntity.ok(service.verificar(r));}
-    @PostMapping("/reenviar") public ResponseEntity<Map<String,Object>> reenviar(@RequestBody Map<String,String> r){return ResponseEntity.ok(service.reenviar(r.getOrDefault("cedula","")));}
+    @PostMapping("/reenviar") public ResponseEntity<Map<String,Object>> reenviar(@Valid @RequestBody ReenviarCodigoRequest r){return ResponseEntity.ok(service.reenviar(r.identificador()));}
     @PostMapping("/login") public ResponseEntity<Map<String,Object>> login(@Valid @RequestBody LoginRequest r){return ResponseEntity.ok(service.login(r));}
     @PostMapping("/logout") public ResponseEntity<Map<String,String>> logout(@RequestHeader(value="Authorization",required=false) String authorization){sesiones.cerrar(authorization);return ResponseEntity.ok(Map.of("mensaje","Sesión cerrada"));}
 }
