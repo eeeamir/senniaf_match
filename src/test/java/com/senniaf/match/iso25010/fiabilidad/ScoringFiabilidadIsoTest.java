@@ -1,0 +1,6 @@
+package com.senniaf.match.iso25010.fiabilidad;
+import com.senniaf.match.model.*; import com.senniaf.match.model.enums.*; import com.senniaf.match.repository.*; import com.senniaf.match.service.ScoringService; import org.junit.jupiter.api.*; import org.junit.jupiter.params.ParameterizedTest; import org.junit.jupiter.params.provider.ValueSource; import java.util.*; import static org.junit.jupiter.api.Assertions.*; import static org.mockito.Mockito.*;
+class ScoringFiabilidadIsoTest { ScoringService s; PerfilNino n; PerfilFamilia f; PesosScoring p;
+ @BeforeEach void b(){s=new ScoringService(mock(PerfilNinoRepository.class),mock(PerfilFamiliaRepository.class),mock(DecisionComiteRepository.class),mock(PesosScoringRepository.class)); n=new PerfilNino();n.setEdad(8);n.setTieneHermanos(SiNo.NO);n.setCondicionesSalud(List.of());f=new PerfilFamilia();f.setEdadMinimaAceptada(1);f.setEdadMaximaAceptada(17);f.setDisponibilidadViaje(DisponibilidadViaje.ALTA);f.setDisposicionHermanos(DisposicionHermanos.DISPUESTA);p=new PesosScoring();}
+ @ParameterizedTest @ValueSource(ints={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}) void FIA01_mismasEntradasMismaSalida(int i){assertEquals(s.candidato(n,f,p),s.candidato(n,f,p));}
+}
