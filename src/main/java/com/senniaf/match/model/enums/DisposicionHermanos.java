@@ -9,5 +9,7 @@ package com.senniaf.match.model.enums;
 public enum DisposicionHermanos {
     DISPUESTA,
     DISPUESTA_CON_DUDAS,
-    PREFIERE_UN_SOLO_NINO
+    PREFIERE_UN_SOLO_NINO,
+    OTRA,
+    NINGUNA_DE_LAS_ANTERIORES
 }

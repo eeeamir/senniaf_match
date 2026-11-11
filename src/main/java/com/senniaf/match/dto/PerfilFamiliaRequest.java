@@ -32,11 +32,18 @@ public class PerfilFamiliaRequest {
     @NotNull(message = "El tipo de estructura del hogar es obligatorio")
     private TipoFamilia tipoFamilia;
 
+    @jakarta.validation.constraints.Size(max=1000)
+    private String especificacionHogar;
+    public String getEspecificacionHogar() { return especificacionHogar; }
+    public void setEspecificacionHogar(String valor) { especificacionHogar = valor; }
+
+    @jakarta.validation.constraints.Size(max=2000)
     private String notaEstructuraHogar;
 
     @NotEmpty(message = "Seleccione al menos una fuente de apoyo (o 'Ninguna por ahora')")
-    private List<FuenteApoyo> redApoyo;
+    private List<@NotNull FuenteApoyo> redApoyo;
 
+    @jakarta.validation.constraints.Size(max=2000)
     private String notaRedApoyo;
 
     @NotNull(message = "La provincia o comarca donde vive la familia es obligatoria")
@@ -45,37 +52,43 @@ public class PerfilFamiliaRequest {
     @NotNull(message = "La disponibilidad para viajar o recibir visitas es obligatoria")
     private DisponibilidadViaje disponibilidadViaje;
 
+    @jakarta.validation.constraints.Size(max=2000)
     private String notaDistancia;
 
     @NotNull(message = "La edad mínima aceptada es obligatoria")
     @Min(value = 0, message = "La edad mínima no puede ser negativa")
     @Max(value = 17, message = "La edad mínima debe corresponder a un menor de edad")
+    @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using=PerfilNinoRequest.EnteroEstricto.class)
     private Integer edadMinimaAceptada;
 
     @NotNull(message = "La edad máxima aceptada es obligatoria")
     @Min(value = 0, message = "La edad máxima no puede ser negativa")
     @Max(value = 17, message = "La edad máxima debe corresponder a un menor de edad")
+    @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using=PerfilNinoRequest.EnteroEstricto.class)
     private Integer edadMaximaAceptada;
 
+    @jakarta.validation.constraints.Size(max=255)
     private String notaRangoEdad;
 
     @NotNull(message = "La disposición a recibir grupos de hermanos es obligatoria")
     private DisposicionHermanos disposicionHermanos;
 
+    @jakarta.validation.constraints.Size(max=2000)
     private String notaHermanos;
 
     /**
      * Condiciones que la familia siente que puede acompañar hoy sin
      * apoyo adicional. Puede ir vacía (ver nota de clase).
      */
-    private List<CondicionSalud> condicionesPuedeAcompanarHoy;
+    private List<@NotNull CondicionSalud> condicionesPuedeAcompanarHoy;
 
     /**
      * Condiciones que la familia podría acompañar si recibe capacitación
      * o apoyo adicional. Puede ir vacía (ver nota de clase).
      */
-    private List<CondicionSalud> condicionesConApoyo;
+    private List<@NotNull CondicionSalud> condicionesConApoyo;
 
+    @jakarta.validation.constraints.Size(max=2000)
     private String notaCondicionesSalud;
 
     /**
@@ -84,6 +97,7 @@ public class PerfilFamiliaRequest {
      * propósito: no se presenta como catálogo ni filtro de
      * características (principio del rediseño humanizado del Sprint 0).
      */
+    @jakarta.validation.constraints.Size(max=2000)
     private String continuidadCultural;
 
     public TipoFamilia getTipoFamilia() {
@@ -213,4 +227,39 @@ public class PerfilFamiliaRequest {
     public void setContinuidadCultural(String continuidadCultural) {
         this.continuidadCultural = continuidadCultural;
     }
+    @com.fasterxml.jackson.annotation.JsonIgnore @jakarta.validation.constraints.AssertTrue(message="Especifica cómo está conformado tu hogar al seleccionar «Otra»")
+    public boolean isHogarCoherente() {
+        return tipoFamilia != TipoFamilia.OTRA || especificacionHogar != null && !especificacionHogar.isBlank();
+    }
+    @com.fasterxml.jackson.annotation.JsonIgnore @jakarta.validation.constraints.AssertTrue(message="«Ninguna por ahora» no se puede combinar con fuentes de apoyo")
+    public boolean isRedApoyoCoherente() {
+        return redApoyo == null || !redApoyo.stream().anyMatch(java.util.Objects::isNull) && new java.util.HashSet<>(redApoyo).size() == redApoyo.size()
+                && (!redApoyo.contains(FuenteApoyo.NINGUNA_POR_AHORA) || redApoyo.size() == 1);
+    }
+    @com.fasterxml.jackson.annotation.JsonIgnore @jakarta.validation.constraints.AssertTrue(message="La edad mínima no puede superar la edad máxima")
+    public boolean isRangoEdadCoherente() {
+        return edadMinimaAceptada == null || edadMaximaAceptada == null || edadMinimaAceptada <= edadMaximaAceptada;
+    }
+    @com.fasterxml.jackson.annotation.JsonIgnore @jakarta.validation.constraints.AssertTrue(message="Explica tu situación al seleccionar «Otra» o «Ninguna de las anteriores» sobre hermanos")
+    public boolean isDisposicionHermanosCoherente() {
+        return disposicionHermanos != DisposicionHermanos.OTRA && disposicionHermanos != DisposicionHermanos.NINGUNA_DE_LAS_ANTERIORES
+                || notaHermanos != null && !notaHermanos.isBlank();
+    }
+    @com.fasterxml.jackson.annotation.JsonIgnore @jakarta.validation.constraints.AssertTrue(message="Declara condiciones específicas de acompañamiento, sin repetirlas en las dos listas")
+    public boolean isCapacidadesCoherentes() {
+        var hoy = condicionesPuedeAcompanarHoy == null ? List.<CondicionSalud>of() : condicionesPuedeAcompanarHoy;
+        var apoyo = condicionesConApoyo == null ? List.<CondicionSalud>of() : condicionesConApoyo;
+        return java.util.stream.Stream.concat(hoy.stream(), apoyo.stream()).allMatch(c -> c != null
+                && c != CondicionSalud.NINGUNA_CONOCIDA && c != CondicionSalud.INFORMACION_NO_DISPONIBLE)
+                && new java.util.HashSet<>(hoy).size() == hoy.size() && new java.util.HashSet<>(apoyo).size() == apoyo.size()
+                && java.util.Collections.disjoint(hoy, apoyo)
+                && (!(hoy.contains(CondicionSalud.OTRA) || apoyo.contains(CondicionSalud.OTRA))
+                    || notaCondicionesSalud != null && !notaCondicionesSalud.isBlank());
+    }
+    public void validarCoherencia() {
+        if (!isHogarCoherente() || !isRedApoyoCoherente() || !isRangoEdadCoherente()
+                || !isDisposicionHermanosCoherente() || !isCapacidadesCoherentes())
+            throw new IllegalArgumentException("Revisa la descripción del hogar, la red de apoyo, las edades y la disposición ante hermanos");
+    }
+
 }

@@ -38,7 +38,7 @@ const Profesionales = {
   },
   etiqueta(valor) {
     if (valor == null || valor === '') return 'Sin información';
-    const etiquetas={SI:'Sí',NO:'No',NO_SABE:'No se sabe',NINGUNA_CONOCIDA:'Ninguna conocida',NINGUNA_IDENTIFICADA:'Ninguna identificada',NINGUNO_IDENTIFICADO:'Ninguno identificado',TEA:'TEA (autismo)',TDAH:'TDAH',DESACTIVACION:'Desactivación',REACTIVACION:'Reactivación',PENDIENTE:'Pendiente',APROBADA:'Aprobada',RECHAZADA:'Rechazada',ACEPTADA:'Propuesta aceptada',DESCARTADA:'Propuesta descartada',REEVALUACION:'Reevaluación solicitada'};
+    const etiquetas={NO_APLICA:'No aplica',NO_EVALUADO:'No evaluado',AUN_NO_EVALUADO:'Aún no evaluado',INFORMACION_INSUFICIENTE:'Información insuficiente',INFORMACION_NO_DISPONIBLE:'Información no disponible',NINGUNA_DE_LAS_ANTERIORES:'Ninguna de las anteriores',SI:'Sí',NO:'No',NO_SABE:'No se sabe',NINGUNA_CONOCIDA:'Ninguna conocida',NINGUNA_IDENTIFICADA:'Ninguna identificada',NINGUNO_IDENTIFICADO:'Ninguno identificado',TEA:'TEA (autismo)',TDAH:'TDAH',DESACTIVACION:'Desactivación',REACTIVACION:'Reactivación',PENDIENTE:'Pendiente',APROBADA:'Aprobada',RECHAZADA:'Rechazada',ACEPTADA:'Propuesta aceptada',DESCARTADA:'Propuesta descartada',REEVALUACION:'Reevaluación solicitada'};
     return etiquetas[valor] || String(valor).toLocaleLowerCase('es').replaceAll('_',' ').replace(/^./,c=>c.toLocaleUpperCase('es'));
   },
   estado(p) { return p.cierrePorAdopcion?'Cierre por adopción':p.bajaLogica?'Fuera del Match':p.perfilCompleto?'Disponible para análisis':'Pendiente de información'; },
@@ -99,13 +99,47 @@ const Profesionales = {
     d.innerHTML=`<h2 id="tituloConfirmacion">${limpiarHtml(titulo)}</h2><p>${limpiarHtml(texto)}</p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="button" class="boton" data-confirmar>Continuar</button></div>`;
     document.body.append(d);d.addEventListener('close',()=>d.remove(),{once:true});d.querySelector('[data-cancelar]').addEventListener('click',()=>d.close());d.querySelector('[data-confirmar]').addEventListener('click',()=>{d.close();accion();});d.showModal();
   },
+  justificar({titulo,contexto,opciones,confirmacion,alConfirmar,alGuardar}) {
+    const d=document.createElement('dialog');d.className='pro-dialogo pro-dialogo-decision';d.setAttribute('aria-label',titulo);
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('solicitudes')}</span><h2>${limpiarHtml(titulo)}</h2></div><p class="pro-modal-contexto">${limpiarHtml(contexto)}</p><form><fieldset class="pro-motivos"><legend>Selecciona un motivo</legend>${opciones.map(([valor,nombre])=>`<label class="pro-motivo"><input type="radio" name="motivoDecision" value="${limpiarHtml(valor)}" required><span>${limpiarHtml(nombre)}</span></label>`).join('')}</fieldset><label>Justificación<textarea name="justificacion" required minlength="10" maxlength="1850" rows="5" placeholder="Selecciona un motivo para ver la sugerencia editable."></textarea></label><p class="ayuda">Puedes editar completamente la justificación. Para «Otro», escribe tu propia explicación.</p><p data-error role="alert"></p><div class="pro-acciones"><button class="boton secundario" type="button" data-cancelar>Cancelar</button><button class="boton" type="submit">Revisar y confirmar</button></div></form>`;
+    document.body.append(d);
+    const form=d.querySelector('form'),texto=d.querySelector('textarea'),boton=d.querySelector('[type=submit]');
+    let guardando=false;
+    d.querySelector('[data-cancelar]').addEventListener('click',()=>d.close());
+    d.addEventListener('cancel',e=>{if(guardando)e.preventDefault();});
+    d.addEventListener('close',()=>d.remove(),{once:true});
+    form.addEventListener('change',e=>{if(e.target.name==='motivoDecision'){texto.value=opciones.find(o=>o[0]===e.target.value)?.[2]||'';texto.setCustomValidity('');texto.placeholder=e.target.value==='OTRO'?'Explica tu decisión con tus propias palabras.':'Puedes modificar esta sugerencia.';}});
+    texto.addEventListener('input',()=>texto.setCustomValidity(''));
+    form.addEventListener('submit',e=>{
+      e.preventDefault();if(guardando)return;
+      texto.setCustomValidity(texto.value.trim().length<10?'Escribe una justificación de al menos 10 caracteres.':'');
+      if(!form.reportValidity())return;
+      const motivo=opciones.find(o=>o[0]===form.elements.motivoDecision.value);
+      const justificacion=`${motivo[1]}: ${texto.value.trim()}`;
+      const confirmar=document.createElement('dialog');confirmar.className='pro-dialogo';confirmar.setAttribute('aria-label','Confirmar acción');
+      confirmar.innerHTML=`<h2>Confirmar acción</h2><p>${limpiarHtml(confirmacion)}</p><div class="pro-acciones"><button class="boton secundario" type="button" data-volver>Volver</button><button class="boton" type="button" data-confirmar>Confirmar</button></div>`;
+      document.body.append(confirmar);boton.disabled=true;
+      confirmar.addEventListener('close',()=>{confirmar.remove();if(!guardando)boton.disabled=false;},{once:true});
+      confirmar.querySelector('[data-volver]').onclick=()=>confirmar.close();
+      confirmar.querySelector('[data-confirmar]').onclick=async()=>{
+        guardando=true;confirmar.close();boton.disabled=true;d.querySelector('[data-cancelar]').disabled=true;
+        let resultado;
+        try{resultado=await alConfirmar(justificacion);}
+        catch(error){d.querySelector('[data-error]').textContent=error.message;return;}
+        finally{guardando=false;boton.disabled=false;d.querySelector('[data-cancelar]').disabled=false;}
+        d.close();if(alGuardar)await alGuardar(resultado);
+      };
+      confirmar.showModal();
+    });
+    d.showModal();
+  },
   errorCampo(campo,mensaje) {
     const grupo=campo.closest('.campo')||campo.parentElement;let aviso=grupo.querySelector('.pro-error-campo');
     if(!aviso){aviso=document.createElement('span');aviso.className='pro-error-campo';aviso.id='error-'+(campo.id||campo.closest('[data-grupo]')?.dataset.grupo||campo.name);aviso.setAttribute('role','alert');grupo.append(aviso);}
     aviso.textContent=mensaje||'';campo.setAttribute('aria-invalid',String(Boolean(mensaje)));campo.setAttribute('aria-describedby',aviso.id);
     if(mensaje)campo.closest('details')?.setAttribute('open','');
   },
-  erroresServidor(errores) {const campos={habilidadesCoherentes:'habilidadesDetalle',gustosCoherentes:'gustosDetalle',personalidadCoherente:'personalidadDetalle',alergiasCoherentes:'alergiasDetalle',condicionesSaludCoherentes:'condicionesSaludDetalle',hermanosCoherentes:'cantidadHermanos'};Object.entries(errores||{}).forEach(([id,mensaje])=>{const c=document.getElementById(campos[id]||id);if(c)this.errorCampo(c,mensaje);});},
+  erroresServidor(errores) {const campos={habilidadesCoherentes:'habilidadesDetalle',gustosCoherentes:'gustosDetalle',personalidadCoherente:'personalidadDetalle',alergiasCoherentes:'alergiasDetalle',condicionesSaludCoherentes:'condicionesSaludDetalle',hermanosCoherentes:'cantidadHermanos',escolaridadCoherente:'rendimientoAcademico',hogarCoherente:'especificacionHogar',redApoyoCoherente:'notaRedApoyo',rangoEdadCoherente:'edadMaximaAceptada',disposicionHermanosCoherente:'notaHermanos',capacidadesCoherentes:'notaCondicionesSalud'};Object.entries(errores||{}).forEach(([id,mensaje])=>{const c=document.getElementById(campos[id]||id);if(c)this.errorCampo(c,mensaje);});},
   organizarFormulario() {
     const form=document.getElementById('formulario');if(!form)return;
     const iconos=['persona','escuela','estrella','personas','salud'];
@@ -118,21 +152,6 @@ const Profesionales = {
     });
     form.addEventListener('invalid',e=>this.errorCampo(e.target,e.target.validationMessage),true);
     form.addEventListener('input',e=>{if(e.target.matches('input,textarea,select'))this.errorCampo(e.target,'');});
-    ['habilidades','gustos','personalidad','alergias','condicionesSalud'].forEach(nombre=>{
-      const grupo=form.querySelector(`[data-grupo="${nombre}"]`),detalle=document.getElementById(nombre+'Detalle');
-      const actualizar=()=>{
-        const marcados=[...grupo.querySelectorAll('input:checked')];
-        const neutro=marcados.some(c=>['NINGUNA_CONOCIDA','NINGUNA_IDENTIFICADA','NINGUNO_IDENTIFICADO'].includes(c.value));
-        grupo.querySelector('input').setCustomValidity(!marcados.length?'Selecciona al menos una opción.':neutro&&marcados.length>1?'Selecciona una opción coherente con la información registrada.':'');
-        detalle.required=marcados.some(c=>['OTRO','OTRA'].includes(c.value)||(nombre==='alergias'&&c.value==='ALIMENTARIA'));
-      };grupo.addEventListener('change',actualizar);form.addEventListener('submit',actualizar,true);actualizar();
-    });
-    ['gradoEscolar','habilidadesDetalle','gustosDetalle','personalidadDetalle','alergiasDetalle','condicionesSaludDetalle','hermanosDetalle'].forEach(id=>document.getElementById(id).maxLength=255);
-    ['necesidadesApoyo','contextoCultural'].forEach(id=>document.getElementById(id).maxLength=2000);
-    document.getElementById('edad').step='1';document.getElementById('cantidadHermanos').step='1';
-    const hermanos=document.getElementById('tieneHermanos'),cantidad=document.getElementById('cantidadHermanos');
-    const revisar=()=>{cantidad.required=hermanos.value==='SI';cantidad.min=hermanos.value==='SI'?'1':'0';cantidad.setCustomValidity(hermanos.value==='NO'&&Number(cantidad.value)>0?'Revisa la cantidad: indicaste que no tiene hermanos.':'');};
-    hermanos.addEventListener('change',revisar);cantidad.addEventListener('input',revisar);form.addEventListener('submit',revisar,true);
     document.querySelector('#pantallaNino h1').textContent=new URLSearchParams(location.search).has('editar')?'Actualizar perfil infantil':'Registrar perfil infantil';
     document.querySelector('#pantallaNino .hero p').textContent='Completa la información del niño, niña o adolescente.';
     document.querySelector('#pantallaNino .volver').textContent='← Volver al inicio';document.querySelector('#pantallaNino .volver').href='funcionario.html';

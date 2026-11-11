@@ -196,6 +196,8 @@
             <option value="PREMEDIA">Premedia</option>
             <option value="MEDIA">Media</option>
             <option value="NO_ESCOLARIZADO">No escolarizado</option>
+            <option value="OTRO">Otro nivel o programa</option>
+            <option value="INFORMACION_NO_DISPONIBLE">Información no disponible</option>
           </select>
 
         </div>
@@ -203,16 +205,16 @@
 
         <div class="campo">
 
-          <label for="gradoEscolar">
-            Grado o año (opcional)
+          <label for="gradoEscolarSeleccion">
+            Grado o programa educativo
           </label>
 
-          <input
-            id="gradoEscolar"
-            name="gradoEscolar"
-            type="text"
-            placeholder="5to grado"
-          >
+          <input id="gradoEscolar" name="gradoEscolar" type="hidden">
+          <select id="gradoEscolarSeleccion" aria-label="Grado o programa educativo"><option value="">Seleccione el nivel primero…</option></select>
+          <div id="gradoOtroCampo" hidden class="campo">
+            <label for="gradoEscolarOtro">Especifica el grado o programa</label>
+            <input id="gradoEscolarOtro" type="text" maxlength="240" disabled>
+          </div>
 
         </div>
 
@@ -229,6 +231,9 @@
             <option value="BUENO">Bueno</option>
             <option value="REGULAR">Regular</option>
             <option value="NECESITA_APOYO">Necesita apoyo</option>
+            <option value="NO_EVALUADO">No evaluado</option>
+            <option value="INFORMACION_NO_DISPONIBLE">Información no disponible</option>
+            <option value="NO_APLICA" hidden>No aplica</option>
           </select>
 
         </div>
@@ -258,6 +263,14 @@
           </label>
 
           <div class="grupo-checks" data-grupo="habilidades">
+            <label class="opcion-check"><input type="checkbox" value="JUEGO"> Juego y participación</label>
+            <label class="opcion-check"><input type="checkbox" value="COMUNICACION"> Comunicación</label>
+            <label class="opcion-check"><input type="checkbox" value="EXPLORACION"> Exploración del entorno</label>
+            <label class="opcion-check"><input type="checkbox" value="MOVIMIENTO"> Movimiento y coordinación</label>
+            <label class="opcion-check"><input type="checkbox" value="INTERACCION_SOCIAL"> Interacción social</label>
+            <label class="opcion-check"><input type="checkbox" value="AUN_NO_EVALUADO"> Aún no evaluado</label>
+            <label class="opcion-check"><input type="checkbox" value="INFORMACION_INSUFICIENTE"> Información insuficiente</label>
+
             <label class="opcion-check"><input type="checkbox" value="NINGUNA_IDENTIFICADA"> Ninguna identificada</label>
             <label class="opcion-check"><input type="checkbox" value="DEPORTES"> Deportes</label>
             <label class="opcion-check"><input type="checkbox" value="ARTE"> Arte</label>
@@ -288,6 +301,13 @@
           </label>
 
           <div class="grupo-checks" data-grupo="gustos">
+            <label class="opcion-check"><input type="checkbox" value="JUEGO_SENSORIAL"> Juego sensorial</label>
+            <label class="opcion-check"><input type="checkbox" value="JUEGO_SIMBOLICO"> Juego simbólico</label>
+            <label class="opcion-check"><input type="checkbox" value="CUENTOS"> Cuentos e imágenes</label>
+            <label class="opcion-check"><input type="checkbox" value="EXPLORACION"> Exploración</label>
+            <label class="opcion-check"><input type="checkbox" value="AUN_NO_EVALUADO"> Aún no evaluado</label>
+            <label class="opcion-check"><input type="checkbox" value="INFORMACION_INSUFICIENTE"> Información insuficiente</label>
+
             <label class="opcion-check"><input type="checkbox" value="NINGUNO_IDENTIFICADO"> Ninguno identificado</label>
             <label class="opcion-check"><input type="checkbox" value="DEPORTES"> Deportes</label>
             <label class="opcion-check"><input type="checkbox" value="VIDEOJUEGOS"> Videojuegos</label>
@@ -318,6 +338,9 @@
           </label>
 
           <div class="grupo-checks" data-grupo="personalidad">
+            <label class="opcion-check"><input type="checkbox" value="AUN_NO_EVALUADO"> Aún no evaluado</label>
+            <label class="opcion-check"><input type="checkbox" value="INFORMACION_INSUFICIENTE"> Información insuficiente</label>
+
             <label class="opcion-check"><input type="checkbox" value="RESERVADO"> Reservado/a</label>
             <label class="opcion-check"><input type="checkbox" value="SOCIABLE"> Sociable</label>
             <label class="opcion-check"><input type="checkbox" value="EXTROVERTIDO"> Extrovertido/a</label>
@@ -366,6 +389,7 @@
             <option value="">Seleccione…</option>
             <option value="SI">Sí</option>
             <option value="NO">No</option>
+            <option value="NO_SABE">No se sabe / pendiente</option>
           </select>
 
         </div>
@@ -454,6 +478,8 @@
           </label>
 
           <div class="grupo-checks" data-grupo="alergias">
+            <label class="opcion-check"><input type="checkbox" value="INFORMACION_NO_DISPONIBLE"> Información médica no disponible</label>
+
             <label class="opcion-check"><input type="checkbox" value="NINGUNA_CONOCIDA"> Ninguna conocida</label>
             <label class="opcion-check"><input type="checkbox" value="ALIMENTARIA"> Alimentaria</label>
             <label class="opcion-check"><input type="checkbox" value="MEDICAMENTOS"> A medicamentos</label>
@@ -496,6 +522,8 @@
           </label>
 
           <div class="grupo-checks" data-grupo="condicionesSalud">
+            <label class="opcion-check"><input type="checkbox" value="INFORMACION_NO_DISPONIBLE"> Información médica no disponible</label>
+
             <label class="opcion-check"><input type="checkbox" value="NINGUNA_CONOCIDA"> Ninguna conocida</label>
             <label class="opcion-check"><input type="checkbox" value="ASMA"> Asma</label>
             <label class="opcion-check"><input type="checkbox" value="DIABETES"> Diabetes</label>
@@ -695,6 +723,10 @@
 
           </div>
 
+          <div class="campo ancho" id="especificacionHogarCampo" hidden>
+            <label for="especificacionHogar">Especifica cómo está conformado tu hogar. <span class="req">*</span></label>
+            <textarea id="especificacionHogar" maxlength="1000" rows="3" disabled></textarea>
+          </div>
           <div class="campo ancho">
 
             <label for="notaEstructuraHogar">
@@ -921,6 +953,8 @@
               <option value="DISPUESTA">Sí, estamos dispuestos</option>
               <option value="DISPUESTA_CON_DUDAS">Lo consideraríamos, con dudas</option>
               <option value="PREFIERE_UN_SOLO_NINO">Preferimos un solo niño o niña</option>
+              <option value="OTRA">Otra disposición que queremos explicar</option>
+              <option value="NINGUNA_DE_LAS_ANTERIORES">Ninguna de las anteriores describe nuestra situación</option>
             </select>
 
           </div>
@@ -928,7 +962,7 @@
           <div class="campo ancho">
 
             <label for="notaHermanos">
-              Cuéntanos qué dudas tendrías (opcional)
+              Cuéntanos tus dudas o explica tu situación
             </label>
 
             <textarea
@@ -1022,36 +1056,7 @@
       </section>
 
 
-      <!-- ===============================================
-           CONTINUIDAD CULTURAL
-           =============================================== -->
-
-      <section class="grupo">
-
-        <h2>Para cerrar</h2>
-
-        <div class="fila">
-
-          <div class="campo ancho">
-
-            <label for="continuidadCultural">
-              ¿Tienes cercanía con alguna cultura, idioma o
-              comunidad que te gustaría que tu hijo o hija pueda
-              seguir conociendo? (opcional)
-            </label>
-
-            <textarea
-              id="continuidadCultural"
-              name="continuidadCultural"
-              placeholder="Este dato ayuda a preservar vínculos de identidad; no es un filtro de características."
-            ></textarea>
-
-          </div>
-
-        </div>
-
-      </section>
-
+      <!-- La sección de continuidad cultural se retomará en Sprint 8. Se conservan los datos históricos. -->
 
       <!-- ===============================================
            ACCIONES
@@ -1094,6 +1099,8 @@
 
 <script src="senniaf.js"></script>
 <script src="profesionales.js"></script>
+<script src="formulario-reglas.js"></script>
+<script src="ejemplos-demo.js"></script>
 <script>
 
 /* ===============================================
@@ -1226,9 +1233,9 @@ document
 
 function actualizarAvisoMedico() {
   const alergiaRelevante = valoresMarcados('alergias')
-    .some((valor) => valor !== 'NINGUNA_CONOCIDA');
+    .some((valor) => !['NINGUNA_CONOCIDA','INFORMACION_NO_DISPONIBLE'].includes(valor));
   const condicionRelevante = valoresMarcados('condicionesSalud')
-    .some((valor) => valor !== 'NINGUNA_CONOCIDA');
+    .some((valor) => !['NINGUNA_CONOCIDA','INFORMACION_NO_DISPONIBLE'].includes(valor));
   const intolerante =
     document.getElementById('intoleranciaLactosa').value === 'SI';
 
@@ -1255,47 +1262,19 @@ document
    DATOS DE EJEMPLO: NIÑO/A
    =============================================== */
 
-function cargarEjemploInfantil() {
-  // Solo cambia controles del formulario; no realiza solicitudes al servidor.
+async function cargarEjemploInfantil() {
+ const boton=document.getElementById('btnEjemplo');if(boton.disabled)return;boton.disabled=true;
+ try {
   if(!Profesionales.formulariosBase.has(formulario))Profesionales.marcarGuardado(formulario);
+  const ejemplo=await EjemplosDemo.siguiente('nino');
   const profesional=document.getElementById('idFuncionario').value;
   formulario.reset();document.getElementById('idFuncionario').value=profesional;
-  formulario.querySelectorAll('.pro-error-campo').forEach(e=>e.textContent='');
-  formulario.querySelectorAll('[aria-invalid]').forEach(e=>e.setAttribute('aria-invalid','false'));
-    document.getElementById('edad').value = 10;
-    document.getElementById('nivelEscolar').value = 'PRIMARIA';
-    document.getElementById('gradoEscolar').value = '5to grado';
-    document.getElementById('rendimientoAcademico').value = 'BUENO';
-
-    marcarValores('habilidades', ['MATEMATICAS', 'ARTE']);
-    document.getElementById('habilidadesDetalle').value =
-      'Muestra facilidad para el dibujo técnico';
-
-    marcarValores('gustos', ['DEPORTES', 'VIDEOJUEGOS']);
-    document.getElementById('gustosDetalle').value = 'Fútbol y videojuegos cooperativos';
-
-    marcarValores('personalidad', ['RESERVADO', 'SOCIABLE']);
-    document.getElementById('personalidadDetalle').value =
-      'Reservado al principio, pero sociable cuando adquiere confianza';
-
-    document.getElementById('tieneHermanos').value = 'SI';
-    document.getElementById('cantidadHermanos').value = 1;
-    document.getElementById('hermanosDetalle').value =
-      'Tiene una hermana de 7 años';
-
-    marcarValores('alergias', ['NINGUNA_CONOCIDA']);
-    document.getElementById('intoleranciaLactosa').value = 'NO';
-    marcarValores('condicionesSalud', ['NINGUNA_CONOCIDA']);
-    document.getElementById('necesidadesApoyo').value =
-      'Apoyo educativo en lectura';
-
-    document.getElementById('alergiasDetalle').value='No se reportan alergias conocidas en la entrevista de demostración.';
-    document.getElementById('condicionesSaludDetalle').value='Se mantiene el seguimiento preventivo habitual de salud.';
-    document.getElementById('contextoCultural').value='Participa en actividades de su comunidad y disfruta compartir relatos y celebraciones locales.';
-    formulario.querySelectorAll('input,select,textarea').forEach(c=>c.dispatchEvent(new Event('change',{bubbles:true})));
-    actualizarAvisoMedico();
-
-
+  EjemplosDemo.aplicar(formulario,ejemplo);
+  ReglasPerfil.refrescarNino(ejemplo.gradoEscolar);
+  actualizarAvisoMedico();
+  document.getElementById('btnEjemplo').textContent='Cargar otro ejemplo';
+  resultado.className='resultado';resultado.textContent='Ejemplo cargado. Revisa y modifica las respuestas antes de guardar.';
+ } catch(e){resultado.className='resultado error';resultado.textContent=e.message;}finally{boton.disabled=false;}
 }
 document.getElementById('btnEjemplo').addEventListener('click',()=>{
   const tieneDatos=[...formulario.querySelectorAll('input,select,textarea')].some(c=>c.id!=='idFuncionario' && c.type!=='hidden' && (c.type==='checkbox'?c.checked:Boolean(c.value.trim())));
@@ -1311,6 +1290,7 @@ document.getElementById('btnEjemplo').addEventListener('click',()=>{
 formulario.addEventListener('submit', async (evento) => {
 
   evento.preventDefault();
+  ReglasPerfil.refrescarNino();
 
   resultado.className = 'resultado';
   resultado.textContent = '';
@@ -1322,7 +1302,7 @@ formulario.addEventListener('submit', async (evento) => {
     edad: Number(document.getElementById('edad').value),
     nivelEscolar: document.getElementById('nivelEscolar').value,
     gradoEscolar: document.getElementById('gradoEscolar').value,
-    rendimientoAcademico: document.getElementById('rendimientoAcademico').value,
+    rendimientoAcademico: document.getElementById('rendimientoAcademico').value || null,
     habilidades: valoresMarcados('habilidades'),
     habilidadesDetalle: document.getElementById('habilidadesDetalle').value,
     gustos: valoresMarcados('gustos'),
@@ -1372,7 +1352,7 @@ formulario.addEventListener('submit', async (evento) => {
       Profesionales.marcarGuardado(formulario);
       resultado.className = 'resultado exito';
       resultado.innerHTML =
-        `<strong>Entrevista enviada correctamente.</strong><br>` +
+        `<strong>Perfil guardado correctamente.</strong><br>` +
         `${datos.mensaje} · Código de caso: <span class="codigo">${datos.codigoCaso}</span>` +
         (datos.perfilCompleto ? '' : ' · El perfil quedó marcado como incompleto.') +
         (datos.alertaMedica ? ' · <strong>Alerta médica activa.</strong>' : '') +
@@ -1428,40 +1408,18 @@ formulario.addEventListener('submit', async (evento) => {
    DATOS DE EJEMPLO: FAMILIA
    =============================================== */
 
-function cargarEjemploFamilia(){
- if(!Profesionales.formulariosBase.has(formularioFamilia))Profesionales.marcarGuardado(formularioFamilia);
-    document.getElementById('tipoFamilia').value = 'PAREJA';
-    document.getElementById('notaEstructuraHogar').value =
-      'Vivimos juntos hace 8 años, sin otros hijos en casa';
-
-    marcarValores('redApoyo', ['PAREJA', 'FAMILIA_EXTENDIDA']);
-    document.getElementById('notaRedApoyo').value =
-      'Mis padres viven cerca y podrían ayudarnos los primeros meses';
-
-    document.getElementById('provincia').value = 'PANAMA';
-    document.getElementById('disponibilidadViaje').value = 'ALTA';
-    document.getElementById('notaDistancia').value =
-      'Podemos viajar cada fin de semana si es necesario';
-
-    document.getElementById('edadMinimaAceptada').value = 3;
-    document.getElementById('edadMaximaAceptada').value = 8;
-    document.getElementById('notaRangoEdad').value =
-      'Nos sentimos más preparados para edad escolar';
-
-    document.getElementById('disposicionHermanos').value = 'DISPUESTA_CON_DUDAS';
-    document.getElementById('notaHermanos').value =
-      'Nos preocupa tener espacio suficiente en la casa para dos';
-
-    marcarValores('condicionesPuedeAcompanarHoy', ['ASMA']);
-    marcarValores('condicionesConApoyo', ['TDAH']);
-    document.getElementById('notaCondicionesSalud').value =
-      'Nos gustaría recibir capacitación sobre TDAH';
-
-    document.getElementById('continuidadCultural').value =
-      'Tenemos raíces indígenas y nos gustaría preservarlas';
-
-
- formularioFamilia.querySelectorAll('input,select,textarea').forEach(c=>c.dispatchEvent(new Event('change',{bubbles:true})));
+async function cargarEjemploFamilia(){
+ const boton=document.getElementById('btnEjemploFamilia');if(boton.disabled)return;boton.disabled=true;
+ try {
+  if(!Profesionales.formulariosBase.has(formularioFamilia))Profesionales.marcarGuardado(formularioFamilia);
+  const ejemplo=await EjemplosDemo.siguiente('familia');
+  const identificador=document.getElementById('cedulaFamilia').value;
+  formularioFamilia.reset();document.getElementById('cedulaFamilia').value=identificador;
+  EjemplosDemo.aplicar(formularioFamilia,ejemplo);
+  ReglasPerfil.refrescarFamilia();
+  document.getElementById('btnEjemploFamilia').textContent='Cargar otro ejemplo';
+  resultadoFamilia.className='resultado';resultadoFamilia.textContent='Ejemplo cargado. La entrevista registrada se conserva hasta que guardes los cambios.';
+ } catch(e){resultadoFamilia.className='resultado error';resultadoFamilia.textContent=e.message;}finally{boton.disabled=false;}
 }
 document.getElementById('btnEjemploFamilia').addEventListener('click',()=>{
  const respondido=[...formularioFamilia.querySelectorAll('input,select,textarea')].some(c=>c.id!=='cedulaFamilia'&&!['hidden','button','submit'].includes(c.type)&&(c.type==='checkbox'||c.type==='radio'?c.checked:Boolean(c.value.trim())));
@@ -1476,6 +1434,7 @@ document.getElementById('btnEjemploFamilia').addEventListener('click',()=>{
 formularioFamilia.addEventListener('submit', async (evento) => {
 
   evento.preventDefault();
+  ReglasPerfil.refrescarFamilia();
 
   resultadoFamilia.className = 'resultado';
   resultadoFamilia.textContent = '';
@@ -1485,6 +1444,7 @@ formularioFamilia.addEventListener('submit', async (evento) => {
 
   const cuerpo = {
     tipoFamilia: document.getElementById('tipoFamilia').value,
+    especificacionHogar: document.getElementById('tipoFamilia').value==='OTRA'?document.getElementById('especificacionHogar').value:null,
     notaEstructuraHogar: document.getElementById('notaEstructuraHogar').value,
     redApoyo: valoresMarcados('redApoyo'),
     notaRedApoyo: document.getElementById('notaRedApoyo').value,
@@ -1503,7 +1463,6 @@ formularioFamilia.addEventListener('submit', async (evento) => {
     condicionesPuedeAcompanarHoy: valoresMarcados('condicionesPuedeAcompanarHoy'),
     condicionesConApoyo: valoresMarcados('condicionesConApoyo'),
     notaCondicionesSalud: document.getElementById('notaCondicionesSalud').value,
-    continuidadCultural: document.getElementById('continuidadCultural').value
   };
 
   if (!formularioFamilia.checkValidity()) {
@@ -1556,9 +1515,8 @@ formularioFamilia.addEventListener('submit', async (evento) => {
       let texto = datos.mensaje || 'No se pudo registrar el perfil.';
 
       if (datos.errores) {
-        const detalles = Object.entries(datos.errores).map(
-          ([campo, msg]) => `${campo}: ${msg}`
-        );
+        Profesionales.erroresServidor(datos.errores);
+        const detalles = Object.values(datos.errores).map(limpiarHtml);
         texto += '<ul>' + detalles.map((d) => `<li>${d}</li>`).join('') + '</ul>';
       }
 
@@ -1586,6 +1544,8 @@ formularioFamilia.addEventListener('submit', async (evento) => {
    SESIÓN (viene de index.html)
    =============================================== */
 
+ReglasPerfil.iniciar();
+
 const sesion = Sesion.requerir(['FAMILIA', 'TRABAJADOR_SOCIAL']);
 
 if (sesion) {
@@ -1610,10 +1570,11 @@ if (sesion) {
           btnRegistrarFamilia.textContent=textoEnviarFamilia;
           ['tipoFamilia','notaEstructuraHogar','notaRedApoyo','provincia','disponibilidadViaje',
            'notaDistancia','edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad',
-           'disposicionHermanos','notaHermanos','notaCondicionesSalud','continuidadCultural'].forEach(k => {
+           'disposicionHermanos','notaHermanos','notaCondicionesSalud','especificacionHogar'].forEach(k => {
             const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
           });
           ['redApoyo','condicionesPuedeAcompanarHoy','condicionesConApoyo'].forEach(k => marcarValores(k, p[k] || []));
+          ReglasPerfil.refrescarFamilia();
           Profesionales.marcarGuardado(formularioFamilia);
           btnRegistrarFamilia.disabled = false;
         }).catch(e => {
@@ -1637,6 +1598,8 @@ if (sesion) {
             const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
           });
         ['habilidades','gustos','personalidad','alergias','condicionesSalud'].forEach(k => marcarValores(k, p[k] || []));
+        ReglasPerfil.refrescarNino(p.gradoEscolar);
+        actualizarAvisoMedico();
         btnRegistrar.textContent = 'Guardar correcciones';
         Profesionales.marcarGuardado(formulario);
       }).catch(e => { resultado.textContent = e.message; });

@@ -91,6 +91,7 @@
 <script src="senniaf.js"></script>
 <script src="profesionales.js"></script>
 <script src="contexto-evaluacion.js"></script>
+<script src="ejemplos-demo.js"></script>
 <script>
 const sesion = Sesion.requerir(['TRABAJADOR_SOCIAL', 'PSICOLOGO', 'COMITE']);
 const codigoEvaluacion = new URLSearchParams(location.search).get('caso');
@@ -99,6 +100,7 @@ const vistaSolicitudes = sesion?.rol === 'TRABAJADOR_SOCIAL' && new URLSearchPar
 let expedientes = [], pagina = 1;
 let expedienteSeleccionado = null;
 let informesPsicologicos = [];
+let solicitudesDelCaso = [];
 let corrigiendoInforme = null;
 if (sesion) {
   ContextoPsicologico.iniciar();
@@ -195,7 +197,7 @@ async function cargarEvaluaciones() {
 document.getElementById('cargarEjemploPsicologico').addEventListener('click',()=>{
  const form=document.getElementById('formEvaluacion');
  const tieneRespuestas=[...form.querySelectorAll('textarea,input')].some(c=>c.id!=='sinDiagnostico'&&!['hidden','submit','button'].includes(c.type)&&(c.type==='checkbox'?c.checked:Boolean(c.value.trim())));
- const cargar=()=>{ContextoPsicologico.cargarEjemplo();Profesionales.mensaje(document.getElementById('estadoEvaluaciones'),'Datos de ejemplo cargados. Revisa el contenido y guarda la evaluación solo cuando corresponda.','aviso');};
+ const cargar=async()=>{const b=document.getElementById('cargarEjemploPsicologico');b.disabled=true;try{await ContextoPsicologico.cargarEjemplo(expedienteSeleccionado);Profesionales.mensaje(document.getElementById('estadoEvaluaciones'),'Ejemplo adaptado al expediente. Revísalo antes de guardar; los informes registrados se conservan.','aviso');}catch(e){Profesionales.mensaje(document.getElementById('estadoEvaluaciones'),e.message,'error');}finally{b.disabled=false;}};
  if(tieneRespuestas)Profesionales.confirmar('¿Cargar datos de ejemplo?','Se reemplazarán las respuestas de este formulario. No se guardará ningún cambio hasta que pulses Guardar evaluación.',cargar);
  else cargar();
 });
@@ -241,7 +243,7 @@ const CAMPOS_NINO = {
   perfilCompleto:'Perfil completo', alertaMedica:'Alerta médica', bajaLogica:'Excluido del Match (seguimiento permitido)'
 };
 const CAMPOS_FAMILIA = {
-  codigoCaso:'Código de caso', tipoFamilia:'Estructura familiar', notaEstructuraHogar:'Notas del hogar', redApoyo:'Red de apoyo',
+  codigoCaso:'Código de caso', tipoFamilia:'Estructura familiar', especificacionHogar:'Composición del hogar (otra)', notaEstructuraHogar:'Notas del hogar', redApoyo:'Red de apoyo',
   notaRedApoyo:'Notas de apoyo', provincia:'Provincia', disponibilidadViaje:'Disponibilidad de viaje', notaDistancia:'Notas de distancia',
   edadMinimaAceptada:'Edad mínima', edadMaximaAceptada:'Edad máxima', notaRangoEdad:'Notas del rango de edad',
   disposicionHermanos:'Disposición a hermanos', notaHermanos:'Notas de hermanos', condicionesPuedeAcompanarHoy:'Salud: apoyo actual',
@@ -250,12 +252,12 @@ const CAMPOS_FAMILIA = {
   reevaluacionPendiente:'Reevaluación pendiente', numeroReevaluaciones:'Reevaluaciones completadas'
 };
 function detalleCampos(datos, campos) {
-  return '<dl class="detalle-datos">' + Object.entries(campos).map(([k, titulo]) => {
+  return '<dl class="detalle-datos">' + Object.entries(campos).filter(([k])=>k!=='especificacionHogar'||datos.tipoFamilia==='OTRA').map(([k, titulo]) => {
     let valor = datos[k];
     if (['trabajadorSocialAsignado','psicologoAsignado'].includes(k) && !valor) valor = 'Pendiente de vinculación';
     if(k==='numeroExpedienteInstitucional' && typeof valor==='string' && /^FICTICIO-AZURE-\d+$/.test(valor))valor='Referencia de demostración · '+valor.split('-').pop();
     if (typeof valor === 'boolean') valor = valor ? 'Sí' : 'No';
-    if (Array.isArray(valor)) valor = valor.map(v=>Profesionales.etiqueta(v)).join(', ');
+    if (Array.isArray(valor)) valor = valor.length?valor.map(v=>Profesionales.etiqueta(v)).join(', '):['condicionesPuedeAcompanarHoy','condicionesConApoyo'].includes(k)?'Sin condiciones específicas declaradas':'Sin opciones registradas';
     if (k==='fechaRegistro' && valor) valor=Profesionales.fecha(valor);
     if (typeof valor==='string' && /^[A-Z_]+$/.test(valor)) valor=Profesionales.etiqueta(valor);
     return `<div><dt>${limpiarHtml(titulo)}</dt><dd>${limpiarHtml(valor == null || valor === '' ? 'Sin información' : String(valor))}</dd></div>`;
@@ -316,14 +318,11 @@ async function cargarSolicitudes() {
     <h3>${s.categoria==='ADOPCION_FORMALIZADA'?'Cierre por adopción':limpiarHtml(Profesionales.etiqueta(s.tipo))} · ${limpiarHtml(Profesionales.etiqueta(s.estado))}</h3>
     <p>${limpiarHtml(s.solicitante)} · ${limpiarHtml(Profesionales.fecha(s.fechaSolicitud))}</p><p>${limpiarHtml(s.motivo)}</p>
     ${s.resueltoPor ? `<p>Resolución: ${limpiarHtml(s.resueltoPor)} · ${limpiarHtml(Profesionales.fecha(s.fechaResolucion))}</p><p>${limpiarHtml(s.motivoResolucion)}</p>` : ''}
-    ${sesion.rol === 'COMITE' && s.estado === 'PENDIENTE' ? `<form class="formResolucion" data-solicitud="${s.id}">
-      <label for="resolucion-${s.id}">Motivo de la resolución</label>
-      <textarea id="resolucion-${s.id}" name="motivo" required minlength="10" maxlength="2000" rows="3"></textarea>
-      <button class="boton chico" type="submit" value="aprobar">Aprobar solicitud</button>
-      <button class="boton secundario chico" type="submit" value="rechazar">Rechazar solicitud</button></form>` : ''}
+    ${sesion.rol === 'COMITE' && s.estado === 'PENDIENTE' ? `<div class="pro-acciones"><button class="boton chico" type="button" data-resolver="${s.id}" data-aprobar="si">Aprobar solicitud</button><button class="boton secundario chico" type="button" data-resolver="${s.id}" data-aprobar="no">Rechazar solicitud</button></div>` : ''}
     </article>`;
+  solicitudesDelCaso=datos;
   const pendientes=datos.filter(s=>s.estado==='PENDIENTE'), resueltas=datos.filter(s=>s.estado!=='PENDIENTE');
-  document.getElementById('historialSolicitudes').innerHTML = sesion.rol==='COMITE'?pendientes.map(solicitud).join(''):'';
+  document.getElementById('historialSolicitudes').innerHTML = sesion.rol==='COMITE'?pendientes.map(solicitud).join('')+(resueltas.length?`<details class="pro-seccion"><summary>Solicitudes resueltas · ${resueltas.length}</summary>${resueltas.map(solicitud).join('')}</details>`:''):'';
   document.getElementById('tipoSolicitud').value = expedienteSeleccionado.bajaLogica ? 'REACTIVACION' : 'DESACTIVACION';
   document.getElementById('enviarSolicitud').textContent = 'Enviar solicitud';
   const pendiente=datos.some(s=>s.estado==='PENDIENTE');
@@ -348,17 +347,31 @@ document.getElementById('formSolicitud').addEventListener('submit', async e => {
   } catch(error) { document.getElementById('errorSolicitud').textContent = error.message; }
   finally { boton.disabled = false; }
 });
-document.getElementById('historialSolicitudes').addEventListener('submit', async e => {
-  if (!e.target.matches('.formResolucion')) return;
-  e.preventDefault(); const botones = e.target.querySelectorAll('button'); botones.forEach(b => b.disabled = true);
-  try {
-    const aprobada = e.submitter.value === 'aprobar';
-    await leerApi(`/api/ninos/solicitudes-estado/${e.target.dataset.solicitud}/resolucion`, {method:'POST', body:JSON.stringify({
-      aprobar:aprobada, motivo:new FormData(e.target).get('motivo')})});
-    await cargarCaso();
-    document.getElementById('mensajeEstado').textContent = aprobada ? 'Solicitud aprobada. Estado actualizado.' : 'Solicitud rechazada. Se conserva el estado anterior.';
-  } catch(error) { document.getElementById('mensajeEstado').textContent = error.message; }
-  finally { botones.forEach(b => b.disabled = false); }
+document.getElementById('historialSolicitudes').addEventListener('click',e=>{
+  const boton=e.target.closest('[data-resolver]');if(!boton)return;
+  const s=solicitudesDelCaso.find(s=>String(s.id)===boton.dataset.resolver);if(!s)return;
+  const aprobar=boton.dataset.aprobar==='si',adopcion=s.categoria==='ADOPCION_FORMALIZADA',reactivar=s.tipo==='REACTIVACION';
+  const opciones=!aprobar?[
+    ['INFORMACION_INSUFICIENTE','Información insuficiente','La documentación disponible no permite autorizar el cambio solicitado. El expediente conserva su estado y se recomienda completar la información.'],
+    ['NO_PROCEDE','La solicitud no procede en el estado actual','Después de revisar el estado del expediente y la solicitud, no se considera procedente el cambio. Se conserva el estado actual para su seguimiento.'],
+    ['OTRO','Otro','']
+  ]:adopcion?[
+    ['DOCUMENTACION','Formalización documentada','Se revisó la documentación de la adopción formalizada y se autoriza el cierre de participación en el Match. Se conserva el historial y no procede una reactivación ordinaria.'],
+    ['OTRO','Otro','']
+  ]:reactivar?[
+    ['REVISION_COMPLETADA','Revisión del expediente completada','Se completó la revisión del expediente y se autoriza su reactivación para el análisis de compatibilidad, sujeta al cumplimiento de los requisitos del sistema.'],
+    ['CONDICIONES_RESTABLECIDAS','Condiciones de participación restablecidas','La información revisada permite autorizar la reactivación del expediente, al haberse restablecido las condiciones para participar en el análisis de compatibilidad.'],
+    ['OTRO','Otro','']
+  ]:[
+    ['SUSPENSION','Suspensión temporal justificada','Se revisó la solicitud y se autoriza la desactivación temporal del expediente mientras se actualiza o revisa su situación. Se conserva el seguimiento y el historial.'],
+    ['SITUACION','Cambio de situación documentado','La documentación revisada sustenta suspender temporalmente la participación del expediente en nuevas propuestas. Su posible regreso requerirá autorización del Comité.'],
+    ['OTRO','Otro','']
+  ];
+  const confirmacion=!aprobar?'¿Estás seguro de que deseas rechazar esta solicitud? El estado del expediente se mantendrá sin cambios.':adopcion?'¿Deseas cerrar la participación de este expediente por adopción formalizada? Se conservará el historial y no se permitirá una reactivación ordinaria.':reactivar?'¿Deseas reactivar este expediente? Volverá a estar disponible para el análisis de compatibilidad, siempre que cumpla los requisitos del sistema.':'¿Estás seguro de que deseas desactivar este expediente? Dejará de participar en nuevas propuestas de compatibilidad hasta que se autorice su reactivación.';
+  Profesionales.justificar({titulo:aprobar?'Aprobar solicitud':'Rechazar solicitud',contexto:s.codigoCaso+' · '+(adopcion?'Cierre por adopción formalizada':Profesionales.etiqueta(s.tipo)),opciones,confirmacion,
+    alConfirmar:motivo=>leerApi(`/api/ninos/solicitudes-estado/${s.id}/resolucion`,{method:'POST',body:JSON.stringify({aprobar,motivo})}),
+    alGuardar:async datos=>{try{await cargarCaso();Profesionales.mensaje(document.getElementById('mensajeEstado'),datos.estado==='APROBADA'?(adopcion?'Cierre por adopción formalizada registrado.':reactivar?'Solicitud aprobada. El expediente fue reactivado.':'Solicitud aprobada. El expediente fue desactivado temporalmente.'):'Solicitud rechazada. El estado del expediente se conserva.','exito');}catch(error){Profesionales.mensaje(document.getElementById('mensajeEstado'),'La resolución se guardó. Recarga el expediente para consultar su estado actualizado.','aviso');}}
+  });
 });
 
 function pintarDatosEvaluacion(informe=null){
@@ -398,9 +411,9 @@ const GRUPOS_NINO = {
  'Registro y profesionales responsables':['numeroExpedienteInstitucional','registradoPor','fechaRegistro','trabajadorSocialAsignado','psicologoAsignado']
 };
 const GRUPOS_FAMILIA = {
- 'Hogar y red de apoyo':['tipoFamilia','notaEstructuraHogar','redApoyo','notaRedApoyo'],
+ 'Hogar y red de apoyo':['tipoFamilia','especificacionHogar','notaEstructuraHogar','redApoyo','notaRedApoyo'],
  'Preferencias consideradas por el Match':['edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad','disposicionHermanos','notaHermanos'],
- 'Salud, logística y continuidad':['condicionesPuedeAcompanarHoy','condicionesConApoyo','notaCondicionesSalud','provincia','disponibilidadViaje','notaDistancia','continuidadCultural'],
+ 'Salud y logística':['condicionesPuedeAcompanarHoy','condicionesConApoyo','notaCondicionesSalud','provincia','disponibilidadViaje','notaDistancia'],
  'Registro y seguimiento':['registradoPor','fechaRegistro','perfilCompleto','reevaluacionPendiente','numeroReevaluaciones']
 };
 function detalleSecciones(datos,campos,grupos) {

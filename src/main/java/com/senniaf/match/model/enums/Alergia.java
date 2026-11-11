@@ -12,5 +12,6 @@ public enum Alergia {
     MEDICAMENTOS,
     AMBIENTAL_POLEN,
     PICADURA_INSECTOS,
-    OTRA
+    OTRA,
+    INFORMACION_NO_DISPONIBLE
 }

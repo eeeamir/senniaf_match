@@ -30,6 +30,10 @@ import java.util.Comparator;
 @Service
 public class PerfilNinoService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.senniaf.match.repository.UsuarioRepository usuarios;
+    @org.springframework.beans.factory.annotation.Value("${senniaf.demo.asignacion-automatica:false}")
+    private boolean asignacionDemo;
     private final PerfilNinoRepository repositorio;
     private final EventoCasoRepository auditoria;
     private final EvaluacionPsicologicaRepository evaluaciones;
@@ -45,6 +49,7 @@ public class PerfilNinoService {
 
     @Transactional
     public synchronized PerfilNinoResponse registrarPerfil(PerfilNinoRequest request, String registradoPor) {
+        request.validarCoherencia();
         String referencia = request.getNumeroExpedienteInstitucional();
         referencia = referencia == null || referencia.isBlank() ? null
                 : referencia.strip().replaceAll("\\s+", " ").toUpperCase(java.util.Locale.ROOT);
@@ -61,6 +66,13 @@ public class PerfilNinoService {
         copiarDatos(perfil, request);
         perfil.setRegistradoPor(registradoPor);
         perfil.setTrabajadorSocialAsignado(registradoPor);
+        if (asignacionDemo) {
+            String psicologo = usuarios.findAll().stream().filter(u -> u.isVerificado() && "PSICOLOGO".equals(u.getRol()))
+                    .map(com.senniaf.match.model.Usuario::getIdentificador)
+                    .min(Comparator.<String>comparingLong(id -> repositorio.countByPsicologoAsignado(id)).thenComparing(id -> id))
+                    .orElseThrow(() -> new IllegalStateException("La demostración requiere un psicólogo habilitado antes de crear expedientes"));
+            perfil.setPsicologoAsignado(psicologo);
+        }
         perfil.setFechaRegistro(LocalDateTime.now());
 
         boolean completo = calcularSiEstaCompleto(request);
@@ -70,7 +82,7 @@ public class PerfilNinoService {
         perfil.setAlertaMedica(alertaMedica);
 
         repositorio.save(perfil);
-        auditar(codigoCaso, registradoPor, "CREACION", "Se creó el perfil infantil");
+        auditar(codigoCaso, registradoPor, "CREACION", "Se creó el perfil infantil. Trabajo social: " + registradoPor + "; psicología: " + (perfil.getPsicologoAsignado() == null ? "pendiente" : perfil.getPsicologoAsignado()) + (asignacionDemo ? ". Asignación exclusiva de demostración." : ""));
 
         String mensaje = completo
                 ? "Perfil registrado correctamente"
@@ -82,8 +94,9 @@ public class PerfilNinoService {
     private void copiarDatos(PerfilNino perfil, PerfilNinoRequest request) {
         perfil.setEdad(request.getEdad());
         perfil.setNivelEscolar(request.getNivelEscolar());
-        perfil.setGradoEscolar(request.getGradoEscolar());
-        perfil.setRendimientoAcademico(request.getRendimientoAcademico());
+        boolean noEscolarizado = request.getNivelEscolar() == com.senniaf.match.model.enums.NivelEscolar.NO_ESCOLARIZADO;
+        perfil.setGradoEscolar(noEscolarizado ? "No aplica" : request.getGradoEscolar());
+        perfil.setRendimientoAcademico(noEscolarizado ? com.senniaf.match.model.enums.RendimientoAcademico.NO_APLICA : request.getRendimientoAcademico());
         perfil.setHabilidades(request.getHabilidades());
         perfil.setHabilidadesDetalle(request.getHabilidadesDetalle());
         perfil.setGustos(request.getGustos());
@@ -97,7 +110,8 @@ public class PerfilNinoService {
         perfil.setCondicionesSaludDetalle(request.getCondicionesSaludDetalle());
         perfil.setNecesidadesApoyo(request.getNecesidadesApoyo());
         perfil.setTieneHermanos(request.getTieneHermanos());
-        perfil.setCantidadHermanos(request.getCantidadHermanos());
+        perfil.setCantidadHermanos(request.getTieneHermanos() == com.senniaf.match.model.enums.SiNo.NO ? 0
+                : request.getTieneHermanos() == com.senniaf.match.model.enums.SiNo.SI ? request.getCantidadHermanos() : null);
         perfil.setHermanosDetalle(request.getHermanosDetalle());
         perfil.setContextoCultural(request.getContextoCultural());
     }
@@ -132,6 +146,7 @@ public class PerfilNinoService {
 
     @Transactional
     public PerfilNinoResponse actualizar(String codigo, String actor, PerfilNinoRequest request) {
+        request.validarCoherencia();
         PerfilNino p = vinculadoParaActualizar(codigo, actor, "TRABAJADOR_SOCIAL");
         var anteriores=datosSociales(p);
         copiarDatos(p, request);
@@ -277,8 +292,14 @@ public class PerfilNinoService {
         }
         s.setEstado(request.aprobar() ? SolicitudEstadoCaso.Estado.APROBADA : SolicitudEstadoCaso.Estado.RECHAZADA);
         s.setResueltoPor(actor); s.setFechaResolucion(LocalDateTime.now()); s.setMotivoResolucion(motivo);
-        auditar(p.getCodigoCaso(), actor, s.getTipo() + "_" + s.getEstado(), "Resolución de solicitud #" + s.getId());
+        auditar(p.getCodigoCaso(), actor, s.getTipo() + "_" + s.getEstado(), "{\"resumen\":\"Resolución de solicitud #" + s.getId() + "\",\"justificacion\":"
+                + jsonTexto(motivo) + "}");
         return SolicitudEstadoResponse.de(s);
+    }
+
+    private String jsonTexto(String valor) {
+        try { return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(valor); }
+        catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalStateException("No se pudo conservar la justificación", e); }
     }
 
     private void comprobarEstado(PerfilNino p, SolicitudEstadoCaso.Tipo tipo) {
@@ -328,12 +349,17 @@ public class PerfilNinoService {
     }
 
     private synchronized String siguienteCodigoCaso() {
-        return String.format("NNA-%03d", repositorio.count() + 1);
+        long numero = repositorio.count() + 1;
+        while (repositorio.existsByCodigoCaso(String.format("NNA-%03d", numero))) numero++;
+        return String.format("NNA-%03d", numero);
     }
 
     private boolean calcularSiEstaCompleto(PerfilNinoRequest r) {
         return r.getNivelEscolar() != null
-                && r.getRendimientoAcademico() != null
+                && (r.getNivelEscolar() == com.senniaf.match.model.enums.NivelEscolar.NO_ESCOLARIZADO
+                    || r.getNivelEscolar() == com.senniaf.match.model.enums.NivelEscolar.INFORMACION_NO_DISPONIBLE
+                    || r.getRendimientoAcademico() != null)
+                && r.isEscolaridadCoherente() && r.isHermanosCoherentes()
                 && noVacia(r.getHabilidades())
                 && noVacia(r.getGustos())
                 && noVacia(r.getPersonalidad())
@@ -358,7 +384,8 @@ public class PerfilNinoService {
     }
 
     private <T> boolean tieneValorDistintoDe(List<T> lista, T valorNeutro) {
-        return lista != null && lista.stream().anyMatch(valor -> valor != valorNeutro);
+        return lista != null && lista.stream().anyMatch(valor -> valor != null && valor != valorNeutro
+                && !(valor instanceof Enum<?> e && "INFORMACION_NO_DISPONIBLE".equals(e.name())));
     }
 
     private boolean noVacio(String valor) {

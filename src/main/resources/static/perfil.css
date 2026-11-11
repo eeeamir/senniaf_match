@@ -177,3 +177,15 @@ section.grupo h2::before {
 #formularioFamilia > section.grupo:first-child {
     display: none;
 }
+
+/* Separación uniforme para preguntas extensas y respuestas editables. */
+#formularioFamilia .fila { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px 24px; }
+#formularioFamilia .campo { min-width: 0; gap: 10px; }
+#formularioFamilia .campo > label { line-height: 1.6; }
+#formularioFamilia textarea { min-height: 96px; width: 100%; }
+.grupo-checks { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(220px,100%),1fr)); gap: 10px 16px; }
+.grupo-checks label.opcion-check { white-space: normal; align-items: flex-start; line-height: 1.5; padding: 6px 0; }
+.grupo-checks input[type="checkbox"] { flex-shrink: 0; margin-top: 3px; }
+.campo [hidden], .campo[hidden] { display: none !important; }
+input:disabled,select:disabled { background: #f1f5f9; color: #53677d; opacity: 1; }
+@media(max-width:700px) { #formularioFamilia .fila { grid-template-columns: minmax(0,1fr); gap: 20px; } }

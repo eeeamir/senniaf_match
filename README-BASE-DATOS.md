@@ -41,3 +41,21 @@ Las asignaciones de profesionales se reflejan desde datos existentes; los cuatro
 ## Respaldos
 
 Conservar los respaldos fuera de Git y verificar su integridad. No usar `docker compose down -v`, reiniciar la base o importar datos por una limpieza del repositorio. Los procedimientos de operación remota están en [deploy/azure/README.md](deploy/azure/README.md).
+
+## Correcciones de formularios y carga controlada de demostración
+
+Antes de iniciar el código que incorpora `especificacion_hogar` y las nuevas opciones, revisar y aplicar expresamente `deploy/azure/sql/009-formularios-coherentes.sql`. El script exige indicar la base autorizada y la confirmación `AMPLIAR_SIN_BORRAR`; no se ejecuta al arrancar Spring Boot ni desde el actualizador. Amplía opciones y añade una columna sin actualizar registros ni decisiones. Las restricciones `NOT VALID` conservan filas históricas y controlan nuevas escrituras; no equivalen a una validación de todos los datos anteriores.
+
+La carga `python3 deploy/azure/preparar-demo.py` muestra el destino y los registros existentes sin modificarlos. Para preparar únicamente la demostración ya autorizada de Azure:
+
+```bash
+python3 deploy/azure/preparar-demo.py --aplicar --confirmar SENNIAF_DEMO_AUTORIZADA --familias-nuevas
+```
+
+Requiere Python 3 con `bcrypt`, acceso SSH con la clave y el host previamente fijados y permiso `sudo` para PostgreSQL en esa VM. Solicita mediante entrada oculta una clave única para cada cuenta nueva; nunca solicita ni cambia las de cuentas existentes. `--generar-credenciales` está reservado a un consumidor privado en memoria por tubería y entrega solo las credenciales de cuentas efectivamente insertadas: no redirigir su salida a archivos, registros, capturas ni documentación. Las claves se codifican con BCrypt, coste 10 y prefijo `$2a$`, igual al codificador existente.
+
+El destino está fijado a `senniaf_demo`; la operación usa bloqueo y una transacción, crea solo los profesionales que faltan, conserva todos los registros previos y usa referencias estables `DEMO-FUNCIONAL-A/B/C` para no duplicar los tres casos. `--familias-nuevas` autoriza específicamente `DEMO-FAM-002` y `DEMO-FAM-003`, sin reutilizar cuentas de otras personas. La repetición conserva las cuentas y entrevistas ya existentes y no recupera ni restablece sus contraseñas.
+
+Esta carga no despliega código, no migra el esquema, no modifica pesos y no crea decisiones del Comité. Mantiene compatibilidad con el JAR anterior: primera infancia se describe mediante las opciones abiertas y el rendimiento no aplicable queda nulo. El código corregido reconoce ese dato y lo presenta o guarda como «No aplica». Las observaciones de las evaluaciones son simuladas y no establecen diagnósticos.
+
+Los nuevos expedientes de la carga reciben trabajo social y psicología según el menor número de casos asignados, sin cambiar responsables anteriores. Para aplicar esa misma asignación a nuevas altas interactivas en un entorno de demostración, configurar expresamente `SENNIAF_DEMO_ASIGNACION_AUTOMATICA=true` al operar la versión corregida. Está desactivada por defecto y no representa una política institucional.

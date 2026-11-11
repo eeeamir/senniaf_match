@@ -1,0 +1,545 @@
+{
+  "nino": [
+    {
+      "edad": 2,
+      "nivelEscolar": "NO_ESCOLARIZADO",
+      "gradoEscolar": "No aplica",
+      "rendimientoAcademico": "NO_APLICA",
+      "habilidades": [
+        "JUEGO",
+        "COMUNICACION",
+        "MOVIMIENTO"
+      ],
+      "habilidadesDetalle": "Se comunica con gestos y palabras breves; explora objetos y participa en juegos de movimiento.",
+      "gustos": [
+        "JUEGO_SENSORIAL",
+        "CUENTOS"
+      ],
+      "gustosDetalle": "Disfruta bloques de colores, texturas y cuentos con imágenes.",
+      "personalidad": [
+        "AUN_NO_EVALUADO"
+      ],
+      "personalidadDetalle": "Se registran respuestas al juego y a las figuras de cuidado; aún no se formula una descripción estable de personalidad.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "Sin alergias conocidas en los antecedentes simulados disponibles.",
+      "intoleranciaLactosa": "NO_SABE",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "No se documentan condiciones específicas. Mantener controles de desarrollo.",
+      "necesidadesApoyo": "Rutinas previsibles, juego acompañado, comunicación cotidiana y controles pediátricos de desarrollo.",
+      "tieneHermanos": "NO",
+      "cantidadHermanos": 0,
+      "hermanosDetalle": "No se identifican hermanos en el expediente simulado.",
+      "contextoCultural": ""
+    },
+    {
+      "edad": 10,
+      "nivelEscolar": "PRIMARIA",
+      "gradoEscolar": "5to grado",
+      "rendimientoAcademico": "BUENO",
+      "habilidades": [
+        "ARTE",
+        "MATEMATICAS"
+      ],
+      "habilidadesDetalle": "Resuelve problemas sencillos y disfruta representar ideas mediante dibujos.",
+      "gustos": [
+        "DEPORTES",
+        "ARTE_DIBUJO"
+      ],
+      "gustosDetalle": "Fútbol recreativo y dibujo de animales.",
+      "personalidad": [
+        "RESERVADO",
+        "CURIOSO"
+      ],
+      "personalidadDetalle": "Se integra gradualmente al grupo cuando conoce la rutina.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "No se documentan alergias conocidas.",
+      "intoleranciaLactosa": "NO",
+      "condicionesSalud": [
+        "ASMA"
+      ],
+      "condicionesSaludDetalle": "Asma documentada en el escenario; requiere controles y cumplimiento del plan médico existente.",
+      "necesidadesApoyo": "Seguimiento del asma según indicaciones médicas, coordinación escolar y espacios de expresión emocional.",
+      "tieneHermanos": "SI",
+      "cantidadHermanos": 1,
+      "hermanosDetalle": "Mantiene contacto significativo con una hermana; revisar el vínculo con el equipo responsable.",
+      "contextoCultural": ""
+    },
+    {
+      "edad": 15,
+      "nivelEscolar": "MEDIA",
+      "gradoEscolar": "10mo grado",
+      "rendimientoAcademico": "NECESITA_APOYO",
+      "habilidades": [
+        "TECNOLOGIA",
+        "MUSICA"
+      ],
+      "habilidadesDetalle": "Interés en edición de audio y herramientas digitales.",
+      "gustos": [
+        "MUSICA",
+        "LECTURA"
+      ],
+      "gustosDetalle": "Música instrumental y relatos de ciencia ficción.",
+      "personalidad": [
+        "INDEPENDIENTE",
+        "SENSIBLE"
+      ],
+      "personalidadDetalle": "Valora participar en las decisiones cotidianas y contar con espacios de confianza.",
+      "alergias": [
+        "AMBIENTAL_POLEN"
+      ],
+      "alergiasDetalle": "Alergia ambiental registrada en los antecedentes simulados.",
+      "intoleranciaLactosa": "NO",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "No se documentan otras condiciones específicas.",
+      "necesidadesApoyo": "Tutoría en asignaturas pendientes, acompañamiento emocional, orientación vocacional y autonomía progresiva.",
+      "tieneHermanos": "NO",
+      "cantidadHermanos": 0,
+      "hermanosDetalle": "No se registran hermanos en el escenario.",
+      "contextoCultural": ""
+    },
+    {
+      "edad": 4,
+      "nivelEscolar": "INICIAL",
+      "gradoEscolar": "Prejardín",
+      "rendimientoAcademico": "NO_EVALUADO",
+      "habilidades": [
+        "JUEGO",
+        "INTERACCION_SOCIAL"
+      ],
+      "habilidadesDetalle": "Participa en juegos compartidos con apoyo del adulto.",
+      "gustos": [
+        "JUEGO_SIMBOLICO",
+        "CUENTOS"
+      ],
+      "gustosDetalle": "Juego de cocina y cuentos ilustrados.",
+      "personalidad": [
+        "CURIOSO",
+        "CARINOSO"
+      ],
+      "personalidadDetalle": "Observaciones iniciales durante actividades de juego, sujetas a seguimiento.",
+      "alergias": [
+        "ALIMENTARIA"
+      ],
+      "alergiasDetalle": "Alergia al huevo consignada en el escenario simulado; seguir las indicaciones médicas.",
+      "intoleranciaLactosa": "NO",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "No se documentan otras condiciones.",
+      "necesidadesApoyo": "Adaptación a la rutina de educación inicial y coordinación de cuidados por la alergia alimentaria.",
+      "tieneHermanos": "SI",
+      "cantidadHermanos": 2,
+      "hermanosDetalle": "Dos hermanos con quienes comparte actividades; el equipo revisará las necesidades del vínculo.",
+      "contextoCultural": ""
+    },
+    {
+      "edad": 7,
+      "nivelEscolar": "PRIMARIA",
+      "gradoEscolar": "2do grado",
+      "rendimientoAcademico": "REGULAR",
+      "habilidades": [
+        "MANUALIDADES",
+        "COMUNICACION"
+      ],
+      "habilidadesDetalle": "Organiza materiales y expresa preferencias en actividades breves.",
+      "gustos": [
+        "NATURALEZA_ANIMALES",
+        "JUEGOS_DE_MESA"
+      ],
+      "gustosDetalle": "Cuidado de plantas y juegos de turnos.",
+      "personalidad": [
+        "SOCIABLE"
+      ],
+      "personalidadDetalle": "Busca compartir juegos y necesita recordatorios para esperar turnos.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "",
+      "intoleranciaLactosa": "SI",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "Sin otras condiciones conocidas en los antecedentes simulados.",
+      "necesidadesApoyo": "Lectura acompañada, rutinas de estudio breves y alimentación de acuerdo con la orientación médica sobre lactosa.",
+      "tieneHermanos": "NO_SABE",
+      "cantidadHermanos": null,
+      "hermanosDetalle": "Información familiar pendiente de completar; no equivale a ausencia de hermanos.",
+      "contextoCultural": ""
+    },
+    {
+      "edad": 12,
+      "nivelEscolar": "PREMEDIA",
+      "gradoEscolar": "7mo grado",
+      "rendimientoAcademico": "BUENO",
+      "habilidades": [
+        "CIENCIAS",
+        "DEPORTES"
+      ],
+      "habilidadesDetalle": "Participa en proyectos de ciencias y deportes de equipo.",
+      "gustos": [
+        "DEPORTES",
+        "NATURALEZA_ANIMALES"
+      ],
+      "gustosDetalle": "Caminatas y actividades al aire libre.",
+      "personalidad": [
+        "SOCIABLE",
+        "SENSIBLE"
+      ],
+      "personalidadDetalle": "Se expresa mejor cuando se anticipan las actividades.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "",
+      "intoleranciaLactosa": "NO",
+      "condicionesSalud": [
+        "DIABETES"
+      ],
+      "condicionesSaludDetalle": "Diabetes documentada para el ejercicio; requiere controles y acompañamiento del plan médico.",
+      "necesidadesApoyo": "Apoyo para cumplir el plan de diabetes indicado por profesionales y organizar la transición a premedia.",
+      "tieneHermanos": "SI",
+      "cantidadHermanos": 1,
+      "hermanosDetalle": "Conservar el contacto autorizado con su hermano.",
+      "contextoCultural": ""
+    },
+    {
+      "edad": 16,
+      "nivelEscolar": "OTRO",
+      "gradoEscolar": "Programa flexible de formación técnica",
+      "rendimientoAcademico": "INFORMACION_NO_DISPONIBLE",
+      "habilidades": [
+        "TECNOLOGIA",
+        "MANUALIDADES"
+      ],
+      "habilidadesDetalle": "Interés en reparación de equipos y creación de objetos.",
+      "gustos": [
+        "VIDEOJUEGOS",
+        "MUSICA"
+      ],
+      "gustosDetalle": "Diseño de juegos y creación musical.",
+      "personalidad": [
+        "RESERVADO",
+        "INDEPENDIENTE"
+      ],
+      "personalidadDetalle": "Prefiere conversaciones individuales y participar en la organización de su tiempo.",
+      "alergias": [
+        "INFORMACION_NO_DISPONIBLE"
+      ],
+      "alergiasDetalle": "Pendiente obtener antecedentes médicos.",
+      "intoleranciaLactosa": "NO_SABE",
+      "condicionesSalud": [
+        "INFORMACION_NO_DISPONIBLE"
+      ],
+      "condicionesSaludDetalle": "La información médica está pendiente; no se presume ausencia de condiciones.",
+      "necesidadesApoyo": "Actualizar antecedentes de salud, acompañar la formación técnica y construir un plan de autonomía con participación del adolescente.",
+      "tieneHermanos": "NO_SABE",
+      "cantidadHermanos": null,
+      "hermanosDetalle": "Pendiente verificar el contexto familiar.",
+      "contextoCultural": ""
+    },
+    {
+      "edad": 1,
+      "nivelEscolar": "NO_ESCOLARIZADO",
+      "gradoEscolar": "No aplica",
+      "rendimientoAcademico": "NO_APLICA",
+      "habilidades": [
+        "EXPLORACION",
+        "MOVIMIENTO"
+      ],
+      "habilidadesDetalle": "Explora objetos seguros y ensaya desplazamientos con supervisión.",
+      "gustos": [
+        "JUEGO_SENSORIAL",
+        "MUSICA"
+      ],
+      "gustosDetalle": "Canciones suaves y materiales de distintas texturas.",
+      "personalidad": [
+        "INFORMACION_INSUFICIENTE"
+      ],
+      "personalidadDetalle": "No hay observaciones suficientes para describir rasgos estables.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "",
+      "intoleranciaLactosa": "NO_SABE",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "Controles preventivos de crecimiento y desarrollo.",
+      "necesidadesApoyo": "Cuidado sensible, supervisión del movimiento, descanso y juego de acuerdo con su etapa.",
+      "tieneHermanos": "NO",
+      "cantidadHermanos": 0,
+      "hermanosDetalle": "",
+      "contextoCultural": ""
+    }
+  ],
+  "familia": [
+    {
+      "tipoFamilia": "PAREJA",
+      "especificacionHogar": "",
+      "notaEstructuraHogar": "Hogar de dos adultos con rutinas coordinadas y espacio para acompañar la etapa escolar.",
+      "redApoyo": [
+        "PAREJA",
+        "FAMILIA_EXTENDIDA"
+      ],
+      "notaRedApoyo": "Se distribuyen los cuidados; la familia extendida apoya después de clases.",
+      "provincia": "PANAMA",
+      "disponibilidadViaje": "ALTA",
+      "notaDistancia": "Pueden coordinar visitas semanales con anticipación.",
+      "edadMinimaAceptada": 6,
+      "edadMaximaAceptada": 12,
+      "notaRangoEdad": "Preparación centrada en edad escolar y apoyo al aprendizaje.",
+      "disposicionHermanos": "DISPUESTA",
+      "notaHermanos": "Dispuestos a recibir un grupo con acompañamiento del equipo.",
+      "condicionesPuedeAcompanarHoy": [
+        "ASMA"
+      ],
+      "condicionesConApoyo": [
+        "DIABETES"
+      ],
+      "notaCondicionesSalud": "Cuentan con organización para controles de asma; solicitan capacitación para diabetes."
+    },
+    {
+      "tipoFamilia": "MONOPARENTAL",
+      "especificacionHogar": "",
+      "notaEstructuraHogar": "Una persona adulta responsable con jornada flexible y rutinas estables para primera infancia.",
+      "redApoyo": [
+        "FAMILIA_EXTENDIDA",
+        "AMISTADES_O_COMUNIDAD"
+      ],
+      "notaRedApoyo": "Una familiar y dos amistades cercanas coordinan apoyo cotidiano.",
+      "provincia": "COCLE",
+      "disponibilidadViaje": "MEDIA",
+      "notaDistancia": "Organiza traslados quincenales y necesita anticipación para citas adicionales.",
+      "edadMinimaAceptada": 0,
+      "edadMaximaAceptada": 5,
+      "notaRangoEdad": "Ha organizado el hogar para juego, descanso y cuidado en primera infancia.",
+      "disposicionHermanos": "PREFIERE_UN_SOLO_NINO",
+      "notaHermanos": "Actualmente puede acompañar a un niño; reconoce la importancia de revisar sus vínculos.",
+      "condicionesPuedeAcompanarHoy": [],
+      "condicionesConApoyo": [
+        "ASMA"
+      ],
+      "notaCondicionesSalud": "Solicita orientación y capacitación antes de asumir cuidados de asma."
+    },
+    {
+      "tipoFamilia": "FAMILIA_EXTENDIDA",
+      "especificacionHogar": "",
+      "notaEstructuraHogar": "Hogar de varias generaciones que acuerda responsabilidades y respeta los espacios personales.",
+      "redApoyo": [
+        "FAMILIA_EXTENDIDA",
+        "AMISTADES_O_COMUNIDAD"
+      ],
+      "notaRedApoyo": "Dos adultos pueden acompañar tareas y citas; existe apoyo comunitario cercano.",
+      "provincia": "CHIRIQUI",
+      "disponibilidadViaje": "BAJA",
+      "notaDistancia": "Puede recibir visitas; los viajes a otra provincia requieren organización previa.",
+      "edadMinimaAceptada": 12,
+      "edadMaximaAceptada": 17,
+      "notaRangoEdad": "Preparación para acompañar adolescencia, formación y autonomía progresiva.",
+      "disposicionHermanos": "DISPUESTA_CON_DUDAS",
+      "notaHermanos": "Requiere conversar sobre espacios y responsabilidades ante un grupo de hermanos.",
+      "condicionesPuedeAcompanarHoy": [
+        "ASMA"
+      ],
+      "condicionesConApoyo": [
+        "DISCAPACIDAD_FISICA"
+      ],
+      "notaCondicionesSalud": "Puede acompañar controles de asma; solicita valoración de accesibilidad para otras necesidades."
+    },
+    {
+      "tipoFamilia": "OTRA",
+      "especificacionHogar": "Dos personas adultas responsables conviven con una persona mayor con autonomía.",
+      "notaEstructuraHogar": "Los integrantes mantienen horarios complementarios y acuerdan espacios de cuidado y descanso.",
+      "redApoyo": [
+        "AMISTADES_O_COMUNIDAD"
+      ],
+      "notaRedApoyo": "Amistades cercanas ofrecen apoyo en gestiones y traslados.",
+      "provincia": "PANAMA_OESTE",
+      "disponibilidadViaje": "ALTA",
+      "notaDistancia": "Disponibilidad para visitas coordinadas durante la semana.",
+      "edadMinimaAceptada": 5,
+      "edadMaximaAceptada": 10,
+      "notaRangoEdad": "Desean acompañar el inicio y desarrollo de la etapa escolar.",
+      "disposicionHermanos": "OTRA",
+      "notaHermanos": "Necesitan revisar con el equipo la composición del grupo y la organización del hogar antes de responder.",
+      "condicionesPuedeAcompanarHoy": [
+        "DISCAPACIDAD_AUDITIVA"
+      ],
+      "condicionesConApoyo": [
+        "ASMA"
+      ],
+      "notaCondicionesSalud": "Declaran recursos de comunicación accesible y disponibilidad para capacitación."
+    },
+    {
+      "tipoFamilia": "MONOPARENTAL",
+      "especificacionHogar": "",
+      "notaEstructuraHogar": "Una persona adulta responsable con horarios definidos y espacio para acompañamiento individual.",
+      "redApoyo": [
+        "NINGUNA_POR_AHORA"
+      ],
+      "notaRedApoyo": "Está construyendo una red de apoyo y desea orientación para organizarla.",
+      "provincia": "VERAGUAS",
+      "disponibilidadViaje": "MEDIA",
+      "notaDistancia": "Puede acordar visitas con una semana de anticipación.",
+      "edadMinimaAceptada": 8,
+      "edadMaximaAceptada": 14,
+      "notaRangoEdad": "Preparación para apoyar aprendizaje y cambios de etapa.",
+      "disposicionHermanos": "NINGUNA_DE_LAS_ANTERIORES",
+      "notaHermanos": "Todavía no ha podido valorar su capacidad para un grupo y necesita orientación antes de expresar una disposición.",
+      "condicionesPuedeAcompanarHoy": [],
+      "condicionesConApoyo": [
+        "ASMA",
+        "TDAH"
+      ],
+      "notaCondicionesSalud": "No declara experiencia previa; requiere capacitación y construcción de apoyos."
+    },
+    {
+      "tipoFamilia": "PAREJA",
+      "especificacionHogar": "",
+      "notaEstructuraHogar": "Dos adultos con experiencia de cuidado y horarios complementarios.",
+      "redApoyo": [
+        "PAREJA",
+        "AMISTADES_O_COMUNIDAD"
+      ],
+      "notaRedApoyo": "La pareja organiza cuidados y una red de amistades apoya en traslados.",
+      "provincia": "COLON",
+      "disponibilidadViaje": "ALTA",
+      "notaDistancia": "Puede organizar visitas frecuentes y recibir al equipo.",
+      "edadMinimaAceptada": 9,
+      "edadMaximaAceptada": 17,
+      "notaRangoEdad": "Preparación para niñez mayor y adolescencia.",
+      "disposicionHermanos": "DISPUESTA",
+      "notaHermanos": "Disposición a acompañar al grupo con planificación de espacios y rutinas.",
+      "condicionesPuedeAcompanarHoy": [
+        "DIABETES",
+        "ASMA"
+      ],
+      "condicionesConApoyo": [
+        "EPILEPSIA"
+      ],
+      "notaCondicionesSalud": "Puede organizar controles regulares y solicita capacitación adicional cuando se requiera."
+    },
+    {
+      "tipoFamilia": "FAMILIA_EXTENDIDA",
+      "especificacionHogar": "",
+      "notaEstructuraHogar": "Tres adultos comparten el hogar y acuerdan una figura principal de cuidado.",
+      "redApoyo": [
+        "FAMILIA_EXTENDIDA"
+      ],
+      "notaRedApoyo": "Reparten el acompañamiento cotidiano sin cambiar la figura responsable.",
+      "provincia": "HERRERA",
+      "disponibilidadViaje": "BAJA",
+      "notaDistancia": "Prioriza recibir visitas y puede planificar viajes ocasionales.",
+      "edadMinimaAceptada": 3,
+      "edadMaximaAceptada": 8,
+      "notaRangoEdad": "Acompañamiento de educación inicial y primeros grados.",
+      "disposicionHermanos": "DISPUESTA_CON_DUDAS",
+      "notaHermanos": "Desea orientación sobre cómo sostener rutinas individuales dentro del grupo.",
+      "condicionesPuedeAcompanarHoy": [
+        "ASMA"
+      ],
+      "condicionesConApoyo": [
+        "TEA"
+      ],
+      "notaCondicionesSalud": "Solicita formación antes de declarar capacidad para acompañar necesidades de desarrollo."
+    },
+    {
+      "tipoFamilia": "PAREJA",
+      "especificacionHogar": "",
+      "notaEstructuraHogar": "Hogar de dos adultos con tiempo reservado para cuidado y adaptación gradual.",
+      "redApoyo": [
+        "PAREJA",
+        "FAMILIA_EXTENDIDA",
+        "AMISTADES_O_COMUNIDAD"
+      ],
+      "notaRedApoyo": "Cuenta con apoyo cercano para relevo de cuidados y gestiones.",
+      "provincia": "LOS_SANTOS",
+      "disponibilidadViaje": "MEDIA",
+      "notaDistancia": "Coordina traslados y visitas con el equipo según los horarios laborales.",
+      "edadMinimaAceptada": 0,
+      "edadMaximaAceptada": 7,
+      "notaRangoEdad": "Preparación para primera infancia y transición escolar.",
+      "disposicionHermanos": "PREFIERE_UN_SOLO_NINO",
+      "notaHermanos": "En este momento declara capacidad de cuidado para un niño.",
+      "condicionesPuedeAcompanarHoy": [],
+      "condicionesConApoyo": [
+        "DISCAPACIDAD_VISUAL",
+        "DISCAPACIDAD_AUDITIVA"
+      ],
+      "notaCondicionesSalud": "Solicita capacitación y revisión de recursos de accesibilidad antes de asumir esos cuidados."
+    }
+  ],
+  "psicologico": [
+    {
+      "foco": "adaptación a las rutinas",
+      "areas": [
+        "ADAPTACION_EMOCIONAL",
+        "ACOMPANAMIENTO"
+      ],
+      "orientacion": "Anticipar las actividades, presentar cambios de forma gradual y revisar cómo responde a los apoyos."
+    },
+    {
+      "foco": "comunicación y expresión de preferencias",
+      "areas": [
+        "INTERACCION_SOCIAL",
+        "ACOMPANAMIENTO"
+      ],
+      "orientacion": "Ofrecer oportunidades de expresión acordes con su etapa y respetar el tiempo que necesita para responder."
+    },
+    {
+      "foco": "vínculos con figuras de referencia",
+      "areas": [
+        "RELACIONES_AFECTIVAS",
+        "ADAPTACION_EMOCIONAL"
+      ],
+      "orientacion": "Coordinar transiciones de cuidado con figuras estables y conservar los contactos autorizados."
+    },
+    {
+      "foco": "participación en actividades compartidas",
+      "areas": [
+        "INTERACCION_SOCIAL",
+        "CONDUCTA"
+      ],
+      "orientacion": "Proponer actividades de interés, observar la participación y ajustar la duración y las consignas."
+    },
+    {
+      "foco": "recursos de aprendizaje",
+      "areas": [
+        "APRENDIZAJE",
+        "ACOMPANAMIENTO"
+      ],
+      "orientacion": "Adecuar materiales y tiempos a su escolaridad y a la información documentada, sin asumir dificultades no evaluadas."
+    },
+    {
+      "foco": "necesidades de acompañamiento",
+      "areas": [
+        "ACOMPANAMIENTO",
+        "ADAPTACION_EMOCIONAL"
+      ],
+      "orientacion": "Coordinar el seguimiento con trabajo social y las personas responsables, tomando como base los apoyos registrados."
+    },
+    {
+      "foco": "manejo gradual de los cambios",
+      "areas": [
+        "ADAPTACION_EMOCIONAL",
+        "CONDUCTA"
+      ],
+      "orientacion": "Organizar transiciones previsibles, explicar lo que ocurrirá con recursos comprensibles y revisar las respuestas en contexto."
+    },
+    {
+      "foco": "fortalezas e intereses cotidianos",
+      "areas": [
+        "INTERACCION_SOCIAL",
+        "RELACIONES_AFECTIVAS"
+      ],
+      "orientacion": "Incorporar intereses documentados en actividades de vinculación y revisar con el equipo los recursos disponibles."
+    }
+  ]
+}

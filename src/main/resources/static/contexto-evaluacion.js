@@ -34,20 +34,28 @@ const ContextoPsicologico={
   this.actualizar();
  },
  // Rellena únicamente controles locales; mantiene el expediente, la autoría y la versión que se está editando.
- cargarEjemplo(){
+ async cargarEjemplo(expediente){
+  if(!expediente||expediente.edad==null)throw new Error('Espera a que se cargue el expediente antes de usar el ejemplo.');
+  const ejemplo=await EjemplosDemo.siguiente('psicologico');
   const form=document.getElementById('formEvaluacion');
   if(!Profesionales.formulariosBase.has(form))Profesionales.marcarGuardado(form);
+  const edad=expediente.edad;
+  const etapa=edad<6?'Observar el juego, la comunicación, la exploración y la respuesta a las figuras de cuidado, de acuerdo con su etapa de desarrollo.':edad<12?'Explorar sus actividades de juego, las relaciones con pares y la experiencia escolar de acuerdo con el nivel registrado.':'Dar espacio a su participación, sus intereses, la autonomía progresiva y las expectativas sobre los cambios de cuidado.';
+  const escolar=expediente.nivelEscolar==='NO_ESCOLARIZADO'?'El expediente indica que no está escolarizado; no corresponde atribuirle rendimiento académico.':`Escolaridad registrada: ${Profesionales.etiqueta(expediente.nivelEscolar)}. No se presume un nivel por la edad.`;
+  const hermanos=expediente.tieneHermanos==='SI'?`El expediente registra ${expediente.cantidadHermanos??'una cantidad pendiente de confirmar de'} hermanos; revisar los vínculos y las orientaciones autorizadas.`:expediente.tieneHermanos==='NO'?'El expediente indica que no tiene hermanos.':'La información sobre hermanos está pendiente; debe verificarse antes de extraer conclusiones.';
+  const apoyo=expediente.necesidadesApoyo||'Completar con el equipo la información sobre apoyos requeridos.';
   const valores={
-   evaluacionPsicologica:'El escenario presenta recursos de comunicación e interacción que conviene valorar junto con la adaptación a nuevas rutinas. Se propone explorar la expresión de preferencias, la solicitud de ayuda y los vínculos con las figuras de referencia. La información descrita no establece un diagnóstico clínico.',
-   observacionesPsicologicas:'En el ejemplo se describe una participación gradual en actividades compartidas y una mejor respuesta cuando las indicaciones son claras. Conviene registrar por separado las conductas observables y las interpretaciones profesionales, atendiendo al contexto y al ritmo de adaptación.',
-   hallazgosProfesionales:'Se consideran fortalezas la posibilidad de expresar intereses y la participación en actividades estructuradas. Requieren seguimiento la adaptación a los cambios y la disponibilidad de apoyos estables. La valoración debe completarse con información profesional suficiente antes de formular conclusiones clínicas.',
-   recomendacionesPsicologicas:'Anticipar los cambios de rutina, ofrecer espacios de conversación y actividades compartidas, y coordinar el apoyo educativo con las personas responsables. Revisar periódicamente la adaptación y ajustar las orientaciones conforme a las necesidades documentadas.'
+   evaluacionPsicologica:`Ejemplo para ${expediente.codigoCaso}, de ${edad} años. Se propone revisar los siguientes aspectos: ${ejemplo.foco}. ${etapa} ${escolar}`,
+   observacionesPsicologicas:`Revisar las respuestas durante actividades cotidianas y diferenciar la conducta observada de su interpretación. ${hermanos} Las observaciones de este ejemplo deben ajustarse a lo efectivamente registrado por el profesional.`,
+   hallazgosProfesionales:`La información del expediente orienta la revisión de ${ejemplo.foco}. Necesidades de apoyo documentadas: ${apoyo} No se infieren diagnósticos ni antecedentes adicionales a partir de estos datos.`,
+   recomendacionesPsicologicas:`${ejemplo.orientacion} ${etapa} Coordinar las orientaciones con el seguimiento social y de salud ya documentado.`
   };
-  Object.entries(valores).forEach(([id,v])=>document.getElementById(id).value=v);
-  document.querySelectorAll('[name="areasObservadas"]').forEach(c=>c.checked=['ADAPTACION_EMOCIONAL','INTERACCION_SOCIAL','RELACIONES_AFECTIVAS','ACOMPANAMIENTO'].includes(c.value));
+  Object.entries(valores).forEach(([id,v])=>{const c=document.getElementById(id);c.value=v;c.setCustomValidity('');});
+  document.querySelectorAll('[name="areasObservadas"]').forEach(c=>c.checked=ejemplo.areas.includes(c.value));
   document.getElementById('sinDiagnostico').checked=true;document.getElementById('diagnosticoProfesional').value='';
   document.getElementById('sinDiagnostico').dispatchEvent(new Event('change',{bubbles:true}));
-  this.cargar({formato:1,metodos:['ENTREVISTA_INDIVIDUAL','OBSERVACION_DIRECTA','REVISION_ANTECEDENTES','INSTRUMENTOS'],otroMetodo:null,instrumentos:'Guía de observación estructurada para el ejercicio académico; registro descriptivo sin puntuación psicométrica.',resultadosInstrumentos:'El ejemplo organiza la participación en la conversación, la respuesta a consignas y los recursos de expresión. No permite derivar un diagnóstico ni acredita la aplicación real de una prueba.',apoyos:['EMOCIONAL','RUTINAS','VINCULOS','SEGUIMIENTO_PSICOLOGICO'],otroApoyo:null,detalleAcompanamiento:'Acompañar los cambios de rutina con anticipación y apoyos previsibles. Favorecer los vínculos significativos y coordinar el seguimiento psicológico con las personas responsables, ajustando las orientaciones al contexto registrado.'});
+  this.cargar({formato:1,metodos:['REVISION_ANTECEDENTES'],apoyos:['EMOCIONAL','RUTINAS','VINCULOS'],detalleAcompanamiento:`${ejemplo.orientacion} Apoyos consignados: ${apoyo}`});
+  document.getElementById('cargarEjemploPsicologico').textContent='Cargar otro ejemplo';
  },
  informe(c){
   if(!c)return '';

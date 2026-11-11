@@ -73,7 +73,6 @@ public class PerfilNinoRequest {
     @Size(max=255, message="Utiliza hasta 255 caracteres")
     private String gradoEscolar;
 
-    @NotNull(message = "El rendimiento académico es obligatorio")
     private RendimientoAcademico rendimientoAcademico;
 
     @NotEmpty(message = "Seleccione al menos un área de habilidad (o 'Ninguna identificada')")
@@ -304,16 +303,39 @@ public class PerfilNinoRequest {
             && (alergias == null || !alergias.contains(Alergia.ALIMENTARIA) || alergiasDetalle != null && !alergiasDetalle.isBlank()); }
     @JsonIgnore @AssertTrue(message="Revisa las condiciones de salud y describe «Otra» cuando corresponda")
     public boolean isCondicionesSaludCoherentes() { return seleccionValida(condicionesSalud, "NINGUNA_CONOCIDA", "OTRA", condicionesSaludDetalle); }
-    @JsonIgnore @AssertTrue(message="Revisa la cantidad de hermanos: indica al menos uno si seleccionaste «Sí» y cero o vacío si seleccionaste «No»")
+    @JsonIgnore @AssertTrue(message="Indica el rendimiento cuando corresponda; para un niño no escolarizado utiliza «No aplica»")
+    public boolean isEscolaridadCoherente() {
+        if (nivelEscolar == null) return true;
+        if (nivelEscolar == NivelEscolar.NO_ESCOLARIZADO)
+            return (rendimientoAcademico == null || rendimientoAcademico == RendimientoAcademico.NO_APLICA)
+                    && (gradoEscolar == null || gradoEscolar.isBlank() || "No aplica".equalsIgnoreCase(gradoEscolar.strip()));
+        if (nivelEscolar == NivelEscolar.INFORMACION_NO_DISPONIBLE)
+            return rendimientoAcademico == null || rendimientoAcademico == RendimientoAcademico.INFORMACION_NO_DISPONIBLE
+                    || rendimientoAcademico == RendimientoAcademico.NO_EVALUADO;
+        return rendimientoAcademico != null && rendimientoAcademico != RendimientoAcademico.NO_APLICA
+                && (nivelEscolar != NivelEscolar.OTRO || gradoEscolar != null && !gradoEscolar.isBlank());
+    }
+    @JsonIgnore @AssertTrue(message="Revisa la cantidad de hermanos: indica al menos uno si seleccionaste «Sí» y cero o vacío si seleccionaste «No»; si no se sabe, deja la cantidad vacía")
     public boolean isHermanosCoherentes() {
-        return tieneHermanos == null || (tieneHermanos == SiNo.SI
-                ? cantidadHermanos != null && cantidadHermanos > 0 : cantidadHermanos == null || cantidadHermanos == 0);
+        if (tieneHermanos == SiNo.SI) return cantidadHermanos != null && cantidadHermanos > 0;
+        if (tieneHermanos == SiNo.NO) return cantidadHermanos == null || cantidadHermanos == 0;
+        return cantidadHermanos == null;
+
     }
     private boolean seleccionValida(List<? extends Enum<?>> opciones, String neutra, String otra, String detalle) {
         if (opciones == null || opciones.isEmpty()) return true; // @NotEmpty conserva el mensaje del campo.
         if (opciones.stream().anyMatch(java.util.Objects::isNull)) return false;
-        if (neutra != null && opciones.stream().anyMatch(v -> neutra.equals(v.name())) && opciones.size() > 1) return false;
+        if (new java.util.HashSet<>(opciones).size() != opciones.size()) return false;
+        var exclusivas = java.util.Set.of("AUN_NO_EVALUADO", "INFORMACION_INSUFICIENTE", "INFORMACION_NO_DISPONIBLE");
+        if (opciones.size() > 1 && opciones.stream().anyMatch(v -> exclusivas.contains(v.name()) || v.name().equals(neutra))) return false;
         return opciones.stream().noneMatch(v -> otra.equals(v.name())) || detalle != null && !detalle.isBlank();
+    }
+
+    /** Las llamadas internas y la carga de demostración conservan las mismas reglas de coherencia. */
+    public void validarCoherencia() {
+        if (!isEscolaridadCoherente() || !isHermanosCoherentes() || !isHabilidadesCoherentes()
+                || !isGustosCoherentes() || !isPersonalidadCoherente() || !isAlergiasCoherentes() || !isCondicionesSaludCoherentes())
+            throw new IllegalArgumentException("Revisa la escolaridad, los hermanos y las selecciones excluyentes; explica las opciones «Otro»");
     }
 
     /** Evita truncar silenciosamente edades o cantidades decimales recibidas por JSON. */

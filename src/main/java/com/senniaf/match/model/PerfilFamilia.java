@@ -11,6 +11,8 @@ public class PerfilFamilia {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
     @Column(name="codigo_caso", nullable=false, unique=true, length=20) private String codigoCaso;
     @Enumerated(EnumType.STRING) private TipoFamilia tipoFamilia;
+    @Column(length=1000) private String especificacionHogar;
+    public String getEspecificacionHogar(){return especificacionHogar;} public void setEspecificacionHogar(String v){especificacionHogar=v;}
     @Column(length=2000) private String notaEstructuraHogar;
     @ElementCollection(fetch=FetchType.EAGER) @Enumerated(EnumType.STRING)
     @CollectionTable(name="familia_red_apoyo", joinColumns=@JoinColumn(name="perfil_id"))
