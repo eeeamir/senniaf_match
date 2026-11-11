@@ -82,4 +82,14 @@ No se programaron apagados, suspensión o eliminación. Mantener el límite de g
 
 ## Esquema y datos
 
-Los scripts 001, 002 y 005–008 conservan el esquema y permisos técnicos. Los cambios 006–008 están en la carpeta histórica `sql/propuestas/`, aunque ya fueron autorizados y aplicados en esta VM. Ninguno se ejecuta desde `actualizar.sh`. Los scripts privados de carga 003/004 no se publican ni son necesarios para actualizar el servicio existente. No se incluyen registros o respaldos en Git.
+Los scripts 001, 002 y 005–009 conservan el esquema y permisos técnicos. Los cambios 006–008 están en la carpeta histórica `sql/propuestas/`, aunque ya fueron autorizados y aplicados en esta VM. Ninguno se ejecuta desde `actualizar.sh`. Los scripts privados de carga 003/004 no se publican ni son necesarios para actualizar el servicio existente. No se incluyen registros o respaldos en Git.
+
+## Publicación de correcciones del 10 de noviembre de 2026
+
+La VM utiliza `senniaf-match-revision-demo-20261110.jar`, correspondiente al commit de implementación `0923fe863f92fe9a6cb3074fbfafc0ad0169c864`, con SHA-256 `7d0a92f56402c7dbc7482897ac4914f19cbdf23f587476693cdce413aae9517a`. Se publicó con `actualizar.sh` y se conserva el JAR anterior en `/srv/senniaf/releases/`.
+
+La migración `009-formularios-coherentes.sql` ya está aplicada en `senniaf_demo`. Añade `especificacion_hogar` y amplía las opciones y las restricciones para nuevas escrituras; las restricciones `NOT VALID` conservan los datos históricos sin modificarlos. Antes de aplicarla se generó un respaldo privado, se leyó completo con `pg_restore` sin ejecutar una restauración y se comprobó por SHA-256 la copia descargada de Blob. El actualizador generó otro respaldo antes de sustituir el JAR. Se conservaron las copias anteriores.
+
+La aplicación sigue usando PostgreSQL local y la misma base. Los datos residen en `/var/lib/postgresql/16/main`, sobre el disco administrado persistente Standard SSD LRS de la VM; no se cambió de base ni se reinició PostgreSQL. Las filas existentes se conservaron tras la migración y el reinicio de la aplicación.
+
+En esta demostración se habilitó expresamente `SENNIAF_DEMO_ASIGNACION_AUTOMATICA=true`, conservando una copia privada de la configuración anterior. Solo afecta a nuevas altas y distribuye psicología según la carga de casos; no reasigna expedientes anteriores ni representa una política institucional. No se cambiaron credenciales ni opciones de seguridad. Las credenciales de cuentas de demostración permanecen fuera del repositorio.
