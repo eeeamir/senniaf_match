@@ -30,6 +30,19 @@ public class VinculacionService {
         repo.saveAndFlush(v);
         auditar(v,decision.getFuncionario(),"VINCULACION_CREADA","El Comité aceptó la propuesta. Se creó la vinculación pendiente de respuesta familiar.");
     }
+    private boolean accesoInfantilFamiliar(Vinculacion v){
+        return v.isReservaVigente() && Set.of(Vinculacion.Estado.PENDIENTE_RESPUESTA,Vinculacion.Estado.RESPUESTA_ACEPTADA).contains(v.getEstado()) && interrupcion(v)==null;
+    }
+    /** Proyección cerrada: datos estructurados de la asignación, nunca entidades ni informes internos. */
+    public Map<String,Object> informacionAsignada(Long id,String actor){
+        var v=repo.findById(id).orElseThrow(()->new RolNoAutorizadoException("La información de esta asignación no está disponible"));
+        if(!actor.equals(v.getFamilia().getRegistradoPor()) || !accesoInfantilFamiliar(v))throw new RolNoAutorizadoException("El acceso a la información de esta asignación no está disponible");
+        var n=v.getNino();Map<String,Object> r=new LinkedHashMap<>();r.put("vinculacion", "VIN-"+v.getId());
+        r.put("edad",n.getEdad());r.put("unidadEdad",n.getUnidadEdad());r.put("nivelEscolar",n.getNivelEscolar());r.put("rendimientoAcademico",n.getRendimientoAcademico());
+        r.put("alergias",n.getAlergias());r.put("intoleranciaLactosa",n.getIntoleranciaLactosa());r.put("condicionesSalud",n.getCondicionesSalud());
+        r.put("habilidades",n.getHabilidades());r.put("gustos",n.getGustos());r.put("personalidad",n.getPersonalidad());
+        return r;
+    }
     public List<Map<String,Object>> propias(String actor){
         return repo.findByFamiliaRegistradoPorOrderByIdDesc(actor).stream().map(v->vista(v,true)).toList();
     }
@@ -90,8 +103,8 @@ public class VinculacionService {
     }
     private Map<String,Object> vista(Vinculacion v,boolean familiar){
         var r=resumen(v);
-        // No hay una política documentada que autorice datos infantiles en el portal familiar.
-        if(familiar){r.remove("expedienteInfantil");r.remove("puntajeOriginal");r.remove("versionOriginal");}
+        // El portal usa una proyección separada; esta respuesta no incluye la entidad infantil.
+        if(familiar){r.put("puedeConsultarInformacion",accesoInfantilFamiliar(v));r.remove("expedienteInfantil");r.remove("puntajeOriginal");r.remove("versionOriginal");}
         r.put("fechaRespuesta",fecha(v.getFechaRespuesta()));r.put("disponibilidad",!v.isReservaVigente()?"Pendiente de confirmar elegibilidad para Match":v.getEstado()==Vinculacion.Estado.RESPUESTA_RECHAZADA_PENDIENTE_CIERRE?"Reservado; pendiente de confirmación institucional":"Reservado por asignación vigente");
         r.put("siguientePaso",switch(v.getEstado()){
             case RECHAZADA_POR_FAMILIA -> "Tu respuesta quedó registrada. Gracias por revisar la propuesta. El equipo correspondiente podrá continuar con el seguimiento de tu expediente.";

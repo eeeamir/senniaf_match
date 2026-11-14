@@ -319,6 +319,7 @@ async function cargarFamilia() {
   try {
     const datos = await leerApi(`/api/scoring/familias/${encodeURIComponent(codigoFamilia)}/expediente`);
     document.getElementById('datosDetalle').innerHTML = detalleSecciones(datos,CAMPOS_FAMILIA,GRUPOS_FAMILIA);
+    if(location.hash==='#apoyosCulturales'){const a=document.getElementById('apoyosCulturales');if(a){a.open=true;a.scrollIntoView({block:'start'});}}
     document.getElementById('datosDetalle').classList.add('pro-expedientes-completos');
   } catch(e) { document.getElementById('datosDetalle').textContent = e.message; }
 }
@@ -400,8 +401,8 @@ function pintarDatosEvaluacion(informe=null){
 }
 function actualizarDiagnostico(){const f=document.querySelector('[data-diagnostico-formal]'),activo=!document.getElementById('sinDiagnostico').checked;f.hidden=!activo;f.disabled=!activo;document.getElementById('diagnosticoProfesional').required=activo;}
 document.getElementById('sinDiagnostico').addEventListener('change',actualizarDiagnostico);
-let ubicacionesEdicion=[];
-function restaurarEdicionInline(){for(const [nodo,marca] of ubicacionesEdicion.reverse()){marca.replaceWith(nodo);}ubicacionesEdicion=[];document.getElementById('formEvaluacion').classList.remove('pro-edicion-inline');}
+let ubicacionesEdicion=[],apartadosEdicion=[];
+function restaurarEdicionInline(){for(const [nodo,marca] of ubicacionesEdicion.reverse()){marca.replaceWith(nodo);}ubicacionesEdicion=[];apartadosEdicion.forEach(n=>n.remove());apartadosEdicion=[];document.getElementById('formEvaluacion').classList.remove('pro-edicion-inline');}
 function moverEdicion(nodo,destino){const marca=document.createComment('posición original');nodo.before(marca);ubicacionesEdicion.push([nodo,marca]);destino.append(nodo);}
 function terminarCorreccion() {
   restaurarEdicionInline();
@@ -429,15 +430,24 @@ document.querySelector('main').addEventListener('click',e=>{
   const form=document.getElementById('formEvaluacion'),articulo=document.querySelector('#evaluacionesVigentes .pro-informe');
   if(articulo){const marca=document.createComment('posición del formulario');form.before(marca);ubicacionesEdicion.push([form,marca]);articulo.before(form);form.classList.add('pro-edicion-inline');
    const bloques=[...form.children];moverEdicion(articulo,form);
-   const secciones=[...articulo.querySelectorAll('.pro-informe-bloque')];
-   for(const bloque of bloques){const campo=bloque.querySelector('textarea,input');let i=campo?.id==='evaluacionPsicologica'?0:campo?.id==='observacionesPsicologicas'?1:campo?.id==='recomendacionesPsicologicas'?2:secciones.length-1;const seccion=secciones[i];if(seccion){seccion.open=true;moverEdicion(bloque,seccion.querySelector('.pro-informe-contenido'));}}
+   const nombres={evaluacionPsicologica:'Evaluación',observacionesPsicologicas:'Observaciones',recomendacionesPsicologicas:'Recomendaciones profesionales',hallazgosProfesionales:'Valoración profesional',sinDiagnostico:'Diagnóstico',diagnosticoProfesional:'Diagnóstico',otroMetodo:'Métodos utilizados',detalleAcompanamiento:'Necesidades de acompañamiento'};
+   for(const bloque of bloques){
+    if(bloque.classList.contains('pro-evaluacion-datos'))continue;
+    if(bloque.classList.contains('pro-acciones')){moverEdicion(bloque,articulo.querySelector('.pro-informe-registro'));continue;}
+    const campo=bloque.querySelector('textarea,input');const titulo=nombres[campo?.id]||(bloque.querySelector('[name=areasObservadas]')?'Áreas evaluadas':bloque.querySelector('#apoyosEvaluacion')?'Necesidades de acompañamiento':bloque.querySelector('#metodosEvaluacion')?'Métodos utilizados':null);
+    if(!titulo)continue;
+    let seccion=[...articulo.querySelectorAll('.pro-informe-bloque')].find(n=>n.querySelector('summary')?.textContent.trim()===titulo || titulo==='Diagnóstico'&&n.querySelector('summary')?.textContent.trim()==='Diagnóstico profesional');
+    if(!seccion){seccion=document.createElement('details');seccion.className='detalle-grupo pro-informe-bloque';seccion.innerHTML=`<summary>${Profesionales.icono('informe')}${limpiarHtml(titulo)}</summary><div class="pro-informe-contenido"></div>`;articulo.querySelector('.pro-informe-bloques').append(seccion);apartadosEdicion.push(seccion);}
+    seccion.open=true;moverEdicion(bloque,seccion.querySelector('.pro-informe-contenido'));
+   }
   }
 });
 const GRUPOS_NINO = {
  'Datos generales y escolaridad':['edad','nivelEscolar','gradoEscolar','rendimientoAcademico'],
  'Habilidades, gustos y personalidad':['habilidades','habilidadesDetalle','gustos','gustosDetalle','personalidad','personalidadDetalle'],
- 'Hermanos y contexto familiar':['tieneHermanos','cantidadHermanos','hermanosDetalle','contextoCultural'],
+ 'Hermanos y contexto familiar':['tieneHermanos','cantidadHermanos','hermanosDetalle'],
  'Salud y necesidades de apoyo':['alergias','alergiasDetalle','intoleranciaLactosa','condicionesSalud','condicionesSaludDetalle','necesidadesApoyo','alertaMedica'],
+ 'Identidad y continuidad cultural':['contextoCultural'],
  'Registro y profesionales responsables':['codigoCaso','numeroExpedienteInstitucional','registradoPor','fechaRegistro','trabajadorSocialAsignado','psicologoAsignado']
 };
 const GRUPOS_FAMILIA = {
@@ -449,7 +459,7 @@ const GRUPOS_FAMILIA = {
 };
 function detalleSecciones(datos,campos,grupos) {
  const aviso=grupos===GRUPOS_FAMILIA&&sesion.rol==='COMITE'?Profesionales.avisoReevaluaciones(datos.numeroReevaluaciones):'';
- return aviso+Object.entries(grupos).map(([titulo,keys],i)=>`<details class="detalle-grupo ${keys.length===1?'pro-detalle-amplio':''}"><summary>${Profesionales.icono(titulo==='Apoyos culturales y comunitarios'?'personas':i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
+ return aviso+Object.entries(grupos).map(([titulo,keys],i)=>`<details id="${titulo==='Identidad y continuidad cultural'?'identidadCultural':titulo==='Apoyos culturales y comunitarios'?'apoyosCulturales':'grupo-'+i}" class="detalle-grupo ${keys.length===1?'pro-detalle-amplio':''}"><summary>${Profesionales.icono(titulo==='Apoyos culturales y comunitarios'?'personas':i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
  detalleCampos(datos,Object.fromEntries(keys.map(k=>[k,campos[k]])))+'</details>').join('');
 }
 function pintarResumen(p){
@@ -486,6 +496,7 @@ document.getElementById('abrirSolicitud').addEventListener('click',()=>{document
 
 
 function configurarPestanas(){
+ const abrirCultura=location.hash==='#identidadCultural';
  const tabs=[['panelDetalle','informe','Información social'],['panelEvaluaciones','psicologia','Información psicológica'],...(['TRABAJADOR_SOCIAL','COMITE'].includes(sesion.rol)?[['panelSolicitudes','carpeta','Gestión del expediente']]:[]),['panelAuditoria','reloj','Historial de cambios']];
  if(sesion.rol==='PSICOLOGO')document.getElementById('panelSolicitudes').hidden=true;
  const nav=document.getElementById('pestanasExpediente');nav.hidden=false;
@@ -494,6 +505,7 @@ function configurarPestanas(){
  nav.querySelectorAll('button').forEach((b,i)=>{b.addEventListener('click',()=>mostrarPanel(b.dataset.panel));b.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const botones=[...nav.querySelectorAll('button')];const j=e.key==='Home'?0:e.key==='End'?botones.length-1:(i+(e.key==='ArrowRight'?1:-1)+botones.length)%botones.length;botones[j].focus();mostrarPanel(botones[j].dataset.panel);});});
  if(sesion.rol==='TRABAJADOR_SOCIAL'&&!document.getElementById('editarSocial'))document.getElementById('cabeceraInformacionSocial').insertAdjacentHTML('beforeend',`<a id="editarSocial" class="boton secundario chico" href="perfil.html?editar=${encodeURIComponent(codigoEvaluacion)}">${Profesionales.icono('informe')}Editar información social</a>`);
  mostrarPanel(tabs.some(([id])=>id===location.hash.slice(1))?location.hash.slice(1):(sesion.rol==='PSICOLOGO'?'panelEvaluaciones':'panelDetalle'));
+ if(abrirCultura){mostrarPanel('panelDetalle');const apartado=document.getElementById('identidadCultural');if(apartado){apartado.open=true;apartado.scrollIntoView({block:'start'});}}
 }
 function mostrarPanel(id){
  document.querySelectorAll('[data-panel]').forEach(b=>{const activo=b.dataset.panel===id;b.setAttribute('aria-selected',String(activo));b.tabIndex=activo?0:-1;document.getElementById(b.dataset.panel).hidden=!activo;});

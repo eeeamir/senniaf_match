@@ -139,14 +139,20 @@ const Profesionales = {
     const d=document.createElement('dialog');d.className='pro-dialogo pro-dialogo-decision';d.setAttribute('aria-label',titulo);
     d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('solicitudes')}</span><h2>${limpiarHtml(titulo)}</h2></div><p class="pro-modal-contexto">${limpiarHtml(contexto)}</p><form><fieldset class="pro-motivos"><legend>${limpiarHtml(instruccion)}</legend>${opciones.map(([valor,nombre])=>`<label class="pro-motivo"><input type="radio" name="motivoDecision" value="${limpiarHtml(valor)}" required><span>${limpiarHtml(nombre)}</span></label>`).join('')}</fieldset><label>Justificación<textarea name="justificacion" required minlength="10" maxlength="${maximo}" rows="5" placeholder="Selecciona un motivo para ver la sugerencia editable."></textarea></label><p class="ayuda">${limpiarHtml(ayuda)}</p><p data-error role="alert"></p><div class="pro-acciones"><button class="boton secundario" type="button" data-cancelar>Cancelar</button><button class="boton" type="submit">${limpiarHtml(textoRevisar)}</button></div></form>`;
     document.body.append(d);
-    if(titulo==='Solicitar reevaluación')d.querySelector('form').insertAdjacentHTML('afterbegin',`<fieldset class="pro-apartados-reevaluacion"><legend>Apartados de la entrevista familiar</legend>${['Hogar y red de apoyo','Preferencias familiares','Salud y acompañamiento','Disponibilidad y entorno','Apoyos culturales y comunitarios'].map(t=>`<label><input type="checkbox" name="apartadoFamiliar" value="${t}">${this.icono('personas')}${t}</label>`).join('')}</fieldset>`);
+    if(titulo==='Solicitar reevaluación')d.querySelector('form').insertAdjacentHTML('afterbegin',`<fieldset class="pro-apartados-reevaluacion"><legend>Apartados de la entrevista familiar</legend>${['Hogar y red de apoyo','Preferencias familiares','Salud y acompañamiento','Disponibilidad y entorno','Apoyos culturales y comunitarios'].map((t,i)=>`<label><input type="checkbox" name="apartadoFamiliar" value="${t}">${this.icono(['personas','estrella','salud','hogar','personas'][i])}<span>${t}</span></label>`).join('')}</fieldset><p data-apartados-cantidad aria-live="polite">0 apartados seleccionados</p>`);
     const form=d.querySelector('form'),texto=d.querySelector('textarea'),boton=d.querySelector('[type=submit]');
     CamposFormulario.iniciar(form);
+    if(titulo==='Solicitar reevaluación'){
+      texto.placeholder='Explica qué información debe corregirse, aclararse o completarse y por qué.';
+      const contar=()=>{d.querySelector('[data-apartados-cantidad]').textContent=(()=>{const n=form.querySelectorAll('[name=apartadoFamiliar]:checked').length;return n===1?'1 apartado seleccionado':n+' apartados seleccionados';})();};
+      form.addEventListener('change',contar);form.addEventListener('reset',()=>setTimeout(contar,0));
+      const limpiar=document.createElement('button');limpiar.type='reset';limpiar.className='boton secundario';limpiar.textContent='Limpiar';form.querySelector('.pro-acciones').prepend(limpiar);
+    }
     let guardando=false;
     d.querySelector('[data-cancelar]').addEventListener('click',()=>d.close());
     d.addEventListener('cancel',e=>{if(guardando)e.preventDefault();});
     d.addEventListener('close',()=>d.remove(),{once:true});
-    form.addEventListener('change',e=>{if(e.target.name==='motivoDecision'){texto.value=opciones.find(o=>o[0]===e.target.value)?.[2]||'';texto.setCustomValidity('');CamposFormulario.error(texto,'');texto.placeholder=e.target.value==='OTRO'?'Explica tu decisión con tus propias palabras.':'Puedes modificar esta sugerencia.';}});
+    form.addEventListener('change',e=>{if(e.target.name==='motivoDecision'){texto.value=opciones.find(o=>o[0]===e.target.value)?.[2]||'';texto.setCustomValidity('');CamposFormulario.error(texto,'');texto.placeholder=titulo==='Solicitar reevaluación'?'Explica qué información debe corregirse, aclararse o completarse y por qué.':e.target.value==='OTRO'?'Explica tu decisión con tus propias palabras.':'Puedes modificar esta sugerencia.';}});
     texto.addEventListener('input',()=>texto.setCustomValidity(''));
     form.addEventListener('submit',e=>{
       e.preventDefault();if(guardando)return;
@@ -158,6 +164,7 @@ const Profesionales = {
       const justificacion=(apartados.length?'Apartados: '+apartados.join(' | ')+'\n\n':'')+`${motivo[1].replace(/\.$/,'')}: ${texto.value.trim()}`;
       const confirmar=document.createElement('dialog');confirmar.className='pro-dialogo';confirmar.setAttribute('aria-label',tituloConfirmacion);
       confirmar.innerHTML=`<h2>${limpiarHtml(tituloConfirmacion)}</h2><p>${limpiarHtml(confirmacion)}</p><div class="pro-acciones"><button class="boton secundario" type="button" data-volver>Volver</button><button class="boton" type="button" data-confirmar>${limpiarHtml(textoConfirmar)}</button></div>`;
+      if(titulo==='Solicitar reevaluación')confirmar.querySelector('h2').insertAdjacentHTML('afterend',`<p class="pro-texto-registrado">${limpiarHtml(justificacion)}</p>`);
       document.body.append(confirmar);boton.disabled=true;
       confirmar.addEventListener('close',()=>{confirmar.remove();if(!guardando)boton.disabled=false;},{once:true});
       confirmar.querySelector('[data-volver]').onclick=()=>confirmar.close();

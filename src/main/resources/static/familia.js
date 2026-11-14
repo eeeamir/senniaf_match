@@ -12,6 +12,7 @@ const Familia = {
    const sinEntrevista=r.status===404;
    if(sinEntrevista && vista==='entrevista')return location.replace('perfil.html');
    const vinculaciones=await Vinculaciones.api('/api/vinculaciones/propias');
+   document.querySelectorAll('[data-asignacion-info]').forEach(d=>{if(!vinculaciones.some(v=>String(v.id)===d.dataset.asignacionInfo&&v.puedeConsultarInformacion))d.close();});
    const pendiente=vinculaciones.find(v=>v.estado==='PENDIENTE_RESPUESTA');
    const p=sinEntrevista?{perfilCompleto:false,actividad:[]}:await r.json();
    const enlaceEntrevista=sinEntrevista?'perfil.html':'perfil.html?reevaluacion=1';

@@ -18,32 +18,43 @@ const Vinculaciones = {
     if (!r.ok) throw new Error(datos.mensaje || 'No pudimos completar la consulta. Inténtalo nuevamente.');
     return datos;
   },
-  estado(v) {
+  estado(v,familiar=false) {
     const rechazado = ['RECHAZADA_POR_FAMILIA','RESPUESTA_RECHAZADA_PENDIENTE_CIERRE'].includes(v.estado);
     const icono = v.estado === 'PENDIENTE_RESPUESTA' ? 'reloj' : rechazado ? 'advertencia' : 'comprobar';
-    return `<span class="chip ${rechazado ? 'retirado' : v.estado === 'PENDIENTE_RESPUESTA' ? 'vinculacion-pendiente' : ''}">${Profesionales.icono(icono)}${limpiarHtml(this.estados[v.estado] || v.estado)}</span>${v.interrupcionRegistrada?` <span class="chip retirado">${Profesionales.icono('advertencia')}${v.interrupcionPendiente?'Interrupción pendiente de revisión':'Interrupción revisada'}</span>`:''}`;
+    return `<span class="chip ${rechazado ? 'retirado' : v.estado === 'PENDIENTE_RESPUESTA' ? 'vinculacion-pendiente' : ''}">${Profesionales.icono(icono)}${limpiarHtml(familiar&&v.estado==='RESPUESTA_ACEPTADA'?'Propuesta aceptada':this.estados[v.estado] || v.estado)}</span>${v.interrupcionRegistrada?` <span class="chip retirado">${Profesionales.icono('advertencia')}${v.interrupcionPendiente?'Interrupción pendiente de revisión':'Interrupción revisada'}</span>`:''}`;
   },
   familiar(lista) {
     if (!lista.length) return `<section class="tarjeta"><h2>${Profesionales.icono('vinculacion')}Mi vinculación</h2><p>Por ahora no tienes vinculaciones registradas.</p></section>`;
-    return `<div class="vinculaciones-lista">${lista.map(v => `<section class="tarjeta vinculacion-tarjeta vinculacion-familiar">
-      <header class="vinculacion-cabecera"><h2><span class="vinculacion-emblema">${Profesionales.icono('heart-handshake')}</span>${limpiarHtml(v.codigo)}</h2>${this.estado(v)}</header>
-      <dl class="vinculacion-resumen"><div><dt>${Profesionales.icono('personas')}Tu expediente</dt><dd>${limpiarHtml(v.expedienteFamiliar)}</dd></div><div><dt>${Profesionales.icono('calendario')}Propuesta recibida</dt><dd>${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</dd></div></dl>
-      ${v.estado==='RESPUESTA_ACEPTADA'?`<h3>Tu aceptación fue registrada</h3><p>${limpiarHtml(v.siguientePaso)}</p><section class="familia-seguimiento"><h3>Seguimiento de tu proceso</h3><ol class="familia-etapas"><li class="completado">Aceptación registrada</li><li>Acompañamiento e interrelación · Pendiente</li><li>Acogimiento preadoptivo · Pendiente</li></ol><p><strong>Siguiente paso: Preparación de la interrelación.</strong></p><p>El equipo responsable coordinará el acompañamiento y te informará cuando haya novedades.</p></section>`:`<p class="vinculacion-siguiente">${limpiarHtml(v.siguientePaso)}</p>`}
-      <details class="vinculacion-informacion"><summary>${Profesionales.icono('consulta')}Ver seguimiento</summary>
-        ${v.fechaRespuesta ? `<p>${Profesionales.icono('comprobar')}Tu respuesta quedó registrada el ${limpiarHtml(Profesionales.fecha(v.fechaRespuesta))}.</p>` : '<p>Aún no hay una respuesta familiar registrada.</p>'}
-        <p class="ayuda">${Profesionales.icono('informacion')}La respuesta en este portal no sustituye las formalidades legales ni autoriza el acogimiento preadoptivo.</p>
-      </details>
-      ${v.estado === 'PENDIENTE_RESPUESTA' ? `<footer class="pro-acciones vinculacion-acciones">
-        <button class="boton" data-responder="ACEPTAR" data-id="${v.id}">${Profesionales.icono('comprobar')}Aceptar</button>
-        <button class="boton secundario" data-responder="RECHAZAR" data-id="${v.id}">${Profesionales.icono('cerrar')}Rechazar</button>
-      </footer>` : ''}
+    return `<div class="vinculaciones-lista familiar-amplia">${lista.map(v=>`<section class="tarjeta vinculacion-familiar vinculacion-tarjeta">
+      <header class="vinculacion-cabecera"><div class="familia-identificacion"><span class="vinculacion-emblema">${Profesionales.icono('heart-handshake')}</span><div><h2>${limpiarHtml(v.codigo)} · Mi vinculación</h2><p>Expediente familiar ${limpiarHtml(v.expedienteFamiliar)}</p></div></div>${this.estado(v,true)}</header>
+      ${v.estado==='RESPUESTA_ACEPTADA'?`<div class="familia-confirmacion"><span class="vinculacion-emblema menta">${Profesionales.icono('comprobar')}</span><div><h3>Tu aceptación fue registrada</h3><p>Puedes consultar el estado de tu vinculación mientras el equipo responsable continúa con el proceso.</p></div></div>`:['RECHAZADA_POR_FAMILIA','RESPUESTA_RECHAZADA_PENDIENTE_CIERRE'].includes(v.estado)?`<div class="familia-confirmacion"><span class="vinculacion-emblema">${Profesionales.icono('informacion')}</span><div><h3>Tu rechazo fue registrado</h3><p>El acceso digital a la información del niño ha finalizado. El equipo institucional podrá continuar con las actuaciones correspondientes.</p></div></div>`:`<p class="vinculacion-siguiente">${limpiarHtml(v.siguientePaso)}</p>`}
+      <div class="familia-propuesta-acciones">
+        ${v.puedeConsultarInformacion?`<section class="familia-informacion-asignada"><span class="vinculacion-emblema">${Profesionales.icono('informe')}</span><div><h3>Información del niño asignado</h3><p>Consulta la información autorizada de esta asignación.</p></div><button type="button" class="boton secundario chico" data-informacion-nino="${v.id}">${Profesionales.icono('consulta')}Ver información ${Profesionales.icono('flecha')}</button></section>`:''}
+        ${v.estado==='PENDIENTE_RESPUESTA'?`<div class="familia-respuesta"><p>Tu decisión sobre la propuesta</p><div class="pro-acciones"><button class="boton" data-responder="ACEPTAR" data-id="${v.id}">${Profesionales.icono('comprobar')}Aceptar</button><button class="boton secundario" data-responder="RECHAZAR" data-id="${v.id}">${Profesionales.icono('cerrar')}Rechazar</button></div></div>`:''}
+      </div>
+      ${v.estado==='RESPUESTA_ACEPTADA'&&!v.interrupcionRegistrada?this.progresoFamiliar():''}${v.estado==='RESPUESTA_ACEPTADA'&&v.interrupcionRegistrada?`<p class="mensaje aviso">${limpiarHtml(v.siguientePaso)}</p>`:''}
+      <details class="vinculacion-informacion"><summary>${Profesionales.icono('reloj')}Ver seguimiento</summary><p>${limpiarHtml(v.siguientePaso)}</p><p>Propuesta recibida: ${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</p>${v.fechaRespuesta?`<p>Respuesta registrada: ${limpiarHtml(Profesionales.fecha(v.fechaRespuesta))}</p>`:''}<p class="ayuda">${Profesionales.icono('informacion')}La respuesta en este portal no sustituye las formalidades legales ni autoriza el acogimiento preadoptivo.</p></details>
     </section>`).join('')}</div>`;
+  },
+  progresoFamiliar(){
+    return `<section class="familia-seguimiento"><header><span class="vinculacion-emblema">${Profesionales.icono('solicitudes')}</span><div><h3>Seguimiento de tu proceso</h3><p>Consulta el avance registrado de tu vinculación.</p></div><span class="chip retirado">Pendiente de coordinación</span></header><ol class="familia-progreso">${[['Aceptación registrada','actual','Etapa actual'],['Acompañamiento e interrelación','pendiente','Etapa posterior'],['Acogimiento preadoptivo','pendiente','Etapa posterior']].map(([n,e,t])=>`<li class="${e}"><span class="familia-indicador">${Profesionales.icono(e==='actual'?'reloj':'informacion')}</span><strong>${n}</strong><small>${t}</small></li>`).join('')}</ol><aside class="familia-siguiente"><span>${Profesionales.icono('informacion')}</span><div><strong>Siguiente paso: Preparación de la interrelación.</strong><p>El equipo responsable coordinará el acompañamiento y te informará cuando haya novedades.</p></div></aside></section>`;
+  },
+  async informacionFamiliar(id){
+    try{
+      const datos=await this.api(`/api/vinculaciones/${encodeURIComponent(id)}/informacion-asignada`);
+      const d=document.createElement('dialog');d.className='pro-dialogo';d.dataset.asignacionInfo=String(id);d.setAttribute('aria-label','Información del niño asignado');
+      const etiquetas={edad:'Edad',unidadEdad:'Unidad de edad',nivelEscolar:'Escolaridad',rendimientoAcademico:'Rendimiento académico',alergias:'Alergias registradas',intoleranciaLactosa:'Intolerancia a la lactosa',condicionesSalud:'Condiciones de salud registradas',habilidades:'Habilidades',gustos:'Intereses',personalidad:'Características personales registradas'};
+      const valor=v=>v==null?'No disponible':Array.isArray(v)?v.length?v.map(x=>Profesionales.etiqueta(x)).join(', '):'Sin información registrada':Profesionales.etiqueta(v);
+      d.innerHTML=`<h2>${Profesionales.icono('informe')}Información del niño asignado</h2><p>${limpiarHtml(datos.vinculacion)}</p><dl class="detalle-datos">${Object.entries(etiquetas).map(([k,t])=>`<div><dt>${t}</dt><dd>${limpiarHtml(valor(datos[k]))}</dd></div>`).join('')}</dl><p class="ayuda">${Profesionales.icono('informacion')}Esta consulta contiene los datos estructurados disponibles de la asignación. El equipo responsable te orientará sobre la información médica, psicológica y educativa que requiera explicación adicional.</p><button type="button" class="boton secundario" data-cerrar>Cerrar</button>`;
+      d.onclose=()=>d.remove();d.querySelector('[data-cerrar]').onclick=()=>d.close();document.body.append(d);d.showModal();
+    }catch(e){const aviso=document.createElement('p');aviso.className='mensaje error';aviso.setAttribute('role','alert');aviso.textContent=e.message;document.querySelector('#contenido').prepend(aviso);}
   },
   descripcion(v){
     if(v.interrupcionPendiente)return 'Hay una interrupción registrada pendiente de revisión institucional.';
     return ({PENDIENTE_RESPUESTA:'La propuesta fue enviada a la familia y estamos a la espera de su respuesta.',RESPUESTA_ACEPTADA:'La familia aceptó la propuesta. Consulta el estado y las actuaciones registradas.',RECHAZADA_POR_FAMILIA:'La familia rechazó la propuesta. Su respuesta quedó registrada.',RESPUESTA_RECHAZADA_PENDIENTE_CIERRE:'La respuesta negativa quedó registrada. El cierre institucional sigue pendiente.',CERRADA:'El cierre quedó registrado. La disponibilidad de cada expediente se revisa por separado.'})[v.estado]||'Consulta las actuaciones registradas en el detalle.';
   },
   enlazarRespuestas(sesion) {
+    document.querySelectorAll('[data-informacion-nino]').forEach(b=>b.onclick=()=>this.informacionFamiliar(b.dataset.informacionNino));
     document.querySelectorAll('[data-responder]').forEach(b => b.onclick = () => {
       if (document.querySelector('dialog[data-respuesta]')) return;
       const aceptar = b.dataset.responder === 'ACEPTAR', d = document.createElement('dialog');
@@ -60,7 +71,7 @@ const Vinculaciones = {
         d.addEventListener('cancel', impedirCierre);
         try {
           await this.api(`/api/vinculaciones/${b.dataset.id}/respuesta`, {method: 'POST', body: JSON.stringify({respuesta: b.dataset.responder})});
-          d.close(); Familia.version = null; await Familia.mostrar(sesion);
+          document.querySelectorAll('[data-asignacion-info]').forEach(info=>info.close());d.close(); Familia.version = null; await Familia.mostrar(sesion);
         } catch (error) {
           d.querySelector('[data-error]').textContent = error.message || 'No pudimos guardar el cambio. Inténtalo nuevamente.';
           confirmar.disabled = cancelar.disabled = false;
