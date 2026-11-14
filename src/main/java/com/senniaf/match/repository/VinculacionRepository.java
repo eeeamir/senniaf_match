@@ -12,6 +12,8 @@ public interface VinculacionRepository extends JpaRepository<Vinculacion,Long> {
     Optional<Vinculacion> bloquear(@Param("id") Long id);
     List<Vinculacion> findByFamiliaRegistradoPorOrderByIdDesc(String actor);
     List<Vinculacion> findAllByOrderByIdDesc();
-    boolean existsByNinoCodigoCasoAndReservaVigenteTrue(String codigo);
-    boolean existsByFamiliaCodigoCasoAndReservaVigenteTrue(String codigo);
+    @Query("select count(v)>0 from Vinculacion v where v.nino.codigoCaso=:codigo and v.reservaVigente=true and v.ninoLiberado=false")
+    boolean existsByNinoCodigoCasoAndReservaVigenteTrue(@Param("codigo") String codigo);
+    @Query("select count(v)>0 from Vinculacion v where v.familia.codigoCaso=:codigo and v.reservaVigente=true and v.familiaLiberada=false")
+    boolean existsByFamiliaCodigoCasoAndReservaVigenteTrue(@Param("codigo") String codigo);
 }

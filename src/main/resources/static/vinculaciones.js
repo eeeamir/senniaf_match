@@ -1,6 +1,7 @@
 /* Comparte las vistas de vinculaciones sin presumir acogimiento ni adopción formalizada. */
 const Vinculaciones = {
   estados: {
+    CERRADA: 'Cerrada',
     PENDIENTE_RESPUESTA: 'Pendiente de respuesta familiar',
     RESPUESTA_ACEPTADA: 'Respuesta aceptada',
     RESPUESTA_RECHAZADA_PENDIENTE_CIERRE: 'Respuesta rechazada — pendiente de cierre institucional'
@@ -114,10 +115,18 @@ const Vinculaciones = {
       <h2>${Profesionales.icono('solicitudes')}Proceso</h2><p>${limpiarHtml(v.siguientePaso)}</p>
       ${v.fechaRespuesta ? `<p>Respuesta familiar registrada por ${limpiarHtml(v.respondidoPor)} · ${limpiarHtml(Profesionales.fecha(v.fechaRespuesta))}</p>` : ''}
       <p class="ayuda">${Profesionales.icono('informacion')}Esta vinculación no acredita acogimiento preadoptivo ni adopción formalizada.</p></section>
-      ${this.panelInterrupcion(v)}
+      ${this.panelInterrupcion(v)}${this.panelCierre(v)}
       <section class="tarjeta"><h2>${Profesionales.icono('reloj')}Historial</h2><ul class="familia-actividad">
         ${v.historial.map(e => `<li><strong>${limpiarHtml(e.resumen)}</strong><p>${Profesionales.icono('persona')}${limpiarHtml(e.responsable)} · ${limpiarHtml(Profesionales.fecha(e.fecha))}</p></li>`).join('') || '<li>La decisión del Comité se conserva en la información general. No hay movimientos adicionales registrados.</li>'}
       </ul></section><a class="boton secundario" href="vinculaciones.html">${Profesionales.icono('vinculacion')}Volver a vinculaciones</a>`;
+    c.querySelector('[data-cierre]')?.addEventListener('click',()=>this.registrarCierre(c,v,sesion));
+    c.querySelectorAll('[data-disponibilidad]').forEach(b=>b.onclick=()=>Profesionales.justificar({
+      titulo:'Revisar disponibilidad del expediente',maximo:500,contexto:b.dataset.disponibilidad==='NINO'?'Expediente infantil':'Expediente familiar',
+      opciones:[['OTRO','Revisión de disponibilidad y elegibilidad','']],
+      confirmacion:'Confirma que revisaste por separado la disponibilidad y elegibilidad de este expediente. Esta actuación no modifica la idoneidad ni los requisitos vigentes.',
+      alConfirmar:justificacion=>this.api(`/api/vinculaciones/${v.id}/disponibilidad`,{method:'POST',body:JSON.stringify({expediente:b.dataset.disponibilidad,justificacion})}),
+      alGuardar:async datos=>{await this.detalle(c,v.id,sesion,datos);c.insertAdjacentHTML('afterbegin','<p class="mensaje exito" role="status">La revisión de este expediente quedó registrada.</p>');}
+    }));
     c.querySelector('[data-interrupcion]')?.addEventListener('click',()=>this.registrarInterrupcion(c,v,sesion));
     c.querySelector('[data-revisar-interrupcion]')?.addEventListener('click',()=>Profesionales.justificar({
       titulo:'Revisar interrupción de convivencia',contexto:v.codigo,
@@ -126,6 +135,27 @@ const Vinculaciones = {
       alConfirmar:justificacion=>this.api(`/api/vinculaciones/${v.id}/interrupcion/revision`,{method:'POST',body:JSON.stringify({justificacion})}),
       alGuardar:async datos=>{await this.detalle(c,v.id,sesion,datos);c.insertAdjacentHTML('afterbegin','<p class="mensaje exito" role="status">La revisión quedó registrada.</p>');}
     }));
+  },
+  panelCierre(v){
+    if(!v.cierre && !v.puedeCerrar)return '';
+    const x=v.cierre;
+    return `<section class="tarjeta"><h2>${Profesionales.icono('informe')}Cierre institucional</h2>
+      <p>El Comité registra la confirmación de la autoridad competente. Este registro no autoriza legalmente el cierre ni formaliza una adopción.</p>
+      ${x?`<dl class="detalle-datos"><div><dt>Fecha del cierre</dt><dd>${limpiarHtml(x.fecha)}</dd></div><div><dt>Referencia institucional</dt><dd>${limpiarHtml(x.referencia)}</dd></div><div><dt>Autoridad responsable</dt><dd>${limpiarHtml(x.autoridad)}</dd></div></dl><p class="pro-texto-registrado">${limpiarHtml(x.motivo)}</p><p>${limpiarHtml(x.registradoPor)} · ${limpiarHtml(Profesionales.fecha(x.registradoEl))}</p>
+      <h3>Revisión independiente de los expedientes</h3><p>El cierre no devuelve automáticamente los expedientes al Match. Cada uno requiere revisión de disponibilidad y elegibilidad.</p>
+      ${[['NINO','Expediente infantil',x.ninoLiberado],['FAMILIA','Expediente familiar',x.familiaLiberada]].map(([k,n,revisado])=>`<p><strong>${n}:</strong> ${revisado?'Revisión registrada; sujeto a las condiciones vigentes de Match.':'Reserva conservada; pendiente de revisión.'}</p>${v.puedeRevisarDisponibilidad&&!revisado?`<button class="boton secundario" data-disponibilidad="${k}">${Profesionales.icono('consulta')}Revisar ${n.toLowerCase()}</button>`:''}`).join('')}`:''}
+      ${v.puedeCerrar?`<button class="boton secundario" data-cierre>${Profesionales.icono('informe')}Registrar cierre institucional</button>`:''}</section>`;
+  },
+  registrarCierre(c,v,sesion){
+    if(document.querySelector('[data-dialogo-cierre]'))return;
+    const d=document.createElement('dialog');d.className='pro-dialogo';d.dataset.dialogoCierre='';d.setAttribute('aria-labelledby','tituloCierre');
+    d.innerHTML=`<h2 id="tituloCierre">${Profesionales.icono('informe')}Registrar cierre institucional</h2><p>Registra únicamente un cierre confirmado por la autoridad competente. Ambos expedientes conservarán su reserva hasta ser revisados por separado.</p>
+    <form class="pro-interrupcion-form"><label>Fecha del cierre<input type="date" name="fechaCierre" required></label><label>Referencia institucional<input name="referenciaInstitucional" minlength="5" maxlength="200" required></label><label>Autoridad responsable<input name="autoridadResponsable" minlength="3" maxlength="200" required></label><label>Motivo o resultado<textarea name="motivo" rows="4" minlength="10" maxlength="2000" required></textarea></label><label><input type="checkbox" name="confirmacionAutoridad" required>Confirmo que cuento con la actuación de la autoridad competente.</label><p data-error role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="submit" class="boton">Registrar cierre</button></div></form>`;
+    document.body.append(d);let guardando=false;const form=d.querySelector('form');CamposFormulario.iniciar(form);d.onclose=()=>d.remove();d.addEventListener('cancel',e=>{if(guardando)e.preventDefault();});d.querySelector('[data-cancelar]').onclick=()=>{if(!guardando)d.close();};
+    form.onsubmit=async e=>{e.preventDefault();if(guardando||!Profesionales.validarFormulario(form))return;guardando=true;form.querySelectorAll('button').forEach(b=>b.disabled=true);
+      try{const datos=Object.fromEntries(new FormData(form));datos.confirmacionAutoridad=form.elements.confirmacionAutoridad.checked;const actualizado=await this.api(`/api/vinculaciones/${v.id}/cierre`,{method:'POST',body:JSON.stringify(datos)});Profesionales.marcarGuardado(form);d.close();await this.detalle(c,v.id,sesion,actualizado);c.insertAdjacentHTML('afterbegin','<p class="mensaje exito" role="status">El cierre institucional quedó registrado. Cada expediente conserva su reserva hasta revisión.</p>');}
+      catch(error){d.querySelector('[data-error]').textContent=error.message;guardando=false;form.querySelectorAll('button').forEach(b=>b.disabled=false);}
+    };d.showModal();
   },
   panelInterrupcion(v){
     const i=v.interrupcion;

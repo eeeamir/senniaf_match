@@ -29,10 +29,12 @@ for archivo in \
     deploy/azure/sql/propuestas/011-unidad-edad-PENDIENTE.sql \
     deploy/azure/sql/002-permisos.sql \
     deploy/azure/sql/012-vinculaciones.sql \
-    deploy/azure/sql/013-interrupciones-convivencia.sql; do
+    deploy/azure/sql/013-interrupciones-convivencia.sql \
+    deploy/azure/sql/014-cierre-institucional.sql; do
     confirmacion=AMPLIAR_SIN_BORRAR
     [[ $archivo != *010-* ]] || confirmacion=AGREGAR_DOCUMENTOS_SIN_REEMPLAZAR
     [[ $archivo != *012-* ]] || confirmacion=CREAR_VINCULACIONES_SIN_BORRAR
     [[ $archivo != *013-* ]] || confirmacion=AGREGAR_INTERRUPCIONES_SIN_BORRAR
+    [[ $archivo != *014-* ]] || confirmacion=REGISTRAR_CIERRE_SIN_BORRAR
     psql -X -v ON_ERROR_STOP=1 -v base_autorizada="$PGDATABASE" -v confirmacion="$confirmacion" -f "$raiz/$archivo"
 done

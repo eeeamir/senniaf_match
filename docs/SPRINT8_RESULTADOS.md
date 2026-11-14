@@ -1,5 +1,7 @@
 # Sprint 8 — implementación y evidencias locales
 
+**Ampliación posterior autorizada:** el cierre institucional y la revisión independiente de disponibilidad se incorporan antes del despliegue. El alcance conservador sin cierre descrito abajo es el antecedente de los seis commits originales. Consulta [la integración y despliegue](SPRINT8_INTEGRACION_DESPLIEGUE.md) para el estado vigente.
+
 Plan vigente: HU19 (5 SP), HU11 (5), HU12 (2), HU14 (2), HU13 (2): **16 SP**. La discrepancia suministrada de 12 SP anteriores frente a 11 SP actuales para HU11–HU14 se registra sin cambiar estimaciones. No se encontró otra definición operativa contradictoria del umbral: el código y la petición vigente indican tres reevaluaciones completadas.
 
 La petición más reciente permite avanzar entre historias validadas localmente sin esperar al despliegue de Azure. Esto reemplaza el bloqueo operativo para desarrollo consignado en la auditoría anterior; no autoriza publicación ni migraciones reales. Rama: `sprint7-desarrollo`. No se realizan push ni operaciones de Azure.

@@ -58,6 +58,16 @@ jobs:
           -Dsenniaf.commit=${{ github.sha }}
           -Dsenniaf.branch=${{ github.ref_name }}
           -Dsenniaf.worktree=limpio
+      - name: Identificar el JAR validado
+        run: sha256sum target/senniaf-match-0.1.0.jar > target/senniaf-match.sha256
+      - name: Conservar el JAR para el procedimiento manual existente
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-validado
+          path: |
+            target/senniaf-match-0.1.0.jar
+            target/senniaf-match.sha256
+          if-no-files-found: error
       - name: Guardar resultados de pruebas
         if: always()
         uses: actions/upload-artifact@v4

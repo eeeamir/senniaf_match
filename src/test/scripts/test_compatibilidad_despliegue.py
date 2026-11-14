@@ -51,6 +51,13 @@ class CompatibilidadDespliegueTest(unittest.TestCase):
     def test_hu19_no_recupera_sin_revision_de_interrupciones(self):
         self.assertFalse(modulo.compatible(self.actual,"t","t")[0])
 
+    def test_cierre_requiere_014_y_no_recupera_jar_sin_cierre(self):
+        with zipfile.ZipFile(self.actual,"a") as jar:
+            jar.writestr("BOOT-INF/classes/com/senniaf/match/model/InterrupcionConvivencia.class",b"fixture")
+            jar.writestr("BOOT-INF/classes/com/senniaf/match/dto/CierreInstitucionalRequest.class",b"fixture")
+        self.assertFalse(modulo.compatible(self.actual,"t","t","f")[0])
+        self.assertTrue(modulo.compatible(self.actual,"t","t","t")[0])
+        self.assertFalse(modulo.compatible(self.anterior,"t","t","t")[0])
 
 if __name__ == "__main__":
     unittest.main()

@@ -19,5 +19,10 @@ public class VinculacionController {
     public Map<String,Object> registrarInterrupcion(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@jakarta.validation.Valid @RequestBody com.senniaf.match.dto.InterrupcionRequest solicitud){return service.registrarInterrupcion(id,rol,actor,solicitud);}
     @PostMapping("/{id}/interrupcion/revision")
     public Map<String,Object> revisarInterrupcion(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@jakarta.validation.Valid @RequestBody com.senniaf.match.dto.RevisionInterrupcionRequest solicitud){return service.revisarInterrupcion(id,rol,actor,solicitud);}
+    @PostMapping("/{id}/cierre")
+    public Map<String,Object> cerrar(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@jakarta.validation.Valid @RequestBody com.senniaf.match.dto.CierreInstitucionalRequest solicitud){return service.cerrar(id,rol,actor,solicitud);}
+    public record Disponibilidad(@jakarta.validation.constraints.NotBlank(message="Selecciona el expediente revisado") String expediente,@jakarta.validation.constraints.Size(min=10,max=600,message="La revisión debe tener entre 10 y 600 caracteres") @jakarta.validation.constraints.NotBlank(message="Documenta la revisión individual") String justificacion){}
+    @PostMapping("/{id}/disponibilidad")
+    public Map<String,Object> disponibilidad(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@jakarta.validation.Valid @RequestBody Disponibilidad solicitud){return service.revisarDisponibilidad(id,rol,actor,solicitud.expediente(),solicitud.justificacion());}
     private void familia(String rol){if(!"FAMILIA".equals(rol))throw new RolNoAutorizadoException("Solo la familia correspondiente puede responder esta propuesta");}
 }

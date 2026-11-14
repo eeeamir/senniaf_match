@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name="vinculaciones")
 public class Vinculacion {
-    public enum Estado { PENDIENTE_RESPUESTA, RESPUESTA_ACEPTADA, RESPUESTA_RECHAZADA_PENDIENTE_CIERRE }
+    public enum Estado { PENDIENTE_RESPUESTA, RESPUESTA_ACEPTADA, RESPUESTA_RECHAZADA_PENDIENTE_CIERRE, CERRADA }
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
     @OneToOne(optional=false) @JoinColumn(name="decision_id",nullable=false,unique=true) private DecisionComite decision;
     @ManyToOne(optional=false) @JoinColumn(name="nino_id",nullable=false) private PerfilNino nino;
@@ -16,13 +16,29 @@ public class Vinculacion {
     @Column(nullable=false) private boolean reservaVigente=true;
     private LocalDateTime fechaRespuesta;
     @Column(length=40) private String respondidoPor;
+     private java.time.LocalDate fechaCierre;
+    public java.time.LocalDate getFechaCierre(){return fechaCierre;} public void setFechaCierre(java.time.LocalDate v){fechaCierre=v;}
+    @Column(length=200) private String referenciaCierre;
+    public String getReferenciaCierre(){return referenciaCierre;} public void setReferenciaCierre(String v){referenciaCierre=v;}
+    @Column(length=200) private String autoridadCierre;
+    public String getAutoridadCierre(){return autoridadCierre;} public void setAutoridadCierre(String v){autoridadCierre=v;}
+    @Column(length=2000) private String motivoCierre;
+    public String getMotivoCierre(){return motivoCierre;} public void setMotivoCierre(String v){motivoCierre=v;}
+    @Column(length=40) private String cerradoPor;
+    public String getCerradoPor(){return cerradoPor;} public void setCerradoPor(String v){cerradoPor=v;}
+     private LocalDateTime fechaRegistroCierre;
+    public LocalDateTime getFechaRegistroCierre(){return fechaRegistroCierre;} public void setFechaRegistroCierre(LocalDateTime v){fechaRegistroCierre=v;}
+     private boolean ninoLiberado;
+    public boolean isNinoLiberado(){return ninoLiberado;} public void setNinoLiberado(boolean v){ninoLiberado=v;}
+     private boolean familiaLiberada;
+    public boolean isFamiliaLiberada(){return familiaLiberada;} public void setFamiliaLiberada(boolean v){familiaLiberada=v;}
     @Version private long version;
     public Long getId(){return id;}
     public DecisionComite getDecision(){return decision;} public void setDecision(DecisionComite v){decision=v;}
     public PerfilNino getNino(){return nino;} public void setNino(PerfilNino v){nino=v;}
     public PerfilFamilia getFamilia(){return familia;} public void setFamilia(PerfilFamilia v){familia=v;}
     public Estado getEstado(){return estado;} public void setEstado(Estado v){estado=v;}
-    public boolean isReservaVigente(){return reservaVigente;}
+    public boolean isReservaVigente(){return reservaVigente;} public void setReservaVigente(boolean v){reservaVigente=v;}
     public LocalDateTime getFechaRespuesta(){return fechaRespuesta;} public void setFechaRespuesta(LocalDateTime v){fechaRespuesta=v;}
     public String getRespondidoPor(){return respondidoPor;} public void setRespondidoPor(String v){respondidoPor=v;}
 }
