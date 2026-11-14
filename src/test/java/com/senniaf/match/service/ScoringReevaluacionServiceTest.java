@@ -29,8 +29,8 @@ class ScoringReevaluacionServiceTest {
         PerfilFamilia familia = new PerfilFamilia();
         familia.setCodigoCaso("FAM-001");
         familia.setPerfilCompleto(true);
-        when(ninos.findByCodigoCaso("NINO-001")).thenReturn(Optional.of(nino));
-        when(familias.findByCodigoCaso("FAM-001")).thenReturn(Optional.of(familia));
+        when(ninos.bloquear("NINO-001")).thenReturn(Optional.of(nino));
+        when(familias.bloquear("FAM-001")).thenReturn(Optional.of(familia));
 
         ScoringService servicio = new ScoringService(ninos, familias, decisiones, pesos);
         Map<String, Object> resultado = servicio.decidir("NINO-001", "FAM-001", "REEVALUACION",

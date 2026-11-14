@@ -85,14 +85,12 @@ class PerfilFamiliaServiceTest {
     }
 
     @Test
-    void marcaComoIncompletoUnPerfilConRangoDeEdadInconsistente() {
+    void rechazaUnPerfilConRangoDeEdadInconsistente() {
         PerfilFamiliaRequest request = perfilCompleto();
         request.setEdadMinimaAceptada(10);
         request.setEdadMaximaAceptada(5);
 
-        PerfilFamiliaResponse response = service.registrarPerfil(request, "familia-1");
-
-        assertFalse(response.isPerfilCompleto());
+        assertThrows(IllegalArgumentException.class, () -> service.registrarPerfil(request, "familia-1"));
     }
 
     @Test
@@ -143,10 +141,10 @@ class PerfilFamiliaServiceTest {
         incompleta.setEdadMinimaAceptada(12);
         incompleta.setEdadMaximaAceptada(7);
 
-        PerfilFamiliaResponse respuesta = servicio.actualizarPropio(incompleta, "8-456-789");
-        assertEquals(0, respuesta.getNumeroReevaluaciones());
-        assertTrue(respuesta.isReevaluacionPendiente());
-        assertFalse(respuesta.isPerfilCompleto());
+        assertThrows(IllegalArgumentException.class, () -> servicio.actualizarPropio(incompleta, "8-456-789"));
+        assertEquals(0, perfil.getNumeroReevaluaciones());
+        assertTrue(perfil.isReevaluacionPendiente());
+        verify(repo, never()).save(any());
     }
 
     @Test

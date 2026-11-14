@@ -68,3 +68,25 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .pro-dialogo .pro-motivo input[type="radio"]:focus-visible { outline: 2px solid #347bd5; outline-offset: 3px; }
 .familia-nota-propuesta { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--suave); line-height: 1.6; }
 .familia-nota-propuesta .pro-icono { width: 16px; height: 16px; flex: 0 0 16px; margin-top: 2px; }
+
+/* HU19: filtros y estados extensos conservan la distribución en pantallas pequeñas. */
+#filtroVinculaciones{display:flex;align-items:end;flex-wrap:wrap;gap:16px}
+#filtroVinculaciones label{flex:1 1 230px;min-width:0}
+#listaVinculaciones>.tarjeta{margin-bottom:22px}
+#listaVinculaciones .pro-fila-titulo{flex-wrap:wrap}
+#listaVinculaciones .chip{white-space:normal}
+@media(max-width:760px){#filtroVinculaciones .boton{width:100%}#contenido .pro-fila-titulo:has(.chip){flex-wrap:wrap}#contenido .chip{white-space:normal}}
+
+.pro-sidebar a .pro-vinculaciones-aviso{margin-left:auto;padding:2px 6px;border-radius:8px;background:#eaf2ff;color:#0866f5;font-size:11px;flex-shrink:0}
+.chip.vinculacion-pendiente{background:#eaf2ff;color:#1459a3}
+
+.pro-sidebar nav a:has(.pro-vinculaciones-aviso){display:grid;grid-template-columns:22px minmax(0,1fr);row-gap:5px}
+.pro-sidebar nav a .pro-vinculaciones-aviso{grid-column:2;justify-self:start;margin-left:0}
+@media(max-width:760px){
+  .profesional .topbar-in{min-height:68px}
+  .profesional .usuario{min-width:0;flex:1 0 120px}
+  .profesional .usuario .chip{max-width:100%;white-space:normal;line-height:1.25;text-align:left}
+  .profesional .usuario .pro-rol-texto{min-width:0;overflow-wrap:anywhere}
+  .profesional .topbar-marca{flex:0 1 160px;min-width:90px}
+  .profesional .topbar-marca img{width:100%;max-width:160px}
+}

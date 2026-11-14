@@ -20,7 +20,7 @@ PostgreSQL se publica solo en `127.0.0.1:5432`. El volumen se conserva entre arr
 
 ## Esquema
 
-La configuración habitual usa `ddl-auto=validate`: comprueba el esquema, sin crearlo ni migrarlo automáticamente. Para una base **nueva y vacía**, el esquema SQL sin datos está en `deploy/azure/sql/001-esquema-inicial.sql`. Aplicar después, en orden, `005-cierre-adopcion.sql`, los cambios 006, 007 y 008 de `deploy/azure/sql/propuestas/`, y las migraciones 009 y 010 de `deploy/azure/sql/`. El nombre histórico de la carpeta `propuestas` no implica que sus cambios 006–008 estén pendientes en Azure: ya están aplicados allí.
+La configuración habitual usa `ddl-auto=validate`: comprueba el esquema, sin crearlo ni migrarlo automáticamente. Para una base **nueva y vacía**, el esquema SQL sin datos está en `deploy/azure/sql/001-esquema-inicial.sql`. Aplicar después, en orden, `005-cierre-adopcion.sql`, los cambios 006, 007 y 008 de `deploy/azure/sql/propuestas/`, y las migraciones 009 y 010 de `deploy/azure/sql/`, la ampliación 011 de unidad de edad y la migración 012 de vinculaciones, confirmando expresamente el destino en cada script. El nombre histórico de la carpeta `propuestas` no implica que sus cambios 006–008 estén pendientes en Azure: ya están aplicados allí.
 
 Ejemplo de aplicación local sobre una base nueva:
 
@@ -65,3 +65,11 @@ Los nuevos expedientes de la carga reciben trabajo social y psicología según e
 La ampliación del registro distingue cédula panameña, cédula de extranjero residente y pasaporte. La migración [010-documentos-identidad.sql](deploy/azure/sql/010-documentos-identidad.sql) añade únicamente `tipo_documento` y `numero_documento`, ambos opcionales para los usuarios anteriores, y un índice único por tipo y número normalizado. No contiene actualizaciones ni elimina datos; conserva cédulas, identificadores, contraseñas, sesiones y relaciones existentes. La aplicación consulta también los datos heredados para impedir registros duplicados.
 
 **La migración fue autorizada para esta publicación y validada dos veces en PostgreSQL 16 aislado. Antes de iniciar la versión ampliada contra una base existente, verificar un respaldo y aplicarla expresamente.** No se ejecuta automáticamente al iniciar la aplicación; el estado del despliegue remoto se documenta en [deploy/azure/README.md](deploy/azure/README.md). Los pasaportes nuevos usan un identificador interno `PAS-<número>` y admiten acceso por su número o correo; las credenciales anteriores no se convierten ni se restablecen. El registro de acceso no determina la idoneidad legal para adoptar.
+
+## HU19 — Vinculaciones
+
+Antes de iniciar esta versión con `ddl-auto=validate`, aplicar expresamente [012-vinculaciones.sql](deploy/azure/sql/012-vinculaciones.sql) sobre la base autorizada, con respaldo y la versión anterior detenida. La migración requiere `base_autorizada` y `confirmacion=CREAR_VINCULACIONES_SIN_BORRAR`; no se ejecuta automáticamente. Conserva las aceptaciones previas como pendientes de respuesta y aborta completamente si hay referencias inválidas o asignaciones incompatibles.
+
+La validación se realizó en PostgreSQL 18.3 temporal, sin modificar bases existentes del usuario ni Azure. Los comandos, pruebas de concurrencia y pendientes de despliegue están en [la validación final de HU19](docs/HU19_VALIDACION_FINAL.md).
+
+La [verificación integral posterior](docs/VERIFICACION_INTEGRAL_HU19.md) repitió las pruebas en PostgreSQL **16.15** y Java 17 y confirmó mediante lectura de Azure que 012 sigue ausente en la base persistente. La validación aislada no autoriza ni ejecuta esa migración real.

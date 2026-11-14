@@ -32,3 +32,6 @@ target/
 # Cargas privadas: no forman parte del esquema ni del procedimiento de actualización.
 deploy/azure/sql/003-cuentas-ficticias.sql.example
 deploy/azure/sql/004-expediente-ficticio.sql
+
+# Cachés de las herramientas Python de despliegue y pruebas.
+__pycache__/

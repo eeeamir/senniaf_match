@@ -94,7 +94,7 @@ public class PerfilFamiliaService {
         if(p.getFechaRegistro()!=null)actividad.add(actividad("Entrevista registrada","Se recibió la información de tu hogar.",p.getFechaRegistro()));
         if(decisiones!=null)for(var d:decisiones.findByCodigoFamiliaOrderByFechaAsc(p.getCodigoCaso())) {
             if(d.getFecha()==null)continue;
-            if("ACEPTADA".equals(d.getDecision()))actividad.add(actividad("Propuesta aceptada","El equipo SENNIAF te orientará sobre los siguientes pasos.",d.getFecha()));
+            if("ACEPTADA".equals(d.getDecision()))actividad.add(actividad("Propuesta enviada por el Comité","Consulta Mi vinculación para conocer el estado y registrar tu respuesta.",d.getFecha()));
             else if("REEVALUACION".equals(d.getDecision()))actividad.add(actividad("Revisión de entrevista solicitada","Se solicitó ampliar la información de la entrevista.",d.getFecha()));
         }
         if(auditoria!=null)for(var e:auditoria.findByCodigoCasoOrderByFechaAsc(p.getCodigoCaso())) {
