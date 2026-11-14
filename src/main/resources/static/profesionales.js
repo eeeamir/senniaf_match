@@ -26,7 +26,7 @@ const Profesionales = {
       credencial:'M4 5h16v16H4z M9 5V2h6v3 M10 11a2 2 0 1 0-4 0 2 2 0 0 0 4 0 M5 17c0-4 6-4 6 0 M14 10h3M14 14h3',
       persona:'M5 21v-3a7 7 0 0 1 14 0v3 M16 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0'
     };
-    return `<svg class="pro-icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${trazos[nombre] || trazos.informe}"/></svg>`;
+    return `<svg class="pro-icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${trazos[nombre==='vinculacion'?'heart-handshake':nombre] || trazos.informe}"/></svg>`;
   },
   fecha(valor) {
     if (!valor) return 'Fecha no registrada';
@@ -73,21 +73,6 @@ const Profesionales = {
     const nav=document.createElement('aside');nav.className='pro-sidebar';nav.id='navegacionProfesional';
     nav.innerHTML=`<nav aria-label="Navegación principal">${opciones.map(([clave,href,icono,texto])=>`<a href="${href}" ${seleccionado===clave?'aria-current="page"':''}>${this.icono(icono)}<span>${texto}</span></a>`).join('')}</nav><div class="pro-sidebar-pie"><button type="button" id="proSalir">${this.icono('salir')}Cerrar sesión</button></div>`;
     document.body.prepend(nav);
-    if(s.rol!=='FAMILIA') {
-      const actualizarVinculaciones=async()=>{
-        try {
-          const respuesta=await fetch('/api/vinculaciones',{headers:Sesion.encabezados(),cache:'no-store'});
-          if(!respuesta.ok)return;
-          const lista=await respuesta.json(),pendientes=lista.filter(v=>v.interrupcionPendiente).length,respondidas=lista.filter(v=>v.estado!=='PENDIENTE_RESPUESTA').length;
-          const enlace=nav.querySelector('a[href="vinculaciones.html"]');
-          enlace.title=pendientes?`${pendientes} interrupciones pendientes de revisión`:respondidas?`${respondidas} vinculaciones con respuesta familiar`:'Vinculaciones';
-          let aviso=enlace.querySelector('.pro-vinculaciones-aviso');
-          if(!aviso){aviso=document.createElement('small');aviso.className='pro-vinculaciones-aviso';aviso.setAttribute('aria-hidden','true');enlace.append(aviso);}
-          aviso.hidden=!(pendientes||respondidas);aviso.textContent=pendientes||respondidas;
-        }catch(error){ /* La navegación sigue disponible si falla la actualización. */ }
-      };
-      actualizarVinculaciones();setInterval(()=>{if(!document.hidden)actualizarVinculaciones();},15000);
-    }
     const marca=document.querySelector('.topbar-marca');marca.href=['COMITE','FAMILIA'].includes(s.rol)?'match.html':'funcionario.html';marca.querySelector('img').alt='SENNIAF Match';
     const rol=s.rol==='FAMILIA'?'Familia adoptante':s.rol==='COMITE'?'Comité de asignación familiar':ROLES[s.rol];
     document.getElementById('usuario').innerHTML=`<span class="chip">${this.icono('persona')}<span class="pro-rol-texto">${limpiarHtml(rol)}<small class="pro-id-sesion">ID: ${limpiarHtml(s.id)}</small></span></span>`;
