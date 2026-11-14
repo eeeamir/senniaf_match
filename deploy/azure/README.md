@@ -123,3 +123,21 @@ Antes de desplegar HU19, preparar una intervención autorizada:
 7. Verificar HTTPS, acceso autenticado de los cuatro roles, respuestas familiares, alcance profesional, auditoría y persistencia. Contrastar la huella remota con el artefacto aprobado y leer sus metadatos de compilación sin imprimir el entorno privado.
 
 Ninguno de estos pasos operativos se ha aplicado durante la revisión. La inspección de la VM se realizó mediante Run Command de Azure porque SSH agotaba el tiempo de conexión; no se abrió SSH a Internet ni se cambiaron reglas de red.
+
+
+## Sprint 8 integrado — preparación local, sin publicación
+
+La implementación posterior validó HU19, HU11, HU12, HU14 y HU13 en orden, con commits locales separados. La petición vigente permitió continuar el desarrollo local sin esperar a Azure. Esto sustituye el bloqueo para desarrollar HU11 indicado en la auditoría histórica; no autoriza cambios en el servidor. La consulta pública final sigue mostrando raíz 200 y `/vinculaciones.html` 404. No se ejecutaron migraciones, reinicios ni despliegues remotos.
+
+La entrega funcional probada corresponde al commit **9d6b06d** de `sprint7-desarrollo`, con 273 pruebas Java y ocho del actualizador aprobadas. Artefacto local `target/senniaf-match-sprint8-validacion-9d6b06d.jar`, SHA-256 **bd9fe9382da347a9b5bb0efa44aa489f14808f9ba37e0b931d685391c8690cec**. Sus metadatos registran commit, rama y árbol limpio. Los cambios posteriores de cierre son documentación; cualquier cambio de código requiere una nueva validación y artefacto identificado. Ver [resultados](../../docs/SPRINT8_RESULTADOS.md) y [matriz](../../docs/SPRINT8_MATRIZ_ACEPTACION.md).
+
+Para una intervención futura autorizada, ampliar el procedimiento anterior:
+
+1. Revisar/publicar los commits y confirmar la versión exacta del JAR y su SHA. Contrastar Java 17, PostgreSQL 16 y el esquema real antes de actuar. El artefacto contiene HU11 y requiere 012 **y 013**; el control local `python3 deploy/azure/verificar-compatibilidad.py archivo.jar t t` comprueba esa etapa, pero no sustituye la validación del esquema.
+2. Instalar conjuntamente las versiones revisadas de `actualizar.sh` y `verificar-compatibilidad.py`; el auxiliar debe incluir el control de interrupciones. El script consulta ambas tablas y comprueba también la compatibilidad del candidato de recuperación. No aplicar únicamente una de las dos piezas.
+3. Generar y verificar un respaldo nuevo de la base persistente con el procedimiento existente, conservando copia privada externa, SHA y lectura completa. Conservar el JAR anterior sin alterarlo. Acordar una recuperación compatible antes de convertir el esquema.
+4. Detener el backend anterior para impedir decisiones durante la conversión. Aplicar manualmente 012 con `base_autorizada` y `confirmacion=CREAR_VINCULACIONES_SIN_BORRAR`; analizar cualquier conflicto sin borrar antecedentes. Después aplicar `013-interrupciones-convivencia.sql` con `base_autorizada` y `confirmacion=AGREGAR_INTERRUPCIONES_SIN_BORRAR`, usando `ON_ERROR_STOP=1` y el propietario del esquema. Conservar las credenciales y permisos de `senniaf_app`. Nunca ejecutar 001 ni restaurar una base de desarrollo sobre el destino persistente.
+5. Publicar el JAR revisado mediante el actualizador existente, sin carga de datos sintéticos. Si no hay un JAR de recuperación compatible con las dos migraciones, conservar el servicio detenido para intervención del operador ante un fallo. No volver a un JAR de HU19 que oculte interrupciones, ni al legado que omite vinculaciones. Las tablas aditivas no se borran automáticamente para forzar una recuperación.
+6. Verificar HTTPS, los cuatro roles, asignación profesional, privacidad familiar, historial, respuestas, revisión de interrupciones, apoyos culturales, alertas y pesos/versiones. Confirmar persistencia y huellas/conteos de los datos que deban conservarse. Verificar la huella del JAR activo y sus metadatos, sin imprimir secretos.
+
+Ninguno de estos pasos ha sido ejecutado en Azure. El ensayo de arranque y persistencia del JAR se limita al entorno local sintético.
