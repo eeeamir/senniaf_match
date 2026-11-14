@@ -40,7 +40,7 @@ const Profesionales = {
   informe(e,mostrarMetadatos=true) {
     const m=this.momento(e.fecha),s=Sesion.leer();
     const seccion=(icono,titulo,valor)=>`<details class="detalle-grupo pro-informe-bloque"><summary>${this.icono(icono)}${titulo}</summary><div class="pro-informe-contenido"><p>${limpiarHtml(valor||'Sin información registrada')}</p></div></details>`;
-    return `<article class="pro-informe"><div class="pro-informe-registro"><div class="pro-informe-cabecera"><h3>${this.icono('psicologia')} ${e.vigente?'Evaluación actual':'Evaluación anterior'}</h3><small>Versión ${e.version}</small><span class="chip ${e.vigente?'':'retirado'}">${e.vigente?'Vigente':'Versión anterior'}</span></div>${mostrarMetadatos?`<div class="pro-informe-meta"><span>${this.icono('persona')}${limpiarHtml(e.profesional)}</span><span>${this.icono('calendario')}${limpiarHtml(m.fecha)}</span><span>${this.icono('reloj')}${limpiarHtml(m.hora)}</span></div>`:''}</div><div class="pro-informe-bloques">${seccion('psicologia','Evaluación',e.evaluacion)}${seccion('informe','Observaciones',e.observaciones)}${seccion('salud','Recomendaciones profesionales',e.recomendaciones)}${e.areasObservadas?.length?seccion('comprobar','Áreas evaluadas',e.areasObservadas.map(a=>this.etiqueta(a)).join(', ')):''}${e.sinDiagnostico===true?seccion('informe','Diagnóstico','No se establece diagnóstico'):''}${e.hallazgosProfesionales?seccion('informe','Valoración profesional',e.hallazgosProfesionales):''}${e.diagnosticoProfesional?seccion('informe','Diagnóstico profesional',e.diagnosticoProfesional):''}${e.contextoEvaluacion&&typeof ContextoPsicologico!=='undefined'?ContextoPsicologico.informe(e.contextoEvaluacion):''}</div></article>`;
+    return `<article class="pro-informe"><div class="pro-informe-registro"><div class="pro-informe-cabecera"><h3>${this.icono('psicologia')} ${e.vigente?'Evaluación actual':'Evaluación anterior'}</h3>${mostrarMetadatos?'':`<small>Versión ${e.version}</small>`}<span class="chip ${e.vigente?'':'retirado'}">${e.vigente?'Vigente':'Versión anterior'}</span></div>${mostrarMetadatos?`<div class="pro-informe-meta"><span>${this.icono('persona')}${limpiarHtml(e.profesional)}</span><span>${this.icono('calendario')}${limpiarHtml(m.fecha)}</span><span>${this.icono('reloj')}${limpiarHtml(m.hora)}</span></div>`:''}</div><div class="pro-informe-bloques">${seccion('psicologia','Evaluación',e.evaluacion)}${seccion('informe','Observaciones',e.observaciones)}${seccion('salud','Recomendaciones profesionales',e.recomendaciones)}${e.areasObservadas?.length?seccion('comprobar','Áreas evaluadas',e.areasObservadas.map(a=>this.etiqueta(a)).join(', ')):''}${e.sinDiagnostico===true?seccion('informe','Diagnóstico','No se establece diagnóstico'):''}${e.hallazgosProfesionales?seccion('informe','Valoración profesional',e.hallazgosProfesionales):''}${e.diagnosticoProfesional?seccion('informe','Diagnóstico profesional',e.diagnosticoProfesional):''}${e.contextoEvaluacion&&typeof ContextoPsicologico!=='undefined'?ContextoPsicologico.informe(e.contextoEvaluacion):''}</div></article>`;
   },
   etiqueta(valor) {
     if (valor == null || valor === '') return 'Sin información';
@@ -89,7 +89,7 @@ const Profesionales = {
     }
     const marca=document.querySelector('.topbar-marca');marca.href=['COMITE','FAMILIA'].includes(s.rol)?'match.html':'funcionario.html';marca.querySelector('img').alt='SENNIAF Match';
     const rol=s.rol==='FAMILIA'?'Familia adoptante':s.rol==='COMITE'?'Comité de asignación familiar':ROLES[s.rol];
-    document.getElementById('usuario').innerHTML=`<span class="chip">${this.icono('persona')}<span class="pro-rol-texto">${limpiarHtml(rol)}</span></span>`;
+    document.getElementById('usuario').innerHTML=`<span class="chip">${this.icono('persona')}<span class="pro-rol-texto">${limpiarHtml(rol)}<small class="pro-id-sesion">ID: ${limpiarHtml(s.id)}</small></span></span>`;
     const abrir=document.createElement('button');abrir.type='button';abrir.className='pro-menu';abrir.setAttribute('aria-label','Abrir navegación');abrir.setAttribute('aria-controls',nav.id);abrir.setAttribute('aria-expanded','false');abrir.innerHTML=this.icono('menu');
     document.querySelector('.topbar-in').prepend(abrir);
     abrir.addEventListener('click',()=>{const activo=document.body.classList.toggle('pro-nav-abierta');abrir.setAttribute('aria-expanded',String(activo));});
@@ -132,12 +132,13 @@ const Profesionales = {
   },
   avisoReevaluaciones(numero){
     const n=Number.isInteger(Number(numero))&&Number(numero)>=0?Number(numero):0;
-    return `<aside class="pro-aviso-reevaluaciones ${n>=3?'destacado':''}"><h3>${this.icono('informacion')}Historial de reevaluaciones</h3><p>Esta familia registra <strong>${n} reevaluaciones completadas</strong>. ${n>=3?'Puedes revisar su historial antes de continuar con el análisis.':'Las solicitudes pendientes no se incluyen en esta cantidad.'}</p></aside>`;
+    return `<aside class="pro-aviso-reevaluaciones ${n>=3?'destacado':''}"><h3>${this.icono('informacion')}Historial de reevaluaciones</h3><p>Esta familia registra <strong>${n} reevaluaciones completadas</strong>. ${n>=3?'Revisa sus antecedentes antes de continuar. Aviso para revisión humana, sin sanción automática.':'Las solicitudes pendientes no se incluyen en esta cantidad.'}</p></aside>`;
   },
   justificar({titulo,contexto,opciones,confirmacion,alConfirmar,alGuardar,alError=null,maximo=1850,instruccion='Selecciona un motivo',textoRevisar='Revisar y confirmar',tituloConfirmacion='Confirmar acción',textoConfirmar='Confirmar',ayuda='Puedes editar completamente la justificación. Para «Otro», escribe tu propia explicación.'}) {
     const d=document.createElement('dialog');d.className='pro-dialogo pro-dialogo-decision';d.setAttribute('aria-label',titulo);
     d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('solicitudes')}</span><h2>${limpiarHtml(titulo)}</h2></div><p class="pro-modal-contexto">${limpiarHtml(contexto)}</p><form><fieldset class="pro-motivos"><legend>${limpiarHtml(instruccion)}</legend>${opciones.map(([valor,nombre])=>`<label class="pro-motivo"><input type="radio" name="motivoDecision" value="${limpiarHtml(valor)}" required><span>${limpiarHtml(nombre)}</span></label>`).join('')}</fieldset><label>Justificación<textarea name="justificacion" required minlength="10" maxlength="${maximo}" rows="5" placeholder="Selecciona un motivo para ver la sugerencia editable."></textarea></label><p class="ayuda">${limpiarHtml(ayuda)}</p><p data-error role="alert"></p><div class="pro-acciones"><button class="boton secundario" type="button" data-cancelar>Cancelar</button><button class="boton" type="submit">${limpiarHtml(textoRevisar)}</button></div></form>`;
     document.body.append(d);
+    if(titulo==='Solicitar reevaluación')d.querySelector('form').insertAdjacentHTML('afterbegin',`<fieldset class="pro-apartados-reevaluacion"><legend>Apartados de la entrevista familiar</legend>${['Hogar y red de apoyo','Preferencias familiares','Salud y acompañamiento','Disponibilidad y entorno','Apoyos culturales y comunitarios'].map(t=>`<label><input type="checkbox" name="apartadoFamiliar" value="${t}">${this.icono('personas')}${t}</label>`).join('')}</fieldset>`);
     const form=d.querySelector('form'),texto=d.querySelector('textarea'),boton=d.querySelector('[type=submit]');
     CamposFormulario.iniciar(form);
     let guardando=false;
@@ -149,9 +150,11 @@ const Profesionales = {
     form.addEventListener('submit',e=>{
       e.preventDefault();if(guardando)return;
       texto.setCustomValidity(texto.value.trim().length<10?'Escribe una justificación de al menos 10 caracteres.':'');
+      if(titulo==='Solicitar reevaluación'&&!form.querySelector('[name=apartadoFamiliar]:checked')){d.querySelector('[data-error]').textContent='Selecciona al menos un apartado de la entrevista familiar.';return;}
       if(!form.reportValidity())return;
       const motivo=opciones.find(o=>o[0]===form.elements.motivoDecision.value);
-      const justificacion=`${motivo[1].replace(/\.$/,'')}: ${texto.value.trim()}`;
+      const apartados=[...form.querySelectorAll('[name=apartadoFamiliar]:checked')].map(c=>c.value);
+      const justificacion=(apartados.length?'Apartados: '+apartados.join(' | ')+'\n\n':'')+`${motivo[1].replace(/\.$/,'')}: ${texto.value.trim()}`;
       const confirmar=document.createElement('dialog');confirmar.className='pro-dialogo';confirmar.setAttribute('aria-label',tituloConfirmacion);
       confirmar.innerHTML=`<h2>${limpiarHtml(tituloConfirmacion)}</h2><p>${limpiarHtml(confirmacion)}</p><div class="pro-acciones"><button class="boton secundario" type="button" data-volver>Volver</button><button class="boton" type="button" data-confirmar>${limpiarHtml(textoConfirmar)}</button></div>`;
       document.body.append(confirmar);boton.disabled=true;

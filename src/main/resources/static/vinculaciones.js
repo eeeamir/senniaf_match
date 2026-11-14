@@ -28,14 +28,14 @@ const Vinculaciones = {
     return `<div class="vinculaciones-lista">${lista.map(v => `<section class="tarjeta vinculacion-tarjeta vinculacion-familiar">
       <header class="vinculacion-cabecera"><h2><span class="vinculacion-emblema">${Profesionales.icono('heart-handshake')}</span>${limpiarHtml(v.codigo)}</h2>${this.estado(v)}</header>
       <dl class="vinculacion-resumen"><div><dt>${Profesionales.icono('personas')}Tu expediente</dt><dd>${limpiarHtml(v.expedienteFamiliar)}</dd></div><div><dt>${Profesionales.icono('calendario')}Propuesta recibida</dt><dd>${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</dd></div></dl>
-      <p class="vinculacion-siguiente">${limpiarHtml(v.siguientePaso)}</p>
+      ${v.estado==='RESPUESTA_ACEPTADA'?`<h3>Tu aceptación fue registrada</h3><p>${limpiarHtml(v.siguientePaso)}</p><section class="familia-seguimiento"><h3>Seguimiento de tu proceso</h3><ol class="familia-etapas"><li class="completado">Aceptación registrada</li><li>Acompañamiento e interrelación · Pendiente</li><li>Acogimiento preadoptivo · Pendiente</li></ol><p><strong>Siguiente paso: Preparación de la interrelación.</strong></p><p>El equipo responsable coordinará el acompañamiento y te informará cuando haya novedades.</p></section>`:`<p class="vinculacion-siguiente">${limpiarHtml(v.siguientePaso)}</p>`}
       <details class="vinculacion-informacion"><summary>${Profesionales.icono('consulta')}Ver seguimiento</summary>
         ${v.fechaRespuesta ? `<p>${Profesionales.icono('comprobar')}Tu respuesta quedó registrada el ${limpiarHtml(Profesionales.fecha(v.fechaRespuesta))}.</p>` : '<p>Aún no hay una respuesta familiar registrada.</p>'}
         <p class="ayuda">${Profesionales.icono('informacion')}La respuesta en este portal no sustituye las formalidades legales ni autoriza el acogimiento preadoptivo.</p>
       </details>
       ${v.estado === 'PENDIENTE_RESPUESTA' ? `<footer class="pro-acciones vinculacion-acciones">
-        <button class="boton" data-responder="ACEPTAR" data-id="${v.id}">${Profesionales.icono('comprobar')}Aceptar propuesta</button>
-        <button class="boton secundario" data-responder="RECHAZAR" data-id="${v.id}">${Profesionales.icono('cerrar')}Rechazar propuesta</button>
+        <button class="boton" data-responder="ACEPTAR" data-id="${v.id}">${Profesionales.icono('comprobar')}Aceptar</button>
+        <button class="boton secundario" data-responder="RECHAZAR" data-id="${v.id}">${Profesionales.icono('cerrar')}Rechazar</button>
       </footer>` : ''}
     </section>`).join('')}</div>`;
   },
@@ -49,7 +49,7 @@ const Vinculaciones = {
       const aceptar = b.dataset.responder === 'ACEPTAR', d = document.createElement('dialog');
       d.className = 'pro-dialogo'; d.dataset.respuesta = ''; d.setAttribute('aria-labelledby', 'tituloRespuesta');
       d.innerHTML = `<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono(aceptar ? 'comprobar' : 'advertencia')}</span><h2 id="tituloRespuesta">${aceptar ? 'Aceptar' : 'Rechazar'} propuesta</h2></div>
-        <p>${aceptar ? 'Se registrará tu aceptación y el equipo institucional te orientará sobre los siguientes pasos. Esto no formaliza una adopción.' : 'Se registrará tu respuesta. Esta combinación no volverá a recomendarse automáticamente. No cambia tu idoneidad ni tu puntuación.'}</p>
+        <p>${aceptar ? 'Se registrará tu aceptación y el equipo institucional te orientará sobre los siguientes pasos. Esto no formaliza una adopción.' : 'Se registrará tu rechazo y finalizará el acceso digital a la información del niño. Esta combinación no volverá a recomendarse automáticamente. No cambia tu idoneidad ni tu puntuación.'}</p>
         <p role="alert" data-error></p><div class="pro-acciones"><button class="boton secundario" data-cancelar>Cancelar</button><button class="boton" data-confirmar>${Profesionales.icono(aceptar ? 'comprobar' : 'cerrar')}Confirmar respuesta</button></div>`;
       document.body.append(d); d.onclose = () => d.remove();
       d.querySelector('[data-cancelar]').onclick = () => d.close();
@@ -120,7 +120,6 @@ const Vinculaciones = {
       <div class="vinculacion-accesos" aria-label="Accesos de la vinculación">
         ${this.acceso('carpeta','Expediente infantil',v.expedienteInfantil,enlaceNino,'Ver expediente','azul')}
         ${this.acceso('personas','Expediente familiar',v.expedienteFamiliar,sesion.rol==='COMITE'?enlaceFamilia:null,'Ver expediente','menta')}
-        ${this.acceso('criterios','Compatibilidad registrada',v.compatibilidadOriginal?.puntaje==null?'No disponible':v.compatibilidadOriginal.puntaje+'/100','#compatibilidadRegistrada','Ver análisis','lavanda')}
       </div>
       ${this.compatibilidadOriginal(v.compatibilidadOriginal,d.fecha)}
       <nav class="pro-pestanas vinculacion-pestanas" role="tablist" aria-label="Apartados de seguimiento">${[['proceso','solicitudes','Proceso'],['reportes','informe','Reportes profesionales'],['incidencias','advertencia','Incidencias'],['historial','reloj','Historial de cambios']].map(([k,i,n])=>`<button type="button" role="tab" id="tab-seguimiento-${k}" aria-controls="seguimiento-${k}" aria-selected="false" data-seguimiento="${k}">${Profesionales.icono(i)}${n}</button>`).join('')}</nav>
@@ -135,7 +134,6 @@ const Vinculaciones = {
       <div class="vinculacion-panel" role="tabpanel" id="seguimiento-historial" aria-labelledby="tab-seguimiento-historial" hidden>${this.historial(v.historial)}</div></div>`;
     c.querySelector('.hero').insertAdjacentHTML('beforeend',`<div class="vinculacion-estado-hero">${this.estado(v)}</div>`);
     this.enlazarPestanas(c,panelActivo);
-    c.querySelector('a[href="#compatibilidadRegistrada"]').onclick=()=>{const desglose=c.querySelector('#compatibilidadRegistrada details');if(desglose)desglose.open=true;};
     c.querySelector('[data-cierre]')?.addEventListener('click',()=>this.registrarCierre(c,v,sesion));
     c.querySelectorAll('[data-disponibilidad]').forEach(b=>b.onclick=()=>Profesionales.justificar({
       titulo:'Revisar disponibilidad del expediente',maximo:500,contexto:b.dataset.disponibilidad==='NINO'?'Expediente infantil':'Expediente familiar',
@@ -167,7 +165,7 @@ const Vinculaciones = {
     return `<section class="tarjeta"><h2>${Profesionales.icono('solicitudes')}Etapas del proceso</h2><ol class="vinculacion-etapas">${etapas.map(([titulo,texto,fecha,estado])=>`<li class="${fecha?'registrada':''}"><span class="vinculacion-hito">${Profesionales.icono(fecha?'comprobar':'reloj')}</span><div><h3>${titulo}</h3><p>${limpiarHtml(texto)}</p></div><div class="vinculacion-etapa-meta"><span class="chip ${fecha?'':'retirado'}">${estado}</span>${fecha?`<time>${limpiarHtml(Profesionales.fecha(fecha))}</time>`:''}</div></li>`).join('')}</ol><p>${limpiarHtml(v.siguientePaso)}</p>${v.fechaRespuesta?`<p>Respuesta registrada por ${limpiarHtml(v.respondidoPor)} · ${limpiarHtml(Profesionales.fecha(v.fechaRespuesta))}</p>`:''}<p class="ayuda">${Profesionales.icono('informacion')}Esta vinculación no acredita acogimiento preadoptivo ni adopción formalizada.</p></section>`;
   },
   reportes(enlaceNino){
-    return `<div class="vinculacion-reportes">${[['informe','Seguimiento social','Información social','panelDetalle','menta'],['psicologia','Seguimiento psicológico','Información psicológica','panelEvaluaciones','lavanda']].map(([icono,titulo,apartado,panel,color])=>`<details class="detalle-grupo vinculacion-reporte ${color}"><summary><span class="vinculacion-emblema">${Profesionales.icono(icono)}</span>${titulo}</summary><div class="vinculacion-reporte-contenido"><p>Consulta la ${apartado.toLowerCase()} disponible en el expediente infantil, con sus autores y versiones registrados.</p><a class="boton secundario chico" href="${enlaceNino}#${panel}">${Profesionales.icono('consulta')}Consultar ${apartado.toLowerCase()}</a></div></details>`).join('')}</div>`;
+    return `<div class="vinculacion-reportes">${[['informe','Seguimiento social','Convivencia, adaptación familiar, condiciones de cuidado y necesidades de acompañamiento.','menta'],['psicologia','Seguimiento psicológico','Adaptación emocional, vínculo afectivo y acompañamiento psicológico.','lavanda']].map(([i,t,d,color])=>`<details class="detalle-grupo vinculacion-reporte ${color}"><summary><span class="vinculacion-emblema">${Profesionales.icono(i)}</span>${t}</summary><div class="vinculacion-reporte-contenido"><p>${d}</p><p>No hay informes periódicos de seguimiento registrados en este apartado.</p></div></details>`).join('')}</div>`;
   },
   historial(eventos){
     return `<section class="tarjeta"><h2>${Profesionales.icono('reloj')}Historial de cambios</h2><ol class="vinculacion-historial">${eventos.map(e=>`<li><span class="vinculacion-emblema">${Profesionales.icono(e.accion?.includes('INTERRUPCION')?'advertencia':e.accion?.includes('CIERRE')?'informe':'reloj')}</span><div><h3>${limpiarHtml(Profesionales.etiqueta(e.accion))}</h3><p class="vinculacion-evento-meta">${Profesionales.icono('persona')}${limpiarHtml(e.responsable)}<time>${limpiarHtml(Profesionales.fecha(e.fecha))}</time></p><p>${limpiarHtml(e.resumen)}</p></div></li>`).join('')||'<li>No hay movimientos adicionales registrados. La decisión se conserva en Proceso.</li>'}</ol></section>`;

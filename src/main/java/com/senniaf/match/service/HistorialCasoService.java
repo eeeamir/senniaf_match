@@ -19,7 +19,9 @@ public class HistorialCasoService {
         evaluaciones=e;solicitudes=s;decisiones=d;
     }
     @Transactional(readOnly=true)
-    public List<Map<String,Object>> consultar(String codigo,List<EventoCaso> auditoria) {
+    public List<Map<String,Object>> consultar(String codigo,List<EventoCaso> auditoria) {return consultar(codigo,auditoria,"COMITE");}
+    @Transactional(readOnly=true)
+    public List<Map<String,Object>> consultar(String codigo,List<EventoCaso> auditoria,String rolConsulta) {
         var informes=evaluaciones.findByExpedienteCodigoCasoOrderByFechaDescIdDesc(codigo);
         var tramites=solicitudes.findByExpedienteCodigoCasoOrderByFechaSolicitudDescIdDesc(codigo);
         Set<Long> idsInformes=new HashSet<>(),idsSolicitudes=new HashSet<>(),revisados=new HashSet<>();
@@ -47,6 +49,15 @@ public class HistorialCasoService {
             var v=evento("evaluacion:"+e.getId(),e.getRevisionDe()==null?"EVALUACION_PSICOLOGICA":"CORRECCION_PSICOLOGICA",
                     incorporacionAutomatica?"SISTEMA":e.getProfesional(),incorporacionAutomatica?"SISTEMA":"PSICOLOGO",e.getFecha());
             v.put("descripcion",e.getRevisionDe()==null?"Se registró una evaluación psicológica correspondiente al expediente.":"Se registró una nueva versión, conservando el informe anterior.");
+            if(e.getRevisionDe()!=null && !"TRABAJADOR_SOCIAL".equals(rolConsulta)){
+                Map<String,Object> cambios=new LinkedHashMap<>();
+                for(String campo:List.of("evaluacion","observaciones","recomendaciones","sinDiagnostico","areasObservadas","hallazgosProfesionales","diagnosticoProfesional","contextoEvaluacion")){
+                    try{String getter="get"+Character.toUpperCase(campo.charAt(0))+campo.substring(1);Object antes=e.getClass().getMethod(getter).invoke(e.getRevisionDe()),despues=e.getClass().getMethod(getter).invoke(e);
+                    if(!Objects.equals(antes,despues)){Map<String,Object> valores=new LinkedHashMap<>();valores.put("anterior",antes);valores.put("nuevo",despues);cambios.put(campo,valores);}}
+                    catch(ReflectiveOperationException error){throw new IllegalStateException("No se pudo leer el antecedente de la evaluación",error);}
+                }
+                v.put("detalles",Map.of("cambios",cambios));
+            }
             v.put("evaluacionId",e.getId());v.put("version",e.getNumeroVersion()==null?1:e.getNumeroVersion());v.put("vigente",!revisados.contains(e.getId()));lista.add(v);
         }
         for(var s:tramites) {
@@ -67,6 +78,13 @@ public class HistorialCasoService {
             var v=evento("decision:"+d.getId(),"DECISION_"+d.getDecision(),d.getFuncionario(),"COMITE",d.getFecha());
             v.put("descripcion","Se registró una decisión sobre una propuesta de vinculación.");
             v.put("detalles",Map.of("justificacion",d.getMotivo(),"familia",d.getCodigoFamilia(),"puntaje",d.getPuntaje(),"versionPesos",d.getVersionPesos()));lista.add(v);
+        }
+        for(var evento:lista){
+            boolean psicologico=Set.of("EVALUACION_PSICOLOGICA","CORRECCION_PSICOLOGICA").contains(evento.get("accion"));
+            boolean social=Set.of("EDICION","CREACION","CONTENIDO_ACADEMICO_ACTUALIZADO").contains(evento.get("accion"));
+            if(psicologico && "TRABAJADOR_SOCIAL".equals(rolConsulta) || social && "PSICOLOGO".equals(rolConsulta)){
+                evento.remove("evaluacionId");evento.put("detalles",Map.of("detalleParcial",true));evento.put("descripcion","Movimiento institucional registrado. El contenido está reservado a la especialidad autorizada.");
+            }
         }
         lista.sort(Comparator.comparing((Map<String,Object> m)->(OffsetDateTime)m.get("fecha"),Comparator.nullsLast(Comparator.reverseOrder())));return lista;
     }

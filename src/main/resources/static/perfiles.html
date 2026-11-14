@@ -305,12 +305,12 @@ async function cargarHistoria(){
      const unidad=d[antes?'unidadEdadAnterior':'unidadEdadNueva']||d.cambios?.unidadEdad?.[antes?'anterior':'nuevo']||'ANIOS';
      return Profesionales.edad({edad:v,unidadEdad:unidad});
    };
-   const cambios=Object.entries(d.cambios||{}).map(([campo,v])=>`<h4>${limpiarHtml(CAMPOS_NINO[campo]||'Dato del expediente')}</h4><div class="pro-cambio-valores"><span><strong>Antes</strong><br>${limpiarHtml(campo==='edad'?edadHistorica(v.anterior,true):valor(v.anterior))}</span><span><strong>Después</strong><br>${limpiarHtml(campo==='edad'?edadHistorica(v.nuevo,false):valor(v.nuevo))}</span></div>`).join('');
+   const cambios=Object.entries(d.cambios||{}).map(([campo,v])=>`<h4>${limpiarHtml(CAMPOS_NINO[campo]||({evaluacion:'Evaluación',observaciones:'Observaciones',recomendaciones:'Recomendaciones',hallazgosProfesionales:'Valoración profesional',diagnosticoProfesional:'Diagnóstico',areasObservadas:'Áreas evaluadas',sinDiagnostico:'Sin diagnóstico',contextoEvaluacion:'Contexto de la evaluación'})[campo]||'Dato del expediente')}</h4><div class="pro-cambio-valores"><span><strong>Antes</strong><br>${limpiarHtml(campo==='edad'?edadHistorica(v.anterior,true):valor(v.anterior))}</span><span><strong>Después</strong><br>${limpiarHtml(campo==='edad'?edadHistorica(v.nuevo,false):valor(v.nuevo))}</span></div>`).join('');
    const contextoDecision=d.familia?`<p><strong>Familia propuesta:</strong> ${limpiarHtml(d.familia)} · <strong>Resultado registrado:</strong> ${limpiarHtml(d.puntaje)} de 100 · <strong>Versión de criterios:</strong> ${limpiarHtml(d.versionPesos)}</p>`:'';
    const asignacion=(d.trabajadorSocial?`<p><strong>Trabajo social asignado:</strong> ${limpiarHtml(d.trabajadorSocial)}</p>`:'')+(d.psicologo?`<p><strong>Psicología asignada:</strong> ${limpiarHtml(d.psicologo)}</p>`:'');
-   const contenido=informe?Profesionales.informe(informe,false):contextoDecision+asignacion+(d.justificacion?`<p>${limpiarHtml(d.justificacion)}</p>`:'')+(campos?`<p>Campos modificados: ${campos}.</p>`:'')+cambios+(d.detalleParcial?'<p>No se conservó el detalle ampliado de todos los campos; la información actual está disponible en el expediente.</p>':'');
+   const contenido=contextoDecision+asignacion+(d.justificacion?`<p>${limpiarHtml(d.justificacion)}</p>`:'')+(campos?`<p>Campos modificados: ${campos}.</p>`:'')+cambios+(d.detalleParcial?'<p>No se conservó el detalle ampliado de todos los campos; la información actual está disponible en el expediente.</p>':'');
    const responsable=e.rol==='SISTEMA'?'Sistema':e.actor||'Responsable no registrado';
-   return `<li class="pro-evento"><div class="pro-evento-cabecera">${Profesionales.icono(icono)}<strong>${titulo}${e.version?' · Versión '+e.version:''}</strong></div><div class="pro-evento-meta"><span>${limpiarHtml(responsable)}</span><span>${limpiarHtml(e.rol==='SISTEMA'?'Sistema':e.rol==='OPERACION_TECNICA'?'Gestión del expediente':ROLES[e.rol]||'Rol no registrado')}</span><time>${limpiarHtml(m.fecha)} · ${limpiarHtml(m.hora)} · Panamá</time></div><p>${limpiarHtml(e.descripcion||'Actuación conservada en el expediente.')}</p>${contenido?`<details class="pro-evento-detalle"><summary>Ver información registrada</summary>${contenido}</details>`:''}</li>`;
+   return `<li class="pro-evento"><div class="pro-evento-cabecera">${Profesionales.icono(icono)}<strong>${titulo}${e.version?' · Versión '+e.version:''}</strong></div><div class="pro-evento-meta"><span>${limpiarHtml(responsable)}</span><span>${limpiarHtml(e.rol==='SISTEMA'?'Sistema':e.rol==='OPERACION_TECNICA'?'Gestión del expediente':ROLES[e.rol]||'Rol no registrado')}</span><time>${limpiarHtml(m.fecha)} · ${limpiarHtml(m.hora)} · Panamá</time></div><p>${limpiarHtml(e.descripcion||'Actuación conservada en el expediente.')}</p>${contenido?`<details class="pro-evento-detalle"><summary>Ver cambios</summary>${contenido}</details>`:''}</li>`;
  }).join('')||'<li>No hay actuaciones registradas.</li>';
 }
 async function cargarFamilia() {
@@ -400,7 +400,11 @@ function pintarDatosEvaluacion(informe=null){
 }
 function actualizarDiagnostico(){const f=document.querySelector('[data-diagnostico-formal]'),activo=!document.getElementById('sinDiagnostico').checked;f.hidden=!activo;f.disabled=!activo;document.getElementById('diagnosticoProfesional').required=activo;}
 document.getElementById('sinDiagnostico').addEventListener('change',actualizarDiagnostico);
+let ubicacionesEdicion=[];
+function restaurarEdicionInline(){for(const [nodo,marca] of ubicacionesEdicion.reverse()){marca.replaceWith(nodo);}ubicacionesEdicion=[];document.getElementById('formEvaluacion').classList.remove('pro-edicion-inline');}
+function moverEdicion(nodo,destino){const marca=document.createComment('posición original');nodo.before(marca);ubicacionesEdicion.push([nodo,marca]);destino.append(nodo);}
 function terminarCorreccion() {
+  restaurarEdicionInline();
   corrigiendoInforme=null; document.getElementById('formEvaluacion').reset();actualizarDiagnostico();ContextoPsicologico.cargar(null);Profesionales.marcarGuardado(document.getElementById('formEvaluacion'));
   pintarDatosEvaluacion();
   document.getElementById('guardarEvaluacion').textContent=corrigiendoInforme?'Guardar cambios':'Guardar evaluación'; document.getElementById('cancelarCorreccion').hidden=false;
@@ -422,7 +426,12 @@ document.querySelector('main').addEventListener('click',e=>{
   pintarDatosEvaluacion(informe);
   document.getElementById('guardarEvaluacion').textContent=corrigiendoInforme?'Guardar cambios':'Guardar evaluación';document.getElementById('cancelarCorreccion').hidden=false;
   mostrarPanel('panelEvaluaciones');
-  document.getElementById('formEvaluacion').scrollIntoView({behavior:'smooth',block:'center'});
+  const form=document.getElementById('formEvaluacion'),articulo=document.querySelector('#evaluacionesVigentes .pro-informe');
+  if(articulo){const marca=document.createComment('posición del formulario');form.before(marca);ubicacionesEdicion.push([form,marca]);articulo.before(form);form.classList.add('pro-edicion-inline');
+   const bloques=[...form.children];moverEdicion(articulo,form);
+   const secciones=[...articulo.querySelectorAll('.pro-informe-bloque')];
+   for(const bloque of bloques){const campo=bloque.querySelector('textarea,input');let i=campo?.id==='evaluacionPsicologica'?0:campo?.id==='observacionesPsicologicas'?1:campo?.id==='recomendacionesPsicologicas'?2:secciones.length-1;const seccion=secciones[i];if(seccion){seccion.open=true;moverEdicion(bloque,seccion.querySelector('.pro-informe-contenido'));}}
+  }
 });
 const GRUPOS_NINO = {
  'Datos generales y escolaridad':['edad','nivelEscolar','gradoEscolar','rendimientoAcademico'],

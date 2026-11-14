@@ -95,6 +95,7 @@ public class PerfilFamiliaService {
         if(p.getFechaRegistro()!=null)actividad.add(actividad("Entrevista registrada","Se recibió la información de tu hogar.",p.getFechaRegistro()));
         if(decisiones!=null)for(var d:decisiones.findByCodigoFamiliaOrderByFechaAsc(p.getCodigoCaso())) {
             if(d.getFecha()==null)continue;
+            if(p.isReevaluacionPendiente() && "REEVALUACION".equals(d.getDecision()))respuesta.setObservacionReevaluacion(d.getMotivo());
             if("ACEPTADA".equals(d.getDecision()))actividad.add(actividad("Propuesta enviada por el Comité","Consulta Mi vinculación para conocer el estado y registrar tu respuesta.",d.getFecha()));
             else if("REEVALUACION".equals(d.getDecision()))actividad.add(actividad("Revisión de entrevista solicitada","Se solicitó ampliar la información de la entrevista.",d.getFecha()));
         }

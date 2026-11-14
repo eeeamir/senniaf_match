@@ -10,6 +10,9 @@ package com.senniaf.match.dto;
  * }
  */
 public class PerfilFamiliaResponse {
+    private String observacionReevaluacion;
+    public String getObservacionReevaluacion(){return observacionReevaluacion;}
+    public void setObservacionReevaluacion(String v){observacionReevaluacion=v;}
 
     private java.util.List<java.util.Map<String,Object>> actividad = java.util.List.of();
     public java.util.List<java.util.Map<String,Object>> getActividad(){return actividad;}
