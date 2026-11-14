@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @EnabledIfEnvironmentVariable(named="HU19_TEST_DB_URL",matches="jdbc:postgresql://127\\.0\\.0\\.1:[0-9]+/hu19_[a-z_]+")
 class CierreInstitucionalPostgresIT extends SoportePostgresIT {
+    @org.springframework.beans.factory.annotation.Autowired com.senniaf.match.service.VinculacionService servicioVinculaciones;
     Map<String,Object> cierre(){return Map.of("fechaCierre",LocalDate.now(ZoneId.of("America/Panama")).toString(),"referenciaInstitucional","ACT-CIERRE-SINTETICO","autoridadResponsable","Autoridad de prueba competente","motivo","Cierre sintético confirmado por actuación institucional para esta prueba","confirmacionAutoridad",true);}
     void cerrar(long id){var r=req("/api/vinculaciones/"+id+"/cierre",HttpMethod.POST,comite,cierre());assertEquals(200,r.getStatusCode().value(),r.getBody());assertEquals("CERRADA",datos(r).path("estado").asText());}
     org.springframework.http.ResponseEntity<String> liberar(long id,String quien){return req("/api/vinculaciones/"+id+"/disponibilidad",HttpMethod.POST,comite,Map.of("expediente",quien,"justificacion","Revisión sintética individual de disponibilidad y elegibilidad institucional"));}
@@ -38,4 +39,17 @@ class CierreInstitucionalPostgresIT extends SoportePostgresIT {
         assertTrue(vinculaciones.findById(id).orElseThrow().isReservaVigente());
     }
     @Test void cierresSimultaneosNoSobrescribenActuacion() throws Exception {Caso c=caso();long id=asignar(c);String ruta="/api/vinculaciones/"+id+"/cierre";assertEquals(List.of(200,409),simultaneas(()->req(ruta,HttpMethod.POST,comite,cierre()),()->req(ruta,HttpMethod.POST,comite,cierre())));assertEquals(1,auditoria.findByCodigoCasoOrderByFechaAsc(c.n().getCodigoCaso()).stream().filter(e->"CIERRE_INSTITUCIONAL".equals(e.getAccion())).count());}
+    @Test void cierreUsaLaFechaDePanamaAunqueElServidorEsteEnUtc(){
+        var anterior=TimeZone.getDefault();
+        try{
+            TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+            Caso c=caso();
+            var fechaLocal=LocalDate.now(ZoneId.of("America/Panama")).minusDays(1);
+            var decision=new com.senniaf.match.model.DecisionComite();decision.setCodigoNino(c.n().getCodigoCaso());decision.setCodigoFamilia(c.f().getCodigoCaso());decision.setDecision("ACEPTADA");decision.setFuncionario("HU19-CM");decision.setMotivo("Antecedente sintético nocturno para validar la fecha institucional");
+            decision.setFecha(fechaLocal.atTime(21,0).atZone(ZoneId.of("America/Panama")).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());decision=decisiones.saveAndFlush(decision);servicioVinculaciones.crear(decision,c.n(),c.f());long id=vinculaciones.findByFamiliaRegistradoPorOrderByIdDesc(c.f().getRegistradoPor()).get(0).getId();
+            var cuerpo=new HashMap<>(cierre());cuerpo.put("fechaCierre",fechaLocal.toString());
+            var r=req("/api/vinculaciones/"+id+"/cierre",HttpMethod.POST,comite,cuerpo);assertEquals(200,r.getStatusCode().value(),r.getBody());assertEquals(fechaLocal.toString(),datos(r).path("cierre").path("fecha").asText());
+        }finally{TimeZone.setDefault(anterior);}
+    }
+
 }
