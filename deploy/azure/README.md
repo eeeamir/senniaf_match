@@ -153,3 +153,7 @@ El informe vigente, respaldos, pipelines, commit/SHA y límites de comprobación
 ## Refuerzos posteriores: 015 pendiente de publicación
 
 La programación a las 07:00 de Panamá y la exclusión de pares rechazados requieren la migración 015 y el actualizador/auxiliar revisados conjuntamente. El auxiliar comprueba cuatro etapas: vinculaciones, interrupciones, cierre y refuerzos (`t t t t`). No recuperar un JAR anterior tras aplicar 015: ignoraría tanto las programaciones como las exclusiones. Esta ampliación está validada localmente; no se desplegó ni se migró Azure durante su desarrollo. Ver [informe técnico y pruebas](../../docs/HU13_PROGRAMACION_Y_RECHAZOS.md).
+
+### Cierre simplificado (016; pendiente de despliegue)
+
+`sql/016-cierre-simplificado.sql` permite registrar cierres nuevos sin referencia ni autoridad manual y conserva los valores históricos. Requiere 014 y 015. Para una futura publicación: verificar el respaldo con el procedimiento anterior, detener el servicio, ejecutar el SQL con `base_autorizada` y `confirmacion=SIMPLIFICAR_CIERRE_SIN_BORRAR`, y sustituir el JAR mediante el actualizador y verificador incluidos en esta versión. No permitir escrituras del código anterior durante la transición. La comprobación exige la marca `senniaf-cierre-servidor.properties` y la nueva restricción; impide recuperar un JAR anterior sobre 016. Si la actualización falla, conservar el servicio detenido hasta disponer de código compatible; no restaurar datos automáticamente.

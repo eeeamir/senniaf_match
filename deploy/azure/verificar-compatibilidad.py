@@ -4,11 +4,12 @@ import sys
 import zipfile
 
 
-def compatible(archivo, esquema_vinculaciones, esquema_interrupciones="f", esquema_cierre="f", esquema_refuerzos="f"):
-    if esquema_vinculaciones not in {"t", "f"} or esquema_interrupciones not in {"t", "f"} or esquema_cierre not in {"t", "f"} or esquema_refuerzos not in {"t", "f"}:
+def compatible(archivo, esquema_vinculaciones, esquema_interrupciones="f", esquema_cierre="f", esquema_refuerzos="f", esquema_cierre_servidor="f"):
+    if esquema_vinculaciones not in {"t", "f"} or esquema_interrupciones not in {"t", "f"} or esquema_cierre not in {"t", "f"} or esquema_refuerzos not in {"t", "f"} or esquema_cierre_servidor not in {"t", "f"}:
         return False, "No se pudo confirmar el esquema. Se conserva el servicio sin sustituir el JAR."
     try:
         with zipfile.ZipFile(archivo) as jar:
+            tiene_cierre_servidor = any(ruta in jar.namelist() for ruta in ("META-INF/senniaf-cierre-servidor.properties", "BOOT-INF/classes/META-INF/senniaf-cierre-servidor.properties"))
             tiene_refuerzos = "BOOT-INF/classes/com/senniaf/match/service/PesosProgramadosService.class" in jar.namelist()
             tiene_hu19 = "BOOT-INF/classes/com/senniaf/match/model/Vinculacion.class" in jar.namelist()
             tiene_cierre = "BOOT-INF/classes/com/senniaf/match/dto/CierreInstitucionalRequest.class" in jar.namelist()
@@ -27,12 +28,14 @@ def compatible(archivo, esquema_vinculaciones, esquema_interrupciones="f", esque
         return False, "El JAR requiere un esquema de cierres compatible (migración 014). No se sustituirá ni recuperará esta versión."
     if tiene_refuerzos != (esquema_refuerzos == "t"):
         return False, "La versión requiere programaciones y exclusiones compatibles (migración 015). No se sustituirá ni recuperará este JAR."
+    if tiene_cierre_servidor != (esquema_cierre_servidor == "t"):
+        return False, "El registro de cierre necesita código y esquema compatibles con 016. No se sustituirá ni recuperará este JAR."
     return True, "El JAR corresponde a la etapa actual del esquema de vinculaciones."
 
 
 if __name__ == "__main__":
-    if len(sys.argv) not in {3,4,5,6}:
-        sys.exit("Uso: verificar-compatibilidad.py archivo.jar vinculaciones:t|f [interrupciones:t|f] [cierres:t|f] [refuerzos:t|f]")
-    valido, mensaje = compatible(sys.argv[1], sys.argv[2],sys.argv[3] if len(sys.argv)>=4 else "f",sys.argv[4] if len(sys.argv)>=5 else "f",sys.argv[5] if len(sys.argv)==6 else "f")
+    if len(sys.argv) not in {3,4,5,6,7}:
+        sys.exit("Uso: verificar-compatibilidad.py archivo.jar vinculaciones:t|f [interrupciones:t|f] [cierres:t|f] [refuerzos:t|f] [cierre-servidor:t|f]")
+    valido, mensaje = compatible(sys.argv[1], sys.argv[2],sys.argv[3] if len(sys.argv)>=4 else "f",sys.argv[4] if len(sys.argv)>=5 else "f",sys.argv[5] if len(sys.argv)>=6 else "f",sys.argv[6] if len(sys.argv)==7 else "f")
     print(mensaje)
     sys.exit(0 if valido else 1)

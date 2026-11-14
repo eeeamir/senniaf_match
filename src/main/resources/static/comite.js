@@ -8,7 +8,7 @@ const Comite = {
     try {
       if(this.vista==='solicitudes'){await this.solicitudes();return;}
       if(this.vista==='criterios'){await this.criterios();return;}
-      if(this.vista==='reevaluaciones'){await this.reevaluaciones();return;}
+      if(this.vista==='reevaluaciones'){location.replace('match.html?vista=compatibilidad');return;}
       this.casos=await this.api('/api/scoring/casos');this.programacion=await this.api('/api/scoring/pesos/programacion');
       if(this.vista==='compatibilidad'){if(this.codigo&&this.familia)await this.analisis();else this.compatibilidad();}
       else this.inicio();
@@ -54,6 +54,7 @@ const Comite = {
       <section class="tarjeta pro-analisis-resumen"><div class="pro-circulo"><strong>${familia.puntaje}</strong><small>de 100</small></div><div><h3>Resultado de compatibilidad</h3><p>Se acreditan puntos solo con información evaluada. Máximo aplicable: ${familia.maximoAplicable??100}; peso evaluado: ${familia.pesoEvaluado??100}. Los factores no aplicables o desconocidos no suman ni redistribuyen puntos.</p></div><span class="chip">Evidencia ${this.nivel(familia.puntaje)}</span></section>
       <div class="pro-dashboard">${tarjeta('Expediente infantil',caso.codigo,gruposNino,`perfiles.html?caso=${encodeURIComponent(caso.codigo)}&origen=match&familiaOrigen=${encodeURIComponent(familia.codigo)}`)}${tarjeta('Expediente familiar',familia.codigo,gruposFamilia,`perfiles.html?familia=${encodeURIComponent(familia.codigo)}&casoOrigen=${encodeURIComponent(caso.codigo)}&origen=match`,'verde')}</div>
       <section class="tarjeta pro-seccion"><details><summary><strong>Cómo se calculó la compatibilidad</strong></summary><p>Revisa cada criterio del análisis.</p><div class="tabla"><table><thead><tr><th>Criterio</th><th>Puntos</th><th>Estado</th><th>Razón</th></tr></thead><tbody>${Object.entries(familia.f).map(([k,[p,nota]])=>`<tr><td>${limpiarHtml(FACTORES[k]?.n||k)}</td><td>${p} de ${pesos[k]}</td><td>${limpiarHtml(Profesionales.etiqueta(familia.estadosFactores?.[k]||'EVALUADO'))}</td><td>${limpiarHtml(nota)}</td></tr>`).join('')}</tbody></table></div></details></section>
+${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
       <section class="tarjeta pro-seccion"><h2>Decisión del Comité</h2><p>${bloqueado?'Este expediente ya tiene una propuesta aceptada.':'Selecciona la acción que corresponde a esta propuesta.'}</p>${bloqueado?'':`<div class="pro-acciones"><button class="boton" type="button" data-decision="ACEPTADA">${this.icono('comprobar')}Aceptar propuesta</button><button class="boton secundario" type="button" data-decision="DESCARTADA">Rechazar propuesta</button><button class="boton secundario" type="button" data-decision="REEVALUACION">Solicitar reevaluación</button></div>`}<p id="estadoDecision" role="status"></p></section>
       ${caso.historial.length?`<p>Las decisiones anteriores están en el <a href="perfiles.html?caso=${encodeURIComponent(caso.codigo)}&origen=match&familiaOrigen=${encodeURIComponent(familia.codigo)}#panelAuditoria">historial de cambios del expediente</a>.</p>`:''}
       <a class="boton secundario" href="${this.vinculo(caso.codigo)}">← Volver a compatibilidad</a>`;
@@ -73,18 +74,6 @@ const Comite = {
       alConfirmar:motivo=>this.api(`/api/scoring/casos/${encodeURIComponent(caso.codigo)}/decisiones`,{method:'POST',body:JSON.stringify({familia:familia.codigo,decision:tipo,motivo,versionPesos:caso.versionPesos})}),
       alGuardar:async datos=>{try{this.casos=await this.api('/api/scoring/casos');await this.analisis();const aviso=document.getElementById('estadoDecision');if(aviso)aviso.textContent=datos.mensaje||'Decisión registrada correctamente.';else this.contenido.insertAdjacentHTML('afterbegin',`<p role="status" class="mensaje exito">${limpiarHtml(datos.mensaje||'Decisión registrada correctamente.')}</p>`);}catch(e){this.contenido.insertAdjacentHTML('afterbegin',`<p role="status" class="mensaje aviso">La decisión se guardó. ${limpiarHtml(e.message)} Recarga para consultar el estado actualizado.</p>`);}}
     });
-  },
-  async reevaluaciones(){
-    const familias=await this.api('/api/scoring/reevaluaciones');
-    this.contenido.innerHTML=Profesionales.encabezado('Reevaluaciones que requieren revisión','Consulta las familias con tres o más reevaluaciones completadas y sus antecedentes.','reloj')+
-      `<section class="tarjeta"><p>${this.icono('informacion')}Este aviso es informativo. No modifica la puntuación ni desactiva el perfil familiar.</p></section>`+
-      (familias.length?familias.map(f=>`<section class="tarjeta"><div class="pro-fila-titulo"><h2>${this.icono('reloj')}${limpiarHtml(f.codigoFamilia)}</h2><span class="chip vinculacion-pendiente">${Number(f.completadas)} reevaluaciones completadas</span></div>
-      <p>Consulta los antecedentes para conocer su evolución y valorar si se necesita seguimiento adicional.</p>${f.pendiente?'<p class="ayuda">Hay una entrevista pendiente de completar; todavía no se suma al contador.</p>':''}
-      <details class="pro-seccion"><summary>${this.icono('consulta')}Consultar antecedentes</summary>
-      ${f.completadasSinFechaDetallada?`<p class="ayuda">${Number(f.completadasSinFechaDetallada)} completadas proceden de registros anteriores sin fecha detallada. Se conserva el contador sin reconstruir actuaciones.</p>`:''}
-      <ul class="familia-actividad">${f.antecedentes.map(e=>`<li><strong>${limpiarHtml(e.titulo)}</strong><p>${this.icono('persona')}${limpiarHtml(e.responsable||'Responsable no registrado')} · ${limpiarHtml(Profesionales.fecha(e.fecha))}</p><p>${limpiarHtml(e.descripcion)}</p></li>`).join('')||'<li>No hay actuaciones detalladas disponibles.</li>'}</ul></details>
-      <a class="boton secundario" href="perfiles.html?familia=${encodeURIComponent(f.codigoFamilia)}">${this.icono('carpeta')}Consultar expediente familiar</a></section>`).join(''):
-      `<section class="tarjeta"><h2>${this.icono('comprobar')}Sin alertas por reevaluaciones</h2><p>Ninguna familia registra tres reevaluaciones completadas para esta revisión.</p></section>`);
   },
   async solicitudes(){
     const expedientes=await this.api('/api/ninos?incluirInactivos=true');
@@ -112,6 +101,10 @@ const Comite = {
       <p id="pesoEstado" role="status"></p><div id="confirmacionProgramacion"></div></section>
       <section class="tarjeta"><details class="pro-historial-pesos"><summary>${this.icono('reloj')}Historial de ajustes</summary>${historial.length?`<ul class="familia-actividad">${[...historial].reverse().map(h=>{const c=h.cambio;return `<li><h3><span class="chip ${c.estado==='PENDIENTE'?'vinculacion-pendiente':''}">${this.icono(c.estado==='PENDIENTE'?'reloj':'comprobar')}${c.estado==='PENDIENTE'?'Cambio programado':c.estado==='APLICADA'?'Cambio aplicado':'Pesos actualizados'}</span></h3><p>${this.icono('persona')}${limpiarHtml(h.autor)} · ${limpiarHtml(Profesionales.fecha(h.fecha))}</p><p>Configuración ${c.versionAnterior} → ${c.versionNueva}</p><ul>${Object.entries(FACTORES).filter(([k])=>c.anteriores?.[k]!==c.nuevos?.[k]).map(([k,f])=>`<li>${limpiarHtml(f.n)}: ${c.anteriores[k]} → ${c.nuevos[k]} puntos</li>`).join('')}</ul>${c.activarEl?`<p>Fecha prevista: ${limpiarHtml(this.fechaProgramada(c.activarEl))}</p>`:''}${c.activadaEl?`<p>Aplicación efectiva: ${limpiarHtml(this.fechaProgramada(c.activadaEl))}</p>`:''}<p>${limpiarHtml(c.justificacion||'Sin justificación registrada en este antecedente.')}</p></li>`;}).join('')}</ul>`:'<p>No hay ajustes registrados.</p>'}</details></section>`;
     const form=document.getElementById('formPesos');if(!form)return;
+    Profesionales.sugerencias(document.getElementById('justificacionPesos'),[
+      ['Revisión de criterios','Se propone este ajuste tras revisar la distribución de los factores utilizados en la evaluación de compatibilidad.'],
+      ['Ajuste de prioridades','Se considera necesario modificar la importancia relativa de determinados factores para mejorar la valoración de las propuestas.'],
+      ['Mejora de la evaluación','Se propone actualizar la ponderación de los criterios a partir de las necesidades identificadas durante la revisión institucional.'],['Otra justificación','']]);
     const valores=()=>Object.fromEntries(Object.keys(FACTORES).map(k=>[k,Number(form.elements[k].value)]));
     const total=()=>document.getElementById('sumaPesos').textContent=Object.values(valores()).reduce((a,b)=>a+b,0)+' / 100';let revision=0;form.oninput=()=>{revision++;total();document.getElementById('confirmacionProgramacion').replaceChildren();};form.onreset=()=>{revision++;setTimeout(()=>{total();document.getElementById('confirmacionProgramacion').replaceChildren();document.getElementById('pesoEstado').replaceChildren();document.getElementById('pesoEstado').className='';},0);};
     let enviando=false;
