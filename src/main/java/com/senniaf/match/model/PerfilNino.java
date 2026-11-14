@@ -56,6 +56,21 @@ public class PerfilNino {
     private Integer cantidadHermanos;
     private String hermanosDetalle;
     @Column(length=2000) private String contextoCultural;
+    @Column(columnDefinition="text") private String idiomaComunicacion;
+    public String getIdiomaComunicacion(){return idiomaComunicacion;}
+    public void setIdiomaComunicacion(String v){idiomaComunicacion=v;}
+    @Column(columnDefinition="text") private String costumbresTradiciones;
+    public String getCostumbresTradiciones(){return costumbresTradiciones;}
+    public void setCostumbresTradiciones(String v){costumbresTradiciones=v;}
+    @Column(columnDefinition="text") private String vinculosCulturales;
+    public String getVinculosCulturales(){return vinculosCulturales;}
+    public void setVinculosCulturales(String v){vinculosCulturales=v;}
+    @Column(columnDefinition="text") private String opinionCultural;
+    public String getOpinionCultural(){return opinionCultural;}
+    public void setOpinionCultural(String v){opinionCultural=v;}
+    @Column(columnDefinition="text") private String recomendacionesCulturales;
+    public String getRecomendacionesCulturales(){return recomendacionesCulturales;}
+    public void setRecomendacionesCulturales(String v){recomendacionesCulturales=v;}
     private String registradoPor;
     @Column(length=40) private String trabajadorSocialAsignado;
     @Column(length=40) private String psicologoAsignado;

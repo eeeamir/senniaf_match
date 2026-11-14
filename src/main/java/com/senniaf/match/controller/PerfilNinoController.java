@@ -112,6 +112,11 @@ public class PerfilNinoController {
                     @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
         comprobarTrabajoSocial(rol); return service.actualizar(codigo, actor, r);
     }
+    @PutMapping("/{codigo}/continuidad-cultural")
+    public PerfilNinoResponse editarCultura(@PathVariable String codigo,@Valid @RequestBody com.senniaf.match.dto.ContinuidadCulturalRequest r,
+            @RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor){
+        comprobarTrabajoSocial(rol);return service.actualizarCultura(codigo,actor,r);
+    }
     @DeleteMapping("/{codigo}")
     public Map<String, String> baja(@PathVariable String codigo,
                     @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
