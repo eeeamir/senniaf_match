@@ -250,7 +250,7 @@ const CAMPOS_FAMILIA = {
   notaRedApoyo:'Notas de apoyo', provincia:'Provincia', disponibilidadViaje:'Disponibilidad de viaje', notaDistancia:'Notas de distancia',
   edadMinimaAceptada:'Edad mínima', edadMaximaAceptada:'Edad máxima', notaRangoEdad:'Notas del rango de edad',
   disposicionHermanos:'Disposición a hermanos', notaHermanos:'Notas de hermanos', condicionesPuedeAcompanarHoy:'Salud: apoyo actual',
-  condicionesConApoyo:'Salud: con apoyo adicional', notaCondicionesSalud:'Notas de salud', continuidadCultural:'Apoyos culturales, lingüísticos y comunitarios',
+  condicionesConApoyo:'Salud: con apoyo adicional', notaCondicionesSalud:'Notas de salud', ...Object.fromEntries(Profesionales.culturaFamilia.map(([k,t])=>[k,t])), continuidadCultural:'Información cultural registrada anteriormente',
   registradoPor:'Responsable familiar', fechaRegistro:'Fecha de registro', perfilCompleto:'Entrevista completa',
   reevaluacionPendiente:'Reevaluación pendiente', numeroReevaluaciones:'Reevaluaciones completadas'
 };
@@ -454,7 +454,7 @@ const GRUPOS_FAMILIA = {
  'Hogar y red de apoyo':['tipoFamilia','especificacionHogar','notaEstructuraHogar','redApoyo','notaRedApoyo'],
  'Preferencias consideradas por el Match':['edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad','disposicionHermanos','notaHermanos'],
  'Salud y logística':['condicionesPuedeAcompanarHoy','condicionesConApoyo','notaCondicionesSalud','provincia','disponibilidadViaje','notaDistancia'],
- 'Apoyos culturales y comunitarios':['continuidadCultural'],
+ 'Apoyos culturales y comunitarios':[...Profesionales.culturaFamilia.map(([k])=>k),'continuidadCultural'],
  'Registro y seguimiento':['codigoCaso','registradoPor','fechaRegistro','perfilCompleto','reevaluacionPendiente']
 };
 const CAMPOS_CULTURA=[

@@ -9,8 +9,10 @@ import java.time.*;
 public class InterrupcionConvivencia {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
     @OneToOne(optional=false) @JoinColumn(name="vinculacion_id",nullable=false,unique=true,updatable=false) private Vinculacion vinculacion;
-    @Column(nullable=false,updatable=false) private LocalDate fechaInterrupcion;
-    @Column(nullable=false,length=200,updatable=false) private String referenciaActuacion;
+    @Column(updatable=false) private LocalDate fechaInterrupcion;
+    @Column(length=200,updatable=false) private String referenciaActuacion;
+    @Enumerated(EnumType.STRING) @Column(length=40,updatable=false) private com.senniaf.match.model.enums.MotivoInterrupcion motivo;
+    public com.senniaf.match.model.enums.MotivoInterrupcion getMotivo(){return motivo;} public void setMotivo(com.senniaf.match.model.enums.MotivoInterrupcion v){motivo=v;}
     @Column(nullable=false,length=2000,updatable=false) private String justificacion;
     @Column(nullable=false,length=40,updatable=false) private String registradoPor;
     @Column(nullable=false,length=25,updatable=false) private String rolProfesional;

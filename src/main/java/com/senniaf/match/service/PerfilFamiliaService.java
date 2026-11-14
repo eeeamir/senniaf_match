@@ -187,9 +187,14 @@ public class PerfilFamiliaService {
         perfil.setCondicionesPuedeAcompanarHoy(request.getCondicionesPuedeAcompanarHoy());
         perfil.setCondicionesConApoyo(request.getCondicionesConApoyo());
         perfil.setNotaCondicionesSalud(request.getNotaCondicionesSalud());
-        // Los clientes anteriores que omiten esta sección conservan el contenido histórico.
-        if (request.getContinuidadCultural()!=null)
-            perfil.setContinuidadCultural(request.getContinuidadCultural().strip());
+        // El texto anterior se conserva íntegro; no se reparte ni se sustituye en actualizaciones.
+        if (perfil.getId()==null) perfil.setContinuidadCultural(request.getContinuidadCultural());
+        if(request.getApoyoIdiomas()!=null) perfil.setApoyoIdiomas(request.getApoyoIdiomas());
+        if(request.getRespetoTradiciones()!=null) perfil.setRespetoTradiciones(request.getRespetoTradiciones());
+        if(request.getRecursosComunitarios()!=null) perfil.setRecursosComunitarios(request.getRecursosComunitarios());
+        if(request.getRespetoPreferencias()!=null) perfil.setRespetoPreferencias(request.getRespetoPreferencias());
+        if(request.getCompromisoCultural()!=null) perfil.setCompromisoCultural(request.getCompromisoCultural());
+
     }
 
     /** Perfil que la familia ya registró con su cédula, si existe. */

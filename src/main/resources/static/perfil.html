@@ -1060,11 +1060,13 @@
       <section class="grupo" id="seccionApoyosCulturales">
         <h2>Apoyos culturales y comunitarios</h2>
         <p class="ayuda">Cada niño o niña tiene una historia, costumbres y vínculos importantes. Comparte cómo tu familia podría acompañar y respetar esos aspectos durante su desarrollo.</p>
-        <div class="fila"><div class="campo ancho">
-          <label for="continuidadCultural">Apoyos culturales, lingüísticos y comunitarios (opcional)</label>
-          <textarea id="continuidadCultural" name="continuidadCultural" maxlength="2000" rows="5" aria-describedby="ayudaContinuidadCultural" placeholder="Cuéntanos cómo acompañarías sus vínculos culturales, su idioma y su comunidad."></textarea>
-          <p class="ayuda" id="ayudaContinuidadCultural">Esta información apoya la valoración humana del Comité. No modifica tu puntuación de compatibilidad.</p>
-        </div></div>
+        <aside id="antecedenteCulturalFamilia" class="cultura-antecedente" hidden><h3>Información cultural registrada anteriormente</h3><p class="pro-texto-registrado" data-texto-anterior></p></aside>
+        <div class="campo ancho apoyo-cultural-campo"><label for="apoyoIdiomas">Apoyo con idiomas y comunicación <small>(opcional)</small></label><textarea id="apoyoIdiomas" name="apoyoIdiomas" rows="4" aria-describedby="ayuda-apoyoIdiomas"></textarea><p class="ayuda" id="ayuda-apoyoIdiomas">¿Qué idiomas habla tu familia y cómo acompañaría a un niño que utiliza otro idioma?</p></div>
+        <div class="campo ancho apoyo-cultural-campo"><label for="respetoTradiciones">Respeto por costumbres y tradiciones <small>(opcional)</small></label><textarea id="respetoTradiciones" name="respetoTradiciones" rows="4" aria-describedby="ayuda-respetoTradiciones"></textarea><p class="ayuda" id="ayuda-respetoTradiciones">¿Cómo respetaría las costumbres, celebraciones y tradiciones importantes para el niño?</p></div>
+        <div class="campo ancho apoyo-cultural-campo"><label for="recursosComunitarios">Recursos y apoyos comunitarios <small>(opcional)</small></label><textarea id="recursosComunitarios" name="recursosComunitarios" rows="4" aria-describedby="ayuda-recursosComunitarios"></textarea><p class="ayuda" id="ayuda-recursosComunitarios">¿Con qué actividades, personas de apoyo o recursos comunitarios cuenta para acompañarlo?</p></div>
+        <div class="campo ancho apoyo-cultural-campo"><label for="respetoPreferencias">Respeto por las preferencias del niño <small>(opcional)</small></label><textarea id="respetoPreferencias" name="respetoPreferencias" rows="4" aria-describedby="ayuda-respetoPreferencias"></textarea><p class="ayuda" id="ayuda-respetoPreferencias">¿Cómo escucharía y tendría en cuenta sus preferencias culturales y sus vínculos importantes?</p></div>
+        <div class="campo ancho apoyo-cultural-campo"><label for="compromisoCultural">Compromiso de acompañamiento cultural <small>(opcional)</small></label><textarea id="compromisoCultural" name="compromisoCultural" rows="4" aria-describedby="ayuda-compromisoCultural"></textarea><p class="ayuda" id="ayuda-compromisoCultural">¿Qué acciones concretas realizaría para preservar su identidad y facilitar su adaptación?</p></div>
+        <p class="ayuda">Esta información apoya la valoración humana del Comité y no modifica la puntuación. Cada respuesta admite hasta 10.000 caracteres; un exceso se rechaza sin recortar el contenido. No incluyas direcciones ni teléfonos de terceros.</p>
       </section>
 
       <!-- ===============================================
@@ -1475,9 +1477,14 @@ formularioFamilia.addEventListener('submit', async (evento) => {
     condicionesPuedeAcompanarHoy: valoresMarcados('condicionesPuedeAcompanarHoy'),
     condicionesConApoyo: valoresMarcados('condicionesConApoyo'),
     notaCondicionesSalud: document.getElementById('notaCondicionesSalud').value,
-    continuidadCultural: document.getElementById('continuidadCultural').value,
+    apoyoIdiomas: document.getElementById('apoyoIdiomas').value,
+    respetoTradiciones: document.getElementById('respetoTradiciones').value,
+    recursosComunitarios: document.getElementById('recursosComunitarios').value,
+    respetoPreferencias: document.getElementById('respetoPreferencias').value,
+    compromisoCultural: document.getElementById('compromisoCultural').value,
   };
 
+  Profesionales.culturaFamilia.forEach(([k])=>{const c=document.getElementById(k);c.setCustomValidity(c.value.length>10000?'La respuesta supera 10.000 caracteres. Reduce su extensión para guardar sin recortes.':'');});
   if (!Profesionales.validarFormulario(formularioFamilia)) {
     formularioFamilia.reportValidity();
     btnRegistrarFamilia.disabled = false;
@@ -1580,10 +1587,11 @@ if (sesion) {
           btnRegistrarFamilia.textContent=textoEnviarFamilia;
           ['tipoFamilia','notaEstructuraHogar','notaRedApoyo','provincia','disponibilidadViaje',
            'notaDistancia','edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad',
-           'disposicionHermanos','notaHermanos','notaCondicionesSalud','especificacionHogar','continuidadCultural'].forEach(k => {
+           'disposicionHermanos','notaHermanos','notaCondicionesSalud','especificacionHogar','apoyoIdiomas','respetoTradiciones','recursosComunitarios','respetoPreferencias','compromisoCultural'].forEach(k => {
             const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
           });
           ['redApoyo','condicionesPuedeAcompanarHoy','condicionesConApoyo'].forEach(k => marcarValores(k, p[k] || []));
+          const antecedente=document.getElementById('antecedenteCulturalFamilia');antecedente.hidden=!p.continuidadCultural;antecedente.querySelector('[data-texto-anterior]').textContent=p.continuidadCultural||'';
           ReglasPerfil.refrescarFamilia();
           Profesionales.marcarGuardado(formularioFamilia);
           btnRegistrarFamilia.disabled = false;

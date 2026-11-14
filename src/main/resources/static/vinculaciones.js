@@ -26,18 +26,18 @@ const Vinculaciones = {
   familiar(lista) {
     if (!lista.length) return `<section class="tarjeta"><h2>${Profesionales.icono('vinculacion')}Mi vinculación</h2><p>Por ahora no tienes vinculaciones registradas.</p></section>`;
     return `<div class="vinculaciones-lista familiar-amplia">${lista.map(v=>`<section class="tarjeta vinculacion-familiar vinculacion-tarjeta">
-      <header class="vinculacion-cabecera"><div class="familia-identificacion"><span class="vinculacion-emblema">${Profesionales.icono('heart-handshake')}</span><div><h2>${limpiarHtml(v.codigo)} · Mi vinculación</h2><p>Expediente familiar ${limpiarHtml(v.expedienteFamiliar)}</p></div></div>${this.estado(v,true)}</header>
-      ${v.estado==='RESPUESTA_ACEPTADA'?`<div class="familia-confirmacion"><span class="vinculacion-emblema menta">${Profesionales.icono('comprobar')}</span><div><h3>Tu aceptación fue registrada</h3><p>Puedes consultar el estado de tu vinculación mientras el equipo responsable continúa con el proceso.</p></div></div>`:['RECHAZADA_POR_FAMILIA','RESPUESTA_RECHAZADA_PENDIENTE_CIERRE'].includes(v.estado)?`<div class="familia-confirmacion"><span class="vinculacion-emblema">${Profesionales.icono('informacion')}</span><div><h3>Tu rechazo fue registrado</h3><p>El acceso digital a la información del niño ha finalizado. El equipo institucional podrá continuar con las actuaciones correspondientes.</p></div></div>`:`<p class="vinculacion-siguiente">${limpiarHtml(v.siguientePaso)}</p>`}
+      <header class="vinculacion-cabecera"><div class="familia-identificacion"><span class="vinculacion-emblema">${Profesionales.icono('heart-handshake')}</span><div><h2>${limpiarHtml(v.codigo)} · Mi vinculación</h2><p>Expediente familiar ${limpiarHtml(v.expedienteFamiliar)}</p><p>Propuesta recibida: ${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</p></div></div>${this.estado(v,true)}</header>
+      ${v.estado==='RESPUESTA_ACEPTADA'?`<div class="familia-confirmacion"><span class="vinculacion-emblema menta">${Profesionales.icono('comprobar')}</span><div><h3>Tu aceptación fue registrada</h3><p>Puedes consultar los próximos pasos en Historial.</p></div></div>`:['RECHAZADA_POR_FAMILIA','RESPUESTA_RECHAZADA_PENDIENTE_CIERRE'].includes(v.estado)?`<div class="familia-confirmacion"><span class="vinculacion-emblema">${Profesionales.icono('informacion')}</span><div><h3>Tu rechazo fue registrado</h3><p>Puedes consultar el registro de tu respuesta en Historial.</p></div></div>`:`<p class="vinculacion-siguiente">${limpiarHtml(v.siguientePaso)}</p>`}
       <div class="familia-propuesta-acciones">
         ${v.puedeConsultarInformacion?`<section class="familia-informacion-asignada"><span class="vinculacion-emblema">${Profesionales.icono('informe')}</span><div><h3>Información del niño asignado</h3><p>Consulta la información autorizada de esta asignación.</p></div><button type="button" class="boton secundario chico" data-informacion-nino="${v.id}">${Profesionales.icono('consulta')}Ver información ${Profesionales.icono('flecha')}</button></section>`:''}
         ${v.estado==='PENDIENTE_RESPUESTA'?`<div class="familia-respuesta"><p>Tu decisión sobre la propuesta</p><div class="pro-acciones"><button class="boton" data-responder="ACEPTAR" data-id="${v.id}">${Profesionales.icono('comprobar')}Aceptar</button><button class="boton secundario" data-responder="RECHAZAR" data-id="${v.id}">${Profesionales.icono('cerrar')}Rechazar</button></div></div>`:''}
       </div>
-      ${v.estado==='RESPUESTA_ACEPTADA'&&!v.interrupcionRegistrada?this.progresoFamiliar():''}${v.estado==='RESPUESTA_ACEPTADA'&&v.interrupcionRegistrada?`<p class="mensaje aviso">${limpiarHtml(v.siguientePaso)}</p>`:''}
-      <details class="vinculacion-informacion"><summary>${Profesionales.icono('reloj')}Ver seguimiento</summary><p>${limpiarHtml(v.siguientePaso)}</p><p>Propuesta recibida: ${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</p>${v.fechaRespuesta?`<p>Respuesta registrada: ${limpiarHtml(Profesionales.fecha(v.fechaRespuesta))}</p>`:''}<p class="ayuda">${Profesionales.icono('informacion')}La respuesta en este portal no sustituye las formalidades legales ni autoriza el acogimiento preadoptivo.</p></details>
+      <p class="ayuda aviso-legal-familia">${Profesionales.icono('informacion')}<span>La respuesta en este portal no sustituye las formalidades legales ni autoriza el acogimiento preadoptivo.</span></p>
     </section>`).join('')}</div>`;
   },
-  progresoFamiliar(){
-    return `<section class="familia-seguimiento"><header><span class="vinculacion-emblema">${Profesionales.icono('solicitudes')}</span><div><h3>Seguimiento de tu proceso</h3><p>Consulta el avance registrado de tu vinculación.</p></div><span class="chip retirado">Pendiente de coordinación</span></header><ol class="familia-progreso">${[['Aceptación registrada','actual','Etapa actual'],['Acompañamiento e interrelación','pendiente','Etapa posterior'],['Acogimiento preadoptivo','pendiente','Etapa posterior']].map(([n,e,t])=>`<li class="${e}"><span class="familia-indicador">${Profesionales.icono(e==='actual'?'reloj':'informacion')}</span><strong>${n}</strong><small>${t}</small></li>`).join('')}</ol><aside class="familia-siguiente"><span>${Profesionales.icono('informacion')}</span><div><strong>Siguiente paso: Preparación de la interrelación.</strong><p>El equipo responsable coordinará el acompañamiento y te informará cuando haya novedades.</p></div></aside></section>`;
+  progresoFamiliar(v){
+    if(!v || v.estado!=='RESPUESTA_ACEPTADA' || v.interrupcionRegistrada)return `<section class="tarjeta familia-seguimiento"><header><span class="vinculacion-emblema">${Profesionales.icono('solicitudes')}</span><div><h3>Seguimiento de tu proceso</h3><p>${limpiarHtml(v?v.siguientePaso:'Todavía no hay una vinculación aceptada.')}</p></div><span class="chip">${limpiarHtml(v?v.interrupcionRegistrada&&v.estado!=='CERRADA'?'Pendiente de orientación institucional':this.estados[v.estado]:'Sin vinculación aceptada')}</span></header></section>`;
+    return `<section class="tarjeta familia-seguimiento"><header><span class="vinculacion-emblema">${Profesionales.icono('solicitudes')}</span><div><h3>Seguimiento de tu proceso</h3><p>Consulta el avance registrado de tu vinculación.</p></div><span class="chip retirado">Pendiente de coordinación</span></header><ol class="familia-progreso">${[['Aceptación registrada','actual','Etapa actual'],['Acompañamiento e interrelación','pendiente','Etapa posterior'],['Acogimiento preadoptivo','pendiente','Etapa posterior']].map(([n,e,t])=>`<li class="${e}"><span class="familia-indicador">${Profesionales.icono(e==='actual'?'reloj':'informacion')}</span><strong>${n}</strong><small>${t}</small></li>`).join('')}</ol><aside class="familia-siguiente"><span>${Profesionales.icono('informacion')}</span><div><strong>Siguiente paso: Preparación de la interrelación.</strong><p>El equipo responsable coordinará el acompañamiento y te informará cuando haya novedades.</p></div></aside></section>`;
   },
   async informacionFamiliar(id){
     try{
@@ -209,13 +209,20 @@ const Vinculaciones = {
       catch(error){d.querySelector('[data-error]').textContent=error.message;guardando=false;form.querySelectorAll('button').forEach(b=>b.disabled=false);}
     };d.showModal();
   },
+  motivosInterrupcion: [
+    ['DIFICULTADES_CONTINUAR','La familia manifestó dificultades para continuar.','Se registra la comunicación de dificultades de la familia para continuar con la convivencia. Se solicita revisar las circunstancias y el acompañamiento necesario.'],
+    ['ADAPTACION','Se presentaron dificultades importantes de adaptación.','Se comunican dificultades de adaptación durante la convivencia que requieren revisión y acompañamiento del equipo responsable.'],
+    ['BIENESTAR_NINO','Se identificó una situación que requiere proteger el bienestar del niño.','Se comunica una situación que requiere valorar la protección del bienestar del niño. Se deja constancia para la intervención y revisión del equipo responsable, sin anticipar conclusiones.'],
+    ['CONDICIONES_CUIDADO','Cambiaron las condiciones de cuidado de la familia.','Se comunica un cambio en las condiciones de cuidado de la familia que requiere revisar la continuidad de la convivencia y los apoyos necesarios.'],
+    ['OTRO','Otro motivo.','']
+  ],
   panelInterrupcion(v){
     const i=v.interrupcion;
     if(!i && !v.puedeReportarInterrupcion)return '';
     return `<section class="tarjeta"><h2>${Profesionales.icono('advertencia')}Interrupción de convivencia</h2>${i?`
       <p><strong>${i.fechaRevision?'Revisión registrada':'Pendiente de revisión del Comité'}</strong></p>
-      <dl class="detalle-datos"><div><dt>Fecha de la interrupción</dt><dd>${limpiarHtml(i.fechaInterrupcion)}</dd></div><div><dt>Referencia institucional de la convivencia</dt><dd>${limpiarHtml(i.referenciaActuacion)}</dd></div></dl>
-      <p class="pro-texto-registrado">${limpiarHtml(i.justificacion)}</p><p>${Profesionales.icono('persona')}${limpiarHtml(i.registradoPor)} · ${limpiarHtml(Profesionales.fecha(i.fechaRegistro))}</p>
+      <dl class="detalle-datos">${i.motivo?`<div><dt>Motivo de la interrupción</dt><dd>${limpiarHtml(this.motivosInterrupcion.find(([k])=>k===i.motivo)?.[1]||i.motivo)}</dd></div>`:''}${i.fechaInterrupcion?`<div><dt>Fecha de la interrupción registrada anteriormente</dt><dd>${limpiarHtml(i.fechaInterrupcion)}</dd></div>`:''}${i.referenciaActuacion?`<div><dt>Referencia institucional registrada anteriormente</dt><dd>${limpiarHtml(i.referenciaActuacion)}</dd></div>`:''}</dl>
+      <p class="pro-texto-registrado">${limpiarHtml(i.justificacion)}</p><p>${Profesionales.icono('persona')}${limpiarHtml(i.registradoPor)} · ${limpiarHtml(Profesionales.etiqueta(i.rolProfesional))} · ${limpiarHtml(Profesionales.fecha(i.fechaRegistro))} · Panamá</p>
       ${i.fechaRevision?`<h3>Revisión del Comité</h3><p class="pro-texto-registrado">${limpiarHtml(i.revisionJustificacion)}</p><p>${limpiarHtml(i.revisadoPor)} · ${limpiarHtml(Profesionales.fecha(i.fechaRevision))}</p>`:''}
       `:'<p>Deja constancia de una interrupción de convivencia respaldada por la actuación institucional correspondiente.</p>'}
       <p class="ayuda">${Profesionales.icono('informacion')}El registro conserva los antecedentes y la reserva de los expedientes. No cambia su idoneidad ni formaliza una adopción.</p>
@@ -224,16 +231,14 @@ const Vinculaciones = {
   },
   registrarInterrupcion(c,v,sesion){
     const d=document.createElement('dialog');d.className='pro-dialogo';d.setAttribute('aria-labelledby','tituloInterrupcion');
-    const hoy=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('advertencia')}</span><h2 id="tituloInterrupcion">Registrar interrupción de convivencia</h2></div>
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('advertencia')}</span><h2 id="tituloInterrupcion">Registrar interrupción de la convivencia</h2></div>
       <p>Deja constancia de lo ocurrido y de las circunstancias que deben considerarse durante la revisión del Comité.</p>
-      <form class="pro-interrupcion-form"><label>Fecha de la interrupción<input type="date" name="fechaInterrupcion" required max="${hoy}" value="${hoy}"></label>
-      <label>Referencia institucional de la convivencia<input name="referenciaActuacion" minlength="5" maxlength="200" required></label>
-      <p class="ayuda">Indica la actuación que respalda la convivencia. La aceptación en el portal, por sí sola, no la autoriza.</p>
-      <label>Motivo de la interrupción<textarea name="justificacion" minlength="10" maxlength="2000" rows="5" required placeholder="Describe brevemente qué ocurrió y los aspectos importantes para la revisión."></textarea></label>
+      <form class="pro-interrupcion-form"><label>Motivo de la interrupción<select name="motivo" required><option value="">Selecciona el motivo que mejor describa la situación</option>${this.motivosInterrupcion.map(([k,t])=>`<option value="${k}">${t}</option>`).join('')}</select></label>
+      <label>Descripción de lo ocurrido<textarea name="justificacion" minlength="10" maxlength="2000" rows="5" required placeholder="Explica lo sucedido y las circunstancias que deba considerar el Comité."></textarea></label>
       <p data-error role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button class="boton" type="submit">Revisar y confirmar</button></div></form>`;
     document.body.append(d);const form=d.querySelector('form');let guardando=false;
     d.onclose=()=>d.remove();d.addEventListener('cancel',e=>{if(guardando)e.preventDefault();});d.querySelector('[data-cancelar]').onclick=()=>d.close();
+    form.elements.motivo.onchange=()=>{form.elements.justificacion.value=this.motivosInterrupcion.find(([k])=>k===form.elements.motivo.value)?.[2]||'';form.elements.justificacion.dispatchEvent(new Event('input',{bubbles:true}));};
     CamposFormulario.iniciar(form);
     form.onsubmit=e=>{e.preventDefault();if(guardando || !Profesionales.validarFormulario(form))return;
       const datos=Object.fromEntries(new FormData(form));

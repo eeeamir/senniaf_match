@@ -34,6 +34,12 @@ public class PerfilFamilia {
     @Column(name="condicion") private List<CondicionSalud> condicionesConApoyo;
     @Column(length=2000) private String notaCondicionesSalud;
     @Column(length=2000) private String continuidadCultural;
+    @Column(columnDefinition="text") private String apoyoIdiomas;
+    @Column(columnDefinition="text") private String respetoTradiciones;
+    @Column(columnDefinition="text") private String recursosComunitarios;
+    @Column(columnDefinition="text") private String respetoPreferencias;
+    @Column(columnDefinition="text") private String compromisoCultural;
+
     @Column(name="registrado_por", nullable=false, unique=true) private String registradoPor;
     private LocalDateTime fechaRegistro;
     private boolean perfilCompleto;
@@ -58,6 +64,11 @@ public class PerfilFamilia {
     public List<CondicionSalud> getCondicionesConApoyo(){return condicionesConApoyo;} public void setCondicionesConApoyo(List<CondicionSalud> v){condicionesConApoyo=v;}
     public String getNotaCondicionesSalud(){return notaCondicionesSalud;} public void setNotaCondicionesSalud(String v){notaCondicionesSalud=v;}
     public String getContinuidadCultural(){return continuidadCultural;} public void setContinuidadCultural(String v){continuidadCultural=v;}
+    public String getApoyoIdiomas(){return apoyoIdiomas;} public void setApoyoIdiomas(String v){apoyoIdiomas=v;}
+    public String getRespetoTradiciones(){return respetoTradiciones;} public void setRespetoTradiciones(String v){respetoTradiciones=v;}
+    public String getRecursosComunitarios(){return recursosComunitarios;} public void setRecursosComunitarios(String v){recursosComunitarios=v;}
+    public String getRespetoPreferencias(){return respetoPreferencias;} public void setRespetoPreferencias(String v){respetoPreferencias=v;}
+    public String getCompromisoCultural(){return compromisoCultural;} public void setCompromisoCultural(String v){compromisoCultural=v;}
     public String getRegistradoPor(){return registradoPor;} public void setRegistradoPor(String v){registradoPor=v;}
     public LocalDateTime getFechaRegistro(){return fechaRegistro;} public void setFechaRegistro(LocalDateTime v){fechaRegistro=v;}
     public boolean isPerfilCompleto(){return perfilCompleto;} public void setPerfilCompleto(boolean v){perfilCompleto=v;}

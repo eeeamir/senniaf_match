@@ -264,3 +264,7 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 #continuidadCultural{margin-top:14px;margin-bottom:14px}#ayudaContinuidadCultural{margin-top:14px;line-height:1.6}
 .profesional #identidadCultural .cultura-campos.detalle-datos{grid-template-columns:repeat(2,minmax(0,1fr))}.cultura-campos>div:last-child,.cultura-formulario>div:nth-of-type(5){grid-column:1/-1}@media(max-width:650px){.profesional #identidadCultural .cultura-campos.detalle-datos{grid-template-columns:1fr}}
 #seccionApoyosCulturales>p.ayuda{margin:12px 0 24px;line-height:1.65}#seccionApoyosCulturales label[for=continuidadCultural]{display:block;margin:0 0 12px}#seccionApoyosCulturales #continuidadCultural{margin-top:0}
+
+/* Apoyos familiares en el apartado existente; avisos con icono separado. */
+#seccionApoyosCulturales .apoyo-cultural-campo{display:grid;gap:10px;margin:26px 0}#seccionApoyosCulturales .apoyo-cultural-campo label,#seccionApoyosCulturales .apoyo-cultural-campo .ayuda{margin:0}#seccionApoyosCulturales textarea{width:100%}.aviso-legal-familia{display:flex;align-items:flex-start;gap:10px}.aviso-legal-familia .pro-icono{flex-shrink:0}.familia-seguimiento{background:#fff}.pro-interrupcion-form select{width:100%}
+.pro-dialogo[aria-labelledby="tituloInterrupcion"] .pro-interrupcion-form{display:grid;gap:18px}.pro-dialogo[aria-labelledby="tituloInterrupcion"] .pro-interrupcion-form>label{display:grid;gap:8px}

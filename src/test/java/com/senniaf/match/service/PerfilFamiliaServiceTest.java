@@ -169,6 +169,31 @@ class PerfilFamiliaServiceTest {
         verify(decisiones).existsByCodigoFamiliaAndDecision("FAM-002", "ACEPTADA");
     }
 
+    @Test
+    void conservaAntecedenteYAuditaCadaApoyoCulturalSinCambiarReevaluaciones() throws Exception {
+        var repo=mock(PerfilFamiliaRepository.class);
+        var auditoria=mock(com.senniaf.match.repository.EventoCasoRepository.class);
+        var captor=org.mockito.ArgumentCaptor.forClass(PerfilFamilia.class);
+        when(repo.save(captor.capture())).thenAnswer(i->i.getArgument(0));
+        var servicio=new PerfilFamiliaService(repo,mock(DecisionComiteRepository.class),auditoria);
+        var inicial=perfilCompleto();servicio.registrarPerfil(inicial,"familia-cultural");
+        var perfil=captor.getValue();perfil.setId(1L);
+        when(repo.bloquearPorRegistradoPor("familia-cultural")).thenReturn(Optional.of(perfil));
+        var cambios=perfilCompleto();cambios.setContinuidadCultural("No debe sustituir el texto anterior");
+        cambios.setApoyoIdiomas("Idioma familiar "+"á".repeat(3000));cambios.setRespetoTradiciones("Respeto por las celebraciones");
+        cambios.setRecursosComunitarios("Actividades comunitarias");cambios.setRespetoPreferencias("Escuchar las preferencias expresadas");cambios.setCompromisoCultural("Acompañamiento acordado con el equipo");
+        servicio.actualizarPropio(cambios,"familia-cultural");
+        assertEquals(inicial.getContinuidadCultural(),perfil.getContinuidadCultural());
+        assertEquals(cambios.getApoyoIdiomas(),perfil.getApoyoIdiomas());
+        var evento=org.mockito.ArgumentCaptor.forClass(com.senniaf.match.model.EventoCaso.class);verify(auditoria).save(evento.capture());
+        var diff=new com.fasterxml.jackson.databind.ObjectMapper().readTree(evento.getValue().getDescripcion()).path("cambios");
+        assertEquals(5,diff.size());assertFalse(diff.has("continuidadCultural"));
+        for(String k:List.of("apoyoIdiomas","respetoTradiciones","recursosComunitarios","respetoPreferencias","compromisoCultural"))assertTrue(diff.has(k));
+        assertEquals(0,perfil.getNumeroReevaluaciones());assertTrue(perfil.isPerfilCompleto());
+        cambios.setApoyoIdiomas("");servicio.actualizarPropio(cambios,"familia-cultural");assertEquals("",perfil.getApoyoIdiomas());
+        assertEquals(inicial.getContinuidadCultural(),perfil.getContinuidadCultural());
+    }
+
     private PerfilFamiliaRequest perfilCompleto() {
         PerfilFamiliaRequest request = new PerfilFamiliaRequest();
         request.setTipoFamilia(TipoFamilia.PAREJA);

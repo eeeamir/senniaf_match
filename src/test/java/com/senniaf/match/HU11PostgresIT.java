@@ -9,12 +9,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @EnabledIfEnvironmentVariable(named="HU19_TEST_DB_URL",matches="jdbc:postgresql://127\\.0\\.0\\.1:[0-9]+/hu19_[a-z_]+")
 class HU11PostgresIT extends SoportePostgresIT {
-    Map<String,Object> informe(){return Map.of("fechaInterrupcion",LocalDate.now(ZoneId.of("America/Panama")).toString(),"referenciaActuacion","ACT-HU11-PRUEBA","justificacion","Se registra una interrupción sintética para revisión institucional");}
+    Map<String,Object> informe(){return Map.of("motivo","ADAPTACION","justificacion","Se registra una interrupción sintética para revisión institucional");}
     long aceptada(Caso c){long id=asignar(c);assertEquals(200,req("/api/vinculaciones/"+id+"/respuesta",HttpMethod.POST,c.token(),Map.of("respuesta","ACEPTAR")).getStatusCode().value());return id;}
     @Test void profesionalRegistraYComiteRevisaSinSanciones(){
         Caso c=caso();long id=aceptada(c);int puntaje=(int)scoring.candidato(c.n(),c.f(),scoring.pesos()).get("puntaje");
-        var registro=req("/api/vinculaciones/"+id+"/interrupcion",HttpMethod.POST,social,informe());assertEquals(200,registro.getStatusCode().value(),registro.getBody());
-        var i=datos(registro).path("interrupcion");assertEquals("HU19-TS",i.path("registradoPor").asText());assertTrue(datos(registro).path("interrupcionPendiente").asBoolean());
+        var cuerpo=new HashMap<>(informe());cuerpo.put("registradoPor","USUARIO-SUPLANTADO");cuerpo.put("rolProfesional","COMITE");cuerpo.put("fechaRegistro","2000-01-01T00:00:00");
+        var registro=req("/api/vinculaciones/"+id+"/interrupcion",HttpMethod.POST,social,cuerpo);assertEquals(200,registro.getStatusCode().value(),registro.getBody());
+        var i=datos(registro).path("interrupcion");assertEquals("HU19-TS",i.path("registradoPor").asText());assertTrue(datos(registro).path("interrupcionPendiente").asBoolean());assertEquals("ADAPTACION",i.path("motivo").asText());assertEquals("TRABAJADOR_SOCIAL",i.path("rolProfesional").asText());assertTrue(i.path("fechaInterrupcion").isNull());assertTrue(i.path("referenciaActuacion").isNull());assertFalse(i.path("fechaRegistro").isNull());assertFalse(i.path("fechaRegistro").asText().startsWith("2000-"));
         var revision=req("/api/vinculaciones/"+id+"/interrupcion/revision",HttpMethod.POST,comite,Map.of("justificacion","Se revisaron los antecedentes sintéticos y se documentó el seguimiento"));assertEquals(200,revision.getStatusCode().value(),revision.getBody());
         assertFalse(datos(revision).path("interrupcionPendiente").asBoolean());assertEquals(i.path("justificacion"),datos(revision).path("interrupcion").path("justificacion"));
         assertEquals("HU19-CM",datos(revision).path("interrupcion").path("revisadoPor").asText());
@@ -39,7 +40,7 @@ class HU11PostgresIT extends SoportePostgresIT {
     }
     @Test void camposInvalidosNoCreanRegistros(){
         Caso c=caso();long id=aceptada(c);String ruta="/api/vinculaciones/"+id+"/interrupcion";
-        for(Map<String,Object> cambios:List.of(Map.<String,Object>of("justificacion","corto"),Map.<String,Object>of("referenciaActuacion"," "),Map.<String,Object>of("fechaInterrupcion",LocalDate.now(ZoneId.of("America/Panama")).plusDays(1).toString()))){
+        for(Map<String,Object> cambios:List.of(Map.<String,Object>of("justificacion","corto"),Map.<String,Object>of("motivo"," "),Map.<String,Object>of("motivo","NO_VERIFICADO"))){
             var cuerpo=new HashMap<>(informe());cuerpo.putAll(cambios);assertEquals(400,req(ruta,HttpMethod.POST,social,cuerpo).getStatusCode().value());
         }
         assertTrue(datos(req("/api/vinculaciones/"+id,HttpMethod.GET,comite,null)).path("interrupcion").isNull());

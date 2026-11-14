@@ -140,11 +140,9 @@ public class VinculacionService {
         if(!reportable(v))throw new IllegalStateException("Esta vinculación no permite registrar una interrupción de convivencia");
         if(interrupcion(v)!=null)throw new IllegalStateException("Esta vinculación ya tiene una interrupción registrada. Consulta su revisión");
         LocalDateTime ahora=LocalDateTime.now();
-        if(solicitud==null || solicitud.fechaInterrupcion()==null || solicitud.fechaInterrupcion().isAfter(java.time.LocalDate.now(ZoneId.of("America/Panama")))
-                || solicitud.fechaInterrupcion().isBefore(fechaPanama(v.getFechaRespuesta())))
-            throw new IllegalArgumentException("La fecha debe estar entre la aceptación familiar y el día de hoy");
-        InterrupcionConvivencia i=new InterrupcionConvivencia();i.setVinculacion(v);i.setFechaInterrupcion(solicitud.fechaInterrupcion());
-        i.setReferenciaActuacion(texto(solicitud.referenciaActuacion(),5,200,"Indica la referencia institucional de la convivencia"));
+        if(solicitud==null || solicitud.motivo()==null)throw new IllegalArgumentException("Selecciona el motivo de la interrupción");
+        InterrupcionConvivencia i=new InterrupcionConvivencia();i.setVinculacion(v);i.setMotivo(solicitud.motivo());
+        // Fecha de registro e identidad proceden del servidor; no inventar fecha del hecho ni referencia.
         i.setJustificacion(texto(solicitud.justificacion(),10,2000,"Explica el motivo de la interrupción en 10 a 2000 caracteres"));
         i.setRegistradoPor(actor);i.setRolProfesional(rol);i.setFechaRegistro(ahora);interrupciones.saveAndFlush(i);
         auditar(v,actor,"INTERRUPCION_REGISTRADA","Se registró una interrupción de convivencia para revisión del Comité.");
@@ -215,7 +213,7 @@ public class VinculacionService {
     private InterrupcionConvivencia interrupcion(Vinculacion v){return interrupciones==null?null:interrupciones.findByVinculacionId(v.getId()).orElse(null);}
     private Map<String,Object> detalleInterrupcion(InterrupcionConvivencia i){
         Map<String,Object> r=new LinkedHashMap<>();r.put("id",i.getId());r.put("fechaInterrupcion",i.getFechaInterrupcion());
-        r.put("referenciaActuacion",i.getReferenciaActuacion());r.put("justificacion",i.getJustificacion());r.put("registradoPor",i.getRegistradoPor());r.put("rolProfesional",i.getRolProfesional());r.put("fechaRegistro",fecha(i.getFechaRegistro()));
+        r.put("motivo",i.getMotivo());r.put("referenciaActuacion",i.getReferenciaActuacion());r.put("justificacion",i.getJustificacion());r.put("registradoPor",i.getRegistradoPor());r.put("rolProfesional",i.getRolProfesional());r.put("fechaRegistro",fecha(i.getFechaRegistro()));
         r.put("revisionJustificacion",i.getRevisionJustificacion());r.put("revisadoPor",i.getRevisadoPor());r.put("fechaRevision",fecha(i.getFechaRevision()));return r;
     }
     private String texto(String valor,int min,int max,String error){if(valor==null || valor.strip().length()<min || valor.length()>max)throw new IllegalArgumentException(error);return valor.strip();}
