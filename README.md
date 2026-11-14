@@ -41,6 +41,6 @@ Las pruebas históricas y el aporte del equipo se conservan en `src/test`. La re
 
 Las cinco historias están integradas localmente: HU19, HU11, HU12, HU14 y HU13. La regresión completa aprobó 273 pruebas Java (234 unitarias y 39 de integración) y ocho del actualizador. Las fórmulas y los cinco factores se conservaron.
 
-La nueva versión todavía no está publicada en Azure: Vinculaciones devuelve 404 allí y las migraciones 012 y 013 requieren una intervención autorizada. La [verificación integral de HU19](docs/VERIFICACION_INTEGRAL_HU19.md) se conserva como antecedente; la petición posterior permitió desarrollar las otras historias localmente sin esperar al despliegue. No se realizaron push ni cambios remotos.
+La integración del Sprint 8 está publicada en Azure: Vinculaciones responde 200 y las migraciones 012, 013 y 014 están aplicadas en PostgreSQL persistente. Ver [evidencias y alcance de la verificación pública](docs/SPRINT8_INTEGRACION_DESPLIEGUE.md). La [verificación integral de HU19](docs/VERIFICACION_INTEGRAL_HU19.md) se conserva como antecedente; la petición posterior permitió desarrollar las otras historias localmente sin esperar al despliegue. La publicación posterior se realizó mediante PR y el actualizador existente, conservando datos y commits originales.
 
 No hay contraseñas públicas de demostración. Los datos y respaldos de Azure, sesiones, secretos SMTP y claves SSH permanecen fuera del repositorio.

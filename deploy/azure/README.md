@@ -141,3 +141,10 @@ Para una intervención futura autorizada, ampliar el procedimiento anterior:
 6. Verificar HTTPS, los cuatro roles, asignación profesional, privacidad familiar, historial, respuestas, revisión de interrupciones, apoyos culturales, alertas y pesos/versiones. Confirmar persistencia y huellas/conteos de los datos que deban conservarse. Verificar la huella del JAR activo y sus metadatos, sin imprimir secretos.
 
 Ninguno de estos pasos ha sido ejecutado en Azure. El ensayo de arranque y persistencia del JAR se limita al entorno local sintético.
+
+
+## Publicación del Sprint 8 — 14 de noviembre de 2026
+
+El procedimiento autorizado aplicó 012/013/014 sobre `senniaf_demo` con respaldo reciente verificado y backend detenido; luego el actualizador existente publicó el JAR CI del commit `4d19bc2`. La ruta Vinculaciones ya responde 200 y se comprobaron autenticación, consultas y permisos de cuatro roles. Las tablas históricas conservan conteos y huellas. El cierre institucional y la revisión separada de disponibilidad requieren 014; el auxiliar actualizado impide recuperar un JAR que omita esas columnas.
+
+El informe vigente, respaldos, pipelines, commit/SHA y límites de comprobación están en [SPRINT8_INTEGRACION_DESPLIEGUE.md](../../docs/SPRINT8_INTEGRACION_DESPLIEGUE.md). Las secciones anteriores se conservan como antecedentes de las versiones previas.

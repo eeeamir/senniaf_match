@@ -114,7 +114,7 @@ public class VinculacionService {
         if(interrupcion(v)!=null)throw new IllegalStateException("Esta vinculación ya tiene una interrupción registrada. Consulta su revisión");
         LocalDateTime ahora=LocalDateTime.now();
         if(solicitud==null || solicitud.fechaInterrupcion()==null || solicitud.fechaInterrupcion().isAfter(java.time.LocalDate.now(ZoneId.of("America/Panama")))
-                || solicitud.fechaInterrupcion().isBefore(v.getFechaRespuesta().toLocalDate()))
+                || solicitud.fechaInterrupcion().isBefore(fechaPanama(v.getFechaRespuesta())))
             throw new IllegalArgumentException("La fecha debe estar entre la aceptación familiar y el día de hoy");
         InterrupcionConvivencia i=new InterrupcionConvivencia();i.setVinculacion(v);i.setFechaInterrupcion(solicitud.fechaInterrupcion());
         i.setReferenciaActuacion(texto(solicitud.referenciaActuacion(),5,200,"Indica la referencia institucional de la convivencia"));
@@ -142,7 +142,7 @@ public class VinculacionService {
         if(v.getEstado()==Vinculacion.Estado.CERRADA)throw new IllegalStateException("El cierre ya está registrado y se conserva en el historial");
         if(solicitud==null || !solicitud.confirmacionAutoridad())throw new IllegalArgumentException("Confirma la actuación de la autoridad competente");
         var hoy=java.time.LocalDate.now(ZoneId.of("America/Panama"));
-        if(solicitud.fechaCierre()==null || solicitud.fechaCierre().isAfter(hoy) || solicitud.fechaCierre().isBefore(v.getDecision().getFecha().toLocalDate()))throw new IllegalArgumentException("Revisa la fecha del cierre: debe estar entre la propuesta y el día de hoy");
+        if(solicitud.fechaCierre()==null || solicitud.fechaCierre().isAfter(hoy) || solicitud.fechaCierre().isBefore(fechaPanama(v.getDecision().getFecha())))throw new IllegalArgumentException("Revisa la fecha del cierre: debe estar entre la propuesta y el día de hoy");
         v.setReferenciaCierre(texto(solicitud.referenciaInstitucional(),5,200,"Indica la referencia institucional del cierre"));
         v.setAutoridadCierre(texto(solicitud.autoridadResponsable(),3,200,"Indica la autoridad responsable"));
         v.setMotivoCierre(texto(solicitud.motivo(),10,2000,"Explica el motivo o resultado del cierre"));
@@ -182,6 +182,7 @@ public class VinculacionService {
         r.put("revisionJustificacion",i.getRevisionJustificacion());r.put("revisadoPor",i.getRevisadoPor());r.put("fechaRevision",fecha(i.getFechaRevision()));return r;
     }
     private String texto(String valor,int min,int max,String error){if(valor==null || valor.strip().length()<min || valor.length()>max)throw new IllegalArgumentException(error);return valor.strip();}
+    private java.time.LocalDate fechaPanama(LocalDateTime valor){return valor.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("America/Panama")).toLocalDate();}
     private Object fecha(LocalDateTime valor){return valor==null?null:valor.atZone(ZoneId.systemDefault()).toOffsetDateTime();}
     private com.fasterxml.jackson.databind.JsonNode detalleEvento(EventoCaso evento){
         try{

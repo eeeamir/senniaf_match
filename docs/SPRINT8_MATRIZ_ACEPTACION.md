@@ -1,5 +1,7 @@
 # Sprint 8 — matriz final de aceptación local
 
+La publicación y ampliación posterior del cierre institucional se documentan en [integración y despliegue](SPRINT8_INTEGRACION_DESPLIEGUE.md). Esta matriz conserva la evidencia y los límites de los seis commits locales originales.
+
 Validación: 13–14 de noviembre de 2026. Entorno sintético aislado: Java 17, PostgreSQL 16.15, Chromium. **C = comprobado localmente**. Ninguna fila certifica publicación o funcionamiento de estas historias en Azure. Allí sigue pendiente la integración autorizada; la ruta pública de Vinculaciones devuelve 404.
 
 Evidencias reproducibles versionadas:

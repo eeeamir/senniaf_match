@@ -82,3 +82,8 @@ La versión integrada requiere también [013-interrupciones-convivencia.sql](dep
 HU12 reutiliza `continuidad_cultural`; HU14 reutiliza el contador de reevaluaciones completadas y la auditoría; HU13 conserva el esquema de pesos existente. No requieren nuevas columnas. Durante este trabajo, las migraciones 012/013 se probaron en PostgreSQL 16 aislado. No se ejecutaron en Azure durante este trabajo. La recuperación debe usar un JAR compatible con ambas tablas; el actualizador preparado impide volver automáticamente a una versión que omita estas funciones.
 
 La preparación de CI está en `src/test/scripts/preparar-postgres-ci.sh`, exclusivamente para un entorno vacío de pruebas con nombre `hu19_`. No ejecutarlo contra la base habitual ni contra Azure. Los resultados y evidencias están en [el informe del Sprint 8](docs/SPRINT8_RESULTADOS.md).
+
+
+## Estado persistente posterior de Sprint 8
+
+Las migraciones 012, 013 y 014 fueron aplicadas en Azure el 14 de noviembre de 2026 mediante la intervención autorizada, sin recrear la base. La 014 añade el cierre confirmado y reservas independientes sobre Vinculaciones. El detalle de respaldos, validaciones y versión publicada está en [la integración del Sprint 8](docs/SPRINT8_INTEGRACION_DESPLIEGUE.md). Las notas anteriores describen las validaciones previas al despliegue.
