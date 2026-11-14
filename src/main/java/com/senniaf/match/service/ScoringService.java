@@ -49,7 +49,7 @@ public class ScoringService {
         List<PerfilFamilia> disponibles = familias.findAll().stream()
                 .filter(this::familiaDisponible)
                 .sorted(Comparator.comparing(PerfilFamilia::getCodigoCaso)).toList();
-        return ninos.findAll().stream().filter(n -> n.isPerfilCompleto() && !n.isBajaLogica() && !n.isCierrePorAdopcion())
+        return ninos.findAll().stream().filter(n -> n.isPerfilCompleto() && !n.isBajaLogica() && !n.isCierrePorAdopcion() && !ninoReservado(n.getCodigoCaso()))
                 .sorted(Comparator.comparing(PerfilNino::getCodigoCaso))
                 .map(n -> caso(n, disponibles, p,rechazadas)).toList();
     }

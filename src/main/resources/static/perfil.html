@@ -587,7 +587,7 @@
 
       <div style="display:flex; gap:10px; margin-left:auto;">
 
-        <a class="boton secundario" href="perfiles.html">Cancelar</a>
+        <a class="boton secundario" id="cancelarEdicionNino" href="perfiles.html">Cancelar</a>
         <button
           type="button"
           class="boton secundario chico"
@@ -1599,6 +1599,7 @@ if (sesion) {
     f.value = sesion.id;
     f.readOnly = true;
     const editarCodigo = new URLSearchParams(location.search).get('editar');
+    if (editarCodigo) document.getElementById('cancelarEdicionNino').href = `perfiles.html?caso=${encodeURIComponent(editarCodigo)}#panelDetalle`;
     if (editarCodigo) fetch(`/api/ninos/${encodeURIComponent(editarCodigo)}`, { headers: Sesion.encabezados() })
       .then(r => { if (!r.ok) throw new Error('No se puede editar ese caso'); return r.json(); })
       .then(p => {

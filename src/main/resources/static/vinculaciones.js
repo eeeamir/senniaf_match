@@ -85,10 +85,10 @@ const Vinculaciones = {
         try {
           const datos = await this.api('/api/vinculaciones?' + new URLSearchParams(new FormData(form)));
           if (actual !== consulta) return;
-          lista.innerHTML = datos.length ? datos.map(v => `<article class="tarjeta">
+          lista.innerHTML = datos.length ? datos.map(v => `<article class="tarjeta vinculacion-tarjeta">
             <div class="pro-fila-titulo"><h2>${Profesionales.icono('vinculacion')}${limpiarHtml(v.codigo)}</h2>${this.estado(v)}</div>
             <p>${Profesionales.icono('carpeta')} ${limpiarHtml(v.expedienteInfantil)} · ${Profesionales.icono('personas')} ${limpiarHtml(v.expedienteFamiliar)}</p>
-            <p>${Profesionales.icono('calendario')}${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</p>
+            <div class="vinculacion-datos"><p>${Profesionales.icono('calendario')}${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</p><p>${Profesionales.icono('criterios')}Compatibilidad original: <strong>${v.puntajeOriginal??'No disponible'} / 100</strong> · Criterios ${v.versionOriginal??'no disponibles'}</p></div>
             <a class="boton secundario" href="vinculaciones.html?id=${v.id}">${Profesionales.icono('consulta')}Ver detalle</a>
           </article>`).join('') : `<section class="tarjeta"><h2>${Profesionales.icono('informacion')}Sin vinculaciones</h2><p>No hay vinculaciones para esta consulta.</p></section>`;
         } catch (e) {
@@ -105,21 +105,21 @@ const Vinculaciones = {
     const v = actualizado || await this.api('/api/vinculaciones/' + encodeURIComponent(id)), d = v.decisionComite;
     const enlaceNino = `perfiles.html?caso=${encodeURIComponent(v.expedienteInfantil)}`;
     const enlaceFamilia = `perfiles.html?familia=${encodeURIComponent(v.expedienteFamiliar)}&casoOrigen=${encodeURIComponent(v.expedienteInfantil)}&origen=match`;
-    c.innerHTML = Profesionales.encabezado(v.codigo, 'Detalle de la vinculación', 'vinculacion') + `
+    c.innerHTML = `<p class="pro-breadcrumb"><a href="vinculaciones.html">${Profesionales.icono('flecha')}Volver a Vinculaciones</a></p>`+Profesionales.encabezado(v.codigo, 'Detalle de la vinculación', 'vinculacion') + `
       <section class="tarjeta">${this.estado(v)}<dl class="detalle-datos">
         <div><dt>Expediente infantil</dt><dd><a href="${enlaceNino}">${limpiarHtml(v.expedienteInfantil)}</a></dd></div>
         <div><dt>Expediente familiar</dt><dd>${sesion.rol === 'COMITE' ? `<a href="${enlaceFamilia}">${limpiarHtml(v.expedienteFamiliar)}</a>` : limpiarHtml(v.expedienteFamiliar)}</dd></div>
         <div><dt>Creación</dt><dd>${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</dd></div>
         <div><dt>Disponibilidad</dt><dd>${limpiarHtml(v.disponibilidad)}</dd></div>
-      </dl><h2>${Profesionales.icono('solicitudes')}Decisión del Comité</h2>
+      </dl></section>${this.compatibilidadOriginal(v.compatibilidadOriginal)}<section class="tarjeta"><h2>${Profesionales.icono('solicitudes')}Decisión del Comité</h2>
       <p>Propuesta de Match aceptada para remitirla a la familia.</p><p>${limpiarHtml(d.responsable)} · ${limpiarHtml(Profesionales.fecha(d.fecha))}</p><p>${limpiarHtml(d.motivo)}</p>
-      <h2>${Profesionales.icono('solicitudes')}Proceso</h2><p>${limpiarHtml(v.siguientePaso)}</p>
+      </section><section class="tarjeta"><h2>${Profesionales.icono('solicitudes')}Proceso</h2><p>${limpiarHtml(v.siguientePaso)}</p>
       ${v.fechaRespuesta ? `<p>Respuesta familiar registrada por ${limpiarHtml(v.respondidoPor)} · ${limpiarHtml(Profesionales.fecha(v.fechaRespuesta))}</p>` : ''}
       <p class="ayuda">${Profesionales.icono('informacion')}Esta vinculación no acredita acogimiento preadoptivo ni adopción formalizada.</p></section>
       ${this.panelInterrupcion(v)}${this.panelCierre(v)}
       <section class="tarjeta"><h2>${Profesionales.icono('reloj')}Historial</h2><ul class="familia-actividad">
         ${v.historial.map(e => `<li><strong>${limpiarHtml(e.resumen)}</strong><p>${Profesionales.icono('persona')}${limpiarHtml(e.responsable)} · ${limpiarHtml(Profesionales.fecha(e.fecha))}</p></li>`).join('') || '<li>La decisión del Comité se conserva en la información general. No hay movimientos adicionales registrados.</li>'}
-      </ul></section><a class="boton secundario" href="vinculaciones.html">${Profesionales.icono('vinculacion')}Volver a vinculaciones</a>`;
+      </ul></section>`;
     c.querySelector('[data-cierre]')?.addEventListener('click',()=>this.registrarCierre(c,v,sesion));
     c.querySelectorAll('[data-disponibilidad]').forEach(b=>b.onclick=()=>Profesionales.justificar({
       titulo:'Revisar disponibilidad del expediente',maximo:500,contexto:b.dataset.disponibilidad==='NINO'?'Expediente infantil':'Expediente familiar',
@@ -137,12 +137,18 @@ const Vinculaciones = {
       alGuardar:async datos=>{await this.detalle(c,v.id,sesion,datos);c.insertAdjacentHTML('afterbegin','<p class="mensaje exito" role="status">La revisión quedó registrada.</p>');}
     }));
   },
+  compatibilidadOriginal(h){
+    if(!h)return '<section class="tarjeta"><h2>Compatibilidad original</h2><p>No hay análisis histórico disponible.</p></section>';
+    const c=h.contexto||{},factores={edad:'Rango de edad',hermanos:'Vínculos entre hermanos',salud:'Salud y desarrollo',apoyo:'Red de apoyo',logistica:'Logística'},dato=v=>v==null?'No disponible':limpiarHtml(String(v));
+    return `<section class="tarjeta vinculacion-historica"><div class="pro-fila-titulo"><div><h2>${Profesionales.icono('criterios')}Compatibilidad original</h2><p>Se conserva el análisis registrado al aceptar esta propuesta.</p><span class="chip">Criterios: ${dato(h.version)}</span></div><div class="pro-puntaje">${dato(h.puntaje)}<small>/100</small></div></div>
+      <details class="pro-seccion"><summary>${Profesionales.icono('consulta')}Consultar los cinco factores originales</summary><div class="tabla"><table><thead><tr><th>Factor</th><th>Peso original</th><th>Puntos</th><th>Fundamento registrado</th></tr></thead><tbody>${Object.entries(factores).map(([k,n])=>`<tr><td>${n}</td><td>${dato(c.pesos?.[k])}</td><td>${dato(c.factores?.[k]?.[0])}</td><td>${dato(c.factores?.[k]?.[1])}</td></tr>`).join('')}</tbody></table></div>${!h.contexto?'<p class="ayuda">Este antecedente no conserva el desglose. No se sustituye por un cálculo nuevo.</p>':''}<p class="ayuda">Máximo aplicable registrado: ${dato(c.maximoAplicable)} · Peso evaluado: ${dato(c.pesoEvaluado)}</p></details></section>`;
+  },
   panelCierre(v){
     if(!v.cierre && !v.puedeCerrar)return '';
     const x=v.cierre;
     return `<section class="tarjeta"><h2>${Profesionales.icono('informe')}Cierre institucional</h2>
       <p>El Comité registra la confirmación de la autoridad competente. Este registro no autoriza legalmente el cierre ni formaliza una adopción.</p>
-      ${x?`<dl class="detalle-datos"><div><dt>Fecha del cierre</dt><dd>${limpiarHtml(x.fecha)}</dd></div><div><dt>Referencia institucional</dt><dd>${limpiarHtml(x.referencia)}</dd></div><div><dt>Autoridad responsable</dt><dd>${limpiarHtml(x.autoridad)}</dd></div></dl><p class="pro-texto-registrado">${limpiarHtml(x.motivo)}</p><p>${limpiarHtml(x.registradoPor)} · ${limpiarHtml(Profesionales.fecha(x.registradoEl))}</p>
+      ${x?`<dl class="detalle-datos"><div><dt>Fecha del cierre</dt><dd>${limpiarHtml(x.fecha)}</dd></div>${x.referencia?`<div><dt>Referencia institucional registrada</dt><dd>${limpiarHtml(x.referencia)}</dd></div>`:''}${x.autoridad?`<div><dt>Autoridad registrada</dt><dd>${limpiarHtml(x.autoridad)}</dd></div>`:''}</dl><p class="pro-texto-registrado">${limpiarHtml(x.motivo)}</p><p>${limpiarHtml(x.registradoPor)} · ${limpiarHtml(Profesionales.fecha(x.registradoEl))}</p>
       <h3>Revisión independiente de los expedientes</h3><p>El cierre no devuelve automáticamente los expedientes al Match. Cada uno requiere revisión de disponibilidad y elegibilidad.</p>
       ${[['NINO','Expediente infantil',x.ninoLiberado],['FAMILIA','Expediente familiar',x.familiaLiberada]].map(([k,n,revisado])=>`<p><strong>${n}:</strong> ${revisado?'Revisión registrada; sujeto a las condiciones vigentes de Match.':'Reserva conservada; pendiente de revisión.'}</p>${v.puedeRevisarDisponibilidad&&!revisado?`<button class="boton secundario" data-disponibilidad="${k}">${Profesionales.icono('consulta')}Revisar ${n.toLowerCase()}</button>`:''}`).join('')}`:''}
       ${v.puedeCerrar?`<button class="boton secundario" data-cierre>${Profesionales.icono('informe')}Registrar cierre institucional</button>`:''}</section>`;
@@ -151,8 +157,9 @@ const Vinculaciones = {
     if(document.querySelector('[data-dialogo-cierre]'))return;
     const d=document.createElement('dialog');d.className='pro-dialogo';d.dataset.dialogoCierre='';d.setAttribute('aria-labelledby','tituloCierre');
     d.innerHTML=`<h2 id="tituloCierre">${Profesionales.icono('informe')}Registrar cierre institucional</h2><p>Registra únicamente un cierre confirmado por la autoridad competente. Ambos expedientes conservarán su reserva hasta ser revisados por separado.</p>
-    <form class="pro-interrupcion-form"><label>Fecha del cierre<input type="date" name="fechaCierre" required></label><label>Referencia institucional<input name="referenciaInstitucional" minlength="5" maxlength="200" required></label><label>Autoridad responsable<input name="autoridadResponsable" minlength="3" maxlength="200" required></label><label>Motivo o resultado<textarea name="motivo" rows="4" minlength="10" maxlength="2000" required></textarea></label><label><input type="checkbox" name="confirmacionAutoridad" required>Confirmo que cuento con la actuación de la autoridad competente.</label><p data-error role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="submit" class="boton">Registrar cierre</button></div></form>`;
-    document.body.append(d);let guardando=false;const form=d.querySelector('form');CamposFormulario.iniciar(form);d.onclose=()=>d.remove();d.addEventListener('cancel',e=>{if(guardando)e.preventDefault();});d.querySelector('[data-cancelar]').onclick=()=>{if(!guardando)d.close();};
+    <form class="pro-interrupcion-form"><p class="ayuda">Tu identidad y la fecha y hora del registro se guardarán automáticamente.</p><label>Motivo o resultado<textarea name="motivo" rows="4" minlength="10" maxlength="2000" required></textarea></label><label class="pro-confirmacion-check"><input type="checkbox" name="confirmacionAutoridad" required><span>Confirmo que este cierre cuenta con el respaldo institucional correspondiente.</span></label><p data-error role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="submit" class="boton">Registrar cierre</button></div></form>`;
+    document.body.append(d);Profesionales.sugerencias(d.querySelector('[name=motivo]'),[
+      ['Finalización confirmada','Se registró la finalización del proceso después de comprobar la actuación institucional correspondiente.'],['Revisión institucional','Se completó la revisión del caso y se documentó el resultado de la actuación institucional.'],['Cierre del seguimiento','Se registró el cierre del seguimiento conforme a la información revisada por el equipo responsable.'],['Otro motivo','']]);let guardando=false;const form=d.querySelector('form');CamposFormulario.iniciar(form);d.onclose=()=>d.remove();d.addEventListener('cancel',e=>{if(guardando)e.preventDefault();});d.querySelector('[data-cancelar]').onclick=()=>{if(!guardando)d.close();};
     form.onsubmit=async e=>{e.preventDefault();if(guardando||!Profesionales.validarFormulario(form))return;guardando=true;form.querySelectorAll('button').forEach(b=>b.disabled=true);
       try{const datos=Object.fromEntries(new FormData(form));datos.confirmacionAutoridad=form.elements.confirmacionAutoridad.checked;const actualizado=await this.api(`/api/vinculaciones/${v.id}/cierre`,{method:'POST',body:JSON.stringify(datos)});Profesionales.marcarGuardado(form);d.close();await this.detalle(c,v.id,sesion,actualizado);c.insertAdjacentHTML('afterbegin','<p class="mensaje exito" role="status">El cierre institucional quedó registrado. Cada expediente conserva su reserva hasta revisión.</p>');}
       catch(error){d.querySelector('[data-error]').textContent=error.message;guardando=false;form.querySelectorAll('button').forEach(b=>b.disabled=false);}
