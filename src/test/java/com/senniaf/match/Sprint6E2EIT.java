@@ -64,6 +64,9 @@ public class Sprint6E2EIT {
     }
 
     private ResponseEntity<String> peticion(String ruta, HttpMethod metodo, String token, Object cuerpo, Map<String,String> extra) {
+        if(metodo==HttpMethod.POST && ruta.startsWith("/api/scoring/casos/") && ruta.endsWith("/decisiones") && cuerpo instanceof Map<?,?> m && !m.containsKey("versionPesos")){
+            var copia=new LinkedHashMap<String,Object>();m.forEach((k,v)->copia.put(k.toString(),v));copia.put("versionPesos",json(req("/api/scoring/pesos",HttpMethod.GET,comite,null)).path("version").asInt());cuerpo=copia;
+        }
         HttpHeaders headers = new HttpHeaders(); headers.setContentType(MediaType.APPLICATION_JSON);
         if (token != null) headers.setBearerAuth(token);
         extra.forEach(headers::set);

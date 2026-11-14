@@ -1,6 +1,7 @@
 /* Comparte las vistas de vinculaciones sin presumir acogimiento ni adopción formalizada. */
 const Vinculaciones = {
   estados: {
+    RECHAZADA_POR_FAMILIA: 'Propuesta rechazada por la familia',
     CERRADA: 'Cerrada',
     PENDIENTE_RESPUESTA: 'Pendiente de respuesta familiar',
     RESPUESTA_ACEPTADA: 'Respuesta aceptada',
@@ -43,7 +44,7 @@ const Vinculaciones = {
       const aceptar = b.dataset.responder === 'ACEPTAR', d = document.createElement('dialog');
       d.className = 'pro-dialogo'; d.dataset.respuesta = ''; d.setAttribute('aria-labelledby', 'tituloRespuesta');
       d.innerHTML = `<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono(aceptar ? 'comprobar' : 'advertencia')}</span><h2 id="tituloRespuesta">${aceptar ? 'Aceptar' : 'Rechazar'} propuesta</h2></div>
-        <p>${aceptar ? 'Se registrará tu aceptación y el equipo institucional te orientará sobre los siguientes pasos. Esto no formaliza una adopción.' : 'Se registrará tu negativa y se informará al Comité. La vinculación quedará pendiente de cierre institucional. No cambia tu idoneidad ni tu puntuación.'}</p>
+        <p>${aceptar ? 'Se registrará tu aceptación y el equipo institucional te orientará sobre los siguientes pasos. Esto no formaliza una adopción.' : 'Se registrará tu respuesta. Esta combinación no volverá a recomendarse automáticamente. No cambia tu idoneidad ni tu puntuación.'}</p>
         <p role="alert" data-error></p><div class="pro-acciones"><button class="boton secundario" data-cancelar>Cancelar</button><button class="boton" data-confirmar>${Profesionales.icono(aceptar ? 'comprobar' : 'cerrar')}Confirmar respuesta</button></div>`;
       document.body.append(d); d.onclose = () => d.remove();
       d.querySelector('[data-cancelar]').onclick = () => d.close();

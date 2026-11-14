@@ -18,10 +18,10 @@ if [[ -L /srv/senniaf/current.jar && -f /srv/senniaf/current.jar ]]; then
     [[ $anterior =~ ^/srv/senniaf/releases/[0-9a-f]{64}\.jar$ ]] || { echo 'Ruta anterior inesperada: revisar sin sustituirla.' >&2; exit 1; }
 fi
 # El esquema es persistente: un rollback de código no debe omitir las vinculaciones.
-esquema=$(runuser -u postgres -- psql -X -d senniaf_demo -Atqc "SELECT to_regclass('public.vinculaciones') IS NOT NULL, to_regclass('public.interrupciones_convivencia') IS NOT NULL, EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='vinculaciones' AND column_name='fecha_cierre')")
-IFS='|' read -r esquema_vinculaciones esquema_interrupciones esquema_cierre <<< "$esquema"
+esquema=$(runuser -u postgres -- psql -X -d senniaf_demo -Atqc "SELECT to_regclass('public.vinculaciones') IS NOT NULL, to_regclass('public.interrupciones_convivencia') IS NOT NULL, EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='vinculaciones' AND column_name='fecha_cierre'), CASE WHEN to_regclass('public.programaciones_pesos') IS NOT NULL AND to_regclass('public.combinaciones_excluidas') IS NOT NULL THEN 't' WHEN to_regclass('public.programaciones_pesos') IS NULL AND to_regclass('public.combinaciones_excluidas') IS NULL THEN 'f' ELSE 'incompleto' END")
+IFS='|' read -r esquema_vinculaciones esquema_interrupciones esquema_cierre esquema_refuerzos <<< "$esquema"
 compatible() {
-    python3 "$(dirname "$0")/verificar-compatibilidad.py" "$1" "$esquema_vinculaciones" "$esquema_interrupciones" "$esquema_cierre"
+    python3 "$(dirname "$0")/verificar-compatibilidad.py" "$1" "$esquema_vinculaciones" "$esquema_interrupciones" "$esquema_cierre" "$esquema_refuerzos"
 }
 compatible "$artefacto" || exit 1
 # Respaldo consistente antes de la intervención; no se sustituye el volumen ni la configuración.

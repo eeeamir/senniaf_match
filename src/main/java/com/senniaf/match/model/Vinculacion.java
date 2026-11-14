@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name="vinculaciones")
 public class Vinculacion {
-    public enum Estado { PENDIENTE_RESPUESTA, RESPUESTA_ACEPTADA, RESPUESTA_RECHAZADA_PENDIENTE_CIERRE, CERRADA }
+    public enum Estado { RECHAZADA_POR_FAMILIA, PENDIENTE_RESPUESTA, RESPUESTA_ACEPTADA, RESPUESTA_RECHAZADA_PENDIENTE_CIERRE, CERRADA }
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
     @OneToOne(optional=false) @JoinColumn(name="decision_id",nullable=false,unique=true) private DecisionComite decision;
     @ManyToOne(optional=false) @JoinColumn(name="nino_id",nullable=false) private PerfilNino nino;

@@ -34,13 +34,13 @@ class HU19PostgresIT extends SoportePostgresIT {
         var detalle=req("/api/vinculaciones/"+id,HttpMethod.GET,comite,null);assertEquals(200,detalle.getStatusCode().value());assertEquals("RESPUESTA_ACEPTADA",datos(detalle).path("estado").asText());assertEquals(2,datos(detalle).path("historial").size());
         assertEquals(409,req("/api/vinculaciones/"+id+"/respuesta",HttpMethod.POST,c.token(),Map.of("respuesta","RECHAZAR")).getStatusCode().value());
     }
-    @Test void rechazoMantieneReservaSinPenalizarYNoExponeInfancia(){
+    @Test void rechazoLiberaPropuestaSinPenalizarYNoExponeInfancia(){
         Caso c=caso();long id=asignar(c);var antes=scoring.candidato(c.n(),c.f(),scoring.pesos()).get("puntaje");
         assertEquals(403,req("/api/ninos/"+c.n().getCodigoCaso(),HttpMethod.GET,c.token(),null).getStatusCode().value());
         assertEquals(200,req("/api/vinculaciones/"+id+"/respuesta",HttpMethod.POST,c.token(),Map.of("respuesta","RECHAZAR")).getStatusCode().value());
         for(String ruta:List.of("/api/ninos/"+c.n().getCodigoCaso(),"/api/ninos/"+c.n().getCodigoCaso()+"/auditoria","/api/vinculaciones/"+id,"/api/scoring/familias/"+c.f().getCodigoCaso()+"/expediente"))assertEquals(403,req(ruta,HttpMethod.GET,c.token(),null).getStatusCode().value(),ruta);
         var propia=req("/api/vinculaciones/propias",HttpMethod.GET,c.token(),null);assertFalse(propia.getBody().contains(c.n().getCodigoCaso()));assertFalse(propia.getBody().contains("motivo"));
-        assertTrue(vinculaciones.findById(id).orElseThrow().isReservaVigente());assertFalse(familias.findById(c.f().getId()).orElseThrow().isReevaluacionPendiente());assertFalse(ninos.findById(c.n().getId()).orElseThrow().isBajaLogica());assertEquals(antes,scoring.candidato(c.n(),familias.findById(c.f().getId()).orElseThrow(),scoring.pesos()).get("puntaje"));assertEquals(409,aceptar(c.n(),c.f()).getStatusCode().value());
+        assertFalse(vinculaciones.findById(id).orElseThrow().isReservaVigente());assertFalse(familias.findById(c.f().getId()).orElseThrow().isReevaluacionPendiente());assertFalse(ninos.findById(c.n().getId()).orElseThrow().isBajaLogica());assertEquals(antes,scoring.candidato(c.n(),familias.findById(c.f().getId()).orElseThrow(),scoring.pesos()).get("puntaje"));assertEquals(409,aceptar(c.n(),c.f()).getStatusCode().value());
     }
     @Test void permisosRealesYFamiliaAjena(){
         Caso c=caso(),otra=caso();long id=asignar(c);

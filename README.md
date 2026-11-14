@@ -4,6 +4,10 @@ Prototipo académico para el análisis de compatibilidad en procesos de adopció
 
 Demostración: https://senniafmatch.westus2.cloudapp.azure.com/
 
+## Refuerzos en esta rama
+
+La programación de pesos y exclusión de pares rechazados están implementadas y verificadas localmente. Requieren la migración 015 y todavía no forman parte de la versión de Azure documentada abajo. Consulta [funcionalidad, API, pruebas y límites](docs/HU13_PROGRAMACION_Y_RECHAZOS.md).
+
 ## Funciones
 
 - **Trabajo social:** registrar, consultar y editar expedientes propios; solicitar retiro o reactivación sin alterar automáticamente su participación en Match; registrar interrupciones de convivencia de vinculaciones asignadas.

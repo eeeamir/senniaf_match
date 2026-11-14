@@ -87,3 +87,8 @@ La preparación de CI está en `src/test/scripts/preparar-postgres-ci.sh`, exclu
 ## Estado persistente posterior de Sprint 8
 
 Las migraciones 012, 013 y 014 fueron aplicadas en Azure el 14 de noviembre de 2026 mediante la intervención autorizada, sin recrear la base. La 014 añade el cierre confirmado y reservas independientes sobre Vinculaciones. El detalle de respaldos, validaciones y versión publicada está en [la integración del Sprint 8](docs/SPRINT8_INTEGRACION_DESPLIEGUE.md). Las notas anteriores describen las validaciones previas al despliegue.
+
+
+## Ampliación pendiente: programación de pesos y rechazos
+
+La rama de refuerzos requiere 015 después de 014. Añade `programaciones_pesos` y `combinaciones_excluidas`, conserva decisiones/puntuaciones y levanta únicamente reservas de propuestas rechazadas sin actuaciones institucionales. Todavía no se aplica en Azure. Procedimiento, confirmación y validaciones en [HU13_PROGRAMACION_Y_RECHAZOS.md](docs/HU13_PROGRAMACION_Y_RECHAZOS.md).

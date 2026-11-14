@@ -148,3 +148,8 @@ Ninguno de estos pasos ha sido ejecutado en Azure. El ensayo de arranque y persi
 El procedimiento autorizado aplicó 012/013/014 sobre `senniaf_demo` con respaldo reciente verificado y backend detenido; luego el actualizador existente publicó el JAR CI del commit `4d19bc2`. La ruta Vinculaciones ya responde 200 y se comprobaron autenticación, consultas y permisos de cuatro roles. Las tablas históricas conservan conteos y huellas. El cierre institucional y la revisión separada de disponibilidad requieren 014; el auxiliar actualizado impide recuperar un JAR que omita esas columnas.
 
 El informe vigente, respaldos, pipelines, commit/SHA y límites de comprobación están en [SPRINT8_INTEGRACION_DESPLIEGUE.md](../../docs/SPRINT8_INTEGRACION_DESPLIEGUE.md). Las secciones anteriores se conservan como antecedentes de las versiones previas.
+
+
+## Refuerzos posteriores: 015 pendiente de publicación
+
+La programación a las 07:00 de Panamá y la exclusión de pares rechazados requieren la migración 015 y el actualizador/auxiliar revisados conjuntamente. El auxiliar comprueba cuatro etapas: vinculaciones, interrupciones, cierre y refuerzos (`t t t t`). No recuperar un JAR anterior tras aplicar 015: ignoraría tanto las programaciones como las exclusiones. Esta ampliación está validada localmente; no se desplegó ni se migró Azure durante su desarrollo. Ver [informe técnico y pruebas](../../docs/HU13_PROGRAMACION_Y_RECHAZOS.md).

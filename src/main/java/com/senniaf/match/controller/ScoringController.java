@@ -42,7 +42,7 @@ public class ScoringController {
         comite(rol); return scoring.pesos();
     }
     @PutMapping("/pesos")
-    public PesosScoring pesos(@RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor, @RequestBody Map<String, Object> valores) {
+    public Map<String,Object> pesos(@RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor, @RequestBody Map<String, Object> valores) {
         comite(rol);
         if(valores==null || !(valores.get("justificacion") instanceof String justificacion)
                 || !(valores.get("versionEsperada") instanceof Integer version))
@@ -55,11 +55,13 @@ public class ScoringController {
         });
         return scoring.actualizarPesos(enteros,actor,justificacion,version);
     }
+    @GetMapping("/pesos/programacion")
+    public Map<String,Object> programacion(@RequestHeader("X-User-Role") String rol){comite(rol);return scoring.programacion();}
     @GetMapping("/pesos/historial")
     public List<Map<String,Object>> historialPesos(@RequestHeader("X-User-Role") String rol) {
         comite(rol); return scoring.historialPesos();
     }
-    public record DecisionRequest(String familia, String decision, String motivo) {}
+    public record DecisionRequest(String familia, String decision, String motivo, @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using=com.senniaf.match.dto.PerfilNinoRequest.EnteroEstricto.class) Integer versionPesos) {}
     @PostMapping("/casos/{codigo}/decisiones")
     public Map<String, Object> decidir(@RequestHeader("X-User-Role") String rol,
                                        @RequestHeader("X-User-Id") String funcionario,
@@ -67,6 +69,6 @@ public class ScoringController {
         comite(rol);
         if (request == null || request.familia() == null || request.decision() == null)
             throw new IllegalArgumentException("Se requiere familia y decisión");
-        return scoring.decidir(codigo, request.familia(), request.decision(), request.motivo(), funcionario);
+        return scoring.decidir(codigo, request.familia(), request.decision(), request.motivo(), funcionario,request.versionPesos());
     }
 }
