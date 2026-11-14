@@ -90,3 +90,5 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
   .profesional .topbar-marca{flex:0 1 160px;min-width:90px}
   .profesional .topbar-marca img{width:100%;max-width:160px}
 }
+
+.pro-interrupcion-form{display:grid;gap:15px}.pro-interrupcion-form input,.pro-interrupcion-form textarea{width:100%}.pro-texto-registrado{white-space:pre-wrap;overflow-wrap:anywhere}

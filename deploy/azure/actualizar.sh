@@ -18,9 +18,10 @@ if [[ -L /srv/senniaf/current.jar && -f /srv/senniaf/current.jar ]]; then
     [[ $anterior =~ ^/srv/senniaf/releases/[0-9a-f]{64}\.jar$ ]] || { echo 'Ruta anterior inesperada: revisar sin sustituirla.' >&2; exit 1; }
 fi
 # El esquema es persistente: un rollback de código no debe omitir las vinculaciones.
-esquema_vinculaciones=$(runuser -u postgres -- psql -X -d senniaf_demo -Atqc "SELECT to_regclass('public.vinculaciones') IS NOT NULL")
+esquema=$(runuser -u postgres -- psql -X -d senniaf_demo -Atqc "SELECT to_regclass('public.vinculaciones') IS NOT NULL, to_regclass('public.interrupciones_convivencia') IS NOT NULL")
+IFS='|' read -r esquema_vinculaciones esquema_interrupciones <<< "$esquema"
 compatible() {
-    python3 "$(dirname "$0")/verificar-compatibilidad.py" "$1" "$esquema_vinculaciones"
+    python3 "$(dirname "$0")/verificar-compatibilidad.py" "$1" "$esquema_vinculaciones" "$esquema_interrupciones"
 }
 compatible "$artefacto" || exit 1
 # Respaldo consistente antes de la intervención; no se sustituye el volumen ni la configuración.

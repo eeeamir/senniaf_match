@@ -1,5 +1,7 @@
 # Verificación integral antes de HU11
 
+Nota posterior: la planificación vigente permite continuar localmente sin desplegar HU19. El bloqueo de desarrollo descrito en esta auditoría histórica queda sustituido por [los resultados del Sprint 8](SPRINT8_RESULTADOS.md); la publicación real continúa pendiente.
+
 Fecha: 13 de noviembre de 2026, Panamá.
 
 ## Estado y decisión

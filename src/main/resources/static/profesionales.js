@@ -76,12 +76,12 @@ const Profesionales = {
         try {
           const respuesta=await fetch('/api/vinculaciones',{headers:Sesion.encabezados(),cache:'no-store'});
           if(!respuesta.ok)return;
-          const lista=await respuesta.json(),respondidas=lista.filter(v=>v.estado!=='PENDIENTE_RESPUESTA').length;
+          const lista=await respuesta.json(),pendientes=lista.filter(v=>v.interrupcionPendiente).length,respondidas=lista.filter(v=>v.estado!=='PENDIENTE_RESPUESTA').length;
           const enlace=nav.querySelector('a[href="vinculaciones.html"]');
-          enlace.title=respondidas?`${respondidas} vinculaciones con respuesta familiar`:'Vinculaciones';
+          enlace.title=pendientes?`${pendientes} interrupciones pendientes de revisión`:respondidas?`${respondidas} vinculaciones con respuesta familiar`:'Vinculaciones';
           let aviso=enlace.querySelector('.pro-vinculaciones-aviso');
           if(!aviso){aviso=document.createElement('small');aviso.className='pro-vinculaciones-aviso';aviso.setAttribute('aria-hidden','true');enlace.append(aviso);}
-          aviso.hidden=!respondidas;aviso.textContent=respondidas;
+          aviso.hidden=!(pendientes||respondidas);aviso.textContent=pendientes||respondidas;
         }catch(error){ /* La navegación sigue disponible si falla la actualización. */ }
       };
       actualizarVinculaciones();setInterval(()=>{if(!document.hidden)actualizarVinculaciones();},15000);

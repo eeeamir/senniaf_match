@@ -15,5 +15,9 @@ public class VinculacionController {
     @GetMapping("/{id}") public Map<String,Object> detalle(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor){return service.detalle(id,rol,actor);}
     public record Respuesta(String respuesta){}
     @PostMapping("/{id}/respuesta") public Map<String,Object> responder(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@RequestBody Respuesta request){familia(rol);return service.responder(id,actor,request==null?null:request.respuesta());}
+    @PostMapping("/{id}/interrupcion")
+    public Map<String,Object> registrarInterrupcion(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@jakarta.validation.Valid @RequestBody com.senniaf.match.dto.InterrupcionRequest solicitud){return service.registrarInterrupcion(id,rol,actor,solicitud);}
+    @PostMapping("/{id}/interrupcion/revision")
+    public Map<String,Object> revisarInterrupcion(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@jakarta.validation.Valid @RequestBody com.senniaf.match.dto.RevisionInterrupcionRequest solicitud){return service.revisarInterrupcion(id,rol,actor,solicitud);}
     private void familia(String rol){if(!"FAMILIA".equals(rol))throw new RolNoAutorizadoException("Solo la familia correspondiente puede responder esta propuesta");}
 }

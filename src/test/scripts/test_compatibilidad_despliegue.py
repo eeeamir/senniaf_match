@@ -42,6 +42,15 @@ class CompatibilidadDespliegueTest(unittest.TestCase):
         self.actual.write_bytes(b"no es un jar")
         self.assertFalse(modulo.compatible(self.actual, "t")[0])
 
+    def test_hu11_requiere_migracion_013(self):
+        with zipfile.ZipFile(self.actual,"a") as jar:
+            jar.writestr("BOOT-INF/classes/com/senniaf/match/model/InterrupcionConvivencia.class",b"fixture")
+        self.assertFalse(modulo.compatible(self.actual,"t","f")[0])
+        self.assertTrue(modulo.compatible(self.actual,"t","t")[0])
+
+    def test_hu19_no_recupera_sin_revision_de_interrupciones(self):
+        self.assertFalse(modulo.compatible(self.actual,"t","t")[0])
+
 
 if __name__ == "__main__":
     unittest.main()
