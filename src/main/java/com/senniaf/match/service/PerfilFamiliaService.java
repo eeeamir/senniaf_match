@@ -154,9 +154,9 @@ public class PerfilFamiliaService {
         perfil.setCondicionesPuedeAcompanarHoy(request.getCondicionesPuedeAcompanarHoy());
         perfil.setCondicionesConApoyo(request.getCondicionesConApoyo());
         perfil.setNotaCondicionesSalud(request.getNotaCondicionesSalud());
-        // Sprint 8: la sección está retirada; una actualización no borra ni reemplaza información histórica.
-        if (perfil.getId() == null && request.getContinuidadCultural() != null)
-            perfil.setContinuidadCultural(request.getContinuidadCultural());
+        // Los clientes anteriores que omiten esta sección conservan el contenido histórico.
+        if (request.getContinuidadCultural()!=null)
+            perfil.setContinuidadCultural(request.getContinuidadCultural().strip());
     }
 
     /** Perfil que la familia ya registró con su cédula, si existe. */

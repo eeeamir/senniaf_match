@@ -248,7 +248,7 @@ const CAMPOS_FAMILIA = {
   notaRedApoyo:'Notas de apoyo', provincia:'Provincia', disponibilidadViaje:'Disponibilidad de viaje', notaDistancia:'Notas de distancia',
   edadMinimaAceptada:'Edad mínima', edadMaximaAceptada:'Edad máxima', notaRangoEdad:'Notas del rango de edad',
   disposicionHermanos:'Disposición a hermanos', notaHermanos:'Notas de hermanos', condicionesPuedeAcompanarHoy:'Salud: apoyo actual',
-  condicionesConApoyo:'Salud: con apoyo adicional', notaCondicionesSalud:'Notas de salud', continuidadCultural:'Continuidad cultural',
+  condicionesConApoyo:'Salud: con apoyo adicional', notaCondicionesSalud:'Notas de salud', continuidadCultural:'Apoyos culturales, lingüísticos y comunitarios',
   registradoPor:'Responsable familiar', fechaRegistro:'Fecha de registro', perfilCompleto:'Entrevista completa',
   reevaluacionPendiente:'Reevaluación pendiente', numeroReevaluaciones:'Reevaluaciones completadas'
 };
@@ -434,10 +434,11 @@ const GRUPOS_FAMILIA = {
  'Hogar y red de apoyo':['tipoFamilia','especificacionHogar','notaEstructuraHogar','redApoyo','notaRedApoyo'],
  'Preferencias consideradas por el Match':['edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad','disposicionHermanos','notaHermanos'],
  'Salud y logística':['condicionesPuedeAcompanarHoy','condicionesConApoyo','notaCondicionesSalud','provincia','disponibilidadViaje','notaDistancia'],
+ 'Apoyos culturales y comunitarios':['continuidadCultural'],
  'Registro y seguimiento':['codigoCaso','registradoPor','fechaRegistro','perfilCompleto','reevaluacionPendiente','numeroReevaluaciones']
 };
 function detalleSecciones(datos,campos,grupos) {
- return Object.entries(grupos).map(([titulo,keys],i)=>`<details class="detalle-grupo"><summary>${Profesionales.icono(i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
+ return Object.entries(grupos).map(([titulo,keys],i)=>`<details class="detalle-grupo ${keys.length===1?'pro-detalle-amplio':''}"><summary>${Profesionales.icono(titulo==='Apoyos culturales y comunitarios'?'personas':i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
  detalleCampos(datos,Object.fromEntries(keys.map(k=>[k,campos[k]])))+'</details>').join('');
 }
 function pintarResumen(p){

@@ -32,6 +32,16 @@ La petición más reciente permite avanzar entre historias validadas localmente 
 
 **Persistencia:** interrupción y revisión idénticas en PostgreSQL y recuperables por HTTP después de reiniciar el backend. **Git:** commit local de HU11, consultable en el historial de la rama. **Azure:** no desplegada. Migraciones reales pendientes de autorización.
 
+## HU12 — Continuidad cultural y lingüística
+
+**Estado:** completada localmente. **Qué se implementó:** sección opcional «Apoyos culturales y comunitarios» en la entrevista familiar, consulta y edición propias y presentación al Comité dentro del expediente existente. Un único texto de hasta 2000 caracteres reutiliza `continuidadCultural`; no solicita pertenencia étnica ni incorpora un factor de scoring.
+
+**Cómo funciona:** la familia abre su entrevista, describe cómo acompañaría costumbres, idioma y comunidad, y guarda. Puede volver a consultar o editar. El Comité ve el mismo contenido en el expediente familiar autorizado. Los clientes que omiten el campo o envían `null` conservan el texto histórico; un vaciado explícito mediante texto vacío queda auditado con su valor anterior.
+
+**Qué se comprobó:** 19 pruebas aprobadas: 5 HTTP nuevas y 14 de servicio/controlador familiar. Guardado inicial, dos actualizaciones, lectura del Comité, intentos de acceso/cambio por otros roles y otra familia, exceso de longitud con mensaje español, conservación por omisión/null, historial y puntuación idéntica. Los apoyos escritos por las pruebas se recuperaron por HTTP después de reiniciar el backend. Chromium comprobó dos guardados reales, recarga y consulta familiar/Comité; se corrigió la distribución móvil para que el texto ocupe el ancho de la tarjeta y el recorrido final pasó de nuevo sin errores JavaScript ni desbordamientos.
+
+**Archivos principales:** `PerfilFamiliaRequest`, `PerfilFamiliaService`, `perfil.html`, `perfiles.html`, `familia.js`, estilo compartido y `HU12PostgresIT`. **Base:** sin migración nueva; la columna ya existe. **Git:** commit local de HU12, consultable en el historial de la rama. **Azure:** no desplegada. No se alteraron fórmulas, pesos, criterios de completitud ni datos de expedientes infantiles.
+
 ## Matriz de aceptación
 
 | Historia | Criterios | Estado | Evidencia |
@@ -39,6 +49,6 @@ La petición más reciente permite avanzar entre historias validadas localmente 
 | HU19 | 1–8 | Comprobados localmente | Suite inicial 252 Java; `HU19PostgresIT`; auditoría y navegador previos conservados. |
 | HU11 | 1–3, 5–10 | Comprobados localmente | `HU11PostgresIT`, 6 casos HTTP y carreras; navegador TS/Comité/familia; permisos SQL. |
 | HU11 | 4: reinicio | Comprobado localmente | Snapshot íntegro y recuperación HTTP de la revisión tras reinicio. |
-| HU12 | 1–10 | Pendientes de implementación/validación | Se reutilizará `continuidadCultural`, ya persistente. |
+| HU12 | 1–10 | Comprobados localmente | `HU12PostgresIT`, 5 casos HTTP; 14 pruebas familiares existentes; recuperación tras reinicio; Chromium. |
 | HU14 | 1–10 | Pendientes de ampliación/validación | Umbral 3 y contador completado ya existentes. |
 | HU13 | 1–11 | Pendientes de verificación específica | Permisos, bloqueo, versión y auditoría ya existentes. |

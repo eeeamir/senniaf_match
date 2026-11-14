@@ -1057,7 +1057,15 @@
       </section>
 
 
-      <!-- La sección de continuidad cultural se retomará en Sprint 8. Se conservan los datos históricos. -->
+      <section class="grupo" id="seccionApoyosCulturales">
+        <h2>Apoyos culturales y comunitarios</h2>
+        <p class="ayuda">Cada niño o niña tiene una historia, costumbres y vínculos importantes. Comparte cómo tu familia podría acompañar y respetar esos aspectos durante su desarrollo.</p>
+        <div class="fila"><div class="campo ancho">
+          <label for="continuidadCultural">Apoyos culturales, lingüísticos y comunitarios (opcional)</label>
+          <textarea id="continuidadCultural" name="continuidadCultural" maxlength="2000" rows="5" aria-describedby="ayudaContinuidadCultural" placeholder="Cuéntanos cómo acompañarías sus vínculos culturales, su idioma y su comunidad."></textarea>
+          <p class="ayuda" id="ayudaContinuidadCultural">Esta información apoya la valoración humana del Comité. No modifica tu puntuación de compatibilidad.</p>
+        </div></div>
+      </section>
 
       <!-- ===============================================
            ACCIONES
@@ -1437,6 +1445,7 @@ document.getElementById('btnEjemploFamilia').addEventListener('click',()=>{
 formularioFamilia.addEventListener('submit', async (evento) => {
 
   evento.preventDefault();
+  if(btnRegistrarFamilia.disabled)return;
   ReglasPerfil.refrescarFamilia();
 
   resultadoFamilia.className = 'resultado';
@@ -1466,6 +1475,7 @@ formularioFamilia.addEventListener('submit', async (evento) => {
     condicionesPuedeAcompanarHoy: valoresMarcados('condicionesPuedeAcompanarHoy'),
     condicionesConApoyo: valoresMarcados('condicionesConApoyo'),
     notaCondicionesSalud: document.getElementById('notaCondicionesSalud').value,
+    continuidadCultural: document.getElementById('continuidadCultural').value,
   };
 
   if (!Profesionales.validarFormulario(formularioFamilia)) {
@@ -1495,11 +1505,11 @@ formularioFamilia.addEventListener('submit', async (evento) => {
       Profesionales.marcarGuardado(formularioFamilia);
       resultadoFamilia.className = 'resultado exito';
       resultadoFamilia.innerHTML =
-        `<strong>Entrevista enviada correctamente.</strong><br>${datos.mensaje}
+        `<strong>${modoCorreccionFamilia?'Los cambios se guardaron correctamente.':'Entrevista enviada correctamente.'}</strong><br>${datos.mensaje}
         · Código de caso:
         <span class="codigo">${datos.codigoCaso}</span>` +
         (datos.perfilCompleto ? '' : ' · el perfil quedó marcado como incompleto.') +
-        '<br><small>Abriendo tu motor de match…</small>';
+        '<br><small>Abriendo tu seguimiento…</small>';
       setTimeout(() => { location.href = 'match.html'; }, 1600);
 
     } else if (respuesta.status === 403) {
@@ -1544,6 +1554,7 @@ formularioFamilia.addEventListener('submit', async (evento) => {
    =============================================== */
 
 ReglasPerfil.iniciar();
+document.querySelector('#seccionApoyosCulturales h2').insertAdjacentHTML('afterbegin',Profesionales.icono('personas')+' ');
 
 const sesion = Sesion.requerir(['FAMILIA', 'TRABAJADOR_SOCIAL']);
 
@@ -1569,7 +1580,7 @@ if (sesion) {
           btnRegistrarFamilia.textContent=textoEnviarFamilia;
           ['tipoFamilia','notaEstructuraHogar','notaRedApoyo','provincia','disponibilidadViaje',
            'notaDistancia','edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad',
-           'disposicionHermanos','notaHermanos','notaCondicionesSalud','especificacionHogar'].forEach(k => {
+           'disposicionHermanos','notaHermanos','notaCondicionesSalud','especificacionHogar','continuidadCultural'].forEach(k => {
             const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
           });
           ['redApoyo','condicionesPuedeAcompanarHoy','condicionesConApoyo'].forEach(k => marcarValores(k, p[k] || []));
