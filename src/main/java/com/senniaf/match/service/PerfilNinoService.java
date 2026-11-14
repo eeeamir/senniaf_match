@@ -118,6 +118,12 @@ public class PerfilNinoService {
                 : request.getTieneHermanos() == com.senniaf.match.model.enums.SiNo.SI ? request.getCantidadHermanos() : null);
         perfil.setHermanosDetalle(request.getHermanosDetalle());
         perfil.setContextoCultural(request.getContextoCultural());
+        if(request.getIdiomaComunicacion()!=null)perfil.setIdiomaComunicacion(request.getIdiomaComunicacion());
+        if(request.getCostumbresTradiciones()!=null)perfil.setCostumbresTradiciones(request.getCostumbresTradiciones());
+        if(request.getVinculosCulturales()!=null)perfil.setVinculosCulturales(request.getVinculosCulturales());
+        if(request.getOpinionCultural()!=null)perfil.setOpinionCultural(request.getOpinionCultural());
+        if(request.getRecomendacionesCulturales()!=null)perfil.setRecomendacionesCulturales(request.getRecomendacionesCulturales());
+
     }
 
     public List<PerfilNino> listarPerfiles(String actor, String rol, boolean incluirInactivos) {
@@ -160,11 +166,11 @@ public class PerfilNinoService {
         var anteriores=datosSociales(p);
         PerfilNino propuesto=new PerfilNino();
         copiarDatos(propuesto,request);
-        propuesto.setIdiomaComunicacion(p.getIdiomaComunicacion());
-        propuesto.setCostumbresTradiciones(p.getCostumbresTradiciones());
-        propuesto.setVinculosCulturales(p.getVinculosCulturales());
-        propuesto.setOpinionCultural(p.getOpinionCultural());
-        propuesto.setRecomendacionesCulturales(p.getRecomendacionesCulturales());
+        if(request.getIdiomaComunicacion()==null)propuesto.setIdiomaComunicacion(p.getIdiomaComunicacion());
+        if(request.getCostumbresTradiciones()==null)propuesto.setCostumbresTradiciones(p.getCostumbresTradiciones());
+        if(request.getVinculosCulturales()==null)propuesto.setVinculosCulturales(p.getVinculosCulturales());
+        if(request.getOpinionCultural()==null)propuesto.setOpinionCultural(p.getOpinionCultural());
+        if(request.getRecomendacionesCulturales()==null)propuesto.setRecomendacionesCulturales(p.getRecomendacionesCulturales());
 
         propuesto.setPerfilCompleto(calcularSiEstaCompleto(request));
         propuesto.setAlertaMedica(calcularAlertaMedica(request));

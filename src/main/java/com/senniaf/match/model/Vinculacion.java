@@ -32,6 +32,24 @@ public class Vinculacion {
     public boolean isNinoLiberado(){return ninoLiberado;} public void setNinoLiberado(boolean v){ninoLiberado=v;}
      private boolean familiaLiberada;
     public boolean isFamiliaLiberada(){return familiaLiberada;} public void setFamiliaLiberada(boolean v){familiaLiberada=v;}
+    @Column(length=200) private String referenciaAutorizacion;
+    public String getReferenciaAutorizacion(){return referenciaAutorizacion;} public void setReferenciaAutorizacion(String v){referenciaAutorizacion=v;}
+     private java.time.LocalDate fechaEmisionAutorizacion;
+    public java.time.LocalDate getFechaEmisionAutorizacion(){return fechaEmisionAutorizacion;} public void setFechaEmisionAutorizacion(java.time.LocalDate v){fechaEmisionAutorizacion=v;}
+    @Column(length=40) private String autorizacionRegistradaPor;
+    public String getAutorizacionRegistradaPor(){return autorizacionRegistradaPor;} public void setAutorizacionRegistradaPor(String v){autorizacionRegistradaPor=v;}
+    @Column(length=25) private String autorizacionRol;
+    public String getAutorizacionRol(){return autorizacionRol;} public void setAutorizacionRol(String v){autorizacionRol=v;}
+     private LocalDateTime fechaRegistroAutorizacion;
+    public LocalDateTime getFechaRegistroAutorizacion(){return fechaRegistroAutorizacion;} public void setFechaRegistroAutorizacion(LocalDateTime v){fechaRegistroAutorizacion=v;}
+     private java.time.LocalDate fechaInicioConvivencia;
+    public java.time.LocalDate getFechaInicioConvivencia(){return fechaInicioConvivencia;} public void setFechaInicioConvivencia(java.time.LocalDate v){fechaInicioConvivencia=v;}
+    @Column(length=40) private String inicioRegistradoPor;
+    public String getInicioRegistradoPor(){return inicioRegistradoPor;} public void setInicioRegistradoPor(String v){inicioRegistradoPor=v;}
+    @Column(length=25) private String inicioRol;
+    public String getInicioRol(){return inicioRol;} public void setInicioRol(String v){inicioRol=v;}
+     private LocalDateTime fechaRegistroInicio;
+    public LocalDateTime getFechaRegistroInicio(){return fechaRegistroInicio;} public void setFechaRegistroInicio(LocalDateTime v){fechaRegistroInicio=v;}
     @Version private long version;
     public Long getId(){return id;}
     public DecisionComite getDecision(){return decision;} public void setDecision(DecisionComite v){decision=v;}

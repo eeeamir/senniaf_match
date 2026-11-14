@@ -95,7 +95,14 @@ public class PerfilFamiliaService {
         if(p.getFechaRegistro()!=null)actividad.add(actividad("Entrevista registrada","Se recibió la información de tu hogar.",p.getFechaRegistro()));
         if(decisiones!=null)for(var d:decisiones.findByCodigoFamiliaOrderByFechaAsc(p.getCodigoCaso())) {
             if(d.getFecha()==null)continue;
-            if(p.isReevaluacionPendiente() && "REEVALUACION".equals(d.getDecision()))respuesta.setObservacionReevaluacion(d.getMotivo());
+            if(p.isReevaluacionPendiente() && "REEVALUACION".equals(d.getDecision())){
+                var apartados=d.getApartadosReevaluacion();String observacion=d.getMotivo();
+                if(apartados==null && observacion!=null && observacion.startsWith("Apartados: ") && observacion.contains("\n\n")){
+                    var partes=observacion.split("\n\n",2);apartados=java.util.Arrays.asList(partes[0].substring(11).split(java.util.regex.Pattern.quote(" | ")));observacion=partes[1];
+                }
+                if(apartados!=null)respuesta.setApartadosReevaluacion(apartados);
+                respuesta.setObservacionReevaluacion(observacion);
+            }
             if("ACEPTADA".equals(d.getDecision()))actividad.add(actividad("Propuesta enviada por el Comité","Consulta Mi vinculación para conocer el estado y registrar tu respuesta.",d.getFecha()));
             else if("REEVALUACION".equals(d.getDecision()))actividad.add(actividad("Revisión de entrevista solicitada","Se solicitó ampliar la información de la entrevista.",d.getFecha()));
         }

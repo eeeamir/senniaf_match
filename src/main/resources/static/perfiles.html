@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="perfiles.css">
 <link rel="stylesheet" href="calendly-theme.css">
 <link rel="stylesheet" href="profesionales.css">
+<link rel="stylesheet" href="sprint8-acabados.css">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -95,6 +96,7 @@
 const sesion = Sesion.requerir(['TRABAJADOR_SOCIAL', 'PSICOLOGO', 'COMITE']);
 const codigoEvaluacion = new URLSearchParams(location.search).get('caso');
 const codigoFamilia = new URLSearchParams(location.search).get('familia');
+if(codigoFamilia)document.body.classList.add('s8-acabado');
 const vistaSolicitudes = sesion?.rol === 'TRABAJADOR_SOCIAL' && new URLSearchParams(location.search).get('vista') === 'solicitudes';
 let expedientes = [], pagina = 1;
 let expedienteSeleccionado = null;
@@ -465,35 +467,13 @@ const CAMPOS_CULTURA=[
  ['recomendacionesCulturales','Recomendaciones de continuidad cultural','Describe cómo una futura familia podría acompañar y respetar los aspectos culturales importantes para el niño']
 ];
 function culturaDetalle(datos){
- const puedeEditar=sesion.rol==='TRABAJADOR_SOCIAL'&&datos.trabajadorSocialAsignado===sesion.id;
  return `<details id="identidadCultural" class="detalle-grupo pro-detalle-amplio"><summary>${Profesionales.icono('personas')}Identidad y continuidad cultural</summary><div class="cultura-contenido">
  ${datos.contextoCultural?`<aside class="cultura-antecedente"><h3>Información cultural registrada anteriormente</h3><p class="pro-texto-registrado">${limpiarHtml(datos.contextoCultural)}</p><p class="ayuda">Este antecedente se conserva sin reinterpretarlo ni repartirlo entre los nuevos campos.</p></aside>`:''}
  <dl class="detalle-datos cultura-campos">${CAMPOS_CULTURA.map(([k,t,a])=>`<div><dt>${t}</dt><dd>${limpiarHtml(datos[k]||'Sin información registrada')}</dd><p class="ayuda">${a}.</p></div>`).join('')}</dl>
- ${puedeEditar?`<div class="pro-acciones"><button class="boton secundario chico" type="button" data-editar-cultura>${Profesionales.icono('informe')}Editar continuidad cultural</button></div>`:''}
  <p data-cultura-estado role="status"></p></div></details>`;
 }
-document.querySelector('main').addEventListener('click',e=>{
- if(!e.target.closest('[data-editar-cultura]'))return;
- const panel=document.getElementById('identidadCultural'),contenido=panel.querySelector('.cultura-contenido');
- const datos=expedienteSeleccionado;if(sesion.rol!=='TRABAJADOR_SOCIAL'||datos?.trabajadorSocialAsignado!==sesion.id)return;
- panel.open=true;contenido.querySelector('dl').hidden=true;contenido.querySelector('[data-editar-cultura]').hidden=true;
- const form=document.createElement('form');form.className='cultura-formulario';
- form.innerHTML=`${CAMPOS_CULTURA.map(([k,t,a])=>`<div><label for="cultura-${k}">${t} <small>(opcional)</small></label><textarea id="cultura-${k}" name="${k}" rows="4" aria-describedby="ayuda-${k}">${limpiarHtml(datos[k]||'')}</textarea><p class="ayuda" id="ayuda-${k}">${a}.${k==='vinculosCulturales'?' No incluyas nombres completos, direcciones ni teléfonos de terceros.':''}</p>${k==='opinionCultural'?'<button class="boton secundario chico" type="button" data-sin-opinion>Indicar que no se ha podido obtener su opinión</button>':''}</div>`).join('')}<p class="ayuda">Cada campo admite hasta 10.000 caracteres. Si se supera ese límite, no se guardará ni recortará el contenido.</p><p data-error role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar-cultura>Cancelar</button><button type="submit" class="boton">Guardar cambios</button></div>`;
- contenido.append(form);CamposFormulario.iniciar(form);form.addEventListener('input',e=>{if(e.target instanceof HTMLTextAreaElement)e.target.setCustomValidity('');});
- form.querySelector('[data-sin-opinion]').onclick=()=>{form.elements.opinionCultural.value='No se ha podido obtener la opinión del niño.';form.elements.opinionCultural.dispatchEvent(new Event('input',{bubbles:true}));};
- form.querySelector('[data-cancelar-cultura]').onclick=()=>{Profesionales.marcarGuardado(form);form.remove();contenido.querySelector('dl').hidden=false;contenido.querySelector('[data-editar-cultura]').hidden=false;};
- form.onsubmit=async ev=>{ev.preventDefault();
-  for(const [k] of CAMPOS_CULTURA){const campo=form.elements[k];campo.setCustomValidity(campo.value.length>10000?'Utiliza hasta 10000 caracteres. El texto no se ha recortado.':'');}
-  if(!form.reportValidity())return;
-  form.querySelectorAll('button,textarea').forEach(b=>b.disabled=true);
-  try{const respuesta=await fetch(`/api/ninos/${encodeURIComponent(codigoEvaluacion)}/continuidad-cultural`,{method:'PUT',headers:Sesion.encabezados({'Content-Type':'application/json'}),body:JSON.stringify(Object.fromEntries(CAMPOS_CULTURA.map(([k])=>[k,form.elements[k].value===''?null:form.elements[k].value])))});const resultado=await respuesta.json();if(!respuesta.ok)throw new Error(resultado.mensaje||'No se pudieron guardar los cambios culturales');
-   Profesionales.marcarGuardado(form);expedienteSeleccionado=await leerApi(`/api/ninos/${encodeURIComponent(codigoEvaluacion)}`);
-   panel.outerHTML=culturaDetalle(expedienteSeleccionado);const actualizado=document.getElementById('identidadCultural');actualizado.open=true;actualizado.querySelector('[data-cultura-estado]').textContent=resultado.mensaje;try{await cargarHistoria();}catch(error){actualizado.querySelector('[data-cultura-estado]').textContent=resultado.mensaje+'. No se pudo actualizar el historial en pantalla. Recarga para consultarlo.';}
-  }catch(error){form.querySelector('[data-error]').textContent=error.message;form.querySelectorAll('button,textarea').forEach(b=>b.disabled=false);}
- };
-});
 function detalleSecciones(datos,campos,grupos) {
- const aviso=grupos===GRUPOS_FAMILIA&&sesion.rol==='COMITE'?Profesionales.avisoReevaluaciones(datos.numeroReevaluaciones):'';
+ const aviso=grupos===GRUPOS_FAMILIA&&sesion.rol==='COMITE'?Profesionales.avisoInterrupcion(datos.antecedenteInterrupcion)+Profesionales.avisoReevaluaciones(datos.numeroReevaluaciones):'';
  return aviso+Object.entries(grupos).map(([titulo,keys],i)=>titulo==='Identidad y continuidad cultural'?culturaDetalle(datos):`<details id="${titulo==='Identidad y continuidad cultural'?'identidadCultural':titulo==='Apoyos culturales y comunitarios'?'apoyosCulturales':'grupo-'+i}" class="detalle-grupo ${keys.length===1?'pro-detalle-amplio':''}"><summary>${Profesionales.icono(titulo==='Apoyos culturales y comunitarios'?'personas':i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
  detalleCampos(datos,Object.fromEntries(keys.map(k=>[k,campos[k]])))+'</details>').join('');
 }
@@ -543,6 +523,7 @@ function configurarPestanas(){
  if(abrirCultura){mostrarPanel('panelDetalle');const apartado=document.getElementById('identidadCultural');if(apartado){apartado.open=true;apartado.scrollIntoView({block:'start'});}}
 }
 function mostrarPanel(id){
+ document.body.classList.toggle('s8-acabado',Boolean(codigoFamilia)||id==='panelSolicitudes');
  document.querySelectorAll('[data-panel]').forEach(b=>{const activo=b.dataset.panel===id;b.setAttribute('aria-selected',String(activo));b.tabIndex=activo?0:-1;document.getElementById(b.dataset.panel).hidden=!activo;});
  history.replaceState(null,'','#'+id);
 }

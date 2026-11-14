@@ -15,6 +15,7 @@ class CierreInstitucionalPostgresIT extends SoportePostgresIT {
     org.springframework.http.ResponseEntity<String> liberar(long id,String quien){return req("/api/vinculaciones/"+id+"/disponibilidad",HttpMethod.POST,comite,Map.of("expediente",quien,"justificacion","Revisión sintética individual de disponibilidad y elegibilidad institucional"));}
     @Test void cierreConservaInterrupcionYReservasHastaRevisionSeparada(){
         Caso c=caso(),otra=caso();long id=asignar(c);req("/api/vinculaciones/"+id+"/respuesta",HttpMethod.POST,c.token(),Map.of("respuesta","ACEPTAR"));
+        autorizarInicio(id);
         var informe=Map.of("motivo","ADAPTACION","justificacion","Interrupción sintética cuyo antecedente debe permanecer después del cierre");
         assertEquals(200,req("/api/vinculaciones/"+id+"/interrupcion",HttpMethod.POST,social,informe).getStatusCode().value());
         var puntaje=scoring.candidato(c.n(),c.f(),scoring.pesos()).get("puntaje");cerrar(id);

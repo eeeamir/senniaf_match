@@ -119,26 +119,38 @@ const Profesionales = {
   },
   avisoReevaluaciones(numero){
     const n=Number.isInteger(Number(numero))&&Number(numero)>=0?Number(numero):0;
+    if(n<3)return '';
     return `<aside class="pro-aviso-reevaluaciones ${n>=3?'destacado':''}"><h3>${this.icono('informacion')}Historial de reevaluaciones</h3><p>Esta familia registra <strong>${n} reevaluaciones completadas</strong>. ${n>=3?'Revisa sus antecedentes antes de continuar. Aviso para revisión humana, sin sanción automática.':'Las solicitudes pendientes no se incluyen en esta cantidad.'}</p></aside>`;
   },
+  avisoInterrupcion(antecedente){
+    if(!antecedente?.revisada)return '';
+    return `<aside class="pro-aviso-interrupcion" role="note"><span class="pro-simbolo">${this.icono('informacion')}</span><div><h3>Antecedente de vinculación interrumpida</h3><p>${antecedente.cierrePendiente?'Esta familia registra una interrupción de convivencia revisada por el Comité. El cierre institucional aún está pendiente. Consulta los antecedentes antes de continuar.':'Esta familia registra una interrupción anterior revisada por el Comité. Consulta los antecedentes antes de considerar una nueva propuesta.'}</p><small>Aviso informativo. No modifica automáticamente su idoneidad ni su puntuación.</small></div></aside>`;
+  },
+  fechaCivil(valor){return valor?new Intl.DateTimeFormat('es-PA',{dateStyle:'medium',timeZone:'UTC'}).format(new Date(valor+'T12:00:00Z')):'Fecha no registrada';},
   justificar({titulo,contexto,opciones,confirmacion,alConfirmar,alGuardar,alError=null,maximo=1850,instruccion='Selecciona un motivo',textoRevisar='Revisar y confirmar',tituloConfirmacion='Confirmar acción',textoConfirmar='Confirmar',ayuda='Puedes editar completamente la justificación. Para «Otro», escribe tu propia explicación.'}) {
-    const d=document.createElement('dialog');d.className='pro-dialogo pro-dialogo-decision';d.setAttribute('aria-label',titulo);
+    const d=document.createElement('dialog');d.className='pro-dialogo pro-dialogo-decision'+(titulo==='Solicitar reevaluación'?' pro-dialogo-reevaluacion':'');d.setAttribute('aria-label',titulo);
     d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('solicitudes')}</span><h2>${limpiarHtml(titulo)}</h2></div><p class="pro-modal-contexto">${limpiarHtml(contexto)}</p><form><fieldset class="pro-motivos"><legend>${limpiarHtml(instruccion)}</legend>${opciones.map(([valor,nombre])=>`<label class="pro-motivo"><input type="radio" name="motivoDecision" value="${limpiarHtml(valor)}" required><span>${limpiarHtml(nombre)}</span></label>`).join('')}</fieldset><label>Justificación<textarea name="justificacion" required minlength="10" maxlength="${maximo}" rows="5" placeholder="Selecciona un motivo para ver la sugerencia editable."></textarea></label><p class="ayuda">${limpiarHtml(ayuda)}</p><p data-error role="alert"></p><div class="pro-acciones"><button class="boton secundario" type="button" data-cancelar>Cancelar</button><button class="boton" type="submit">${limpiarHtml(textoRevisar)}</button></div></form>`;
     document.body.append(d);
-    if(titulo==='Solicitar reevaluación')d.querySelector('form').insertAdjacentHTML('afterbegin',`<fieldset class="pro-apartados-reevaluacion"><legend>Apartados de la entrevista familiar</legend>${['Hogar y red de apoyo','Preferencias familiares','Salud y acompañamiento','Disponibilidad y entorno','Apoyos culturales y comunitarios'].map((t,i)=>`<label><input type="checkbox" name="apartadoFamiliar" value="${t}">${this.icono(['personas','estrella','salud','hogar','personas'][i])}<span>${t}</span></label>`).join('')}</fieldset><p data-apartados-cantidad aria-live="polite">0 apartados seleccionados</p>`);
+    if(titulo==='Solicitar reevaluación')d.querySelector('form').insertAdjacentHTML('afterbegin',`<fieldset class="pro-apartados-reevaluacion"><legend>Apartados de la entrevista familiar</legend><p class="ayuda pro-instruccion-apartados">Selecciona uno o más apartados de la entrevista que consideres necesario revisar o actualizar.</p>${['Hogar y red de apoyo','Preferencias familiares','Salud y acompañamiento','Disponibilidad y entorno','Apoyos culturales y comunitarios'].map((t,i)=>`<label><input type="checkbox" name="apartadoFamiliar" value="${t}">${this.icono(['personas','estrella','salud','hogar','personas'][i])}<span>${t}</span></label>`).join('')}</fieldset>`);
     const form=d.querySelector('form'),texto=d.querySelector('textarea'),boton=d.querySelector('[type=submit]');
     CamposFormulario.iniciar(form);
     if(titulo==='Solicitar reevaluación'){
       texto.placeholder='Explica qué información debe corregirse, aclararse o completarse y por qué.';
-      const contar=()=>{d.querySelector('[data-apartados-cantidad]').textContent=(()=>{const n=form.querySelectorAll('[name=apartadoFamiliar]:checked').length;return n===1?'1 apartado seleccionado':n+' apartados seleccionados';})();};
-      form.addEventListener('change',contar);form.addEventListener('reset',()=>setTimeout(contar,0));
       const limpiar=document.createElement('button');limpiar.type='reset';limpiar.className='boton secundario';limpiar.textContent='Limpiar';form.querySelector('.pro-acciones').prepend(limpiar);
     }
     let guardando=false;
     d.querySelector('[data-cancelar]').addEventListener('click',()=>d.close());
     d.addEventListener('cancel',e=>{if(guardando)e.preventDefault();});
     d.addEventListener('close',()=>d.remove(),{once:true});
-    form.addEventListener('change',e=>{if(e.target.name==='motivoDecision'){texto.value=opciones.find(o=>o[0]===e.target.value)?.[2]||'';texto.setCustomValidity('');CamposFormulario.error(texto,'');texto.placeholder=titulo==='Solicitar reevaluación'?'Explica qué información debe corregirse, aclararse o completarse y por qué.':e.target.value==='OTRO'?'Explica tu decisión con tus propias palabras.':'Puedes modificar esta sugerencia.';}});
+    let motivoAnterior='',ultimaSugerencia='';
+    const aplicarMotivo=valor=>{motivoAnterior=valor;ultimaSugerencia=opciones.find(o=>o[0]===valor)?.[2]||'';texto.value=ultimaSugerencia;texto.setCustomValidity('');CamposFormulario.error(texto,'');texto.dispatchEvent(new Event('input',{bubbles:true}));};
+    form.addEventListener('reset',()=>{motivoAnterior='';ultimaSugerencia='';});
+    form.addEventListener('change',e=>{if(e.target.name!=='motivoDecision')return;const nuevo=e.target.value;
+      if(texto.value.trim() && texto.value!==ultimaSugerencia){
+        [...form.querySelectorAll('[name=motivoDecision]')].forEach(c=>c.checked=c.value===motivoAnterior);
+        this.confirmar('¿Actualizar la sugerencia?','La nueva sugerencia reemplazará la justificación que editaste. Cancela para conservarla.',()=>{form.querySelector(`[name=motivoDecision][value="${nuevo}"]`).checked=true;aplicarMotivo(nuevo);});
+      }else aplicarMotivo(nuevo);
+    });
     texto.addEventListener('input',()=>texto.setCustomValidity(''));
     form.addEventListener('submit',e=>{
       e.preventDefault();if(guardando)return;
@@ -147,17 +159,17 @@ const Profesionales = {
       if(!form.reportValidity())return;
       const motivo=opciones.find(o=>o[0]===form.elements.motivoDecision.value);
       const apartados=[...form.querySelectorAll('[name=apartadoFamiliar]:checked')].map(c=>c.value);
-      const justificacion=(apartados.length?'Apartados: '+apartados.join(' | ')+'\n\n':'')+`${motivo[1].replace(/\.$/,'')}: ${texto.value.trim()}`;
+      const justificacion=titulo==='Solicitar reevaluación'?texto.value.trim():`${motivo[1].replace(/\.$/,'')}: ${texto.value.trim()}`;
       const confirmar=document.createElement('dialog');confirmar.className='pro-dialogo';confirmar.setAttribute('aria-label',tituloConfirmacion);
       confirmar.innerHTML=`<h2>${limpiarHtml(tituloConfirmacion)}</h2><p>${limpiarHtml(confirmacion)}</p><div class="pro-acciones"><button class="boton secundario" type="button" data-volver>Volver</button><button class="boton" type="button" data-confirmar>${limpiarHtml(textoConfirmar)}</button></div>`;
-      if(titulo==='Solicitar reevaluación')confirmar.querySelector('h2').insertAdjacentHTML('afterend',`<p class="pro-texto-registrado">${limpiarHtml(justificacion)}</p>`);
+      if(titulo==='Solicitar reevaluación')confirmar.querySelector('h2').insertAdjacentHTML('afterend',`<p>Revisar: ${apartados.map(limpiarHtml).join(', ')}.</p><p class="pro-texto-registrado">${limpiarHtml(justificacion)}</p>`);
       document.body.append(confirmar);boton.disabled=true;
       confirmar.addEventListener('close',()=>{confirmar.remove();if(!guardando)boton.disabled=false;},{once:true});
       confirmar.querySelector('[data-volver]').onclick=()=>confirmar.close();
       confirmar.querySelector('[data-confirmar]').onclick=async()=>{
         guardando=true;confirmar.close();boton.disabled=true;d.querySelector('[data-cancelar]').disabled=true;
         let resultado;
-        try{resultado=await alConfirmar(justificacion);}
+        try{resultado=await alConfirmar(justificacion,{apartados,categoria:motivo[0]});}
         catch(error){if(alError?.(error)){d.close();return;}d.querySelector('[data-error]').textContent=error.message;return;}
         finally{guardando=false;boton.disabled=false;d.querySelector('[data-cancelar]').disabled=false;}
         d.close();if(alGuardar)await alGuardar(resultado);

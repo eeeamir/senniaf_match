@@ -10,6 +10,8 @@ package com.senniaf.match.dto;
  * }
  */
 public class PerfilFamiliaResponse {
+    private java.util.List<String> apartadosReevaluacion=java.util.List.of();
+    public java.util.List<String> getApartadosReevaluacion(){return apartadosReevaluacion;} public void setApartadosReevaluacion(java.util.List<String> v){apartadosReevaluacion=java.util.List.copyOf(v);}
     private String observacionReevaluacion;
     public String getObservacionReevaluacion(){return observacionReevaluacion;}
     public void setObservacionReevaluacion(String v){observacionReevaluacion=v;}

@@ -410,7 +410,12 @@
       "condicionesConApoyo": [
         "DIABETES"
       ],
-      "notaCondicionesSalud": "Cuentan con organización para controles de asma; solicitan capacitación para diabetes."
+      "notaCondicionesSalud": "Cuentan con organización para controles de asma; solicitan capacitación para diabetes.",
+      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
+      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
+      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
+      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
+      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
     },
     {
       "tipoFamilia": "MONOPARENTAL",
@@ -433,7 +438,12 @@
       "condicionesConApoyo": [
         "ASMA"
       ],
-      "notaCondicionesSalud": "Solicita orientación y capacitación antes de asumir cuidados de asma."
+      "notaCondicionesSalud": "Solicita orientación y capacitación antes de asumir cuidados de asma.",
+      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
+      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
+      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
+      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
+      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
     },
     {
       "tipoFamilia": "FAMILIA_EXTENDIDA",
@@ -458,7 +468,12 @@
       "condicionesConApoyo": [
         "DISCAPACIDAD_FISICA"
       ],
-      "notaCondicionesSalud": "Puede acompañar controles de asma; solicita valoración de accesibilidad para otras necesidades."
+      "notaCondicionesSalud": "Puede acompañar controles de asma; solicita valoración de accesibilidad para otras necesidades.",
+      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
+      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
+      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
+      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
+      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
     },
     {
       "tipoFamilia": "OTRA",
@@ -482,7 +497,12 @@
       "condicionesConApoyo": [
         "ASMA"
       ],
-      "notaCondicionesSalud": "Declaran recursos de comunicación accesible y disponibilidad para capacitación."
+      "notaCondicionesSalud": "Declaran recursos de comunicación accesible y disponibilidad para capacitación.",
+      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
+      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
+      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
+      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
+      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
     },
     {
       "tipoFamilia": "MONOPARENTAL",
@@ -505,7 +525,12 @@
         "ASMA",
         "TDAH"
       ],
-      "notaCondicionesSalud": "No declara experiencia previa; requiere capacitación y construcción de apoyos."
+      "notaCondicionesSalud": "No declara experiencia previa; requiere capacitación y construcción de apoyos.",
+      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
+      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
+      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
+      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
+      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
     },
     {
       "tipoFamilia": "PAREJA",
@@ -531,7 +556,12 @@
       "condicionesConApoyo": [
         "EPILEPSIA"
       ],
-      "notaCondicionesSalud": "Puede organizar controles regulares y solicita capacitación adicional cuando se requiera."
+      "notaCondicionesSalud": "Puede organizar controles regulares y solicita capacitación adicional cuando se requiera.",
+      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
+      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
+      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
+      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
+      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
     },
     {
       "tipoFamilia": "FAMILIA_EXTENDIDA",
@@ -555,7 +585,12 @@
       "condicionesConApoyo": [
         "TEA"
       ],
-      "notaCondicionesSalud": "Solicita formación antes de declarar capacidad para acompañar necesidades de desarrollo."
+      "notaCondicionesSalud": "Solicita formación antes de declarar capacidad para acompañar necesidades de desarrollo.",
+      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
+      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
+      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
+      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
+      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
     },
     {
       "tipoFamilia": "PAREJA",
@@ -580,7 +615,12 @@
         "DISCAPACIDAD_VISUAL",
         "DISCAPACIDAD_AUDITIVA"
       ],
-      "notaCondicionesSalud": "Solicita capacitación y revisión de recursos de accesibilidad antes de asumir esos cuidados."
+      "notaCondicionesSalud": "Solicita capacitación y revisión de recursos de accesibilidad antes de asumir esos cuidados.",
+      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
+      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
+      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
+      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
+      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
     }
   ],
   "psicologico": [

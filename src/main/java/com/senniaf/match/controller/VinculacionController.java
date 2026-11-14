@@ -19,6 +19,8 @@ public class VinculacionController {
     }
     public record Respuesta(String respuesta){}
     @PostMapping("/{id}/respuesta") public Map<String,Object> responder(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@RequestBody Respuesta request){familia(rol);return service.responder(id,actor,request==null?null:request.respuesta());}
+    @PostMapping("/{id}/autorizacion-preadoptiva")
+    public Map<String,Object> autorizacion(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@jakarta.validation.Valid @RequestBody com.senniaf.match.dto.AutorizacionPreadoptivaRequest solicitud){return service.registrarAutorizacion(id,rol,actor,solicitud);}
     @PostMapping("/{id}/interrupcion")
     public Map<String,Object> registrarInterrupcion(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@jakarta.validation.Valid @RequestBody com.senniaf.match.dto.InterrupcionRequest solicitud){return service.registrarInterrupcion(id,rol,actor,solicitud);}
     @PostMapping("/{id}/interrupcion/revision")
