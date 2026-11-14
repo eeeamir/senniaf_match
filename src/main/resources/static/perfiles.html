@@ -262,7 +262,6 @@ function detalleCampos(datos, campos) {
     if(k==='tieneHermanos'&&valor==='NO_SABE')valor='Aún no se ha confirmado';
     if(k==='cantidadHermanos'&&datos.tieneHermanos!=='SI')valor=datos.tieneHermanos==='NO'?0:'Aún no se ha confirmado';
     if (['trabajadorSocialAsignado','psicologoAsignado'].includes(k) && !valor) valor = 'Pendiente de vinculación';
-    if(k==='numeroExpedienteInstitucional' && typeof valor==='string' && /^FICTICIO-AZURE-\d+$/.test(valor))valor='Referencia de demostración · '+valor.split('-').pop();
     if (typeof valor === 'boolean') valor = valor ? 'Sí' : 'No';
     if (Array.isArray(valor)) valor = valor.length?valor.map(v=>Profesionales.etiqueta(v)).join(', '):['condicionesPuedeAcompanarHoy','condicionesConApoyo'].includes(k)?'Sin condiciones específicas declaradas':'Sin opciones registradas';
     if (k==='fechaRegistro' && valor) valor=Profesionales.fecha(valor);

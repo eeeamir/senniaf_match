@@ -107,7 +107,6 @@ const Profesionales = {
     document.getElementById('proCancelarSalida').addEventListener('click',()=>dialogo.close());
     document.getElementById('proConfirmarSalida').addEventListener('click',async()=>{const boton=document.getElementById('proConfirmarSalida');boton.disabled=true;await Sesion.salir();});
     this.decorarHero(s.rol==='PSICOLOGO'?'psicologia':'carpeta');
-    const aviso=document.createElement('span');aviso.className='pro-demostracion';aviso.textContent='Datos de demostración';document.getElementById('usuario').prepend(aviso);
   },
   mensaje(elemento,texto,tipo='aviso'){
     elemento.className='mensaje '+tipo;elemento.setAttribute('role',tipo==='error'?'alert':'status');

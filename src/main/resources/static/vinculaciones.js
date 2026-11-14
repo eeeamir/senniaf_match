@@ -19,24 +19,29 @@ const Vinculaciones = {
     return datos;
   },
   estado(v) {
-    const rechazado = v.estado === 'RESPUESTA_RECHAZADA_PENDIENTE_CIERRE';
+    const rechazado = ['RECHAZADA_POR_FAMILIA','RESPUESTA_RECHAZADA_PENDIENTE_CIERRE'].includes(v.estado);
     const icono = v.estado === 'PENDIENTE_RESPUESTA' ? 'reloj' : rechazado ? 'advertencia' : 'comprobar';
     return `<span class="chip ${rechazado ? 'retirado' : v.estado === 'PENDIENTE_RESPUESTA' ? 'vinculacion-pendiente' : ''}">${Profesionales.icono(icono)}${limpiarHtml(this.estados[v.estado] || v.estado)}</span>${v.interrupcionRegistrada?` <span class="chip retirado">${Profesionales.icono('advertencia')}${v.interrupcionPendiente?'Interrupción pendiente de revisión':'Interrupción revisada'}</span>`:''}`;
   },
   familiar(lista) {
     if (!lista.length) return `<section class="tarjeta"><h2>${Profesionales.icono('vinculacion')}Mi vinculación</h2><p>Por ahora no tienes vinculaciones registradas.</p></section>`;
-    return lista.map(v => `<section class="tarjeta">
-      <div class="pro-fila-titulo"><h2>${Profesionales.icono('vinculacion')} ${limpiarHtml(v.codigo)}</h2>${this.estado(v)}</div>
-      <p>${Profesionales.icono('personas')} Expediente familiar: ${limpiarHtml(v.expedienteFamiliar)}</p>
-      <p>${Profesionales.icono('calendario')} Propuesta enviada por el Comité: ${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</p>
-      <p>${limpiarHtml(v.siguientePaso)}</p>
-      ${v.fechaRespuesta ? `<p>Respuesta registrada: ${limpiarHtml(Profesionales.fecha(v.fechaRespuesta))}</p>` : ''}
-      <p class="ayuda">${Profesionales.icono('informacion')} La respuesta en este portal no sustituye las formalidades legales ni autoriza el acogimiento preadoptivo.</p>
-      ${v.estado === 'PENDIENTE_RESPUESTA' ? `<div class="pro-acciones">
+    return `<div class="vinculaciones-lista">${lista.map(v => `<section class="tarjeta vinculacion-tarjeta vinculacion-familiar">
+      <header class="vinculacion-cabecera"><h2>${Profesionales.icono('vinculacion')}${limpiarHtml(v.codigo)}</h2>${this.estado(v)}</header>
+      <dl class="vinculacion-resumen"><div><dt>${Profesionales.icono('personas')}Tu expediente</dt><dd>${limpiarHtml(v.expedienteFamiliar)}</dd></div><div><dt>${Profesionales.icono('calendario')}Propuesta recibida</dt><dd>${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</dd></div></dl>
+      <p class="vinculacion-siguiente">${limpiarHtml(v.siguientePaso)}</p>
+      <details class="vinculacion-informacion"><summary>${Profesionales.icono('consulta')}Ver detalle de mi propuesta</summary>
+        ${v.fechaRespuesta ? `<p>${Profesionales.icono('comprobar')}Tu respuesta quedó registrada el ${limpiarHtml(Profesionales.fecha(v.fechaRespuesta))}.</p>` : '<p>Aún no hay una respuesta familiar registrada.</p>'}
+        <p class="ayuda">${Profesionales.icono('informacion')}La respuesta en este portal no sustituye las formalidades legales ni autoriza el acogimiento preadoptivo.</p>
+      </details>
+      ${v.estado === 'PENDIENTE_RESPUESTA' ? `<footer class="pro-acciones vinculacion-acciones">
         <button class="boton" data-responder="ACEPTAR" data-id="${v.id}">${Profesionales.icono('comprobar')}Aceptar propuesta</button>
         <button class="boton secundario" data-responder="RECHAZAR" data-id="${v.id}">${Profesionales.icono('cerrar')}Rechazar propuesta</button>
-      </div>` : ''}
-    </section>`).join('');
+      </footer>` : ''}
+    </section>`).join('')}</div>`;
+  },
+  descripcion(v){
+    if(v.interrupcionPendiente)return 'Hay una interrupción registrada pendiente de revisión institucional.';
+    return ({PENDIENTE_RESPUESTA:'La propuesta fue enviada a la familia y estamos a la espera de su respuesta.',RESPUESTA_ACEPTADA:'La familia aceptó la propuesta. Consulta el estado y las actuaciones registradas.',RECHAZADA_POR_FAMILIA:'La familia rechazó la propuesta. Su respuesta quedó registrada.',RESPUESTA_RECHAZADA_PENDIENTE_CIERRE:'La respuesta negativa quedó registrada. El cierre institucional sigue pendiente.',CERRADA:'El cierre quedó registrado. La disponibilidad de cada expediente se revisa por separado.'})[v.estado]||'Consulta las actuaciones registradas en el detalle.';
   },
   enlazarRespuestas(sesion) {
     document.querySelectorAll('[data-responder]').forEach(b => b.onclick = () => {
@@ -77,7 +82,7 @@ const Vinculaciones = {
           <label>Estado<select name="estado"><option value="">Todos los estados</option>${Object.entries(this.estados).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>
           <label>Buscar por identificador o expediente<input name="buscar" type="search" maxlength="80"></label>
           <button class="boton" type="submit">${Profesionales.icono('buscar')}Buscar</button>
-        </form></section><div id="listaVinculaciones" aria-live="polite"></div>`;
+        </form></section><div id="listaVinculaciones" class="vinculaciones-lista" aria-live="polite"></div>`;
       const form = document.getElementById('filtroVinculaciones');
       let consulta = 0;
       const cargar = async () => {
@@ -86,10 +91,10 @@ const Vinculaciones = {
           const datos = await this.api('/api/vinculaciones?' + new URLSearchParams(new FormData(form)));
           if (actual !== consulta) return;
           lista.innerHTML = datos.length ? datos.map(v => `<article class="tarjeta vinculacion-tarjeta">
-            <div class="pro-fila-titulo"><h2>${Profesionales.icono('vinculacion')}${limpiarHtml(v.codigo)}</h2>${this.estado(v)}</div>
-            <p>${Profesionales.icono('carpeta')} ${limpiarHtml(v.expedienteInfantil)} · ${Profesionales.icono('personas')} ${limpiarHtml(v.expedienteFamiliar)}</p>
-            <div class="vinculacion-datos"><p>${Profesionales.icono('calendario')}${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</p><p>${Profesionales.icono('criterios')}Compatibilidad original: <strong>${v.puntajeOriginal??'No disponible'} / 100</strong> · Criterios ${v.versionOriginal??'no disponibles'}</p></div>
-            <a class="boton secundario" href="vinculaciones.html?id=${v.id}">${Profesionales.icono('consulta')}Ver detalle</a>
+            <header class="vinculacion-cabecera"><h2>${Profesionales.icono('vinculacion')}${limpiarHtml(v.codigo)}</h2>${this.estado(v)}</header>
+            <dl class="vinculacion-resumen"><div><dt>${Profesionales.icono('carpeta')}Expediente infantil</dt><dd>${limpiarHtml(v.expedienteInfantil)}</dd></div><div><dt>${Profesionales.icono('personas')}Expediente familiar</dt><dd>${limpiarHtml(v.expedienteFamiliar)}</dd></div><div><dt>${Profesionales.icono('calendario')}Creación</dt><dd>${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</dd></div><div><dt>${Profesionales.icono('criterios')}Compatibilidad original</dt><dd><strong>${limpiarHtml(String(v.puntajeOriginal??'No disponible'))}${v.puntajeOriginal==null?'':' / 100'}</strong><small>Criterios ${limpiarHtml(String(v.versionOriginal??'no disponibles'))}</small></dd></div></dl>
+            <p class="vinculacion-siguiente">${limpiarHtml(this.descripcion(v))}</p>
+            <footer class="vinculacion-acciones"><a class="boton secundario" href="vinculaciones.html?id=${v.id}">${Profesionales.icono('consulta')}Ver detalle</a></footer>
           </article>`).join('') : `<section class="tarjeta"><h2>${Profesionales.icono('informacion')}Sin vinculaciones</h2><p>No hay vinculaciones para esta consulta.</p></section>`;
         } catch (e) {
           if (actual === consulta) lista.innerHTML = `<section class="tarjeta"><p role="alert">${Profesionales.icono('advertencia')}${limpiarHtml(e.message)}</p></section>`;
@@ -106,7 +111,7 @@ const Vinculaciones = {
     const enlaceNino = `perfiles.html?caso=${encodeURIComponent(v.expedienteInfantil)}`;
     const enlaceFamilia = `perfiles.html?familia=${encodeURIComponent(v.expedienteFamiliar)}&casoOrigen=${encodeURIComponent(v.expedienteInfantil)}&origen=match`;
     c.innerHTML = `<p class="pro-breadcrumb"><a href="vinculaciones.html">${Profesionales.icono('flecha')}Volver a Vinculaciones</a></p>`+Profesionales.encabezado(v.codigo, 'Detalle de la vinculación', 'vinculacion') + `
-      <section class="tarjeta">${this.estado(v)}<dl class="detalle-datos">
+      <section class="tarjeta vinculacion-general"><h2>${Profesionales.icono('carpeta')}Información general</h2>${this.estado(v)}<p class="vinculacion-siguiente">${limpiarHtml(this.descripcion(v))}</p><dl class="detalle-datos">
         <div><dt>Expediente infantil</dt><dd><a href="${enlaceNino}">${limpiarHtml(v.expedienteInfantil)}</a></dd></div>
         <div><dt>Expediente familiar</dt><dd>${sesion.rol === 'COMITE' ? `<a href="${enlaceFamilia}">${limpiarHtml(v.expedienteFamiliar)}</a>` : limpiarHtml(v.expedienteFamiliar)}</dd></div>
         <div><dt>Creación</dt><dd>${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</dd></div>
