@@ -54,6 +54,16 @@ La petición más reciente permite avanzar entre historias validadas localmente 
 
 **Archivos principales:** `PerfilFamiliaService`, `PerfilFamiliaRepository`, `ScoringController`, `comite.js`, `profesionales.js`, pruebas familiares ajustadas al bloqueo y `HU14PostgresIT`. **Base:** sin migración adicional. **Azure:** pendiente, sin cambios en el entorno persistente.
 
+## HU13 — Seguridad y auditoría de pesos
+
+**Estado:** completada localmente. **Qué se implementó:** se conservaron y verificaron los controles existentes del módulo de pesos, sin reconstruirlo. Se aclaró la introducción «Configuración de pesos»: la importancia de los cinco factores y la obligación de justificar cada modificación. La confirmación muestra valores actuales/propuestos y conserva el historial consultable.
+
+**Cómo funciona:** el Comité abre «Criterios», despliega «Ajustar pesos», introduce enteros entre 0 y 100 que suman 100 y confirma con una justificación de 10 a 300 caracteres. El servidor valida identidad, rol y versión, serializa el cambio y guarda conjuntamente pesos y auditoría. Un formulario desactualizado recibe un aviso para recargar; otros roles no pueden consultar ni modificar esta configuración.
+
+**Qué se comprobó:** 127 pruebas aprobadas: cinco nuevas HTTP/PostgreSQL y 122 existentes de funcionalidad, fiabilidad y seguridad. Se probaron 18 cuerpos inválidos, permisos de los cuatro roles, falsificación de cabeceras, justificación, anteriores/nuevos, actor/fecha, versiones, dos cambios concurrentes (200/409) y conservación exacta del contexto/puntaje de una decisión anterior. Los intentos rechazados no agregan auditoría ni cambian configuración. Chromium comprobó consulta sin escrituras, guardado justificado, historial, suma inválida, conflicto de versión, recarga y móvil sin errores JavaScript ni desbordamientos. Los valores iniciales se restablecieron mediante un cambio autorizado de prueba; sus versiones y actuaciones se conservaron. Pesos, versión e historial idénticos después de reiniciar el backend.
+
+**Archivos principales:** `comite.js` y `HU13PostgresIT`, reutilizando `ScoringController`, `ScoringService`, `PesosScoringRepository` y `auditoria_casos`. **Base:** sin nueva migración. **Git:** commit local de HU13. **Azure:** pendiente, sin cambios. **Algoritmo:** `ScoringService` completo se comparó byte a byte con `7b5b3fd`; conserva fórmulas, factores y valores iniciales. Evidencias `target/verificacion-hu19/hu13-*` y `HU13-*.png`.
+
 ## Matriz de aceptación
 
 | Historia | Criterios | Estado | Evidencia |
@@ -63,4 +73,4 @@ La petición más reciente permite avanzar entre historias validadas localmente 
 | HU11 | 4: reinicio | Comprobado localmente | Snapshot íntegro y recuperación HTTP de la revisión tras reinicio. |
 | HU12 | 1–10 | Comprobados localmente | `HU12PostgresIT`, 5 casos HTTP; 14 pruebas familiares existentes; recuperación tras reinicio; Chromium. |
 | HU14 | 1–10 | Comprobados localmente | `HU14PostgresIT`, cinco casos HTTP y concurrencia; contador/auditoría originales; Chromium y vista móvil. |
-| HU13 | 1–11 | Pendientes de verificación específica | Permisos, bloqueo, versión y auditoría ya existentes. |
+| HU13 | 1–11 | Comprobados localmente | `HU13PostgresIT`, cinco casos HTTP, 18 cuerpos inválidos, falsificación de rol y concurrencia; 122 pruebas existentes; Chromium; reinicio; comparación íntegra de `ScoringService`. |
