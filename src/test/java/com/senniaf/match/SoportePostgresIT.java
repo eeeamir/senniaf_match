@@ -61,6 +61,9 @@ abstract class SoportePostgresIT {
         return new Caso(n,f,login(actor));
     }
     ResponseEntity<String> req(String ruta,HttpMethod metodo,String token,Object cuerpo){
+        if(metodo==HttpMethod.POST && ruta.startsWith("/api/scoring/casos/") && ruta.endsWith("/decisiones") && cuerpo instanceof Map<?,?> m && !m.containsKey("versionPesos")){
+            var copia=new LinkedHashMap<String,Object>();m.forEach((k,v)->copia.put(k.toString(),v));copia.put("versionPesos",datos(req("/api/scoring/pesos",HttpMethod.GET,comite,null)).path("version").asInt());cuerpo=copia;
+        }
         HttpHeaders h=new HttpHeaders();h.setContentType(MediaType.APPLICATION_JSON);if(token!=null)h.setBearerAuth(token);
         return http.exchange(ruta,metodo,new HttpEntity<>(cuerpo,h),String.class);
     }

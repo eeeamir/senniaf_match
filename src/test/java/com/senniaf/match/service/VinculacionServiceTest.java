@@ -29,8 +29,8 @@ class VinculacionServiceTest {
         assertEquals(Vinculacion.Estado.RESPUESTA_ACEPTADA,resultado.get("estado"));assertTrue(v.isReservaVigente());assertNotNull(v.getFechaRespuesta());assertEquals("FAMILIA-1",v.getRespondidoPor());
         verify(auditoria).save(argThat(e->e.getDescripcion().contains("RESPUESTA_ACEPTADA")&&e.getActor().equals("FAMILIA-1")));
     }
-    @Test void rechazarNoLiberaNiCambiaExpedientes(){
-        service.responder(1L,"FAMILIA-1","RECHAZAR");assertEquals(Vinculacion.Estado.RESPUESTA_RECHAZADA_PENDIENTE_CIERRE,v.getEstado());assertTrue(v.isReservaVigente());assertFalse(v.getNino().isBajaLogica());assertFalse(v.getNino().isCierrePorAdopcion());assertFalse(v.getFamilia().isReevaluacionPendiente());
+    @Test void rechazarLiberaPropuestaSinCambiarIdoneidad(){
+        service.responder(1L,"FAMILIA-1","RECHAZAR");assertEquals(Vinculacion.Estado.RECHAZADA_POR_FAMILIA,v.getEstado());assertFalse(v.isReservaVigente());assertFalse(v.getNino().isBajaLogica());assertFalse(v.getNino().isCierrePorAdopcion());assertFalse(v.getFamilia().isReevaluacionPendiente());
         assertFalse(service.propias("FAMILIA-1").get(0).containsKey("expedienteInfantil"));
     }
     @Test void respuestaNoSePuedeCambiar(){service.responder(1L,"FAMILIA-1","RECHAZAR");assertThrows(IllegalStateException.class,()->service.responder(1L,"FAMILIA-1","ACEPTAR"));verify(repo,times(1)).save(v);}

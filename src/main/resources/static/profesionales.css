@@ -94,3 +94,6 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .pro-interrupcion-form{display:grid;gap:15px}.pro-interrupcion-form input,.pro-interrupcion-form textarea{width:100%}.pro-texto-registrado{white-space:pre-wrap;overflow-wrap:anywhere}
 
 .pro-detalle-amplio .detalle-datos{grid-template-columns:minmax(0,1fr)}
+
+.pro-aviso-programacion{border-left:4px solid var(--azul,#0866ff)}
+.pro-pesos-vigentes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:24px 0}.pro-pesos-vigentes>div{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:16px;background:#f1f6ff}.pro-confirmacion-programacion{padding:20px;border:1px solid #c5d9ff;border-radius:18px;margin-top:20px}.pro-confirmacion-programacion p{overflow-wrap:anywhere}

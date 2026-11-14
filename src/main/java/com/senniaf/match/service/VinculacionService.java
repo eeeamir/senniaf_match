@@ -12,6 +12,7 @@ import java.util.*;
 @Service
 @Transactional(readOnly=true)
 public class VinculacionService {
+    @org.springframework.beans.factory.annotation.Autowired private CombinacionExcluidaRepository excluidas;
     private final VinculacionRepository repo;
     private final EventoCasoRepository auditoria;
     private final com.fasterxml.jackson.databind.ObjectMapper json = new com.fasterxml.jackson.databind.ObjectMapper();
@@ -35,7 +36,7 @@ public class VinculacionService {
     public List<Map<String,Object>> listar(String rol,String actor,String estado,String buscar){
         institucional(rol);
         return repo.findAllByOrderByIdDesc().stream().filter(v->autorizado(v,rol,actor))
-            .filter(v->estado==null || estado.isBlank() || v.getEstado().name().equals(estado))
+            .filter(v->estado==null || estado.isBlank() || estadoVisible(v).name().equals(estado))
             .filter(v->buscar==null || ("VIN-"+v.getId()+" "+v.getNino().getCodigoCaso()+" "+v.getFamilia().getCodigoCaso()).toLowerCase(Locale.ROOT).contains(buscar.toLowerCase(Locale.ROOT)))
             .map(v->resumen(v)).toList();
     }
@@ -46,7 +47,7 @@ public class VinculacionService {
         var r=vista(v,false);
         var interrupcion=interrupcion(v);
         r.put("interrupcion",interrupcion==null?null:detalleInterrupcion(interrupcion));
-        r.put("puedeCerrar","COMITE".equals(rol) && v.getEstado()!=Vinculacion.Estado.CERRADA);
+        r.put("puedeCerrar","COMITE".equals(rol) && v.getEstado()!=Vinculacion.Estado.CERRADA && !rechazoPortal(v));
         r.put("puedeRevisarDisponibilidad","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.CERRADA);
         r.put("cierre",v.getFechaCierre()==null?null:Map.of("fecha",v.getFechaCierre(),"referencia",v.getReferenciaCierre(),"autoridad",v.getAutoridadCierre(),"motivo",v.getMotivoCierre(),"registradoPor",v.getCerradoPor(),"registradoEl",fecha(v.getFechaRegistroCierre()),"ninoLiberado",v.isNinoLiberado(),"familiaLiberada",v.isFamiliaLiberada()));
         r.put("puedeReportarInterrupcion",!"COMITE".equals(rol) && interrupcion==null && reportable(v));
@@ -70,15 +71,21 @@ public class VinculacionService {
         if(!actor.equals(v.getFamilia().getRegistradoPor()))throw new RolNoAutorizadoException("No tienes acceso a esta vinculación");
         if(!v.isReservaVigente() || v.getEstado()!=Vinculacion.Estado.PENDIENTE_RESPUESTA)
             throw new IllegalStateException("Esta propuesta ya tiene una respuesta registrada o dejó de estar vigente");
-        v.setEstado("ACEPTAR".equals(respuesta)?Vinculacion.Estado.RESPUESTA_ACEPTADA:Vinculacion.Estado.RESPUESTA_RECHAZADA_PENDIENTE_CIERRE);
+        if("RECHAZAR".equals(respuesta)){
+            if(excluidas!=null && !excluidas.existsByCodigoNinoAndCodigoFamilia(v.getNino().getCodigoCaso(),v.getFamilia().getCodigoCaso())){
+                var e=new CombinacionExcluida();e.codigoNino=v.getNino().getCodigoCaso();e.codigoFamilia=v.getFamilia().getCodigoCaso();e.origen="FAMILIA";e.responsable=actor;e.fecha=LocalDateTime.now();excluidas.save(e);
+            }
+            if(interrupcion(v)==null && v.getFechaCierre()==null)v.setReservaVigente(false);
+        }
+        v.setEstado("ACEPTAR".equals(respuesta)?Vinculacion.Estado.RESPUESTA_ACEPTADA:Vinculacion.Estado.RECHAZADA_POR_FAMILIA);
         v.setFechaRespuesta(LocalDateTime.now());v.setRespondidoPor(actor);repo.save(v);
-        auditar(v,actor,"RESPUESTA_FAMILIAR",v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA?"La familia aceptó la propuesta.":"La familia rechazó la propuesta. Pendiente de cierre institucional.");
+        auditar(v,actor,"RESPUESTA_FAMILIAR",v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA?"La familia aceptó la propuesta.":"La familia rechazó la propuesta del portal. La combinación no se recomendará automáticamente; se mantienen las condiciones vigentes de cada expediente.");
         return vista(v,true);
     }
     private void institucional(String rol){if(!Set.of("COMITE","TRABAJADOR_SOCIAL","PSICOLOGO").contains(rol))throw new RolNoAutorizadoException("Solo el equipo institucional autorizado puede consultar vinculaciones");}
     private boolean autorizado(Vinculacion v,String rol,String actor){return "COMITE".equals(rol) || "TRABAJADOR_SOCIAL".equals(rol)&&actor.equals(v.getNino().getTrabajadorSocialAsignado()) || "PSICOLOGO".equals(rol)&&actor.equals(v.getNino().getPsicologoAsignado());}
     private Map<String,Object> resumen(Vinculacion v){
-        Map<String,Object> r=new LinkedHashMap<>();r.put("id",v.getId());r.put("codigo","VIN-"+v.getId());r.put("expedienteInfantil",v.getNino().getCodigoCaso());r.put("expedienteFamiliar",v.getFamilia().getCodigoCaso());r.put("fechaCreacion",fecha(v.getDecision().getFecha()));r.put("estado",v.getEstado());var i=interrupcion(v);r.put("interrupcionPendiente",i!=null && i.getFechaRevision()==null);r.put("interrupcionRegistrada",i!=null);return r;
+        Map<String,Object> r=new LinkedHashMap<>();r.put("id",v.getId());r.put("codigo","VIN-"+v.getId());r.put("expedienteInfantil",v.getNino().getCodigoCaso());r.put("expedienteFamiliar",v.getFamilia().getCodigoCaso());r.put("fechaCreacion",fecha(v.getDecision().getFecha()));r.put("estado",estadoVisible(v));var i=interrupcion(v);r.put("interrupcionPendiente",i!=null && i.getFechaRevision()==null);r.put("interrupcionRegistrada",i!=null);return r;
     }
     private Map<String,Object> vista(Vinculacion v,boolean familiar){
         var r=resumen(v);
@@ -86,12 +93,14 @@ public class VinculacionService {
         if(familiar)r.remove("expedienteInfantil");
         r.put("fechaRespuesta",fecha(v.getFechaRespuesta()));r.put("disponibilidad",!v.isReservaVigente()?"Pendiente de confirmar elegibilidad para Match":v.getEstado()==Vinculacion.Estado.RESPUESTA_RECHAZADA_PENDIENTE_CIERRE?"Reservado; pendiente de confirmación institucional":"Reservado por asignación vigente");
         r.put("siguientePaso",switch(v.getEstado()){
+            case RECHAZADA_POR_FAMILIA -> "Tu respuesta quedó registrada. Gracias por revisar la propuesta. El equipo correspondiente podrá continuar con el seguimiento de tu expediente.";
             case CERRADA -> "La vinculación está cerrada. La disponibilidad de cada expediente requiere revisión institucional independiente.";
             case PENDIENTE_RESPUESTA -> "Esta vinculación está pendiente de respuesta familiar.";
             case RESPUESTA_ACEPTADA -> "La familia aceptó la propuesta. El proceso continuará conforme a las actuaciones institucionales correspondientes.";
             case RESPUESTA_RECHAZADA_PENDIENTE_CIERRE -> "La familia rechazó la propuesta. El equipo debe confirmar el cierre y la disponibilidad de los expedientes.";
         });
         if(familiar)r.put("siguientePaso",switch(v.getEstado()){
+            case RECHAZADA_POR_FAMILIA -> "Tu respuesta quedó registrada. Gracias por revisar la propuesta. El equipo correspondiente podrá continuar con el seguimiento de tu expediente.";
             case CERRADA -> "La vinculación está cerrada. La disponibilidad de cada expediente requiere revisión institucional independiente.";
             case PENDIENTE_RESPUESTA -> "Tienes una propuesta pendiente. Revisa la información disponible antes de responder.";
             case RESPUESTA_ACEPTADA -> "Aceptaste la propuesta. El equipo correspondiente continuará con el proceso.";
@@ -102,6 +111,10 @@ public class VinculacionService {
         if(seguimiento!=null && v.getEstado()!=Vinculacion.Estado.CERRADA)r.put("siguientePaso",familiar
                 ?"El equipo institucional te orientará sobre los siguientes pasos de esta vinculación."
                 :seguimiento.getFechaRevision()==null?"La interrupción de convivencia está pendiente de revisión del Comité.":"El Comité registró su revisión. Los expedientes conservan su reserva hasta la actuación institucional correspondiente.");
+        if(rechazoPortal(v)){
+            r.put("siguientePaso",familiar?"Tu respuesta quedó registrada. Gracias por revisar la propuesta. El equipo correspondiente podrá continuar con el seguimiento de tu expediente.":"La propuesta del portal fue rechazada. Esta combinación queda fuera de las recomendaciones automáticas, sin cambiar la idoneidad de los expedientes.");
+            r.put("disponibilidad","Sin reserva por esta propuesta; se mantienen los requisitos vigentes de cada expediente.");
+        }
         if(!familiar){r.put("decisionComite",Map.of("decision",v.getDecision().getDecision(),"responsable",v.getDecision().getFuncionario(),"fecha",fecha(v.getDecision().getFecha()),"motivo",v.getDecision().getMotivo()));r.put("respondidoPor",v.getRespondidoPor());}
         return r;
     }
@@ -139,6 +152,7 @@ public class VinculacionService {
     public Map<String,Object> cerrar(Long id,String rol,String actor,com.senniaf.match.dto.CierreInstitucionalRequest solicitud){
         exigirComite(rol);
         var v=repo.bloquear(id).orElseThrow(()->new IllegalArgumentException("La vinculación no está disponible"));
+        if(rechazoPortal(v))throw new IllegalStateException("La propuesta del portal ya fue rechazada y no requiere un cierre institucional");
         if(v.getEstado()==Vinculacion.Estado.CERRADA)throw new IllegalStateException("El cierre ya está registrado y se conserva en el historial");
         if(solicitud==null || !solicitud.confirmacionAutoridad())throw new IllegalArgumentException("Confirma la actuación de la autoridad competente");
         var hoy=java.time.LocalDate.now(ZoneId.of("America/Panama"));
@@ -174,6 +188,10 @@ public class VinculacionService {
         return detalle(id,rol,actor);
     }
     private void exigirComite(String rol){if(!"COMITE".equals(rol))throw new RolNoAutorizadoException("Solo el Comité puede registrar esta actuación institucional");}
+    private boolean rechazoPortal(Vinculacion v){
+        return v.getEstado()==Vinculacion.Estado.RECHAZADA_POR_FAMILIA || v.getEstado()==Vinculacion.Estado.RESPUESTA_RECHAZADA_PENDIENTE_CIERRE && !v.isReservaVigente() && v.getFechaCierre()==null && interrupcion(v)==null;
+    }
+    private Vinculacion.Estado estadoVisible(Vinculacion v){return rechazoPortal(v)?Vinculacion.Estado.RECHAZADA_POR_FAMILIA:v.getEstado();}
     private boolean reportable(Vinculacion v){return v.isReservaVigente() && v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA && v.getFechaRespuesta()!=null && !v.getNino().isCierrePorAdopcion();}
     private InterrupcionConvivencia interrupcion(Vinculacion v){return interrupciones==null?null:interrupciones.findByVinculacionId(v.getId()).orElse(null);}
     private Map<String,Object> detalleInterrupcion(InterrupcionConvivencia i){

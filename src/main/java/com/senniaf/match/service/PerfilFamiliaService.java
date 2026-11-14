@@ -13,6 +13,7 @@ import java.util.List;
 @Service
 public class PerfilFamiliaService {
 
+    @org.springframework.beans.factory.annotation.Autowired private com.senniaf.match.repository.VinculacionRepository vinculaciones;
     private final PerfilFamiliaRepository repositorio;
     private final com.senniaf.match.repository.EventoCasoRepository auditoria;
     private final com.senniaf.match.repository.DecisionComiteRepository decisiones;
@@ -89,7 +90,7 @@ public class PerfilFamiliaService {
 
     private PerfilFamiliaResponse respuesta(PerfilFamilia p, String mensaje) {
         var respuesta=new PerfilFamiliaResponse(mensaje, p.getCodigoCaso(), p.isPerfilCompleto(),
-                p.isReevaluacionPendiente(), p.getNumeroReevaluaciones(), decisiones!=null && decisiones.existsByCodigoFamiliaAndDecision(p.getCodigoCaso(),"ACEPTADA"));
+                p.isReevaluacionPendiente(), p.getNumeroReevaluaciones(), vinculaciones!=null?vinculaciones.findByFamiliaRegistradoPorOrderByIdDesc(p.getRegistradoPor()).stream().anyMatch(v->v.isReservaVigente() && (v.getEstado()==com.senniaf.match.model.Vinculacion.Estado.PENDIENTE_RESPUESTA || v.getEstado()==com.senniaf.match.model.Vinculacion.Estado.RESPUESTA_ACEPTADA)):decisiones!=null && decisiones.existsByCodigoFamiliaAndDecision(p.getCodigoCaso(),"ACEPTADA"));
         var actividad=new java.util.ArrayList<java.util.Map<String,Object>>();
         if(p.getFechaRegistro()!=null)actividad.add(actividad("Entrevista registrada","Se recibió la información de tu hogar.",p.getFechaRegistro()));
         if(decisiones!=null)for(var d:decisiones.findByCodigoFamiliaOrderByFechaAsc(p.getCodigoCaso())) {
