@@ -42,6 +42,18 @@ La petición más reciente permite avanzar entre historias validadas localmente 
 
 **Archivos principales:** `PerfilFamiliaRequest`, `PerfilFamiliaService`, `perfil.html`, `perfiles.html`, `familia.js`, estilo compartido y `HU12PostgresIT`. **Base:** sin migración nueva; la columna ya existe. **Git:** commit local de HU12, consultable en el historial de la rama. **Azure:** no desplegada. No se alteraron fórmulas, pesos, criterios de completitud ni datos de expedientes infantiles.
 
+## HU14 — Alertas por reevaluaciones
+
+**Estado:** completada localmente. **Qué se implementó:** consulta del Comité «Reevaluaciones», derivada del mismo contador y auditoría existentes, con un aviso por familia al alcanzar tres completadas. Se muestran solicitudes y correcciones con responsable/fecha, y se distingue una solicitud pendiente del total completado. No se crea otro registro persistente de alertas.
+
+**Cómo funciona:** el Comité abre «Reevaluaciones» desde su navegación, consulta los antecedentes desplegables y puede abrir el expediente familiar. Los contadores históricos sin actuaciones detalladas se identifican expresamente sin inventar fechas. El aviso es informativo y no cambia puntuaciones, pesos, idoneidad ni activación del perfil.
+
+**Integridad:** las actualizaciones propias bloquean la fila familiar durante la transacción. Dos envíos concurrentes de una corrección pendiente solo incrementan una vez el contador y conservan la auditoría. Solicitudes sin entrevista completada y antecedentes cancelados no generan incrementos. No se introduce una operación de cancelación inexistente.
+
+**Qué se comprobó:** 19 pruebas aprobadas: cinco HTTP nuevas de HU14, cinco de HU12 y nueve de servicios familiares/reevaluación. Se cubren cero, una, dos, tres y cuatro completadas; solicitud pendiente, entrevista incompleta, antecedente cancelado sintético, contador histórico sin fechas, repetición de consultas, roles y doble envío concurrente. Chromium comprobó menú, consulta real, antecedentes, recarga y móvil 390 px sin errores ni desbordamientos. El estado vacío se revisó con una respuesta simulada de la API; el umbral y los permisos se verificaron contra PostgreSQL. Evidencias `target/verificacion-hu19/hu14-*` y `HU14-*.png`. El contador y los antecedentes se recuperaron idénticos por HTTP tras reiniciar el backend local. **Git:** commit local de HU14.
+
+**Archivos principales:** `PerfilFamiliaService`, `PerfilFamiliaRepository`, `ScoringController`, `comite.js`, `profesionales.js`, pruebas familiares ajustadas al bloqueo y `HU14PostgresIT`. **Base:** sin migración adicional. **Azure:** pendiente, sin cambios en el entorno persistente.
+
 ## Matriz de aceptación
 
 | Historia | Criterios | Estado | Evidencia |
@@ -50,5 +62,5 @@ La petición más reciente permite avanzar entre historias validadas localmente 
 | HU11 | 1–3, 5–10 | Comprobados localmente | `HU11PostgresIT`, 6 casos HTTP y carreras; navegador TS/Comité/familia; permisos SQL. |
 | HU11 | 4: reinicio | Comprobado localmente | Snapshot íntegro y recuperación HTTP de la revisión tras reinicio. |
 | HU12 | 1–10 | Comprobados localmente | `HU12PostgresIT`, 5 casos HTTP; 14 pruebas familiares existentes; recuperación tras reinicio; Chromium. |
-| HU14 | 1–10 | Pendientes de ampliación/validación | Umbral 3 y contador completado ya existentes. |
+| HU14 | 1–10 | Comprobados localmente | `HU14PostgresIT`, cinco casos HTTP y concurrencia; contador/auditoría originales; Chromium y vista móvil. |
 | HU13 | 1–11 | Pendientes de verificación específica | Permisos, bloqueo, versión y auditoría ya existentes. |

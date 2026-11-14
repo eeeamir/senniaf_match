@@ -11,7 +11,12 @@ import java.util.Map;
 @RequestMapping("/api/scoring")
 public class ScoringController {
     private final ScoringService scoring;
-    public ScoringController(ScoringService scoring) { this.scoring = scoring; }
+    private final com.senniaf.match.service.PerfilFamiliaService familias;
+    public ScoringController(ScoringService scoring) { this(scoring,null); }
+    @org.springframework.beans.factory.annotation.Autowired
+    public ScoringController(ScoringService scoring,com.senniaf.match.service.PerfilFamiliaService familias) { this.scoring = scoring;this.familias=familias; }
+    @GetMapping("/reevaluaciones")
+    public List<Map<String,Object>> reevaluaciones(@RequestHeader("X-User-Role") String rol){comite(rol);return familias.alertasReevaluaciones();}
     private void comite(String rol) {
         if (!"COMITE".equals(rol)) throw new RolNoAutorizadoException("Solo el Comité puede revisar el motor");
     }

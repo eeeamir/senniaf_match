@@ -12,6 +12,9 @@ public interface PerfilFamiliaRepository extends JpaRepository<PerfilFamilia, Lo
     Optional<PerfilFamilia> bloquear(@org.springframework.data.repository.query.Param("codigo") String codigo);
     Optional<PerfilFamilia> findByCodigoCaso(String codigoCaso);
     boolean existsByCodigoCaso(String codigoCaso);
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select p from PerfilFamilia p where p.registradoPor=:actor")
+    Optional<PerfilFamilia> bloquearPorRegistradoPor(@org.springframework.data.repository.query.Param("actor") String actor);
     Optional<PerfilFamilia> findByRegistradoPor(String cedula);
     boolean existsByRegistradoPor(String cedula);
 }

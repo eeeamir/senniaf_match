@@ -110,7 +110,7 @@ class PerfilFamiliaServiceTest {
         PerfilFamilia perfil = new PerfilFamilia();
         perfil.setCodigoCaso("FAM-001");
         perfil.setReevaluacionPendiente(true);
-        when(repo.findByRegistradoPor("8-123-456")).thenReturn(Optional.of(perfil));
+        when(repo.bloquearPorRegistradoPor("8-123-456")).thenReturn(Optional.of(perfil));
         when(repo.save(any(PerfilFamilia.class))).thenAnswer(i -> i.getArgument(0));
         PerfilFamiliaService servicio = new PerfilFamiliaService(repo, mock(DecisionComiteRepository.class));
 
@@ -134,7 +134,7 @@ class PerfilFamiliaServiceTest {
         PerfilFamilia perfil = new PerfilFamilia();
         perfil.setCodigoCaso("FAM-002");
         perfil.setReevaluacionPendiente(true);
-        when(repo.findByRegistradoPor("8-456-789")).thenReturn(Optional.of(perfil));
+        when(repo.bloquearPorRegistradoPor("8-456-789")).thenReturn(Optional.of(perfil));
         PerfilFamiliaService servicio = new PerfilFamiliaService(repo, mock(DecisionComiteRepository.class));
 
         PerfilFamiliaRequest incompleta = perfilCompleto();

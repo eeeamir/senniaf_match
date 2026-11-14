@@ -8,6 +8,7 @@ const Comite = {
     try {
       if(this.vista==='solicitudes'){await this.solicitudes();return;}
       if(this.vista==='criterios'){await this.criterios();return;}
+      if(this.vista==='reevaluaciones'){await this.reevaluaciones();return;}
       this.casos=await this.api('/api/scoring/casos');
       if(this.vista==='compatibilidad'){if(this.codigo&&this.familia)await this.analisis();else this.compatibilidad();}
       else this.inicio();
@@ -69,6 +70,18 @@ const Comite = {
       alConfirmar:motivo=>this.api(`/api/scoring/casos/${encodeURIComponent(caso.codigo)}/decisiones`,{method:'POST',body:JSON.stringify({familia:familia.codigo,decision:tipo,motivo})}),
       alGuardar:async datos=>{try{this.casos=await this.api('/api/scoring/casos');await this.analisis();const aviso=document.getElementById('estadoDecision');if(aviso)aviso.textContent=datos.mensaje||'Decisión registrada correctamente.';else this.contenido.insertAdjacentHTML('afterbegin',`<p role="status" class="mensaje exito">${limpiarHtml(datos.mensaje||'Decisión registrada correctamente.')}</p>`);}catch(e){this.contenido.insertAdjacentHTML('afterbegin',`<p role="status" class="mensaje aviso">La decisión se guardó. ${limpiarHtml(e.message)} Recarga para consultar el estado actualizado.</p>`);}}
     });
+  },
+  async reevaluaciones(){
+    const familias=await this.api('/api/scoring/reevaluaciones');
+    this.contenido.innerHTML=Profesionales.encabezado('Reevaluaciones que requieren revisión','Consulta las familias con tres o más reevaluaciones completadas y sus antecedentes.','reloj')+
+      `<section class="tarjeta"><p>${this.icono('informacion')}Este aviso es informativo. No modifica la puntuación ni desactiva el perfil familiar.</p></section>`+
+      (familias.length?familias.map(f=>`<section class="tarjeta"><div class="pro-fila-titulo"><h2>${this.icono('reloj')}${limpiarHtml(f.codigoFamilia)}</h2><span class="chip vinculacion-pendiente">${Number(f.completadas)} reevaluaciones completadas</span></div>
+      <p>Consulta los antecedentes para conocer su evolución y valorar si se necesita seguimiento adicional.</p>${f.pendiente?'<p class="ayuda">Hay una entrevista pendiente de completar; todavía no se suma al contador.</p>':''}
+      <details class="pro-seccion"><summary>${this.icono('consulta')}Consultar antecedentes</summary>
+      ${f.completadasSinFechaDetallada?`<p class="ayuda">${Number(f.completadasSinFechaDetallada)} completadas proceden de registros anteriores sin fecha detallada. Se conserva el contador sin reconstruir actuaciones.</p>`:''}
+      <ul class="familia-actividad">${f.antecedentes.map(e=>`<li><strong>${limpiarHtml(e.titulo)}</strong><p>${this.icono('persona')}${limpiarHtml(e.responsable||'Responsable no registrado')} · ${limpiarHtml(Profesionales.fecha(e.fecha))}</p><p>${limpiarHtml(e.descripcion)}</p></li>`).join('')||'<li>No hay actuaciones detalladas disponibles.</li>'}</ul></details>
+      <a class="boton secundario" href="perfiles.html?familia=${encodeURIComponent(f.codigoFamilia)}">${this.icono('carpeta')}Consultar expediente familiar</a></section>`).join(''):
+      `<section class="tarjeta"><h2>${this.icono('comprobar')}Sin alertas por reevaluaciones</h2><p>Ninguna familia registra tres reevaluaciones completadas para esta revisión.</p></section>`);
   },
   async solicitudes(){
     const expedientes=await this.api('/api/ninos?incluirInactivos=true');
