@@ -17,6 +17,13 @@ if [[ -L /srv/senniaf/current.jar && -f /srv/senniaf/current.jar ]]; then
     anterior=$(readlink -f /srv/senniaf/current.jar)
     [[ $anterior =~ ^/srv/senniaf/releases/[0-9a-f]{64}\.jar$ ]] || { echo 'Ruta anterior inesperada: revisar sin sustituirla.' >&2; exit 1; }
 fi
+# El esquema es persistente: un rollback de código no debe omitir las vinculaciones.
+esquema=$(runuser -u postgres -- psql -X -d senniaf_demo -Atqc "SELECT to_regclass('public.vinculaciones') IS NOT NULL, to_regclass('public.interrupciones_convivencia') IS NOT NULL, EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='vinculaciones' AND column_name='fecha_cierre')")
+IFS='|' read -r esquema_vinculaciones esquema_interrupciones esquema_cierre <<< "$esquema"
+compatible() {
+    python3 "$(dirname "$0")/verificar-compatibilidad.py" "$1" "$esquema_vinculaciones" "$esquema_interrupciones" "$esquema_cierre"
+}
+compatible "$artefacto" || exit 1
 # Respaldo consistente antes de la intervención; no se sustituye el volumen ni la configuración.
 "$(dirname "$0")/respaldo.sh"
 destino="/srv/senniaf/releases/$esperado.jar"
@@ -44,6 +51,10 @@ if activar "$esperado" && systemctl start senniaf.service && comprobar; then ech
 echo 'La nueva versión no está disponible. Intentando recuperar solo el JAR anterior.' >&2
 systemctl stop senniaf.service
 if [[ -n $anterior && -f $anterior ]]; then
+    if ! compatible "$anterior"; then
+        echo 'Se conserva la base y el servicio queda detenido. Publica una versión compatible; no se restauraron ni borraron datos.' >&2
+        exit 1
+    fi
     previo=$(basename "$anterior" .jar)
     if ! activar "$previo" || ! systemctl start senniaf.service || ! comprobar; then
         echo 'La recuperación requiere intervención. No se restauró ni borró la base.' >&2

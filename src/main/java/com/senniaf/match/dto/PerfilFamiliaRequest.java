@@ -97,7 +97,7 @@ public class PerfilFamiliaRequest {
      * propósito: no se presenta como catálogo ni filtro de
      * características (principio del rediseño humanizado del Sprint 0).
      */
-    @jakarta.validation.constraints.Size(max=2000)
+    @jakarta.validation.constraints.Size(max=2000,message="Los apoyos pueden tener hasta 2000 caracteres")
     private String continuidadCultural;
 
     public TipoFamilia getTipoFamilia() {

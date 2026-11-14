@@ -65,7 +65,7 @@ public class PerfilFamiliaService {
     @Transactional
     public PerfilFamiliaResponse actualizarPropio(PerfilFamiliaRequest request, String cedula) {
         request.validarCoherencia();
-        PerfilFamilia perfil = repositorio.findByRegistradoPor(cedula)
+        PerfilFamilia perfil = repositorio.bloquearPorRegistradoPor(cedula)
                 .orElseThrow(() -> new IllegalArgumentException("Todavía no existe una entrevista para modificar"));
         var antes=datosAuditoria(perfil);
         copiarDatos(perfil, request);
@@ -94,7 +94,7 @@ public class PerfilFamiliaService {
         if(p.getFechaRegistro()!=null)actividad.add(actividad("Entrevista registrada","Se recibió la información de tu hogar.",p.getFechaRegistro()));
         if(decisiones!=null)for(var d:decisiones.findByCodigoFamiliaOrderByFechaAsc(p.getCodigoCaso())) {
             if(d.getFecha()==null)continue;
-            if("ACEPTADA".equals(d.getDecision()))actividad.add(actividad("Propuesta aceptada","El equipo SENNIAF te orientará sobre los siguientes pasos.",d.getFecha()));
+            if("ACEPTADA".equals(d.getDecision()))actividad.add(actividad("Propuesta enviada por el Comité","Consulta Mi vinculación para conocer el estado y registrar tu respuesta.",d.getFecha()));
             else if("REEVALUACION".equals(d.getDecision()))actividad.add(actividad("Revisión de entrevista solicitada","Se solicitó ampliar la información de la entrevista.",d.getFecha()));
         }
         if(auditoria!=null)for(var e:auditoria.findByCodigoCasoOrderByFechaAsc(p.getCodigoCaso())) {
@@ -112,6 +112,37 @@ public class PerfilFamiliaService {
         return respuesta;
     }
 
+    /** Vista institucional derivada del contador existente y de sus actuaciones, sin crear avisos persistentes duplicados. */
+    @Transactional(readOnly=true)
+    public java.util.List<java.util.Map<String,Object>> alertasReevaluaciones(){
+        return repositorio.findAll().stream().filter(p->p.getNumeroReevaluaciones()>=3)
+                .sorted(java.util.Comparator.comparing(PerfilFamilia::getCodigoCaso)).map(p->{
+            var antecedentes=new java.util.ArrayList<java.util.Map<String,Object>>();
+            for(var d:decisiones.findByCodigoFamiliaOrderByFechaAsc(p.getCodigoCaso()))if("REEVALUACION".equals(d.getDecision())){
+                var e=new java.util.LinkedHashMap<String,Object>();e.put("titulo","Reevaluación solicitada");e.put("fecha",fechaEvento(d.getFecha()));e.put("responsable",d.getFuncionario());e.put("descripcion",d.getMotivo());e.put("completada",false);antecedentes.add(e);
+            }
+            int completadasDocumentadas=0;
+            for(var e:auditoria.findByCodigoCasoOrderByFechaAsc(p.getCodigoCaso())){
+                if(!"CORRECCION_ENTREVISTA".equals(e.getAccion()))continue;
+                var detalle=detalleCorreccion(e.getDescripcion());
+                if(!"REEVALUACION".equals(detalle.path("tipo").asText()))continue;
+                var contador=detalle.path("cambios").path("numeroReevaluaciones");
+                boolean completa=contador.path("anterior").isNumber() && contador.path("nuevo").asInt(-1)==contador.path("anterior").asInt()+1
+                        && detalle.path("cambios").path("reevaluacionPendiente").path("nuevo").isBoolean()
+                        && !detalle.path("cambios").path("reevaluacionPendiente").path("nuevo").asBoolean();
+                if(completa)completadasDocumentadas++;
+                var h=new java.util.LinkedHashMap<String,Object>();h.put("titulo",completa?"Reevaluación completada":"Corrección recibida; pendiente de completar");h.put("fecha",fechaEvento(e.getFecha()));h.put("responsable",e.getActor());h.put("descripcion",completa?"Se recibió una entrevista completa para la revisión solicitada.":"Esta actuación no acredita una reevaluación completada.");h.put("completada",completa);antecedentes.add(h);
+            }
+            antecedentes.sort(java.util.Comparator.comparing(h->h.get("fecha")==null?"":h.get("fecha").toString()));
+            var r=new java.util.LinkedHashMap<String,Object>();r.put("codigoFamilia",p.getCodigoCaso());r.put("completadas",p.getNumeroReevaluaciones());r.put("pendiente",p.isReevaluacionPendiente());r.put("umbral",3);r.put("antecedentes",antecedentes);
+            r.put("completadasSinFechaDetallada",Math.max(0,p.getNumeroReevaluaciones()-completadasDocumentadas));return (java.util.Map<String,Object>)r;
+        }).toList();
+    }
+    private Object fechaEvento(LocalDateTime fecha){return fecha==null?null:fecha.atZone(java.time.ZoneId.systemDefault()).toOffsetDateTime();}
+    private com.fasterxml.jackson.databind.JsonNode detalleCorreccion(String descripcion){
+        try{var n=descripcion==null?null:new com.fasterxml.jackson.databind.ObjectMapper().readTree(descripcion);return n==null?com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode():n;}
+        catch(com.fasterxml.jackson.core.JsonProcessingException error){return com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode();}
+    }
     private String tituloCorreccion(String descripcion) {
         try {
             var datos=new com.fasterxml.jackson.databind.ObjectMapper().readTree(descripcion);
@@ -154,9 +185,9 @@ public class PerfilFamiliaService {
         perfil.setCondicionesPuedeAcompanarHoy(request.getCondicionesPuedeAcompanarHoy());
         perfil.setCondicionesConApoyo(request.getCondicionesConApoyo());
         perfil.setNotaCondicionesSalud(request.getNotaCondicionesSalud());
-        // Sprint 8: la sección está retirada; una actualización no borra ni reemplaza información histórica.
-        if (perfil.getId() == null && request.getContinuidadCultural() != null)
-            perfil.setContinuidadCultural(request.getContinuidadCultural());
+        // Los clientes anteriores que omiten esta sección conservan el contenido histórico.
+        if (request.getContinuidadCultural()!=null)
+            perfil.setContinuidadCultural(request.getContinuidadCultural().strip());
     }
 
     /** Perfil que la familia ya registró con su cédula, si existe. */

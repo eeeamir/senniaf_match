@@ -11,6 +11,10 @@ import java.util.*;
 /** Motor académico y explicable. Una puntuación jamás constituye una asignación legal. */
 @Service
 public class ScoringService {
+    @org.springframework.beans.factory.annotation.Autowired
+    private VinculacionService vinculaciones;
+    @org.springframework.beans.factory.annotation.Autowired
+    private VinculacionRepository vinculacionesRepo;
     private final PerfilNinoRepository ninos;
     private final PerfilFamiliaRepository familias;
     private final DecisionComiteRepository decisiones;
@@ -86,7 +90,7 @@ public class ScoringService {
     }
 
     private Map<String, Object> caso(PerfilNino n, List<PerfilFamilia> disponibles, PesosScoring p) {
-        boolean aceptada = decisiones.existsByCodigoNinoAndDecision(n.getCodigoCaso(), "ACEPTADA");
+        boolean aceptada = ninoReservado(n.getCodigoCaso());
         List<Map<String, Object>> ranking = (aceptada ? java.util.stream.Stream.<PerfilFamilia>empty() : disponibles.stream()).map(f -> candidato(n, f, p))
                 .sorted(Comparator.<Map<String, Object>>comparingInt(m -> (int)m.get("puntaje"))
                         .reversed().thenComparing(m -> (String)m.get("codigo"))).toList();
@@ -106,9 +110,17 @@ public class ScoringService {
         return result;
     }
 
+    private boolean ninoReservado(String codigo) {
+        return vinculacionesRepo == null ? decisiones.existsByCodigoNinoAndDecision(codigo,"ACEPTADA")
+                : vinculacionesRepo.existsByNinoCodigoCasoAndReservaVigenteTrue(codigo);
+    }
+    private boolean familiaReservada(String codigo) {
+        return vinculacionesRepo == null ? decisiones.existsByCodigoFamiliaAndDecision(codigo,"ACEPTADA")
+                : vinculacionesRepo.existsByFamiliaCodigoCasoAndReservaVigenteTrue(codigo);
+    }
     private boolean familiaDisponible(PerfilFamilia f) {
         return f.isPerfilCompleto() && !f.isReevaluacionPendiente()
-                && !decisiones.existsByCodigoFamiliaAndDecision(f.getCodigoCaso(), "ACEPTADA");
+                && !familiaReservada(f.getCodigoCaso());
     }
 
     /**
@@ -220,9 +232,9 @@ public class ScoringService {
                 .orElseThrow(() -> new IllegalArgumentException("Caso familiar inexistente"));
         if (!n.isPerfilCompleto() || n.isBajaLogica() || n.isCierrePorAdopcion() || !f.isPerfilCompleto() || f.isReevaluacionPendiente())
             throw new IllegalStateException("Solo se revisan casos completos y sin reevaluación pendiente");
-        if (decisiones.existsByCodigoNinoAndDecision(codigoNino, "ACEPTADA"))
+        if (ninoReservado(codigoNino))
             throw new IllegalStateException("Este caso ya tiene una aceptación registrada");
-        if (decisiones.existsByCodigoFamiliaAndDecision(codigoFamilia, "ACEPTADA"))
+        if (familiaReservada(codigoFamilia))
             throw new IllegalStateException("La familia ya tiene una propuesta aceptada; no participa en nuevas propuestas");
         PesosScoring p = pesos();
         DecisionComite d = new DecisionComite();
@@ -241,13 +253,14 @@ public class ScoringService {
         contexto.put("edadMaximaFamilia",f.getEdadMaximaAceptada()); contexto.put("version",p.getVersion());
         d.setContextoScoring(codificar(contexto));
         decisiones.save(d);
+        if (decision.equals("ACEPTADA")) vinculaciones.crear(d,n,f);
         if (decision.equals("REEVALUACION")) {
             // La solicitud se audita ahora, pero solo cuenta cuando la familia
             // envía una entrevista corregida completa.
             f.setReevaluacionPendiente(true);
             familias.save(f);
         }
-        return Map.of("mensaje", "Decisión guardada con trazabilidad", "decision", decision,
+        return Map.of("mensaje", decision.equals("ACEPTADA") ? "La propuesta se envió a la familia" : "La decisión quedó registrada", "decision", decision,
                 "numeroReevaluaciones", f.getNumeroReevaluaciones(),
                 "alertaRevisionTecnica", f.getNumeroReevaluaciones() >= 3);
     }

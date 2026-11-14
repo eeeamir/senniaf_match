@@ -2,6 +2,9 @@
 const Profesionales = {
   icono(nombre) {
     const trazos = {
+      vinculacion:'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2',
+      consulta:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12 M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+      advertencia:'m12 3 10 18H2z M12 9v5 M12 17h.01',
       carpeta:'M3 7h6l2 2h10v11H3z M3 7V4h6l2 3', nuevo:'M12 5v14M5 12h14',
       inicio:'m3 11 9-8 9 8 M5 10v11h5v-7h4v7h5V10',
       solicitudes:'M5 4h14v17H5z M9 2h6v4H9z M8 11h8M8 15h6',
@@ -16,7 +19,7 @@ const Profesionales = {
       psicologia:'M12 3v18 M12 5C7-1 3 5 5 8c-5 1-4 7 0 8-1 5 5 7 7 3 M12 5c5-6 9 0 7 3 5 1 4 7 0 8 1 5-5 7-7 3',
       escuela:'m2 9 10-5 10 5-10 5z M6 12v5c4 3 8 3 12 0v-5 M22 9v7',
       calendario:'M5 5h14v16H5z M8 2v6M16 2v6M5 10h14', flecha:'M4 12h16M15 7l5 5-5 5',
-      comprobar:'m5 12 4 4L19 6', cerrar:'m6 6 12 12M6 18 12-12', criterios:'M4 6h16v15H4z M9 6V3h6v3',
+      comprobar:'m5 12 4 4L19 6', cerrar:'M6 6l12 12M6 18l12-12', criterios:'M4 6h16v15H4z M9 6V3h6v3',
       informacion:'M12 11v6 M12 7h.01 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',
       credencial:'M4 5h16v16H4z M9 5V2h6v3 M10 11a2 2 0 1 0-4 0 2 2 0 0 0 4 0 M5 17c0-4 6-4 6 0 M14 10h3M14 14h3',
       persona:'M5 21v-3a7 7 0 0 1 14 0v3 M16 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0'
@@ -60,16 +63,32 @@ const Profesionales = {
     if(!['TRABAJADOR_SOCIAL','PSICOLOGO','COMITE','FAMILIA'].includes(s?.rol)||document.getElementById('navegacionProfesional'))return;
     document.body.classList.add('profesional');
     const opciones=s.rol==='FAMILIA'
-      ? [['inicio','match.html','inicio','Inicio'],['entrevista','match.html?vista=entrevista','informe','Mi entrevista'],['propuesta','match.html?vista=propuesta','personas','Propuesta de vinculación'],['historial','match.html?vista=historial','reloj','Historial']]
+      ? [['inicio','match.html','inicio','Inicio'],['entrevista','match.html?vista=entrevista','informe','Mi entrevista'],['propuesta','match.html?vista=propuesta','vinculacion','Mi vinculación'],['historial','match.html?vista=historial','reloj','Historial']]
       : s.rol==='COMITE'
-      ? [['inicio','match.html','inicio','Inicio'],['compatibilidad','match.html?vista=compatibilidad','salud','Compatibilidad'],['solicitudes','match.html?vista=solicitudes','solicitudes','Solicitudes'],['criterios','match.html?vista=criterios','criterios','Criterios']]
+      ? [['inicio','match.html','inicio','Inicio'],['compatibilidad','match.html?vista=compatibilidad','salud','Compatibilidad'],['solicitudes','match.html?vista=solicitudes','solicitudes','Solicitudes'],['criterios','match.html?vista=criterios','criterios','Criterios'],['reevaluaciones','match.html?vista=reevaluaciones','reloj','Reevaluaciones']]
       : [['inicio','funcionario.html','inicio','Inicio'],['expedientes','perfiles.html','carpeta','Mis expedientes'],...(s.rol==='TRABAJADOR_SOCIAL'?[['registro','perfil.html','nuevo','Registrar perfil']]:[])];
+    if(s.rol!=='FAMILIA')opciones.push(['vinculaciones','vinculaciones.html','vinculacion','Vinculaciones']);
     const nav=document.createElement('aside');nav.className='pro-sidebar';nav.id='navegacionProfesional';
     nav.innerHTML=`<nav aria-label="Navegación principal">${opciones.map(([clave,href,icono,texto])=>`<a href="${href}" ${seleccionado===clave?'aria-current="page"':''}>${this.icono(icono)}<span>${texto}</span></a>`).join('')}</nav><div class="pro-sidebar-pie"><button type="button" id="proSalir">${this.icono('salir')}Cerrar sesión</button></div>`;
     document.body.prepend(nav);
+    if(s.rol!=='FAMILIA') {
+      const actualizarVinculaciones=async()=>{
+        try {
+          const respuesta=await fetch('/api/vinculaciones',{headers:Sesion.encabezados(),cache:'no-store'});
+          if(!respuesta.ok)return;
+          const lista=await respuesta.json(),pendientes=lista.filter(v=>v.interrupcionPendiente).length,respondidas=lista.filter(v=>v.estado!=='PENDIENTE_RESPUESTA').length;
+          const enlace=nav.querySelector('a[href="vinculaciones.html"]');
+          enlace.title=pendientes?`${pendientes} interrupciones pendientes de revisión`:respondidas?`${respondidas} vinculaciones con respuesta familiar`:'Vinculaciones';
+          let aviso=enlace.querySelector('.pro-vinculaciones-aviso');
+          if(!aviso){aviso=document.createElement('small');aviso.className='pro-vinculaciones-aviso';aviso.setAttribute('aria-hidden','true');enlace.append(aviso);}
+          aviso.hidden=!(pendientes||respondidas);aviso.textContent=pendientes||respondidas;
+        }catch(error){ /* La navegación sigue disponible si falla la actualización. */ }
+      };
+      actualizarVinculaciones();setInterval(()=>{if(!document.hidden)actualizarVinculaciones();},15000);
+    }
     const marca=document.querySelector('.topbar-marca');marca.href=['COMITE','FAMILIA'].includes(s.rol)?'match.html':'funcionario.html';marca.querySelector('img').alt='SENNIAF Match';
     const rol=s.rol==='FAMILIA'?'Familia adoptante':s.rol==='COMITE'?'Comité de asignación familiar':ROLES[s.rol];
-    document.getElementById('usuario').innerHTML=`<span class="chip">${this.icono('persona')}${limpiarHtml(rol)}</span>`;
+    document.getElementById('usuario').innerHTML=`<span class="chip">${this.icono('persona')}<span class="pro-rol-texto">${limpiarHtml(rol)}</span></span>`;
     const abrir=document.createElement('button');abrir.type='button';abrir.className='pro-menu';abrir.setAttribute('aria-label','Abrir navegación');abrir.setAttribute('aria-controls',nav.id);abrir.setAttribute('aria-expanded','false');abrir.innerHTML=this.icono('menu');
     document.querySelector('.topbar-in').prepend(abrir);
     abrir.addEventListener('click',()=>{const activo=document.body.classList.toggle('pro-nav-abierta');abrir.setAttribute('aria-expanded',String(activo));});
@@ -107,9 +126,9 @@ const Profesionales = {
     d.innerHTML=`<h2 id="tituloConfirmacion">${limpiarHtml(titulo)}</h2><p>${limpiarHtml(texto)}</p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="button" class="boton" data-confirmar>Continuar</button></div>`;
     document.body.append(d);d.addEventListener('close',()=>d.remove(),{once:true});d.querySelector('[data-cancelar]').addEventListener('click',()=>d.close());d.querySelector('[data-confirmar]').addEventListener('click',()=>{d.close();accion();});d.showModal();
   },
-  justificar({titulo,contexto,opciones,confirmacion,alConfirmar,alGuardar,instruccion='Selecciona un motivo',textoRevisar='Revisar y confirmar',tituloConfirmacion='Confirmar acción',textoConfirmar='Confirmar',ayuda='Puedes editar completamente la justificación. Para «Otro», escribe tu propia explicación.'}) {
+  justificar({titulo,contexto,opciones,confirmacion,alConfirmar,alGuardar,maximo=1850,instruccion='Selecciona un motivo',textoRevisar='Revisar y confirmar',tituloConfirmacion='Confirmar acción',textoConfirmar='Confirmar',ayuda='Puedes editar completamente la justificación. Para «Otro», escribe tu propia explicación.'}) {
     const d=document.createElement('dialog');d.className='pro-dialogo pro-dialogo-decision';d.setAttribute('aria-label',titulo);
-    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('solicitudes')}</span><h2>${limpiarHtml(titulo)}</h2></div><p class="pro-modal-contexto">${limpiarHtml(contexto)}</p><form><fieldset class="pro-motivos"><legend>${limpiarHtml(instruccion)}</legend>${opciones.map(([valor,nombre])=>`<label class="pro-motivo"><input type="radio" name="motivoDecision" value="${limpiarHtml(valor)}" required><span>${limpiarHtml(nombre)}</span></label>`).join('')}</fieldset><label>Justificación<textarea name="justificacion" required minlength="10" maxlength="1850" rows="5" placeholder="Selecciona un motivo para ver la sugerencia editable."></textarea></label><p class="ayuda">${limpiarHtml(ayuda)}</p><p data-error role="alert"></p><div class="pro-acciones"><button class="boton secundario" type="button" data-cancelar>Cancelar</button><button class="boton" type="submit">${limpiarHtml(textoRevisar)}</button></div></form>`;
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('solicitudes')}</span><h2>${limpiarHtml(titulo)}</h2></div><p class="pro-modal-contexto">${limpiarHtml(contexto)}</p><form><fieldset class="pro-motivos"><legend>${limpiarHtml(instruccion)}</legend>${opciones.map(([valor,nombre])=>`<label class="pro-motivo"><input type="radio" name="motivoDecision" value="${limpiarHtml(valor)}" required><span>${limpiarHtml(nombre)}</span></label>`).join('')}</fieldset><label>Justificación<textarea name="justificacion" required minlength="10" maxlength="${maximo}" rows="5" placeholder="Selecciona un motivo para ver la sugerencia editable."></textarea></label><p class="ayuda">${limpiarHtml(ayuda)}</p><p data-error role="alert"></p><div class="pro-acciones"><button class="boton secundario" type="button" data-cancelar>Cancelar</button><button class="boton" type="submit">${limpiarHtml(textoRevisar)}</button></div></form>`;
     document.body.append(d);
     const form=d.querySelector('form'),texto=d.querySelector('textarea'),boton=d.querySelector('[type=submit]');
     CamposFormulario.iniciar(form);

@@ -85,14 +85,12 @@ class PerfilFamiliaServiceTest {
     }
 
     @Test
-    void marcaComoIncompletoUnPerfilConRangoDeEdadInconsistente() {
+    void rechazaUnPerfilConRangoDeEdadInconsistente() {
         PerfilFamiliaRequest request = perfilCompleto();
         request.setEdadMinimaAceptada(10);
         request.setEdadMaximaAceptada(5);
 
-        PerfilFamiliaResponse response = service.registrarPerfil(request, "familia-1");
-
-        assertFalse(response.isPerfilCompleto());
+        assertThrows(IllegalArgumentException.class, () -> service.registrarPerfil(request, "familia-1"));
     }
 
     @Test
@@ -112,7 +110,7 @@ class PerfilFamiliaServiceTest {
         PerfilFamilia perfil = new PerfilFamilia();
         perfil.setCodigoCaso("FAM-001");
         perfil.setReevaluacionPendiente(true);
-        when(repo.findByRegistradoPor("8-123-456")).thenReturn(Optional.of(perfil));
+        when(repo.bloquearPorRegistradoPor("8-123-456")).thenReturn(Optional.of(perfil));
         when(repo.save(any(PerfilFamilia.class))).thenAnswer(i -> i.getArgument(0));
         PerfilFamiliaService servicio = new PerfilFamiliaService(repo, mock(DecisionComiteRepository.class));
 
@@ -136,17 +134,17 @@ class PerfilFamiliaServiceTest {
         PerfilFamilia perfil = new PerfilFamilia();
         perfil.setCodigoCaso("FAM-002");
         perfil.setReevaluacionPendiente(true);
-        when(repo.findByRegistradoPor("8-456-789")).thenReturn(Optional.of(perfil));
+        when(repo.bloquearPorRegistradoPor("8-456-789")).thenReturn(Optional.of(perfil));
         PerfilFamiliaService servicio = new PerfilFamiliaService(repo, mock(DecisionComiteRepository.class));
 
         PerfilFamiliaRequest incompleta = perfilCompleto();
         incompleta.setEdadMinimaAceptada(12);
         incompleta.setEdadMaximaAceptada(7);
 
-        PerfilFamiliaResponse respuesta = servicio.actualizarPropio(incompleta, "8-456-789");
-        assertEquals(0, respuesta.getNumeroReevaluaciones());
-        assertTrue(respuesta.isReevaluacionPendiente());
-        assertFalse(respuesta.isPerfilCompleto());
+        assertThrows(IllegalArgumentException.class, () -> servicio.actualizarPropio(incompleta, "8-456-789"));
+        assertEquals(0, perfil.getNumeroReevaluaciones());
+        assertTrue(perfil.isReevaluacionPendiente());
+        verify(repo, never()).save(any());
     }
 
     @Test

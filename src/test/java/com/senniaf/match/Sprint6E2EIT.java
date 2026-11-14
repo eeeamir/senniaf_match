@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.senniaf.match.model.PerfilNino;
 import com.senniaf.match.repository.PerfilNinoRepository;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,15 +20,24 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.*;
 
 /** Pruebas HTTP reales contra Spring Boot y PostgreSQL; ejecutar mvn verify -Pe2e. */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties={
+        "senniaf.demo.habilitado=true", "senniaf.auth.codigo-demo=true", "senniaf.auth.registro-publico=true",
+        "senniaf.correo.habilitado=false", "senniaf.demo.asignacion-automatica=false"})
+@EnabledIfEnvironmentVariable(named="HU19_TEST_DB_URL",matches="jdbc:postgresql://127\\.0\\.0\\.1:[0-9]+/hu19_[a-z_]+")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class Sprint6E2EIT {
+    @DynamicPropertySource static void configurar(DynamicPropertyRegistry r){
+        r.add("spring.datasource.url",()->System.getenv("HU19_TEST_DB_URL"));
+        r.add("spring.datasource.username",()->System.getenv().getOrDefault("HU19_TEST_DB_USER","hu19_test"));
+        r.add("spring.datasource.password",()->System.getenv().getOrDefault("HU19_TEST_DB_PASSWORD",""));
+        r.add("spring.jpa.hibernate.ddl-auto",()->"validate");
+    }
     @LocalServerPort int port;
     @Autowired TestRestTemplate cliente;
     @Autowired PerfilNinoRepository repoNinos;
     @Autowired ObjectMapper mapper;
-    @Value("${SENNIAF_DEMO_PASSWORD:Cambio123!}") String passwordDemo;
+    @Value("${SENNIAF_DEMO_PASSWORD:ClaveSoloPruebas-HU19-2026}") String passwordDemo;
 
     private String comite, profesional, psicologo, familia, cedula, nino, familiaCaso;
     private final Map<String,Object> entrevista = new LinkedHashMap<>();
@@ -100,7 +112,9 @@ assertTrue(json(listado).toString().contains(nino), listado.getBody());
         Map<String,Object> editado = new LinkedHashMap<>(perfilInfantil);
         editado.put("necesidadesApoyo", "Necesita acompañamiento escolar y seguimiento respiratorio");
         assertEquals(200, req("/api/ninos/" + nino, HttpMethod.PUT, profesional, editado).getStatusCode().value());
-        assertEquals(2, json(req("/api/ninos/" + nino + "/auditoria", HttpMethod.GET, profesional, null)).size());
+        JsonNode historial=json(req("/api/ninos/" + nino + "/auditoria", HttpMethod.GET, profesional, null));
+        assertTrue(java.util.stream.StreamSupport.stream(historial.spliterator(),false).anyMatch(e->"CREACION".equals(e.path("accion").asText())));
+        assertTrue(java.util.stream.StreamSupport.stream(historial.spliterator(),false).anyMatch(e->"EDICION".equals(e.path("accion").asText())));
     }
 
     @Test @Order(3)
@@ -214,4 +228,21 @@ assertTrue(rankingRestaurado.toString().contains(familiaCaso));
         assertEquals(403, req("/api/familias/mi-perfil", HttpMethod.GET, comite, null)
                 .getStatusCode().value(), "El Comité no consulta entrevistas de familias por este endpoint");
     }
+    @Test @Order(10)
+    void e2e10EvaluacionPsicologicaVersionadaConPermisos(){
+        PerfilNino asignado=new PerfilNino();asignado.setCodigoCaso("PS-"+UUID.randomUUID().toString().substring(0,8));
+        asignado.setTrabajadorSocialAsignado("TS-001");asignado.setPsicologoAsignado("PS-014");
+        asignado.setRegistradoPor("TS-001");repoNinos.saveAndFlush(asignado);
+        String ruta="/api/ninos/"+asignado.getCodigoCaso()+"/evaluaciones-psicologicas";
+        var informe=Map.of("evaluacion","Valoración sintética del contexto emocional", "observaciones","Observaciones sintéticas para validar el historial", "recomendaciones","Acompañamiento institucional según valoración", "sinDiagnostico",true);
+        assertEquals(403,req(ruta,HttpMethod.POST,profesional,informe).getStatusCode().value());
+        var creado=req(ruta,HttpMethod.POST,psicologo,informe);assertEquals(201,creado.getStatusCode().value(),creado.getBody());
+        long id=json(creado).path("id").asLong();
+        var correccion=new LinkedHashMap<String,Object>(informe);correccion.put("motivoCorreccion","Se amplía la valoración sintética registrada");correccion.put("observaciones","Se amplían observaciones conservando la versión anterior");
+        var actualizado=req(ruta+"/"+id,HttpMethod.PUT,psicologo,correccion);assertEquals(200,actualizado.getStatusCode().value(),actualizado.getBody());
+        JsonNode versiones=json(req(ruta,HttpMethod.GET,profesional,null));assertEquals(2,versiones.size());
+        assertEquals(1,java.util.stream.StreamSupport.stream(versiones.spliterator(),false).filter(e->e.path("vigente").asBoolean()).count());
+        assertEquals(403,req(ruta,HttpMethod.GET,familia,null).getStatusCode().value());
+    }
+
 }

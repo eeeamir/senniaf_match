@@ -95,3 +95,49 @@ Antes de la 010 se generó `/var/backups/senniaf/20261111T031732Z.rY1Ae4.dump`, 
 La aplicación sigue usando PostgreSQL local y la misma base. Los datos residen en `/var/lib/postgresql/16/main`, sobre el disco administrado persistente Standard SSD LRS de la VM; no se cambió de base ni se reinició PostgreSQL. La lectura de integridad anterior y posterior conserva conteos y SHA-256 de las 16 tablas de datos durables (excluye `sesiones_acceso`), descontando únicamente las dos columnas nuevas: 11 cuentas, 6 expedientes infantiles, 3 entrevistas familiares, 7 evaluaciones psicológicas, 19 entradas de auditoría y una solicitud pendiente. No se crearon cuentas ni registros de demostración durante esta publicación.
 
 En esta demostración se habilitó expresamente `SENNIAF_DEMO_ASIGNACION_AUTOMATICA=true`, conservando una copia privada de la configuración anterior. Solo afecta a nuevas altas y distribuye psicología según la carga de casos; no reasigna expedientes anteriores ni representa una política institucional. No se cambiaron credenciales ni opciones de seguridad. Las credenciales de cuentas de demostración permanecen fuera del repositorio.
+
+## Revisión integral de HU19 — 13 de noviembre de 2026
+
+La inspección administrativa de solo lectura confirmó PostgreSQL **16.15**, Java **17.0.21**, base persistente `senniaf_demo` y datos en `/var/lib/postgresql/16/main`, sobre el disco de la VM. La migración 011 está representada por la columna `unidad_edad`; **012 todavía no está aplicada**. El JAR activo no contiene HU19 y `/vinculaciones.html` devuelve 404. El SHA-256 del JAR en ejecución es `7a06feedf3165f746d69cb12afec861d3b0c2ebecd4dd4b83c6728d58c35e033`. No contiene metadatos de commit: cuatro recursos web coinciden exactamente con `67db4fa`, pero esa coincidencia no certifica todo el binario.
+
+No existe una rama que despliegue automáticamente: el workflow remoto actual solo prueba cambios de `main`; Azure recibe un JAR mediante el procedimiento manual anterior. La ampliación local del mismo workflow valida también `sprint7-desarrollo`, prepara un esquema aislado con PostgreSQL 16 y ejecuta las suites unitarias y HTTP. Hasta publicarla, no está activa en GitHub. No añadir datos de pruebas a la base persistente para activar HU19.
+
+Antes de desplegar HU19, preparar una intervención autorizada:
+
+1. Publicar y revisar el commit de la rama de trabajo. Empaquetar con Java 17, conservar el SHA-256 y comprobar los metadatos. En una copia sin cambios pendientes:
+
+   ```bash
+   mvn -B package -DskipTests \
+     -Dsenniaf.artifact-name=senniaf-match-release-AAAAMMDD \
+     -Dsenniaf.commit="$(git rev-parse HEAD)" \
+     -Dsenniaf.branch="$(git branch --show-current)" \
+     -Dsenniaf.worktree=limpio
+   ```
+
+   Marcar `limpio` solo después de comprobar `git status`, incluidos archivos nuevos. Las pruebas deben haber pasado antes. `META-INF/build-info.properties` registra commit, rama y condición del árbol; el artefacto con cambios locales debe marcarse `modificado`, nunca atribuirse a un commit limpio.
+2. Actualizar expresamente **el actualizador existente y su nuevo auxiliar** `verificar-compatibilidad.py` en `/usr/local/lib/senniaf/`, con revisión del operador. No se han copiado ni instalado en Azure durante esta auditoría. El auxiliar usa solo Python estándar, ya disponible. Sin él, el actualizador nuevo cancela antes de tocar el servicio.
+3. Generar un respaldo nuevo mediante el procedimiento existente, comprobar SHA y lectura completa, y acordar la recuperación. La lectura correcta de un respaldo anterior no garantiza que incluya escrituras posteriores. No restaurar sobre la base activa automáticamente.
+4. Detener el backend anterior durante la conversión: no permitir nuevas decisiones del Comité entre migración y activación del JAR. Revisar conflictos de aceptaciones y ejecutar manualmente 012 con `ON_ERROR_STOP=1`, `base_autorizada` y `confirmacion=CREAR_VINCULACIONES_SIN_BORRAR`, usando el propietario del esquema. Conservar sus permisos a `senniaf_app`; no cambiar credenciales. No ejecutar el esquema 001 sobre esta base.
+5. Usar el mismo `actualizar.sh` con el JAR y SHA revisados. El nuevo precontrol rechaza HU19 sin su tabla y rechaza un JAR anterior si la tabla ya existe. No migra el esquema por su cuenta.
+6. Si falla el arranque, solo recuperar automáticamente un JAR compatible con vinculaciones. Si el anterior es legado, **el servicio queda detenido**, preservando la base para intervención del operador. Aunque 012 sea aditiva, el JAR legado podría aceptar propuestas sin crear vinculaciones: no es una recuperación funcional segura. La comprobación cubre esta incompatibilidad de HU19; las futuras migraciones deben revisar también sus requisitos de recuperación.
+7. Verificar HTTPS, acceso autenticado de los cuatro roles, respuestas familiares, alcance profesional, auditoría y persistencia. Contrastar la huella remota con el artefacto aprobado y leer sus metadatos de compilación sin imprimir el entorno privado.
+
+Ninguno de estos pasos operativos se ha aplicado durante la revisión. La inspección de la VM se realizó mediante Run Command de Azure porque SSH agotaba el tiempo de conexión; no se abrió SSH a Internet ni se cambiaron reglas de red.
+
+
+## Sprint 8 integrado — preparación local, sin publicación
+
+La implementación posterior validó HU19, HU11, HU12, HU14 y HU13 en orden, con commits locales separados. La petición vigente permitió continuar el desarrollo local sin esperar a Azure. Esto sustituye el bloqueo para desarrollar HU11 indicado en la auditoría histórica; no autoriza cambios en el servidor. La consulta pública final sigue mostrando raíz 200 y `/vinculaciones.html` 404. No se ejecutaron migraciones, reinicios ni despliegues remotos.
+
+La entrega funcional probada corresponde al commit **9d6b06d** de `sprint7-desarrollo`, con 273 pruebas Java y ocho del actualizador aprobadas. Artefacto local `target/senniaf-match-sprint8-validacion-9d6b06d.jar`, SHA-256 **bd9fe9382da347a9b5bb0efa44aa489f14808f9ba37e0b931d685391c8690cec**. Sus metadatos registran commit, rama y árbol limpio. Los cambios posteriores de cierre son documentación; cualquier cambio de código requiere una nueva validación y artefacto identificado. Ver [resultados](../../docs/SPRINT8_RESULTADOS.md) y [matriz](../../docs/SPRINT8_MATRIZ_ACEPTACION.md).
+
+Para una intervención futura autorizada, ampliar el procedimiento anterior:
+
+1. Revisar/publicar los commits y confirmar la versión exacta del JAR y su SHA. Contrastar Java 17, PostgreSQL 16 y el esquema real antes de actuar. El artefacto contiene HU11 y requiere 012 **y 013**; el control local `python3 deploy/azure/verificar-compatibilidad.py archivo.jar t t` comprueba esa etapa, pero no sustituye la validación del esquema.
+2. Instalar conjuntamente las versiones revisadas de `actualizar.sh` y `verificar-compatibilidad.py`; el auxiliar debe incluir el control de interrupciones. El script consulta ambas tablas y comprueba también la compatibilidad del candidato de recuperación. No aplicar únicamente una de las dos piezas.
+3. Generar y verificar un respaldo nuevo de la base persistente con el procedimiento existente, conservando copia privada externa, SHA y lectura completa. Conservar el JAR anterior sin alterarlo. Acordar una recuperación compatible antes de convertir el esquema.
+4. Detener el backend anterior para impedir decisiones durante la conversión. Aplicar manualmente 012 con `base_autorizada` y `confirmacion=CREAR_VINCULACIONES_SIN_BORRAR`; analizar cualquier conflicto sin borrar antecedentes. Después aplicar `013-interrupciones-convivencia.sql` con `base_autorizada` y `confirmacion=AGREGAR_INTERRUPCIONES_SIN_BORRAR`, usando `ON_ERROR_STOP=1` y el propietario del esquema. Conservar las credenciales y permisos de `senniaf_app`. Nunca ejecutar 001 ni restaurar una base de desarrollo sobre el destino persistente.
+5. Publicar el JAR revisado mediante el actualizador existente, sin carga de datos sintéticos. Si no hay un JAR de recuperación compatible con las dos migraciones, conservar el servicio detenido para intervención del operador ante un fallo. No volver a un JAR de HU19 que oculte interrupciones, ni al legado que omite vinculaciones. Las tablas aditivas no se borran automáticamente para forzar una recuperación.
+6. Verificar HTTPS, los cuatro roles, asignación profesional, privacidad familiar, historial, respuestas, revisión de interrupciones, apoyos culturales, alertas y pesos/versiones. Confirmar persistencia y huellas/conteos de los datos que deban conservarse. Verificar la huella del JAR activo y sus metadatos, sin imprimir secretos.
+
+Ninguno de estos pasos ha sido ejecutado en Azure. El ensayo de arranque y persistencia del JAR se limita al entorno local sintético.
