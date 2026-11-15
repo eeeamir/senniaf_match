@@ -11,7 +11,14 @@ import java.util.Map;
 @RequestMapping("/api/scoring")
 public class ScoringController {
     private final ScoringService scoring;
-    public ScoringController(ScoringService scoring) { this.scoring = scoring; }
+    private final com.senniaf.match.service.PerfilFamiliaService familias;
+    public ScoringController(ScoringService scoring) { this(scoring,null); }
+    @org.springframework.beans.factory.annotation.Autowired
+    public ScoringController(ScoringService scoring,com.senniaf.match.service.PerfilFamiliaService familias) { this.scoring = scoring;this.familias=familias; }
+    @GetMapping("/reevaluaciones-pendientes")
+    public List<String> pendientes(@RequestHeader("X-User-Role") String rol){comite(rol);return familias.reevaluacionesPendientes();}
+    @GetMapping("/reevaluaciones")
+    public List<Map<String,Object>> reevaluaciones(@RequestHeader("X-User-Role") String rol){comite(rol);return familias.alertasReevaluaciones();}
     private void comite(String rol) {
         if (!"COMITE".equals(rol)) throw new RolNoAutorizadoException("Solo el Comité puede revisar el motor");
     }
@@ -28,16 +35,24 @@ public class ScoringController {
         comite(rol); return scoring.historial(codigo);
     }
     @GetMapping("/familias/{codigo}/expediente")
-    public com.senniaf.match.model.PerfilFamilia expedienteFamilia(@RequestHeader("X-User-Role") String rol,
+    public Map<String,Object> expedienteFamilia(@RequestHeader("X-User-Role") String rol,
                                                                  @PathVariable String codigo) {
-        comite(rol); return scoring.consultarExpedienteFamilia(codigo);
+        comite(rol);
+        var perfil=scoring.consultarExpedienteFamilia(codigo);
+        Map<String,Object> r=new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules().disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).convertValue(perfil,new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>(){});
+        r.put("antecedenteInterrupcion",scoring.antecedenteInterrupcion(codigo));
+        if(perfil.isReevaluacionPendiente() && familias!=null)familias.consultarPorCedula(perfil.getRegistradoPor()).ifPresent(revision->{
+            r.put("apartadosReevaluacion",revision.getApartadosReevaluacion());
+            r.put("observacionReevaluacion",revision.getObservacionReevaluacion());
+        });
+        return r;
     }
     @GetMapping("/pesos")
     public PesosScoring pesos(@RequestHeader("X-User-Role") String rol) {
         comite(rol); return scoring.pesos();
     }
     @PutMapping("/pesos")
-    public PesosScoring pesos(@RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor, @RequestBody Map<String, Object> valores) {
+    public Map<String,Object> pesos(@RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor, @RequestBody Map<String, Object> valores) {
         comite(rol);
         if(valores==null || !(valores.get("justificacion") instanceof String justificacion)
                 || !(valores.get("versionEsperada") instanceof Integer version))
@@ -50,11 +65,13 @@ public class ScoringController {
         });
         return scoring.actualizarPesos(enteros,actor,justificacion,version);
     }
+    @GetMapping("/pesos/programacion")
+    public Map<String,Object> programacion(@RequestHeader("X-User-Role") String rol){comite(rol);return scoring.programacion();}
     @GetMapping("/pesos/historial")
     public List<Map<String,Object>> historialPesos(@RequestHeader("X-User-Role") String rol) {
         comite(rol); return scoring.historialPesos();
     }
-    public record DecisionRequest(String familia, String decision, String motivo) {}
+    public record DecisionRequest(String familia, String decision, String motivo, @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using=com.senniaf.match.dto.PerfilNinoRequest.EnteroEstricto.class) Integer versionPesos, List<String> apartados, String categoria) {}
     @PostMapping("/casos/{codigo}/decisiones")
     public Map<String, Object> decidir(@RequestHeader("X-User-Role") String rol,
                                        @RequestHeader("X-User-Id") String funcionario,
@@ -62,6 +79,7 @@ public class ScoringController {
         comite(rol);
         if (request == null || request.familia() == null || request.decision() == null)
             throw new IllegalArgumentException("Se requiere familia y decisión");
-        return scoring.decidir(codigo, request.familia(), request.decision(), request.motivo(), funcionario);
+        if("REEVALUACION".equals(request.decision()) && (request.apartados()==null || request.categoria()==null))throw new IllegalArgumentException("Selecciona apartados y motivo de reevaluación");
+        return scoring.decidir(codigo, request.familia(), request.decision(), request.motivo(), funcionario,request.versionPesos(),request.apartados(),request.categoria());
     }
 }

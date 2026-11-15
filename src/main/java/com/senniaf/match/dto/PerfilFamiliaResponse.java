@@ -10,10 +10,21 @@ package com.senniaf.match.dto;
  * }
  */
 public class PerfilFamiliaResponse {
+    private java.util.List<String> apartadosReevaluacion=java.util.List.of();
+    public java.util.List<String> getApartadosReevaluacion(){return apartadosReevaluacion;} public void setApartadosReevaluacion(java.util.List<String> v){apartadosReevaluacion=java.util.List.copyOf(v);}
+    private String observacionReevaluacion;
+    public String getObservacionReevaluacion(){return observacionReevaluacion;}
+    public void setObservacionReevaluacion(String v){observacionReevaluacion=v;}
 
     private java.util.List<java.util.Map<String,Object>> actividad = java.util.List.of();
     public java.util.List<java.util.Map<String,Object>> getActividad(){return actividad;}
     public void setActividad(java.util.List<java.util.Map<String,Object>> v){actividad=java.util.List.copyOf(v);}
+    private java.time.OffsetDateTime fechaActualizacionComunicada;
+    private java.util.List<String> proximosPasos = java.util.List.of();
+    public java.time.OffsetDateTime getFechaActualizacionComunicada(){return fechaActualizacionComunicada;}
+    public void setFechaActualizacionComunicada(java.time.OffsetDateTime valor){fechaActualizacionComunicada=valor;}
+    public java.util.List<String> getProximosPasos(){return proximosPasos;}
+    public void setProximosPasos(java.util.List<String> valor){proximosPasos=java.util.List.copyOf(valor);}
     private final String mensaje;
     private final String codigoCaso;
     private final boolean perfilCompleto;

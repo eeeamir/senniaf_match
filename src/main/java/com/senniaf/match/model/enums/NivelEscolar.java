@@ -10,5 +10,7 @@ public enum NivelEscolar {
     PRIMARIA,
     PREMEDIA,
     MEDIA,
-    NO_ESCOLARIZADO
+    NO_ESCOLARIZADO,
+    OTRO,
+    INFORMACION_NO_DISPONIBLE
 }

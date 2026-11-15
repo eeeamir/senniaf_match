@@ -22,6 +22,10 @@ public class PerfilNino {
     public boolean isCierrePorAdopcion() { return cierrePorAdopcion; }
     public void setCierrePorAdopcion(boolean valor) { cierrePorAdopcion = valor; }
     private Integer edad;
+    @Enumerated(EnumType.STRING) @Column(length=10) private UnidadEdad unidadEdad;
+    // NULL en registros anteriores significa años; nunca supone meses exactos.
+    public UnidadEdad getUnidadEdad(){return unidadEdad == null ? UnidadEdad.ANIOS : unidadEdad;}
+    public void setUnidadEdad(UnidadEdad v){unidadEdad=v;}
     @Enumerated(EnumType.STRING) private NivelEscolar nivelEscolar;
     private String gradoEscolar;
     @Enumerated(EnumType.STRING) private RendimientoAcademico rendimientoAcademico;
@@ -52,6 +56,21 @@ public class PerfilNino {
     private Integer cantidadHermanos;
     private String hermanosDetalle;
     @Column(length=2000) private String contextoCultural;
+    @Column(columnDefinition="text") private String idiomaComunicacion;
+    public String getIdiomaComunicacion(){return idiomaComunicacion;}
+    public void setIdiomaComunicacion(String v){idiomaComunicacion=v;}
+    @Column(columnDefinition="text") private String costumbresTradiciones;
+    public String getCostumbresTradiciones(){return costumbresTradiciones;}
+    public void setCostumbresTradiciones(String v){costumbresTradiciones=v;}
+    @Column(columnDefinition="text") private String vinculosCulturales;
+    public String getVinculosCulturales(){return vinculosCulturales;}
+    public void setVinculosCulturales(String v){vinculosCulturales=v;}
+    @Column(columnDefinition="text") private String opinionCultural;
+    public String getOpinionCultural(){return opinionCultural;}
+    public void setOpinionCultural(String v){opinionCultural=v;}
+    @Column(columnDefinition="text") private String recomendacionesCulturales;
+    public String getRecomendacionesCulturales(){return recomendacionesCulturales;}
+    public void setRecomendacionesCulturales(String v){recomendacionesCulturales=v;}
     private String registradoPor;
     @Column(length=40) private String trabajadorSocialAsignado;
     @Column(length=40) private String psicologoAsignado;

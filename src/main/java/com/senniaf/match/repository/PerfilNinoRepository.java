@@ -10,6 +10,7 @@ public interface PerfilNinoRepository extends JpaRepository<PerfilNino, Long> {
     @org.springframework.data.jpa.repository.Query(value="select 1 from pg_advisory_xact_lock(7362112201)", nativeQuery=true)
     Integer bloquearAltas();
     Optional<PerfilNino> findByCodigoCaso(String codigoCaso);
+    long countByPsicologoAsignado(String identificador);
     boolean existsByCodigoCaso(String codigoCaso);
     @org.springframework.data.jpa.repository.Query("""
             select p from PerfilNino p where (:incluir = true or p.bajaLogica = false)

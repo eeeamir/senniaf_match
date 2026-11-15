@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="perfiles.css">
 <link rel="stylesheet" href="calendly-theme.css">
 <link rel="stylesheet" href="profesionales.css">
+<link rel="stylesheet" href="sprint8-acabados.css">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -31,10 +32,9 @@
   <nav id="pestanasExpediente" class="pro-pestanas" aria-label="Secciones del expediente" role="tablist" hidden></nav>
   <div id="estado" class="tarjeta estado">Cargando perfiles…</div>
   <div id="lista" class="lista"></div><div id="paginacion" class="pro-paginacion" hidden></div>
-  <section id="panelDetalle" class="tarjeta" hidden><div class="pro-fila-titulo" id="cabeceraInformacionSocial"><div><h2 id="tituloDetalle">Expediente completo</h2><p>Consulta los datos registrados en el expediente.</p></div></div><div id="datosDetalle"></div></section>
-  <section id="panelEvaluaciones" class="tarjeta" hidden>
-    <div class="pro-fila-titulo"><h2 id="tituloEvaluaciones">Información psicológica</h2><span class="chip" id="casoAsignadoPsicologia" hidden>Caso asignado</span></div>
-    <p id="descripcionPsicologia">Consulta los informes registrados en el expediente.</p>
+  <section id="panelDetalle" class="tarjeta pro-panel-profesional" hidden><div class="pro-fila-titulo" id="cabeceraInformacionSocial"><div><h2 id="tituloDetalle">Expediente completo</h2><p>Consulta los datos registrados en el expediente.</p></div></div><div id="datosDetalle"></div></section>
+  <section id="panelEvaluaciones" class="tarjeta pro-panel-profesional" hidden>
+    <div class="pro-fila-titulo" id="cabeceraInformacionPsicologica"><div><h2 id="tituloEvaluaciones">Información psicológica</h2><p id="descripcionPsicologia">Consulta los informes registrados en el expediente.</p></div><span class="chip" id="casoAsignadoPsicologia" hidden>Caso asignado</span></div>
     <div class="pro-reciente" id="contextoPsicologia" hidden></div>
     <div id="evaluacionesVigentes"></div>
     <div id="estadoEvaluaciones" role="status"></div>
@@ -86,19 +86,22 @@
 
   <section id="panelAuditoria" class="tarjeta" hidden><h2>Historial de cambios</h2><ul id="historialCaso"></ul></section>
 </main>
-<footer class="pie-pagina">Uso institucional · Datos protegidos</footer>
+<footer class="pie-pagina">© 2026 SENNIAF Match · Proyecto académico</footer>
 
 <script src="senniaf.js"></script>
 <script src="profesionales.js"></script>
 <script src="contexto-evaluacion.js"></script>
+<script src="ejemplos-demo.js"></script>
 <script>
 const sesion = Sesion.requerir(['TRABAJADOR_SOCIAL', 'PSICOLOGO', 'COMITE']);
 const codigoEvaluacion = new URLSearchParams(location.search).get('caso');
 const codigoFamilia = new URLSearchParams(location.search).get('familia');
+if(codigoFamilia)document.body.classList.add('s8-acabado');
 const vistaSolicitudes = sesion?.rol === 'TRABAJADOR_SOCIAL' && new URLSearchParams(location.search).get('vista') === 'solicitudes';
 let expedientes = [], pagina = 1;
 let expedienteSeleccionado = null;
 let informesPsicologicos = [];
+let solicitudesDelCaso = [];
 let corrigiendoInforme = null;
 if (sesion) {
   ContextoPsicologico.iniciar();
@@ -159,10 +162,10 @@ function pintarExpedientes() {
   document.getElementById('lista').innerHTML=datos.slice((pagina-1)*9,pagina*9).map(p=>`<article class="tarjeta pro-caso">
     <div class="pro-caso-cabecera"><span class="pro-carpeta">${Profesionales.icono('carpeta')}</span><h2>${limpiarHtml(p.codigoCaso)}</h2></div>
     <div><span class="chip ${p.cierrePorAdopcion?'cerrado':p.bajaLogica?'retirado':''}">${p.cierrePorAdopcion?'Cierre por adopción':p.bajaLogica?'Fuera del Match':p.perfilCompleto?'Disponible para análisis':'Pendiente de información'}</span></div>
-    <div class="datos"><span>Edad<strong>${p.edad == null?'Sin indicar':limpiarHtml(p.edad)+' años'}</strong></span><span>Escolaridad<strong>${limpiarHtml(Profesionales.etiqueta(p.nivelEscolar))}</strong></span></div>
+    <div class="datos"><span>Edad<strong>${limpiarHtml(Profesionales.edad(p))}</strong></span><span>Escolaridad<strong>${limpiarHtml(Profesionales.etiqueta(p.nivelEscolar))}</strong></span></div>
     <p>Psicología: <strong>${limpiarHtml(p.psicologoAsignado || 'Pendiente de vinculación')}</strong></p>
-    ${p.solicitudesPendientes?'<p>Solicitud pendiente de revisión</p>':''}
-    ${vistaSolicitudes?p.solicitudes.map(s=>`<p>${limpiarHtml(Profesionales.etiqueta(s.tipo))} · <strong>${limpiarHtml(Profesionales.etiqueta(s.estado))}</strong></p>`).join(''):''}
+    ${p.solicitudesPendientes?(p.solicitudesPendientesDetalle?.length?p.solicitudesPendientesDetalle.map(s=>`<p>Solicitud de ${s.categoria==='ADOPCION_FORMALIZADA'?'cierre por adopción':s.tipo==='REACTIVACION'?'reactivación':'desactivación'} pendiente</p>`).join(''):'<p>Consulta la solicitud pendiente del expediente.</p>'):''}
+    ${vistaSolicitudes?p.solicitudes.map(s=>`<p>${s.categoria==='ADOPCION_FORMALIZADA'?'Cierre por adopción':limpiarHtml(Profesionales.etiqueta(s.tipo))} · <strong>${limpiarHtml(Profesionales.etiqueta(s.estado))}</strong></p>`).join(''):''}
     <a class="boton" href="perfiles.html?caso=${encodeURIComponent(p.codigoCaso)}${vistaSolicitudes?'#panelSolicitudes':''}">Abrir expediente ${Profesionales.icono('carpeta')}</a></article>`).join('');
   const pag=document.getElementById('paginacion');pag.hidden=total<=1;pag.innerHTML=`<button class="boton secundario" type="button" id="paginaAnterior" ${pagina===1?'disabled':''}>Anterior</button><span>${pagina} de ${total}</span><button class="boton secundario" type="button" id="paginaSiguiente" ${pagina===total?'disabled':''}>Siguiente</button>`;
   document.getElementById('paginaAnterior').onclick=()=>{pagina--;pintarExpedientes();};document.getElementById('paginaSiguiente').onclick=()=>{pagina++;pintarExpedientes();};
@@ -175,7 +178,7 @@ async function cargarEvaluaciones() {
   const estado = document.getElementById('estadoEvaluaciones');
   panel.hidden = false;
   document.getElementById('formEvaluacion').hidden = true;
-  document.getElementById('tituloEvaluaciones').textContent = sesion.rol==='PSICOLOGO'?'Evaluación psicológica':'Información psicológica';
+  document.getElementById('tituloEvaluaciones').innerHTML = Profesionales.icono('psicologia')+'Información psicológica';
   try {
     const r = await fetch(`/api/ninos/${encodeURIComponent(codigoEvaluacion)}/evaluaciones-psicologicas`, { headers: Sesion.encabezados() });
     const datos = await r.json();
@@ -186,23 +189,26 @@ async function cargarEvaluaciones() {
     pintarDatosEvaluacion();
     document.getElementById('formEvaluacion').hidden = sesion.rol !== 'PSICOLOGO' || datos.some(e=>e.vigente);
     document.getElementById('descripcionPsicologia').textContent=sesion.rol==='PSICOLOGO'?'Registra tus observaciones y orientaciones para este caso.':'Consulta los informes registrados en el expediente.';
-    const contexto=document.getElementById('contextoPsicologia');contexto.hidden=sesion.rol!=='PSICOLOGO';document.getElementById('casoAsignadoPsicologia').hidden=sesion.rol!=='PSICOLOGO';
-    contexto.innerHTML=`<span class="pro-simbolo">${Profesionales.icono('psicologia')}</span><div><strong>${limpiarHtml(codigoEvaluacion)}</strong><p>Información psicológica del expediente</p></div><button class="boton secundario chico" id="verSocialPsicologia" type="button">Ver información social →</button>`;
-    document.getElementById('verSocialPsicologia').addEventListener('click',()=>mostrarPanel('panelDetalle'));
+    const contexto=document.getElementById('contextoPsicologia');contexto.hidden=true;document.getElementById('casoAsignadoPsicologia').hidden=true;
+    contexto.replaceChildren();
+    document.getElementById('editarPsicologia')?.remove();
+    const vigente=datos.find(e=>e.vigente);
+    if(sesion.rol==='PSICOLOGO'&&vigente?.profesional===sesion.id)document.getElementById('cabeceraInformacionPsicologica').insertAdjacentHTML('beforeend',`<button id="editarPsicologia" class="boton secundario chico" type="button" data-corregir="${vigente.id}">${Profesionales.icono('informe')}Editar información psicológica</button>`);
+
 
   } catch (e) { Profesionales.mensaje(estado,e.message,'error'); }
 }
 document.getElementById('cargarEjemploPsicologico').addEventListener('click',()=>{
  const form=document.getElementById('formEvaluacion');
  const tieneRespuestas=[...form.querySelectorAll('textarea,input')].some(c=>c.id!=='sinDiagnostico'&&!['hidden','submit','button'].includes(c.type)&&(c.type==='checkbox'?c.checked:Boolean(c.value.trim())));
- const cargar=()=>{ContextoPsicologico.cargarEjemplo();Profesionales.mensaje(document.getElementById('estadoEvaluaciones'),'Datos de ejemplo cargados. Revisa el contenido y guarda la evaluación solo cuando corresponda.','aviso');};
+ const cargar=async()=>{const b=document.getElementById('cargarEjemploPsicologico');b.disabled=true;try{await ContextoPsicologico.cargarEjemplo(expedienteSeleccionado);Profesionales.mensaje(document.getElementById('estadoEvaluaciones'),'Ejemplo adaptado al expediente. Revísalo antes de guardar; los informes registrados se conservan.','aviso');}catch(e){Profesionales.mensaje(document.getElementById('estadoEvaluaciones'),e.message,'error');}finally{b.disabled=false;}};
  if(tieneRespuestas)Profesionales.confirmar('¿Cargar datos de ejemplo?','Se reemplazarán las respuestas de este formulario. No se guardará ningún cambio hasta que pulses Guardar evaluación.',cargar);
  else cargar();
 });
 document.getElementById('formEvaluacion').addEventListener('submit', async e => {
   e.preventDefault();
   ContextoPsicologico.actualizar();
-  if(!e.currentTarget.reportValidity())return;
+  if(!Profesionales.validarFormulario(e.currentTarget))return;
   const boton = document.getElementById('guardarEvaluacion');
   const estado = document.getElementById('estadoEvaluaciones');
   boton.disabled = true;
@@ -220,45 +226,49 @@ document.getElementById('formEvaluacion').addEventListener('submit', async e => 
     });
     const datos = await r.json();
     if (!r.ok) throw new Error(datos.mensaje || 'No se pudo guardar la evaluación.');
+    const sinCambios=corrigiendoInforme!=null&&String(datos.id)===String(corrigiendoInforme);
     terminarCorreccion();
     await cargarEvaluaciones();
     await cargarHistoria();
-    Profesionales.mensaje(estado,'Evaluación guardada correctamente','exito');
+    Profesionales.mensaje(estado,sinCambios?'La evaluación ya contiene esta información; no se registró una nueva versión.':'Evaluación guardada correctamente',sinCambios?'aviso':'exito');
   } catch (error) { Profesionales.mensaje(estado,error.message,'error'); }
   finally { boton.disabled = false; }
 });
 
 const CAMPOS_NINO = {
-  numeroExpedienteInstitucional: 'Referencia del expediente',
-  codigoCaso:'Código de caso', edad:'Edad', nivelEscolar:'Nivel escolar', gradoEscolar:'Grado escolar',
+  numeroExpedienteInstitucional: 'Número de expediente institucional',
+  codigoCaso:'Código del expediente', edad:'Edad', unidadEdad:'Unidad de edad', nivelEscolar:'Nivel escolar', gradoEscolar:'Grado escolar',
   rendimientoAcademico:'Rendimiento académico', habilidades:'Habilidades', habilidadesDetalle:'Detalle de habilidades',
   gustos:'Intereses', gustosDetalle:'Detalle de intereses', personalidad:'Rasgos de personalidad', personalidadDetalle:'Detalle de personalidad',
   alergias:'Alergias', alergiasDetalle:'Detalle de alergias', intoleranciaLactosa:'Intolerancia a la lactosa',
   condicionesSalud:'Condiciones de salud', condicionesSaludDetalle:'Detalle de salud', necesidadesApoyo:'Necesidades de apoyo',
   tieneHermanos:'Tiene hermanos', cantidadHermanos:'Cantidad de hermanos', hermanosDetalle:'Información de hermanos',
-  contextoCultural:'Contexto cultural', registradoPor:'Creador del expediente', fechaRegistro:'Fecha de registro',
+  idiomaComunicacion:'Idioma y comunicación',costumbresTradiciones:'Costumbres y tradiciones significativas',vinculosCulturales:'Vínculos culturales y comunitarios',opinionCultural:'Preferencias y opinión del niño',recomendacionesCulturales:'Recomendaciones de continuidad cultural',contextoCultural:'Contexto cultural', registradoPor:'Creador del expediente', fechaRegistro:'Fecha de registro',
   trabajadorSocialAsignado:'Responsable de trabajo social', psicologoAsignado:'Profesional de psicología',
   perfilCompleto:'Perfil completo', alertaMedica:'Alerta médica', bajaLogica:'Excluido del Match (seguimiento permitido)'
 };
 const CAMPOS_FAMILIA = {
-  codigoCaso:'Código de caso', tipoFamilia:'Estructura familiar', notaEstructuraHogar:'Notas del hogar', redApoyo:'Red de apoyo',
+  codigoCaso:'Código del expediente', tipoFamilia:'Estructura familiar', especificacionHogar:'Composición del hogar (otra)', notaEstructuraHogar:'Notas del hogar', redApoyo:'Red de apoyo',
   notaRedApoyo:'Notas de apoyo', provincia:'Provincia', disponibilidadViaje:'Disponibilidad de viaje', notaDistancia:'Notas de distancia',
   edadMinimaAceptada:'Edad mínima', edadMaximaAceptada:'Edad máxima', notaRangoEdad:'Notas del rango de edad',
   disposicionHermanos:'Disposición a hermanos', notaHermanos:'Notas de hermanos', condicionesPuedeAcompanarHoy:'Salud: apoyo actual',
-  condicionesConApoyo:'Salud: con apoyo adicional', notaCondicionesSalud:'Notas de salud', continuidadCultural:'Continuidad cultural',
+  condicionesConApoyo:'Salud: con apoyo adicional', notaCondicionesSalud:'Notas de salud', ...Object.fromEntries(Profesionales.culturaFamilia.map(([k,t])=>[k,t])), continuidadCultural:'Información cultural registrada anteriormente',
   registradoPor:'Responsable familiar', fechaRegistro:'Fecha de registro', perfilCompleto:'Entrevista completa',
   reevaluacionPendiente:'Reevaluación pendiente', numeroReevaluaciones:'Reevaluaciones completadas'
 };
+const ICONOS_REGISTRO = {codigoCaso:'carpeta',numeroExpedienteInstitucional:'carpeta',registradoPor:'persona',fechaRegistro:'calendario',trabajadorSocialAsignado:'credencial',psicologoAsignado:'psicologia'};
 function detalleCampos(datos, campos) {
-  return '<dl class="detalle-datos">' + Object.entries(campos).map(([k, titulo]) => {
+  return '<dl class="detalle-datos">' + Object.entries(campos).filter(([k])=>k!=='especificacionHogar'||datos.tipoFamilia==='OTRA').map(([k, titulo]) => {
     let valor = datos[k];
+    if(k==='edad')valor=Profesionales.edad(datos);
+    if(k==='tieneHermanos'&&valor==='NO_SABE')valor='Aún no se ha confirmado';
+    if(k==='cantidadHermanos'&&datos.tieneHermanos!=='SI')valor=datos.tieneHermanos==='NO'?0:'Aún no se ha confirmado';
     if (['trabajadorSocialAsignado','psicologoAsignado'].includes(k) && !valor) valor = 'Pendiente de vinculación';
-    if(k==='numeroExpedienteInstitucional' && typeof valor==='string' && /^FICTICIO-AZURE-\d+$/.test(valor))valor='Referencia de demostración · '+valor.split('-').pop();
     if (typeof valor === 'boolean') valor = valor ? 'Sí' : 'No';
-    if (Array.isArray(valor)) valor = valor.map(v=>Profesionales.etiqueta(v)).join(', ');
+    if (Array.isArray(valor)) valor = valor.length?valor.map(v=>Profesionales.etiqueta(v)).join(', '):['condicionesPuedeAcompanarHoy','condicionesConApoyo'].includes(k)?'Sin condiciones específicas declaradas':'Sin opciones registradas';
     if (k==='fechaRegistro' && valor) valor=Profesionales.fecha(valor);
     if (typeof valor==='string' && /^[A-Z_]+$/.test(valor)) valor=Profesionales.etiqueta(valor);
-    return `<div><dt>${limpiarHtml(titulo)}</dt><dd>${limpiarHtml(valor == null || valor === '' ? 'Sin información' : String(valor))}</dd></div>`;
+    return `<div${ICONOS_REGISTRO[k]?' class="detalle-con-icono"':''}><dt>${ICONOS_REGISTRO[k]?Profesionales.icono(ICONOS_REGISTRO[k]):''}${limpiarHtml(titulo)}</dt><dd>${limpiarHtml(valor == null || valor === '' ? 'Sin información' : String(valor))}</dd></div>`;
   }).join('') + '</dl>';
 }
 async function leerApi(ruta, opciones = {}) {
@@ -274,7 +284,7 @@ async function cargarCaso() {
     expedienteSeleccionado = await leerApi(`/api/ninos/${encodeURIComponent(codigoEvaluacion)}`);
     {
       document.getElementById('panelDetalle').hidden = false;
-      document.getElementById('tituloDetalle').textContent = 'Información social';
+      document.getElementById('tituloDetalle').innerHTML = Profesionales.icono('informe')+'Información social';
       document.getElementById('datosDetalle').innerHTML = detalleSecciones(expedienteSeleccionado,CAMPOS_NINO,GRUPOS_NINO);
       pintarResumen(expedienteSeleccionado);
       if(sesion.rol==='COMITE')document.getElementById('datosDetalle').classList.add('pro-expedientes-completos');
@@ -287,17 +297,22 @@ async function cargarCaso() {
 }
 async function cargarHistoria(){
  const eventos=await leerApi(`/api/ninos/${encodeURIComponent(codigoEvaluacion)}/auditoria`);
- const acciones={CONTENIDO_ACADEMICO_ACTUALIZADO:['Contenido académico actualizado','informe'],CREACION:['Registro del expediente','carpeta'],EDICION:['Información social actualizada','informe'],EVALUACION_PSICOLOGICA:['Evaluación psicológica registrada','psicologia'],CORRECCION_PSICOLOGICA:['Evaluación psicológica actualizada','psicologia'],SOLICITUD_DESACTIVACION:['Desactivación solicitada','solicitudes'],SOLICITUD_REACTIVACION:['Reactivación solicitada','solicitudes'],DESACTIVACION_APROBADA:['Desactivación aprobada','comprobar'],DESACTIVACION_RECHAZADA:['Desactivación rechazada','cerrar'],REACTIVACION_APROBADA:['Reactivación aprobada','comprobar'],REACTIVACION_RECHAZADA:['Reactivación rechazada','cerrar'],DECISION_ACEPTADA:['Propuesta aceptada','personas'],DECISION_DESCARTADA:['Propuesta descartada','cerrar'],DECISION_REEVALUACION:['Reevaluación solicitada','informe'],VINCULACION_INSTITUCIONAL_FICTICIA:['Vinculación de demostración registrada','personas']};
- const valor=v=>v==null?'Sin información':Array.isArray(v)?v.map(x=>Profesionales.etiqueta(x)).join(', '):typeof v==='boolean'?(v?'Sí':'No'):String(v);
+ const acciones={CONTENIDO_ACADEMICO_ACTUALIZADO:['Información del expediente actualizada','informe'],CREACION:['Registro del expediente','carpeta'],EDICION:['Información social actualizada','informe'],EVALUACION_PSICOLOGICA:['Evaluación psicológica registrada','psicologia'],CORRECCION_PSICOLOGICA:['Evaluación psicológica actualizada','psicologia'],SOLICITUD_DESACTIVACION:['Solicitud de desactivación presentada','solicitudes'],SOLICITUD_REACTIVACION:['Solicitud de reactivación presentada','solicitudes'],DESACTIVACION_APROBADA:['Desactivación aprobada','comprobar'],DESACTIVACION_RECHAZADA:['Desactivación rechazada','cerrar'],REACTIVACION_APROBADA:['Reactivación aprobada','comprobar'],REACTIVACION_RECHAZADA:['Reactivación rechazada','cerrar'],DECISION_ACEPTADA:['Propuesta aceptada','personas'],DECISION_DESCARTADA:['Propuesta descartada','cerrar'],DECISION_REEVALUACION:['Reevaluación solicitada','informe'],ASIGNACION_AUTOMATICA_PROFESIONALES:['Profesionales asignados al expediente','personas'],VINCULACION_INSTITUCIONAL_FICTICIA:['Profesionales asignados al expediente','personas']};
+ const valor=v=>v==='ANIOS'?'Años':v==='MESES'?'Meses':v==='NO_SABE'?'Aún no se ha confirmado':v==null?'Sin información':Array.isArray(v)?v.map(x=>Profesionales.etiqueta(x)).join(', '):typeof v==='boolean'?(v?'Sí':'No'):String(v);
  document.getElementById('historialCaso').innerHTML=eventos.map(e=>{
-   const [titulo,icono]=acciones[e.accion]||['Actuación registrada','reloj'],m=Profesionales.momento(e.fecha),d=e.detalles||{};
+   const [titulo,icono]=e.titulo?[e.titulo,acciones[e.accion]?.[1]||'solicitudes']:acciones[e.accion]||['Actuación registrada','reloj'],m=Profesionales.momento(e.fecha),d=e.detalles||{};
    const informe=e.evaluacionId?informesPsicologicos.find(i=>i.id===e.evaluacionId):null;
    const campos=(d.campos||[]).map(c=>limpiarHtml(CAMPOS_NINO[c]||'Dato del expediente')).join(', ');
-   const cambios=Object.entries(d.cambios||{}).map(([campo,v])=>`<h4>${limpiarHtml(CAMPOS_NINO[campo]||'Dato del expediente')}</h4><div class="pro-cambio-valores"><span><strong>Antes</strong><br>${limpiarHtml(valor(v.anterior))}</span><span><strong>Después</strong><br>${limpiarHtml(valor(v.nuevo))}</span></div>`).join('');
+   const edadHistorica=(v,antes)=>{
+     const unidad=d[antes?'unidadEdadAnterior':'unidadEdadNueva']||d.cambios?.unidadEdad?.[antes?'anterior':'nuevo']||'ANIOS';
+     return Profesionales.edad({edad:v,unidadEdad:unidad});
+   };
+   const cambios=Object.entries(d.cambios||{}).map(([campo,v])=>`<article class="pro-cambio"><h4>${limpiarHtml(CAMPOS_NINO[campo]||({evaluacion:'Evaluación',observaciones:'Observaciones',recomendaciones:'Recomendaciones',hallazgosProfesionales:'Valoración profesional',diagnosticoProfesional:'Diagnóstico',areasObservadas:'Áreas evaluadas',sinDiagnostico:'Sin diagnóstico',contextoEvaluacion:'Contexto de la evaluación'})[campo]||'Dato del expediente')}</h4><div class="pro-cambio-valores"><span><strong>Antes</strong><br>${limpiarHtml(campo==='edad'?edadHistorica(v.anterior,true):valor(v.anterior))}</span><span class="pro-cambio-flecha" aria-hidden="true">→</span><span><strong>Después</strong><br>${limpiarHtml(campo==='edad'?edadHistorica(v.nuevo,false):valor(v.nuevo))}</span></div></article>`).join('');
    const contextoDecision=d.familia?`<p><strong>Familia propuesta:</strong> ${limpiarHtml(d.familia)} · <strong>Resultado registrado:</strong> ${limpiarHtml(d.puntaje)} de 100 · <strong>Versión de criterios:</strong> ${limpiarHtml(d.versionPesos)}</p>`:'';
-   const contenido=informe?Profesionales.informe(informe,false):contextoDecision+(d.justificacion?`<p>${limpiarHtml(d.justificacion)}</p>`:'')+(campos?`<p>Campos modificados: ${campos}.</p>`:'')+cambios+(d.detalleParcial?'<p>No se conservó el detalle ampliado de todos los campos; la información actual está disponible en el expediente.</p>':'');
-   const responsable=e.actor==='CONFIGURACION_FICTICIA'?'Inicialización de demostración':e.actor||'Responsable no registrado';
-   return `<li class="pro-evento"><div class="pro-evento-cabecera">${Profesionales.icono(icono)}<strong>${titulo}${e.version?' · Versión '+e.version:''}</strong></div><div class="pro-evento-meta"><span>${limpiarHtml(responsable)}</span><span>${limpiarHtml(e.rol==='OPERACION_TECNICA'?'Intervención técnica autorizada':ROLES[e.rol]||'Rol no registrado')}</span><time>${limpiarHtml(m.fecha)} · ${limpiarHtml(m.hora)} · Panamá</time></div><p>${limpiarHtml(e.descripcion||'Actuación conservada en el expediente.')}</p>${contenido?`<details class="pro-evento-detalle"><summary>Ver información registrada</summary>${contenido}</details>`:''}</li>`;
+   const asignacion=(d.trabajadorSocial?`<p><strong>Trabajo social asignado:</strong> ${limpiarHtml(d.trabajadorSocial)}</p>`:'')+(d.psicologo?`<p><strong>Psicología asignada:</strong> ${limpiarHtml(d.psicologo)}</p>`:'');
+   const contenido=contextoDecision+asignacion+(d.justificacion?`<p>${limpiarHtml(d.justificacion)}</p>`:'')+(campos?`<p>Campos modificados: ${campos}.</p>`:'')+cambios+(d.detalleParcial?'<p>No se conservó el detalle ampliado de todos los campos; la información actual está disponible en el expediente.</p>':'');
+   const responsable=e.rol==='SISTEMA'?'Sistema':e.actor||'Responsable no registrado';
+   return `<li class="pro-evento"><div class="pro-evento-cabecera">${Profesionales.icono(icono)}<strong>${titulo}${e.version?' · Versión '+e.version:''}</strong></div><div class="pro-evento-meta"><span>${limpiarHtml(responsable)}</span><span>${limpiarHtml(e.rol==='SISTEMA'?'Sistema':e.rol==='OPERACION_TECNICA'?'Gestión del expediente':ROLES[e.rol]||'Rol no registrado')}</span><time>${limpiarHtml(m.fecha)} · ${limpiarHtml(m.hora)} · Panamá</time></div><p>${limpiarHtml(e.descripcion||'Actuación conservada en el expediente.')}</p>${contenido?`<details class="pro-evento-detalle"><summary>Ver cambios</summary>${contenido}</details>`:''}</li>`;
  }).join('')||'<li>No hay actuaciones registradas.</li>';
 }
 async function cargarFamilia() {
@@ -305,7 +320,8 @@ async function cargarFamilia() {
   document.getElementById('tituloDetalle').textContent = 'Expediente familiar · ' + codigoFamilia;
   try {
     const datos = await leerApi(`/api/scoring/familias/${encodeURIComponent(codigoFamilia)}/expediente`);
-    document.getElementById('datosDetalle').innerHTML = detalleSecciones(datos,CAMPOS_FAMILIA,GRUPOS_FAMILIA);
+    document.getElementById('datosDetalle').innerHTML = (datos.reevaluacionPendiente?`<aside class="pro-aviso-reevaluaciones" role="status"><h3>${Profesionales.icono('reloj')}Revisión de entrevista pendiente</h3><p>La familia no recibe nuevas recomendaciones hasta completar su actualización.</p>${datos.apartadosReevaluacion?.length?`<p><strong>Apartados solicitados:</strong> ${datos.apartadosReevaluacion.map(limpiarHtml).join(', ')}.</p>`:''}${datos.observacionReevaluacion?`<p><strong>Justificación del Comité</strong></p><p class="pro-texto-registrado">${limpiarHtml(datos.observacionReevaluacion)}</p>`:''}</aside>`:'')+detalleSecciones(datos,CAMPOS_FAMILIA,GRUPOS_FAMILIA);
+    if(location.hash==='#apoyosCulturales'){const a=document.getElementById('apoyosCulturales');if(a){a.open=true;a.scrollIntoView({block:'start'});}}
     document.getElementById('datosDetalle').classList.add('pro-expedientes-completos');
   } catch(e) { document.getElementById('datosDetalle').textContent = e.message; }
 }
@@ -316,19 +332,21 @@ async function cargarSolicitudes() {
     <h3>${s.categoria==='ADOPCION_FORMALIZADA'?'Cierre por adopción':limpiarHtml(Profesionales.etiqueta(s.tipo))} · ${limpiarHtml(Profesionales.etiqueta(s.estado))}</h3>
     <p>${limpiarHtml(s.solicitante)} · ${limpiarHtml(Profesionales.fecha(s.fechaSolicitud))}</p><p>${limpiarHtml(s.motivo)}</p>
     ${s.resueltoPor ? `<p>Resolución: ${limpiarHtml(s.resueltoPor)} · ${limpiarHtml(Profesionales.fecha(s.fechaResolucion))}</p><p>${limpiarHtml(s.motivoResolucion)}</p>` : ''}
-    ${sesion.rol === 'COMITE' && s.estado === 'PENDIENTE' ? `<form class="formResolucion" data-solicitud="${s.id}">
-      <label for="resolucion-${s.id}">Motivo de la resolución</label>
-      <textarea id="resolucion-${s.id}" name="motivo" required minlength="10" maxlength="2000" rows="3"></textarea>
-      <button class="boton chico" type="submit" value="aprobar">Aprobar solicitud</button>
-      <button class="boton secundario chico" type="submit" value="rechazar">Rechazar solicitud</button></form>` : ''}
+    ${sesion.rol === 'COMITE' && s.estado === 'PENDIENTE' ? `<div class="pro-acciones"><button class="boton chico" type="button" data-resolver="${s.id}" data-aprobar="si">Aprobar solicitud</button><button class="boton secundario chico" type="button" data-resolver="${s.id}" data-aprobar="no">Rechazar solicitud</button></div>` : ''}
     </article>`;
+  solicitudesDelCaso=datos;
   const pendientes=datos.filter(s=>s.estado==='PENDIENTE'), resueltas=datos.filter(s=>s.estado!=='PENDIENTE');
-  document.getElementById('historialSolicitudes').innerHTML = sesion.rol==='COMITE'?pendientes.map(solicitud).join(''):'';
+  document.getElementById('historialSolicitudes').innerHTML = sesion.rol==='COMITE'?pendientes.map(solicitud).join('')+(resueltas.length?`<details class="pro-seccion"><summary>Solicitudes resueltas · ${resueltas.length}</summary>${resueltas.map(solicitud).join('')}</details>`:''):'';
   document.getElementById('tipoSolicitud').value = expedienteSeleccionado.bajaLogica ? 'REACTIVACION' : 'DESACTIVACION';
   document.getElementById('enviarSolicitud').textContent = 'Enviar solicitud';
-  const pendiente=datos.some(s=>s.estado==='PENDIENTE');
+  const solicitudPendiente=pendientes[0],pendiente=Boolean(solicitudPendiente);
   document.getElementById('estadoGestion').textContent=Profesionales.estado(expedienteSeleccionado);
-  document.getElementById('tituloGestion').textContent=pendiente?'Solicitud pendiente de revisión':expedienteSeleccionado.cierrePorAdopcion?'Participación cerrada por adopción':expedienteSeleccionado.bajaLogica?'Participación desactivada':'Participación activa';
+  document.getElementById('tituloGestion').textContent=pendiente?(solicitudPendiente.categoria==='ADOPCION_FORMALIZADA'?'Solicitud de cierre por adopción pendiente':solicitudPendiente.tipo==='REACTIVACION'?'Solicitud de reactivación pendiente':'Solicitud de desactivación pendiente'):expedienteSeleccionado.cierrePorAdopcion?'Participación cerrada por adopción':expedienteSeleccionado.bajaLogica?'Participación desactivada':'Participación activa';
+  document.getElementById('ayudaGestion').textContent=pendiente
+    ?solicitudPendiente.categoria==='ADOPCION_FORMALIZADA'?'Se solicitó cerrar la participación de este expediente debido a la formalización de la adopción. El Comité revisará la documentación antes de resolver.'
+    :solicitudPendiente.tipo==='REACTIVACION'?'Se solicitó reactivar este expediente. El Comité revisará la solicitud antes de tomar una decisión.'
+    :'Se solicitó desactivar este expediente. El Comité revisará la justificación antes de autorizar el cambio.'
+    :expedienteSeleccionado.cierrePorAdopcion?'Se conserva el seguimiento y el historial; el cierre no admite una reactivación ordinaria.':'El Comité revisará la solicitud antes de tomar una decisión.';
   document.getElementById('abrirSolicitud').textContent=expedienteSeleccionado.bajaLogica?'Solicitar reactivación':'Solicitar desactivación';
   document.getElementById('tituloDialogoSolicitud').textContent=document.getElementById('abrirSolicitud').textContent;
   document.getElementById('abrirSolicitud').hidden=sesion.rol!=='TRABAJADOR_SOCIAL'||pendiente||expedienteSeleccionado.cierrePorAdopcion;
@@ -348,17 +366,36 @@ document.getElementById('formSolicitud').addEventListener('submit', async e => {
   } catch(error) { document.getElementById('errorSolicitud').textContent = error.message; }
   finally { boton.disabled = false; }
 });
-document.getElementById('historialSolicitudes').addEventListener('submit', async e => {
-  if (!e.target.matches('.formResolucion')) return;
-  e.preventDefault(); const botones = e.target.querySelectorAll('button'); botones.forEach(b => b.disabled = true);
-  try {
-    const aprobada = e.submitter.value === 'aprobar';
-    await leerApi(`/api/ninos/solicitudes-estado/${e.target.dataset.solicitud}/resolucion`, {method:'POST', body:JSON.stringify({
-      aprobar:aprobada, motivo:new FormData(e.target).get('motivo')})});
-    await cargarCaso();
-    document.getElementById('mensajeEstado').textContent = aprobada ? 'Solicitud aprobada. Estado actualizado.' : 'Solicitud rechazada. Se conserva el estado anterior.';
-  } catch(error) { document.getElementById('mensajeEstado').textContent = error.message; }
-  finally { botones.forEach(b => b.disabled = false); }
+document.getElementById('historialSolicitudes').addEventListener('click',e=>{
+  const boton=e.target.closest('[data-resolver]');if(!boton)return;
+  const s=solicitudesDelCaso.find(s=>String(s.id)===boton.dataset.resolver);if(!s)return;
+  const aprobar=boton.dataset.aprobar==='si',adopcion=s.categoria==='ADOPCION_FORMALIZADA',reactivar=s.tipo==='REACTIVACION';
+  const opciones=adopcion&&!aprobar?[
+    ['INFORMACION_INSUFICIENTE','Falta información o documentación para aprobar el cierre.','Después de revisar la solicitud, se determinó que falta información o documentación para confirmar la adopción formalizada. Por este motivo, no se aprueba el cierre de participación y el expediente conserva su estado actual'],
+    ['NO_PROCEDE','La solicitud no corresponde al estado actual del expediente.','Al revisar la solicitud y el expediente, se identificó que su estado actual no permite tramitar el cierre solicitado. Por ello, se rechaza la solicitud y se mantiene el estado del expediente'],
+    ['OTRO','Otro motivo.','']
+  ]:!aprobar?[
+    ['INFORMACION_INSUFICIENTE','Información insuficiente','La documentación disponible no permite autorizar el cambio solicitado. El expediente conserva su estado y se recomienda completar la información.'],
+    ['NO_PROCEDE','La solicitud no procede en el estado actual','Después de revisar el estado del expediente y la solicitud, no se considera procedente el cambio. Se conserva el estado actual para su seguimiento.'],
+    ['OTRO','Otro','']
+  ]:adopcion?[
+    ['DOCUMENTACION','Se verificó la documentación de la adopción.','Se revisó la documentación que confirma la adopción formalizada. Por este motivo, se aprueba el cierre de participación del expediente en SENNIAF Match. El historial se conservará y no procederá su reactivación ordinaria'],
+    ['OTRO','Otro motivo.','']
+  ]:reactivar?[
+    ['REVISION_COMPLETADA','Revisión del expediente completada','Se completó la revisión del expediente y se autoriza su reactivación para el análisis de compatibilidad, sujeta al cumplimiento de los requisitos del sistema.'],
+    ['CONDICIONES_RESTABLECIDAS','Condiciones de participación restablecidas','La información revisada permite autorizar la reactivación del expediente, al haberse restablecido las condiciones para participar en el análisis de compatibilidad.'],
+    ['OTRO','Otro','']
+  ]:[
+    ['SUSPENSION','Suspensión temporal justificada','Se revisó la solicitud y se autoriza la desactivación temporal del expediente mientras se actualiza o revisa su situación. Se conserva el seguimiento y el historial.'],
+    ['SITUACION','Cambio de situación documentado','La documentación revisada sustenta suspender temporalmente la participación del expediente en nuevas propuestas. Su posible regreso requerirá autorización del Comité.'],
+    ['OTRO','Otro','']
+  ];
+  const confirmacion=!aprobar?'¿Estás seguro de que deseas rechazar esta solicitud? El estado del expediente se mantendrá sin cambios.':adopcion?'¿Deseas cerrar la participación de este expediente por adopción formalizada? Se conservará el historial y no se permitirá una reactivación ordinaria.':reactivar?'¿Deseas reactivar este expediente? Volverá a estar disponible para el análisis de compatibilidad, siempre que cumpla los requisitos del sistema.':'¿Estás seguro de que deseas desactivar este expediente? Dejará de participar en nuevas propuestas de compatibilidad hasta que se autorice su reactivación.';
+  Profesionales.justificar({titulo:adopcion?(aprobar?'Aprobar solicitud de cierre':'Rechazar solicitud de cierre'):(aprobar?'Aprobar solicitud':'Rechazar solicitud'),
+    ...(adopcion?{instruccion:aprobar?'Selecciona el motivo de aprobación':'Selecciona el motivo de rechazo',textoRevisar:aprobar?'Revisar aprobación':'Revisar rechazo',tituloConfirmacion:aprobar?'Confirmar aprobación':'Confirmar rechazo',textoConfirmar:aprobar?'Confirmar aprobación':'Confirmar rechazo',ayuda:aprobar?'Puedes editar la justificación. Antes de aprobar, verifica la documentación que confirma la adopción, también si eliges «Otro motivo».':'Puedes editar la justificación. Si eliges «Otro motivo», escribe tu propia explicación.'}:{}),contexto:s.codigoCaso+' · '+(adopcion?'Cierre por adopción formalizada':Profesionales.etiqueta(s.tipo)),opciones,confirmacion,
+    alConfirmar:motivo=>leerApi(`/api/ninos/solicitudes-estado/${s.id}/resolucion`,{method:'POST',body:JSON.stringify({aprobar,motivo})}),
+    alGuardar:async datos=>{try{await cargarCaso();Profesionales.mensaje(document.getElementById('mensajeEstado'),datos.estado==='APROBADA'?(adopcion?'Cierre por adopción formalizada registrado.':reactivar?'Solicitud aprobada. El expediente fue reactivado.':'Solicitud aprobada. El expediente fue desactivado temporalmente.'):'Solicitud rechazada. El estado del expediente se conserva.','exito');}catch(error){Profesionales.mensaje(document.getElementById('mensajeEstado'),'La resolución se guardó. Recarga el expediente para consultar su estado actualizado.','aviso');}}
+  });
 });
 
 function pintarDatosEvaluacion(informe=null){
@@ -366,14 +403,18 @@ function pintarDatosEvaluacion(informe=null){
 }
 function actualizarDiagnostico(){const f=document.querySelector('[data-diagnostico-formal]'),activo=!document.getElementById('sinDiagnostico').checked;f.hidden=!activo;f.disabled=!activo;document.getElementById('diagnosticoProfesional').required=activo;}
 document.getElementById('sinDiagnostico').addEventListener('change',actualizarDiagnostico);
+let ubicacionesEdicion=[],apartadosEdicion=[];
+function restaurarEdicionInline(){for(const [nodo,marca] of ubicacionesEdicion.reverse()){marca.replaceWith(nodo);}ubicacionesEdicion=[];apartadosEdicion.forEach(n=>n.remove());apartadosEdicion=[];document.getElementById('formEvaluacion').classList.remove('pro-edicion-inline');}
+function moverEdicion(nodo,destino){const marca=document.createComment('posición original');nodo.before(marca);ubicacionesEdicion.push([nodo,marca]);destino.append(nodo);}
 function terminarCorreccion() {
+  restaurarEdicionInline();
   corrigiendoInforme=null; document.getElementById('formEvaluacion').reset();actualizarDiagnostico();ContextoPsicologico.cargar(null);Profesionales.marcarGuardado(document.getElementById('formEvaluacion'));
   pintarDatosEvaluacion();
-  document.getElementById('guardarEvaluacion').textContent='Guardar evaluación'; document.getElementById('cancelarCorreccion').hidden=false;
+  document.getElementById('guardarEvaluacion').textContent=corrigiendoInforme?'Guardar cambios':'Guardar evaluación'; document.getElementById('cancelarCorreccion').hidden=false;
 }
 document.getElementById('cancelarCorreccion').addEventListener('click',()=>{terminarCorreccion();document.getElementById('formEvaluacion').hidden=informesPsicologicos.some(e=>e.vigente);mostrarPanel('panelEvaluaciones');});
 document.querySelector('main').addEventListener('click',e=>{
-  const b=e.target.closest('[data-corregir]');if(!b)return;
+  const b=e.target.closest('[data-corregir]');if(!b||document.getElementById('formEvaluacion').classList.contains('pro-edicion-inline'))return;
   const informe=informesPsicologicos.find(x=>x.id===Number(b.dataset.corregir));if(!informe)return;
   corrigiendoInforme=informe.id;
   document.getElementById('evaluacionPsicologica').value=informe.evaluacion;
@@ -386,34 +427,63 @@ document.querySelector('main').addEventListener('click',e=>{
   document.getElementById('diagnosticoProfesional').value=informe.diagnosticoProfesional||'';
   actualizarDiagnostico();ContextoPsicologico.cargar(informe.contextoEvaluacion);Profesionales.marcarGuardado(document.getElementById('formEvaluacion'));
   pintarDatosEvaluacion(informe);
-  document.getElementById('guardarEvaluacion').textContent='Guardar evaluación';document.getElementById('cancelarCorreccion').hidden=false;
+  document.getElementById('guardarEvaluacion').textContent=corrigiendoInforme?'Guardar cambios':'Guardar evaluación';document.getElementById('cancelarCorreccion').hidden=false;
   mostrarPanel('panelEvaluaciones');
-  document.getElementById('formEvaluacion').scrollIntoView({behavior:'smooth',block:'center'});
+  const form=document.getElementById('formEvaluacion'),articulo=document.querySelector('#evaluacionesVigentes .pro-informe');
+  if(articulo){const marca=document.createComment('posición del formulario');form.before(marca);ubicacionesEdicion.push([form,marca]);articulo.before(form);form.classList.add('pro-edicion-inline');
+   const bloques=[...form.children];moverEdicion(articulo,form);
+   const nombres={evaluacionPsicologica:'Evaluación',observacionesPsicologicas:'Observaciones',recomendacionesPsicologicas:'Recomendaciones profesionales',hallazgosProfesionales:'Valoración profesional',sinDiagnostico:'Diagnóstico',diagnosticoProfesional:'Diagnóstico',otroMetodo:'Métodos utilizados',detalleAcompanamiento:'Necesidades de acompañamiento'};
+   for(const bloque of bloques){
+    if(bloque.classList.contains('pro-evaluacion-datos'))continue;
+    if(bloque.classList.contains('pro-acciones')){moverEdicion(bloque,articulo.querySelector('.pro-informe-registro'));continue;}
+    const campo=bloque.querySelector('textarea,input');const titulo=nombres[campo?.id]||(bloque.querySelector('[name=areasObservadas]')?'Áreas evaluadas':bloque.querySelector('#apoyosEvaluacion')?'Necesidades de acompañamiento':bloque.querySelector('#metodosEvaluacion')?'Métodos utilizados':null);
+    if(!titulo)continue;
+    let seccion=[...articulo.querySelectorAll('.pro-informe-bloque')].find(n=>n.querySelector('summary')?.textContent.trim()===titulo || titulo==='Diagnóstico'&&n.querySelector('summary')?.textContent.trim()==='Diagnóstico profesional');
+    if(!seccion){seccion=document.createElement('details');seccion.className='detalle-grupo pro-informe-bloque';seccion.innerHTML=`<summary>${Profesionales.icono('informe')}${limpiarHtml(titulo)}</summary><div class="pro-informe-contenido"></div>`;articulo.querySelector('.pro-informe-bloques').append(seccion);apartadosEdicion.push(seccion);}
+    seccion.open=true;moverEdicion(bloque,seccion.querySelector('.pro-informe-contenido'));
+   }
+  }
 });
 const GRUPOS_NINO = {
  'Datos generales y escolaridad':['edad','nivelEscolar','gradoEscolar','rendimientoAcademico'],
  'Habilidades, gustos y personalidad':['habilidades','habilidadesDetalle','gustos','gustosDetalle','personalidad','personalidadDetalle'],
- 'Hermanos y contexto familiar':['tieneHermanos','cantidadHermanos','hermanosDetalle','contextoCultural'],
+ 'Hermanos y contexto familiar':['tieneHermanos','cantidadHermanos','hermanosDetalle'],
  'Salud y necesidades de apoyo':['alergias','alergiasDetalle','intoleranciaLactosa','condicionesSalud','condicionesSaludDetalle','necesidadesApoyo','alertaMedica'],
- 'Registro y profesionales responsables':['numeroExpedienteInstitucional','registradoPor','fechaRegistro','trabajadorSocialAsignado','psicologoAsignado']
+ 'Identidad y continuidad cultural':['idiomaComunicacion','costumbresTradiciones','vinculosCulturales','opinionCultural','recomendacionesCulturales'],
+ 'Registro y profesionales responsables':['codigoCaso','numeroExpedienteInstitucional','registradoPor','fechaRegistro','trabajadorSocialAsignado','psicologoAsignado']
 };
 const GRUPOS_FAMILIA = {
- 'Hogar y red de apoyo':['tipoFamilia','notaEstructuraHogar','redApoyo','notaRedApoyo'],
+ 'Hogar y red de apoyo':['tipoFamilia','especificacionHogar','notaEstructuraHogar','redApoyo','notaRedApoyo'],
  'Preferencias consideradas por el Match':['edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad','disposicionHermanos','notaHermanos'],
- 'Salud, logística y continuidad':['condicionesPuedeAcompanarHoy','condicionesConApoyo','notaCondicionesSalud','provincia','disponibilidadViaje','notaDistancia','continuidadCultural'],
- 'Registro y seguimiento':['registradoPor','fechaRegistro','perfilCompleto','reevaluacionPendiente','numeroReevaluaciones']
+ 'Salud y logística':['condicionesPuedeAcompanarHoy','condicionesConApoyo','notaCondicionesSalud','provincia','disponibilidadViaje','notaDistancia'],
+ 'Apoyos culturales y comunitarios':[...Profesionales.culturaFamilia.map(([k])=>k),'continuidadCultural'],
+ 'Registro y seguimiento':['codigoCaso','registradoPor','fechaRegistro','perfilCompleto','reevaluacionPendiente']
 };
+const CAMPOS_CULTURA=[
+ ['idiomaComunicacion','Idioma y comunicación','Indica el idioma que utiliza habitualmente el niño y si necesita algún apoyo para comunicarse'],
+ ['costumbresTradiciones','Costumbres y tradiciones significativas','Describe costumbres, celebraciones o tradiciones relevantes para su identidad y bienestar'],
+ ['vinculosCulturales','Vínculos culturales y comunitarios','Indica las actividades, espacios o vínculos comunitarios que sería importante preservar'],
+ ['opinionCultural','Preferencias y opinión del niño','Registra las preferencias expresadas por el niño sobre las costumbres y vínculos que desea mantener, según su edad y madurez'],
+ ['recomendacionesCulturales','Recomendaciones de continuidad cultural','Describe cómo una futura familia podría acompañar y respetar los aspectos culturales importantes para el niño']
+];
+function culturaDetalle(datos){
+ return `<details id="identidadCultural" class="detalle-grupo pro-detalle-amplio"><summary>${Profesionales.icono('personas')}Identidad y continuidad cultural</summary><div class="cultura-contenido">
+ ${datos.contextoCultural?`<aside class="cultura-antecedente"><h3>Información cultural registrada anteriormente</h3><p class="pro-texto-registrado">${limpiarHtml(datos.contextoCultural)}</p><p class="ayuda">Este antecedente se conserva sin reinterpretarlo ni repartirlo entre los nuevos campos.</p></aside>`:''}
+ <dl class="detalle-datos cultura-campos">${CAMPOS_CULTURA.map(([k,t,a])=>`<div><dt>${t}</dt><dd>${limpiarHtml(datos[k]||'Sin información registrada')}</dd><p class="ayuda">${a}.</p></div>`).join('')}</dl>
+ <p data-cultura-estado role="status"></p></div></details>`;
+}
 function detalleSecciones(datos,campos,grupos) {
- return Object.entries(grupos).map(([titulo,keys],i)=>`<details class="detalle-grupo" ${i===0?'open':''}><summary>${Profesionales.icono(i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
+ const aviso=grupos===GRUPOS_FAMILIA&&sesion.rol==='COMITE'?Profesionales.avisoInterrupcion(datos.antecedenteInterrupcion)+Profesionales.avisoReevaluaciones(datos.numeroReevaluaciones):'';
+ return aviso+Object.entries(grupos).map(([titulo,keys],i)=>titulo==='Identidad y continuidad cultural'?culturaDetalle(datos):`<details id="${titulo==='Identidad y continuidad cultural'?'identidadCultural':titulo==='Apoyos culturales y comunitarios'?'apoyosCulturales':'grupo-'+i}" class="detalle-grupo ${keys.length===1?'pro-detalle-amplio':''}"><summary>${Profesionales.icono(titulo==='Apoyos culturales y comunitarios'?'personas':i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
  detalleCampos(datos,Object.fromEntries(keys.map(k=>[k,campos[k]])))+'</details>').join('');
 }
 function pintarResumen(p){
- const r=document.getElementById('resumenExpediente');r.hidden=false;r.innerHTML=`<div>Expediente<strong>${limpiarHtml(p.codigoCaso)}</strong></div><div>Edad<strong>${p.edad==null?'Sin información':limpiarHtml(p.edad)+' años'}</strong></div><div>Escolaridad<strong>${limpiarHtml(Profesionales.etiqueta(p.nivelEscolar))}</strong></div><div>Estado<strong><span class="chip">${Profesionales.estado(p)}</span></strong></div>`;
+ const r=document.getElementById('resumenExpediente');r.hidden=false;r.innerHTML=`<div>Expediente<strong>${limpiarHtml(p.codigoCaso)}</strong></div><div>Edad<strong>${limpiarHtml(Profesionales.edad(p))}</strong></div><div>Escolaridad<strong>${limpiarHtml(Profesionales.etiqueta(p.nivelEscolar))}</strong></div><div>Estado<strong><span class="chip">${Profesionales.estado(p)}</span></strong></div>`;
 }
 function resumenParticipacion(p) {
  const estado=p.cierrePorAdopcion?'Cierre por adopción':p.bajaLogica?'Fuera del Match':p.perfilCompleto?'Disponible para análisis de compatibilidad':'Pendiente de completar información social';
  return `<div class="estado-resumen"><span class="chip">${estado}</span><span class="chip">Seguimiento profesional</span></div>
- <p>Edad: ${limpiarHtml(p.edad ?? 'Sin indicar')} · Formulario social ${p.perfilCompleto?'completo':'incompleto'}. </p>
+ <p>Edad: ${limpiarHtml(Profesionales.edad(p))} · Formulario social ${p.perfilCompleto?'completo':'incompleto'}. </p>
  <nav class="detalle-nav"><a href="#panelDetalle">Informe social</a><a href="#panelEvaluaciones">Psicología</a><a href="#panelSolicitudes">Solicitudes e historial</a></nav>`;
 }
 
@@ -441,16 +511,19 @@ document.getElementById('abrirSolicitud').addEventListener('click',()=>{document
 
 
 function configurarPestanas(){
+ const abrirCultura=location.hash==='#identidadCultural';
  const tabs=[['panelDetalle','informe','Información social'],['panelEvaluaciones','psicologia','Información psicológica'],...(['TRABAJADOR_SOCIAL','COMITE'].includes(sesion.rol)?[['panelSolicitudes','carpeta','Gestión del expediente']]:[]),['panelAuditoria','reloj','Historial de cambios']];
  if(sesion.rol==='PSICOLOGO')document.getElementById('panelSolicitudes').hidden=true;
  const nav=document.getElementById('pestanasExpediente');nav.hidden=false;
  nav.innerHTML=tabs.map(([id,icono,titulo])=>`<button type="button" role="tab" id="tab-${id}" aria-controls="${id}" aria-selected="false" data-panel="${id}">${Profesionales.icono(icono)}${titulo}</button>`).join('');
  tabs.forEach(([id])=>{const p=document.getElementById(id);p.setAttribute('role','tabpanel');p.setAttribute('aria-labelledby','tab-'+id);});
  nav.querySelectorAll('button').forEach((b,i)=>{b.addEventListener('click',()=>mostrarPanel(b.dataset.panel));b.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const botones=[...nav.querySelectorAll('button')];const j=e.key==='Home'?0:e.key==='End'?botones.length-1:(i+(e.key==='ArrowRight'?1:-1)+botones.length)%botones.length;botones[j].focus();mostrarPanel(botones[j].dataset.panel);});});
- if(sesion.rol==='TRABAJADOR_SOCIAL'&&!document.getElementById('editarSocial'))document.getElementById('cabeceraInformacionSocial').insertAdjacentHTML('beforeend',`<a id="editarSocial" class="boton secundario" href="perfil.html?editar=${encodeURIComponent(codigoEvaluacion)}">Editar información social</a>`);
- mostrarPanel(tabs.some(([id])=>id===location.hash.slice(1))?location.hash.slice(1):'panelDetalle');
+ if(sesion.rol==='TRABAJADOR_SOCIAL'&&!document.getElementById('editarSocial'))document.getElementById('cabeceraInformacionSocial').insertAdjacentHTML('beforeend',`<a id="editarSocial" class="boton secundario chico" href="perfil.html?editar=${encodeURIComponent(codigoEvaluacion)}">${Profesionales.icono('informe')}Editar información social</a>`);
+ mostrarPanel(tabs.some(([id])=>id===location.hash.slice(1))?location.hash.slice(1):(sesion.rol==='PSICOLOGO'?'panelEvaluaciones':'panelDetalle'));
+ if(abrirCultura){mostrarPanel('panelDetalle');const apartado=document.getElementById('identidadCultural');if(apartado){apartado.open=true;apartado.scrollIntoView({block:'start'});}}
 }
 function mostrarPanel(id){
+ document.body.classList.toggle('s8-acabado',Boolean(codigoFamilia)||id==='panelSolicitudes');
  document.querySelectorAll('[data-panel]').forEach(b=>{const activo=b.dataset.panel===id;b.setAttribute('aria-selected',String(activo));b.tabIndex=activo?0:-1;document.getElementById(b.dataset.panel).hidden=!activo;});
  history.replaceState(null,'','#'+id);
 }

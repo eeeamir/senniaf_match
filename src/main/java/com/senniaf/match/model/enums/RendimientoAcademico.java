@@ -9,5 +9,8 @@ public enum RendimientoAcademico {
     EXCELENTE,
     BUENO,
     REGULAR,
-    NECESITA_APOYO
+    NECESITA_APOYO,
+    NO_APLICA,
+    NO_EVALUADO,
+    INFORMACION_NO_DISPONIBLE
 }

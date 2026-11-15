@@ -24,17 +24,28 @@ public class GlobalExceptionHandler {
         Map<String, Object> cuerpo = new LinkedHashMap<>();
         cuerpo.put("mensaje", "El cuerpo de la solicitud tiene un formato inválido o incluye un valor "
                 + "que no está entre las opciones permitidas de una lista desplegable");
+        if(ex.getCause() instanceof com.fasterxml.jackson.databind.JsonMappingException detalle && !detalle.getPath().isEmpty()) {
+            String campo=detalle.getPath().stream().map(com.fasterxml.jackson.databind.JsonMappingException.Reference::getFieldName)
+                    .filter(java.util.Objects::nonNull).collect(java.util.stream.Collectors.joining("."));
+            if(!campo.isEmpty()) {
+                Class<?> tipo=detalle instanceof com.fasterxml.jackson.databind.exc.MismatchedInputException dato?dato.getTargetType():null;
+                String mensaje=tipo==Integer.class||tipo==int.class?"Escribe un número entero, sin letras ni decimales."
+                        :tipo!=null&&tipo.isEnum()?"Selecciona una de las opciones disponibles."
+                        :"Revisa el formato de este campo.";
+                cuerpo.put("errores",Map.of(campo,mensaje));
+            }
+        }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cuerpo);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> manejarValidacion(MethodArgumentNotValidException ex) {
         Map<String, Object> cuerpo = new LinkedHashMap<>();
-        cuerpo.put("mensaje", "El perfil enviado tiene datos inválidos o incompletos");
+        cuerpo.put("mensaje", "Revisa los campos señalados para continuar");
 
         Map<String, String> errores = new LinkedHashMap<>();
         ex.getBindingResult().getFieldErrors()
-                .forEach(error -> errores.put(error.getField(), error.getDefaultMessage()));
+                .forEach(error -> errores.put(error.getField().equals("documentoValido")?"numeroDocumento":error.getField(), error.getDefaultMessage()));
         cuerpo.put("errores", errores);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cuerpo);
@@ -51,6 +62,12 @@ public class GlobalExceptionHandler {
         Map<String, Object> cuerpo = new LinkedHashMap<>();
         cuerpo.put("mensaje", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(cuerpo);
+    }
+
+    @ExceptionHandler(com.senniaf.match.web.CampoInvalidoException.class)
+    public ResponseEntity<Map<String,Object>> manejarCampo(com.senniaf.match.web.CampoInvalidoException ex) {
+        return ResponseEntity.status(ex.isConflicto()?HttpStatus.CONFLICT:HttpStatus.BAD_REQUEST)
+                .body(Map.of("mensaje",ex.getMessage(),"errores",Map.of(ex.getCampo(),ex.getMessage())));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

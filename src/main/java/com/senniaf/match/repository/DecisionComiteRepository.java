@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface DecisionComiteRepository extends JpaRepository<DecisionComite, Long> {
+    List<DecisionComite> findByDecision(String decision);
+    boolean existsByCodigoNinoAndCodigoFamiliaAndDecision(String n,String f,String d);
     List<DecisionComite> findByCodigoNinoOrderByFechaAsc(String codigoNino);
     List<DecisionComite> findByCodigoFamiliaOrderByFechaAsc(String codigoFamilia);
     boolean existsByCodigoFamiliaAndDecision(String codigoFamilia, String decision);

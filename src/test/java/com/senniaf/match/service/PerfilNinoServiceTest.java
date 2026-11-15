@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PerfilNinoServiceTest {
 
@@ -66,18 +67,12 @@ class PerfilNinoServiceTest {
     }
 
     @Test
-    void marcaComoIncompletoUnPerfilConCamposObligatoriosSinLlenar() {
+    void rechazaPerfilConEscolaridadIncoherenteSinPersistir() {
         PerfilNinoRequest request = new PerfilNinoRequest();
         request.setEdad(8);
         request.setNivelEscolar(NivelEscolar.PRIMARIA);
-        request.setNecesidadesApoyo("Terapia de lenguaje");
-        // el resto de las listas (habilidades, gustos, personalidad,
-        // alergias, condicionesSalud) y campos obligatorios queda sin llenar
-
-        PerfilNinoResponse response = service.registrarPerfil(request, "trabajador-social-1");
-
-        assertFalse(response.isPerfilCompleto());
-        assertTrue(response.getMensaje().contains("incompleto"));
+        // La escolaridad declarada requiere una valoración de rendimiento coherente.
+        assertThrows(IllegalArgumentException.class, () -> service.registrarPerfil(request, "trabajador-social-1"));
     }
 
     @Test

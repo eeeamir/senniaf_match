@@ -30,6 +30,10 @@ import java.util.Comparator;
 @Service
 public class PerfilNinoService {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.senniaf.match.repository.UsuarioRepository usuarios;
+    @org.springframework.beans.factory.annotation.Value("${senniaf.demo.asignacion-automatica:false}")
+    private boolean asignacionDemo;
     private final PerfilNinoRepository repositorio;
     private final EventoCasoRepository auditoria;
     private final EvaluacionPsicologicaRepository evaluaciones;
@@ -45,6 +49,7 @@ public class PerfilNinoService {
 
     @Transactional
     public synchronized PerfilNinoResponse registrarPerfil(PerfilNinoRequest request, String registradoPor) {
+        request.validarCoherencia();
         String referencia = request.getNumeroExpedienteInstitucional();
         referencia = referencia == null || referencia.isBlank() ? null
                 : referencia.strip().replaceAll("\\s+", " ").toUpperCase(java.util.Locale.ROOT);
@@ -61,6 +66,13 @@ public class PerfilNinoService {
         copiarDatos(perfil, request);
         perfil.setRegistradoPor(registradoPor);
         perfil.setTrabajadorSocialAsignado(registradoPor);
+        if (asignacionDemo) {
+            String psicologo = usuarios.findAll().stream().filter(u -> u.isVerificado() && "PSICOLOGO".equals(u.getRol()))
+                    .map(com.senniaf.match.model.Usuario::getIdentificador)
+                    .min(Comparator.<String>comparingLong(id -> repositorio.countByPsicologoAsignado(id)).thenComparing(id -> id))
+                    .orElseThrow(() -> new IllegalStateException("La demostración requiere un psicólogo habilitado antes de crear expedientes"));
+            perfil.setPsicologoAsignado(psicologo);
+        }
         perfil.setFechaRegistro(LocalDateTime.now());
 
         boolean completo = calcularSiEstaCompleto(request);
@@ -70,7 +82,10 @@ public class PerfilNinoService {
         perfil.setAlertaMedica(alertaMedica);
 
         repositorio.save(perfil);
-        auditar(codigoCaso, registradoPor, "CREACION", "Se creó el perfil infantil");
+        auditar(codigoCaso, registradoPor, "CREACION", "Se creó el perfil infantil. Trabajo social: " + registradoPor + "; psicología: " + (perfil.getPsicologoAsignado() == null ? "pendiente" : perfil.getPsicologoAsignado()) + (asignacionDemo ? ". Asignación exclusiva de demostración." : ""));
+        if(asignacionDemo)auditar(codigoCaso,"SISTEMA","ASIGNACION_AUTOMATICA_PROFESIONALES",
+                "{\"resumen\":\"Se registró automáticamente la asignación de los profesionales responsables.\",\"trabajadorSocial\":"
+                        +jsonTexto(perfil.getTrabajadorSocialAsignado())+",\"psicologo\":"+jsonTexto(perfil.getPsicologoAsignado())+"}");
 
         String mensaje = completo
                 ? "Perfil registrado correctamente"
@@ -81,9 +96,11 @@ public class PerfilNinoService {
 
     private void copiarDatos(PerfilNino perfil, PerfilNinoRequest request) {
         perfil.setEdad(request.getEdad());
+        perfil.setUnidadEdad(request.esEdadHistoricaSinMeses()?null:request.getUnidadEdad());
         perfil.setNivelEscolar(request.getNivelEscolar());
-        perfil.setGradoEscolar(request.getGradoEscolar());
-        perfil.setRendimientoAcademico(request.getRendimientoAcademico());
+        boolean noEscolarizado = request.getNivelEscolar() == com.senniaf.match.model.enums.NivelEscolar.NO_ESCOLARIZADO;
+        perfil.setGradoEscolar(noEscolarizado ? "No aplica" : request.getGradoEscolar());
+        perfil.setRendimientoAcademico(noEscolarizado ? com.senniaf.match.model.enums.RendimientoAcademico.NO_APLICA : request.getRendimientoAcademico());
         perfil.setHabilidades(request.getHabilidades());
         perfil.setHabilidadesDetalle(request.getHabilidadesDetalle());
         perfil.setGustos(request.getGustos());
@@ -97,9 +114,16 @@ public class PerfilNinoService {
         perfil.setCondicionesSaludDetalle(request.getCondicionesSaludDetalle());
         perfil.setNecesidadesApoyo(request.getNecesidadesApoyo());
         perfil.setTieneHermanos(request.getTieneHermanos());
-        perfil.setCantidadHermanos(request.getCantidadHermanos());
+        perfil.setCantidadHermanos(request.getTieneHermanos() == com.senniaf.match.model.enums.SiNo.NO ? 0
+                : request.getTieneHermanos() == com.senniaf.match.model.enums.SiNo.SI ? request.getCantidadHermanos() : null);
         perfil.setHermanosDetalle(request.getHermanosDetalle());
         perfil.setContextoCultural(request.getContextoCultural());
+        if(request.getIdiomaComunicacion()!=null)perfil.setIdiomaComunicacion(request.getIdiomaComunicacion());
+        if(request.getCostumbresTradiciones()!=null)perfil.setCostumbresTradiciones(request.getCostumbresTradiciones());
+        if(request.getVinculosCulturales()!=null)perfil.setVinculosCulturales(request.getVinculosCulturales());
+        if(request.getOpinionCultural()!=null)perfil.setOpinionCultural(request.getOpinionCultural());
+        if(request.getRecomendacionesCulturales()!=null)perfil.setRecomendacionesCulturales(request.getRecomendacionesCulturales());
+
     }
 
     public List<PerfilNino> listarPerfiles(String actor, String rol, boolean incluirInactivos) {
@@ -133,13 +157,46 @@ public class PerfilNinoService {
     @Transactional
     public PerfilNinoResponse actualizar(String codigo, String actor, PerfilNinoRequest request) {
         PerfilNino p = vinculadoParaActualizar(codigo, actor, "TRABAJADOR_SOCIAL");
+        if(request.getContextoCultural()!=null && !request.getContextoCultural().replace("\r\n","\n").equals(p.getContextoCultural()==null?"":p.getContextoCultural().replace("\r\n","\n")))
+            throw new IllegalArgumentException("El antecedente cultural se conserva sin cambios. Edita los cinco campos dentro de Información Social.");
+        request.setContextoCultural(p.getContextoCultural());
+        boolean conservarEdadHistorica=Integer.valueOf(0).equals(p.getEdad())
+                && p.getUnidadEdad()==com.senniaf.match.model.enums.UnidadEdad.ANIOS;
+        request.validarCoherencia(conservarEdadHistorica);
         var anteriores=datosSociales(p);
+        PerfilNino propuesto=new PerfilNino();
+        copiarDatos(propuesto,request);
+        if(request.getIdiomaComunicacion()==null)propuesto.setIdiomaComunicacion(p.getIdiomaComunicacion());
+        if(request.getCostumbresTradiciones()==null)propuesto.setCostumbresTradiciones(p.getCostumbresTradiciones());
+        if(request.getVinculosCulturales()==null)propuesto.setVinculosCulturales(p.getVinculosCulturales());
+        if(request.getOpinionCultural()==null)propuesto.setOpinionCultural(p.getOpinionCultural());
+        if(request.getRecomendacionesCulturales()==null)propuesto.setRecomendacionesCulturales(p.getRecomendacionesCulturales());
+
+        propuesto.setPerfilCompleto(calcularSiEstaCompleto(request));
+        propuesto.setAlertaMedica(calcularAlertaMedica(request));
+        if(ContenidoComparable.iguales(anteriores,datosSociales(propuesto)))
+            return new PerfilNinoResponse("La información ya está registrada; no hay cambios de contenido para guardar",codigo,p.isPerfilCompleto(),p.isAlertaMedica());
         copiarDatos(p, request);
         p.setPerfilCompleto(calcularSiEstaCompleto(request));
         p.setAlertaMedica(calcularAlertaMedica(request));
         repositorio.save(p);
         auditar(codigo, actor, "EDICION", cambiosSociales(anteriores,datosSociales(p)));
         return new PerfilNinoResponse("Perfil actualizado correctamente", codigo, p.isPerfilCompleto(), p.isAlertaMedica());
+    }
+
+    @Transactional
+    public PerfilNinoResponse actualizarCultura(String codigo,String actor,com.senniaf.match.dto.ContinuidadCulturalRequest r){
+        var p=vinculadoParaActualizar(codigo,actor,"TRABAJADOR_SOCIAL");
+        var anteriores=datosSociales(p);
+        p.setIdiomaComunicacion(r.idiomaComunicacion());
+        p.setCostumbresTradiciones(r.costumbresTradiciones());
+        p.setVinculosCulturales(r.vinculosCulturales());
+        p.setOpinionCultural(r.opinionCultural());
+        p.setRecomendacionesCulturales(r.recomendacionesCulturales());
+        var actuales=datosSociales(p);
+        if(java.util.Objects.equals(anteriores,actuales))return new PerfilNinoResponse("No hay cambios culturales para guardar",codigo,p.isPerfilCompleto(),p.isAlertaMedica());
+        repositorio.save(p);auditar(codigo,actor,"EDICION",cambiosSociales(anteriores,actuales));
+        return new PerfilNinoResponse("Los cambios culturales se guardaron correctamente",codigo,p.isPerfilCompleto(),p.isAlertaMedica());
     }
 
     public List<EventoCaso> historial(String codigo, String actor, String rol) {
@@ -189,6 +246,8 @@ public class PerfilNinoService {
         nueva.setNumeroVersion((anterior.getNumeroVersion()==null ? 1 : anterior.getNumeroVersion())+1);
         nueva.setMotivoCorreccion(motivo); copiarValoracion(nueva,request);
         if(request.contextoEvaluacion()==null)nueva.setContextoEvaluacion(anterior.getContextoEvaluacion());
+        if(ContenidoComparable.iguales(datosEvaluacion(anterior),datosEvaluacion(nueva)))
+            return EvaluacionPsicologicaResponse.de(anterior,true);
         evaluaciones.save(nueva);
         auditar(codigo,actor,"CORRECCION_PSICOLOGICA","Informe #"+id+" -> revisión #"+nueva.getId());
         return EvaluacionPsicologicaResponse.de(nueva,true);
@@ -221,8 +280,33 @@ public class PerfilNinoService {
         catch(com.fasterxml.jackson.core.JsonProcessingException error){throw new IllegalStateException("No se pudo guardar la valoración",error);}
     }
 
+    private java.util.Map<String,Object> datosEvaluacion(EvaluacionPsicologica e) {
+        var datos=new java.util.LinkedHashMap<String,Object>();
+        datos.put("evaluacion",e.getEvaluacion());datos.put("observaciones",e.getObservaciones());datos.put("recomendaciones",e.getRecomendaciones());
+        datos.put("sinDiagnostico",e.getSinDiagnostico());datos.put("hallazgos",e.getHallazgosProfesionales());datos.put("diagnostico",e.getDiagnosticoProfesional());
+        Object areas=jsonComparable(e.getAreasObservadas());
+        datos.put("areas",areas==null?java.util.List.of():areas);
+        Object contexto=jsonComparable(e.getContextoEvaluacion());
+        if(contexto instanceof java.util.Map<?,?> campos && campos.entrySet().stream().allMatch(c->
+                "formato".equals(c.getKey()) || c.getValue()==null || c.getValue() instanceof String s && s.isBlank()
+                || c.getValue() instanceof java.util.List<?> lista && lista.isEmpty()))contexto=null;
+        datos.put("contexto",contexto);
+        return datos;
+    }
+    private Object jsonComparable(String valor) {
+        if(valor==null)return null;
+        try{return new com.fasterxml.jackson.databind.ObjectMapper().readValue(valor,Object.class);}
+        catch(com.fasterxml.jackson.core.JsonProcessingException error){return valor;}
+    }
+
     public long numeroSolicitudesPendientes(PerfilNino perfil) {
         return solicitudes.countByExpedienteIdAndEstado(perfil.getId(),SolicitudEstadoCaso.Estado.PENDIENTE);
+    }
+
+    public List<java.util.Map<String,Object>> resumenSolicitudesPendientes(PerfilNino perfil) {
+        return solicitudes.findByExpedienteIdAndEstado(perfil.getId(),SolicitudEstadoCaso.Estado.PENDIENTE).stream()
+                .map(s->{java.util.Map<String,Object> datos=new java.util.LinkedHashMap<>();
+                    datos.put("tipo",s.getTipo());datos.put("categoria",s.getCategoria());datos.put("estado",s.getEstado());return datos;}).toList();
     }
 
     @Transactional(readOnly=true)
@@ -277,8 +361,14 @@ public class PerfilNinoService {
         }
         s.setEstado(request.aprobar() ? SolicitudEstadoCaso.Estado.APROBADA : SolicitudEstadoCaso.Estado.RECHAZADA);
         s.setResueltoPor(actor); s.setFechaResolucion(LocalDateTime.now()); s.setMotivoResolucion(motivo);
-        auditar(p.getCodigoCaso(), actor, s.getTipo() + "_" + s.getEstado(), "Resolución de solicitud #" + s.getId());
+        auditar(p.getCodigoCaso(), actor, s.getTipo() + "_" + s.getEstado(), "{\"resumen\":\"Resolución de solicitud #" + s.getId() + "\",\"justificacion\":"
+                + jsonTexto(motivo) + "}");
         return SolicitudEstadoResponse.de(s);
+    }
+
+    private String jsonTexto(String valor) {
+        try { return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(valor); }
+        catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalStateException("No se pudo conservar la justificación", e); }
     }
 
     private void comprobarEstado(PerfilNino p, SolicitudEstadoCaso.Tipo tipo) {
@@ -298,7 +388,7 @@ public class PerfilNinoService {
         if (auditoria == null) return; // soporte a pruebas unitarias antiguas sin repositorio de auditoría
         EventoCaso e = new EventoCaso(); e.setCodigoCaso(codigo); e.setActor(actor);
         e.setAccion(accion);
-        String rol=accion.equals("CREACION")||accion.equals("EDICION")||accion.startsWith("SOLICITUD_")?"TRABAJADOR_SOCIAL"
+        String rol="SISTEMA".equals(actor)?"SISTEMA":accion.equals("CREACION")||accion.equals("EDICION")||accion.startsWith("SOLICITUD_")?"TRABAJADOR_SOCIAL"
                 :accion.contains("PSICOLOGICA")?"PSICOLOGO":"COMITE";
         var detalles=new java.util.LinkedHashMap<String,Object>();detalles.put("rol",rol);
         var mapper=new com.fasterxml.jackson.databind.ObjectMapper();
@@ -320,6 +410,7 @@ public class PerfilNinoService {
         var campos=new java.util.ArrayList<String>();
         despues.forEach((k,v)->{if(!java.util.Objects.equals(antes.get(k),v))campos.add(k);});
         var contenido=new java.util.LinkedHashMap<String,Object>();contenido.put("resumen","Se actualizó la información social.");contenido.put("campos",campos);
+        contenido.put("unidadEdadAnterior",antes.get("unidadEdad"));contenido.put("unidadEdadNueva",despues.get("unidadEdad"));
         var cambios=new java.util.LinkedHashMap<String,Object>();contenido.put("cambios",cambios);
         try {
             for(String campo:campos){var valores=new java.util.LinkedHashMap<String,Object>();valores.put("anterior",antes.get(campo));valores.put("nuevo",despues.get(campo));cambios.put(campo,valores);}
@@ -328,12 +419,17 @@ public class PerfilNinoService {
     }
 
     private synchronized String siguienteCodigoCaso() {
-        return String.format("NNA-%03d", repositorio.count() + 1);
+        long numero = repositorio.count() + 1;
+        while (repositorio.existsByCodigoCaso(String.format("NNA-%03d", numero))) numero++;
+        return String.format("NNA-%03d", numero);
     }
 
     private boolean calcularSiEstaCompleto(PerfilNinoRequest r) {
         return r.getNivelEscolar() != null
-                && r.getRendimientoAcademico() != null
+                && (r.getNivelEscolar() == com.senniaf.match.model.enums.NivelEscolar.NO_ESCOLARIZADO
+                    || r.getNivelEscolar() == com.senniaf.match.model.enums.NivelEscolar.INFORMACION_NO_DISPONIBLE
+                    || r.getRendimientoAcademico() != null)
+                && r.isEscolaridadCoherente() && r.isHermanosCoherentes()
                 && noVacia(r.getHabilidades())
                 && noVacia(r.getGustos())
                 && noVacia(r.getPersonalidad())
@@ -358,7 +454,8 @@ public class PerfilNinoService {
     }
 
     private <T> boolean tieneValorDistintoDe(List<T> lista, T valorNeutro) {
-        return lista != null && lista.stream().anyMatch(valor -> valor != valorNeutro);
+        return lista != null && lista.stream().anyMatch(valor -> valor != null && valor != valorNeutro
+                && !(valor instanceof Enum<?> e && "INFORMACION_NO_DISPONIBLE".equals(e.name())));
     }
 
     private boolean noVacio(String valor) {

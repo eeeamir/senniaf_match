@@ -1,8 +1,8 @@
-name: Sprint 6 Maven PostgreSQL y validacion
+name: Maven PostgreSQL 16 y validación
 
 on:
   push:
-    branches: [main]
+    branches: [main, sprint7-desarrollo]
   pull_request:
     branches: [main]
 
@@ -13,36 +13,66 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: senniaf_match
+          POSTGRES_DB: hu19_ci
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U postgres -d senniaf_match"
+          --health-cmd "pg_isready -U postgres -d hu19_ci"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 15
     env:
-      DB_URL: jdbc:postgresql://localhost:5432/senniaf_match
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      SENNIAF_DEMO_PASSWORD: ${{ secrets.SENNIAF_DEMO_PASSWORD || 'Cambio123!' }}
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGDATABASE: hu19_ci
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      SENNIAF_PRUEBAS_AISLADAS: SI
+      HU19_TEST_DB_URL: jdbc:postgresql://127.0.0.1:5432/hu19_ci
+      HU19_TEST_DB_USER: senniaf_app
+      # Credenciales sintéticas exclusivas del servicio efímero de este job.
+      HU19_TEST_DB_PASSWORD: ClaveSoloPruebas-HU19-2026
+      SENNIAF_DEMO_PASSWORD: ClaveSoloPruebas-HU19-2026
     steps:
       - name: Obtener código
         uses: actions/checkout@v4
-      - name: Configurar JDK 21
+      - name: Configurar JDK 17 como en Azure
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '17'
           cache: maven
-      - name: Pruebas unitarias e integración PostgreSQL
-        run: mvn -B clean verify -Pe2e
+      - name: Comprobar recursos web y compatibilidad del actualizador
+        run: |
+          for archivo in comite.js familia.js profesionales.js vinculaciones.js; do
+            node --check "src/main/resources/static/$archivo"
+          done
+          bash -n deploy/azure/actualizar.sh src/test/scripts/preparar-postgres-ci.sh
+          python3 src/test/scripts/test_compatibilidad_despliegue.py
+      - name: Preparar esquema y permisos en la base aislada
+        run: bash src/test/scripts/preparar-postgres-ci.sh
+      - name: Compilar y ejecutar pruebas unitarias e integración
+        run: >-
+          mvn -B verify -Pe2e
+          -Dsenniaf.commit=${{ github.sha }}
+          -Dsenniaf.branch=${{ github.ref_name }}
+          -Dsenniaf.worktree=limpio
+      - name: Identificar el JAR validado
+        run: sha256sum target/senniaf-match-0.1.0.jar > target/senniaf-match.sha256
+      - name: Conservar el JAR para el procedimiento manual existente
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-validado
+          path: |
+            target/senniaf-match-0.1.0.jar
+            target/senniaf-match.sha256
+          if-no-files-found: error
       - name: Guardar resultados de pruebas
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: evidencias-sprint-6
+          name: evidencias-pruebas
           path: |
             target/surefire-reports/*
             target/failsafe-reports/*

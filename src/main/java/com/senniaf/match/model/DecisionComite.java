@@ -17,6 +17,11 @@ public class DecisionComite {
     private int versionPesos;
     @Column(length = 12000) private String contextoScoring;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(columnDefinition="jsonb") private java.util.List<String> apartadosReevaluacion;
+    @Column(length=40) private String categoriaReevaluacion;
+    public java.util.List<String> getApartadosReevaluacion(){return apartadosReevaluacion;} public void setApartadosReevaluacion(java.util.List<String> v){apartadosReevaluacion=v;}
+    public String getCategoriaReevaluacion(){return categoriaReevaluacion;} public void setCategoriaReevaluacion(String v){categoriaReevaluacion=v;}
     public String getContextoScoring(){return contextoScoring;} public void setContextoScoring(String v){contextoScoring=v;}
     public Long getId(){return id;}
     public String getCodigoNino(){return codigoNino;} public void setCodigoNino(String v){codigoNino=v;}
