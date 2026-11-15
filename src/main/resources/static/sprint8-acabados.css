@@ -49,8 +49,8 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 .s8-acabado .familia-siguiente{background:#edf4ff}
 .s8-acabado .vinculacion-general{background:linear-gradient(115deg,#fff 65%,#f1f7ff)}
 .s8-acabado .vinculacion-acceso.menta{background:linear-gradient(120deg,#fff,#e7f8f1)}
-.s8-acabado .vinculacion-reporte.menta>summary{background:#e7f8f1}
-.s8-acabado .vinculacion-reporte.lavanda>summary{background:#f0e9ff}
+.s8-acabado .vinculacion-reporte.menta>summary{background:#fff}
+.s8-acabado .vinculacion-reporte.lavanda>summary{background:#fff}
 .s8-acabado .vinculacion-autorizacion{position:relative;isolation:isolate;overflow:hidden}
 .s8-acabado .vinculacion-autorizacion::after{content:'';position:absolute;z-index:-1;pointer-events:none;width:110px;height:110px;border-radius:50%;right:-35px;top:-55px;background:#f0e9ff}
 .s8-acabado #seguimiento-incidencias .tarjeta{border-color:#eddbcc}
@@ -213,3 +213,29 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 .s8-acabado #compatibilidadRegistrada{padding-block:18px}
 .s8-acabado #compatibilidadRegistrada p{margin-block:8px}
 .s8-acabado #compatibilidadRegistrada .detalle-datos>div{padding-block:10px}
+
+/* Cierre visual: consultas y seguimiento sobre los mismos registros. */
+.s8-acabado .vinculacion-reporte { background:#fff; border:1px solid #dce7f5; }
+.s8-acabado .vinculacion-reporte>summary { display:flex; align-items:center; gap:12px; }
+.s8-acabado .vinculacion-reporte>summary .vinculacion-emblema { color:#0064ff; background:#edf4ff; }
+.pro-familias-reevaluacion { margin-top:28px; padding:24px; }
+.pro-familias-reevaluacion>h2 { display:flex; align-items:center; gap:12px; margin:0 0 20px; }
+.pro-reevaluacion-fila { display:flex; align-items:center; gap:20px; flex-wrap:wrap; padding:20px; border:1px solid #dce7f5; border-radius:14px; margin-top:14px; }
+.pro-reevaluacion-fila h3,.pro-reevaluacion-fila p { margin:0; }
+.pro-reevaluacion-fila p { flex:1 1 220px; }
+.pro-reevaluacion-fila .chip { display:inline-flex; align-items:center; gap:8px; background:#fff4d6; color:#805600; }
+#propuestasComite>.pro-compatibilidad-caso { margin-top:24px; padding:24px; }
+.pro-cambio { background:#fff; border:1px solid #e1eaf5; border-radius:14px; padding:18px; margin-top:18px; }
+.pro-cambio h4 { margin:0 0 14px; color:#0b3558; }
+.pro-cambio .pro-cambio-valores { grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr); gap:16px; padding:0; background:#fff; margin:0; align-items:stretch; }
+.pro-cambio-valores>span { padding:14px; border-radius:10px; background:#f5f7fa; line-height:1.6; }
+.pro-cambio-valores>span:last-child { background:#f0f6ff; border:1px solid #e4edfa; }
+.pro-cambio-valores strong { display:inline-block; color:#455d79; margin-bottom:8px; }
+.pro-cambio-valores>span:last-child strong { color:#0064d9; }
+.pro-cambio-valores>.pro-cambio-flecha { display:flex; align-items:center; justify-content:center; padding:0; background:transparent; color:#567495; font-size:22px; }
+@media(max-width:760px){
+  .pro-cambio .pro-cambio-valores { grid-template-columns:minmax(0,1fr); gap:10px; }
+  .pro-cambio-valores>.pro-cambio-flecha { transform:rotate(90deg); }
+  .pro-familias-reevaluacion,#propuestasComite>.pro-compatibilidad-caso { padding:18px; }
+  .pro-reevaluacion-fila { padding:16px; gap:14px; }
+}

@@ -149,7 +149,8 @@ assertTrue(json(listado).toString().contains(nino), listado.getBody());
         for (int i = 1; i <= 3; i++) {
             ResponseEntity<String> accion = req("/api/scoring/casos/" + nino + "/decisiones", HttpMethod.POST, comite,
                     Map.of("familia", familiaCaso,"decision","REEVALUACION",
-                           "motivo","Solicitar actualización de información familiar número " + i));
+                           "motivo","Solicitar actualización de información familiar número " + i,
+                           "apartados",List.of("Hogar y red de apoyo"),"categoria","DESACTUALIZADA"));
             assertEquals(200, accion.getStatusCode().value(), accion.getBody());
             JsonNode estado = json(req("/api/familias/mi-perfil", HttpMethod.GET, familia, null));
             assertEquals(i - 1, estado.path("numeroReevaluaciones").asInt(),

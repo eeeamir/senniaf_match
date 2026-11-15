@@ -44,6 +44,24 @@ class HU14PostgresIT extends SoportePostgresIT {
         assertEquals(List.of(200,200),simultaneas(()->req("/api/familias/mi-perfil",HttpMethod.PUT,c.token(),cuerpo),()->req("/api/familias/mi-perfil",HttpMethod.PUT,c.token(),cuerpo)));
         assertEquals(3,familias.findById(c.f().getId()).orElseThrow().getNumeroReevaluaciones());assertEquals(1,alertas(c).size());assertEquals(3,completadas(alertas(c).get(0)));
     }
+    @Test void consultaPendienteMuestraSolicitudRealSoloAlComiteYDesapareceAlCompletar(){
+        Caso c=caso();solicitar(c);
+        String pendientes="/api/scoring/reevaluaciones-pendientes",expediente="/api/scoring/familias/"+c.f().getCodigoCaso()+"/expediente";
+        assertTrue(datos(req(pendientes,HttpMethod.GET,comite,null)).toString().contains(c.f().getCodigoCaso()));
+        var detalle=datos(req(expediente,HttpMethod.GET,comite,null));
+        assertTrue(detalle.path("reevaluacionPendiente").asBoolean());
+        assertEquals("Hogar y red de apoyo",detalle.path("apartadosReevaluacion").get(0).asText());
+        assertEquals("Ampliar la entrevista para una revisión humana del caso",detalle.path("observacionReevaluacion").asText());
+        for(String token:List.of(social,psicologo,c.token())){
+            assertEquals(403,req(pendientes,HttpMethod.GET,token,null).getStatusCode().value());
+            assertEquals(403,req(expediente,HttpMethod.GET,token,null).getStatusCode().value());
+        }
+        assertEquals(401,req(pendientes,HttpMethod.GET,null,null).getStatusCode().value());
+        completar(c);
+        assertFalse(datos(req(pendientes,HttpMethod.GET,comite,null)).toString().contains(c.f().getCodigoCaso()));
+        assertFalse(datos(req(expediente,HttpMethod.GET,comite,null)).has("observacionReevaluacion"));
+    }
+
     @Test void servidorRestringeAlertasAlComite(){
         Caso c=caso();for(String token:List.of(social,psicologo,otro,c.token()))assertEquals(403,req("/api/scoring/reevaluaciones",HttpMethod.GET,token,null).getStatusCode().value());
         assertEquals(401,req("/api/scoring/reevaluaciones",HttpMethod.GET,null,null).getStatusCode().value());

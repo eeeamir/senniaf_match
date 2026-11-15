@@ -169,7 +169,7 @@ const Vinculaciones = {
     c.querySelector('[data-cierre]')?.addEventListener('click',()=>this.registrarCierre(c,v,sesion));
     c.querySelectorAll('[data-disponibilidad]').forEach(b=>b.onclick=()=>Profesionales.justificar({
       titulo:'Revisar disponibilidad del expediente',maximo:500,contexto:b.dataset.disponibilidad==='NINO'?'Expediente infantil':'Expediente familiar',
-      opciones:[['OTRO','Revisión de disponibilidad y elegibilidad','']],
+      opciones:this.motivosDisponibilidad[b.dataset.disponibilidad],
       confirmacion:'Confirma que revisaste por separado la disponibilidad y elegibilidad de este expediente. Esta actuación no modifica la idoneidad ni los requisitos vigentes.',
       alConfirmar:justificacion=>this.api(`/api/vinculaciones/${v.id}/disponibilidad`,{method:'POST',body:JSON.stringify({expediente:b.dataset.disponibilidad,justificacion})}),
       alGuardar:async datos=>{await this.detalle(c,v.id,sesion,datos);c.insertAdjacentHTML('afterbegin','<p class="mensaje exito" role="status">La revisión de este expediente quedó registrada.</p>');}
@@ -229,6 +229,20 @@ const Vinculaciones = {
       try{const datos=Object.fromEntries(new FormData(form));datos.confirmacionAutoridad=form.elements.confirmacionAutoridad.checked;const actualizado=await this.api(`/api/vinculaciones/${v.id}/cierre`,{method:'POST',body:JSON.stringify(datos)});Profesionales.marcarGuardado(form);d.close();await this.detalle(c,v.id,sesion,actualizado);c.insertAdjacentHTML('afterbegin','<p class="mensaje exito" role="status">El cierre institucional quedó registrado. Cada expediente conserva su reserva hasta revisión.</p>');}
       catch(error){d.querySelector('[data-error]').textContent=error.message;guardando=false;form.querySelectorAll('button').forEach(b=>b.disabled=false);}
     };d.showModal();
+  },
+  motivosDisponibilidad: {
+    NINO: [
+      ['DISPONIBILIDAD','Disponibilidad para una nueva propuesta','La revisión se centra en la disponibilidad actual del niño para considerar una nueva propuesta. Detalla las actuaciones institucionales que sustentan esta confirmación.'],
+      ['APOYOS','Necesidades y apoyos para la continuidad del proceso','La revisión considera las necesidades actuales del niño y los apoyos que deben mantenerse. Describe los antecedentes documentados que permiten continuar el proceso.'],
+      ['OPINION','Opinión del niño y condiciones de acompañamiento','La revisión considera la opinión del niño según su edad y madurez y las condiciones de acompañamiento. Indica cómo se recabó o, si no fue posible, deja constancia de ello y del respaldo institucional disponible.'],
+      ['OTRO','Otro','']
+    ],
+    FAMILIA: [
+      ['DISPONIBILIDAD','Disponibilidad para continuar con nuevas propuestas','La revisión se centra en la disponibilidad actual de la familia para considerar nuevas propuestas. Detalla la información confirmada y las actuaciones que sustentan esta revisión.'],
+      ['CUIDADOS','Condiciones de cuidado y red de apoyo','La revisión considera las condiciones actuales de cuidado y la red de apoyo familiar. Describe los antecedentes documentados relevantes para confirmar su disponibilidad.'],
+      ['ACTUALIZACION','Actualización de la entrevista y antecedentes','La revisión considera la información vigente de la entrevista y los antecedentes de la familia. Detalla los elementos verificados que sustentan su disponibilidad, sin sustituir los requisitos institucionales.'],
+      ['OTRO','Otro','']
+    ]
   },
   motivosInterrupcion: [
     ['DIFICULTADES_CONTINUAR','La familia manifestó dificultades para continuar.','Se registra la comunicación de dificultades de la familia para continuar con la convivencia. Se solicita revisar las circunstancias y el acompañamiento necesario.'],

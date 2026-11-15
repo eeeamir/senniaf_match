@@ -38,7 +38,14 @@ public class ScoringController {
     public Map<String,Object> expedienteFamilia(@RequestHeader("X-User-Role") String rol,
                                                                  @PathVariable String codigo) {
         comite(rol);
-        Map<String,Object> r=new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules().disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).convertValue(scoring.consultarExpedienteFamilia(codigo),new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>(){});r.put("antecedenteInterrupcion",scoring.antecedenteInterrupcion(codigo));return r;
+        var perfil=scoring.consultarExpedienteFamilia(codigo);
+        Map<String,Object> r=new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules().disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).convertValue(perfil,new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>(){});
+        r.put("antecedenteInterrupcion",scoring.antecedenteInterrupcion(codigo));
+        if(perfil.isReevaluacionPendiente() && familias!=null)familias.consultarPorCedula(perfil.getRegistradoPor()).ifPresent(revision->{
+            r.put("apartadosReevaluacion",revision.getApartadosReevaluacion());
+            r.put("observacionReevaluacion",revision.getObservacionReevaluacion());
+        });
+        return r;
     }
     @GetMapping("/pesos")
     public PesosScoring pesos(@RequestHeader("X-User-Role") String rol) {

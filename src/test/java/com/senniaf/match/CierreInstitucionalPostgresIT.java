@@ -26,6 +26,33 @@ class CierreInstitucionalPostgresIT extends SoportePostgresIT {
         assertEquals(puntaje,scoring.candidato(c.n(),familias.findById(c.f().getId()).orElseThrow(),scoring.pesos()).get("puntaje"));
         var propia=req("/api/vinculaciones/propias",HttpMethod.GET,c.token(),null);assertFalse(propia.getBody().contains(c.n().getCodigoCaso()));assertFalse(propia.getBody().contains("ACT-CIERRE"));assertEquals(403,req("/api/ninos/"+c.n().getCodigoCaso(),HttpMethod.GET,c.token(),null).getStatusCode().value());
     }
+    @Test void familiaVuelveAntesQueNinoSinRepetirParejaInterrumpidaNiEludirNuevaReserva(){
+        Caso c=caso(),otra=caso(),tercera=caso();long id=asignar(c);
+        assertEquals(200,req("/api/vinculaciones/"+id+"/respuesta",HttpMethod.POST,c.token(),Map.of("respuesta","ACEPTAR")).getStatusCode().value());
+        autorizarInicio(id);
+        assertEquals(200,req("/api/vinculaciones/"+id+"/interrupcion",HttpMethod.POST,social,Map.of("motivo","ADAPTACION","justificacion","Interrupción sintética para comprobar la reincorporación independiente")).getStatusCode().value());
+        cerrar(id);
+        assertEquals(200,liberar(id,"FAMILIA").getStatusCode().value());
+        assertTrue(vinculaciones.findById(id).orElseThrow().isReservaVigente());
+        assertTrue(vinculaciones.existsByNinoCodigoCasoAndReservaVigenteTrue(c.n().getCodigoCaso()));
+        assertFalse(vinculaciones.existsByFamiliaCodigoCasoAndReservaVigenteTrue(c.f().getCodigoCaso()));
+        var ranking=datos(req("/api/scoring/casos",HttpMethod.GET,comite,null));
+        assertFalse(java.util.stream.StreamSupport.stream(ranking.spliterator(),false).anyMatch(n->n.path("codigo").asText().equals(c.n().getCodigoCaso())));
+        var candidato=java.util.stream.StreamSupport.stream(ranking.spliterator(),false).filter(n->n.path("codigo").asText().equals(otra.n().getCodigoCaso())).findFirst().orElseThrow();
+        assertTrue(java.util.stream.StreamSupport.stream(candidato.path("familias").spliterator(),false).anyMatch(f->f.path("codigo").asText().equals(c.f().getCodigoCaso())));
+        assertEquals(200,aceptar(otra.n(),c.f()).getStatusCode().value());
+        assertEquals(200,liberar(id,"NINO").getStatusCode().value());
+        assertTrue(vinculaciones.existsByFamiliaCodigoCasoAndReservaVigenteTrue(c.f().getCodigoCaso()));
+        assertEquals(409,aceptar(tercera.n(),c.f()).getStatusCode().value());
+        assertEquals(409,aceptar(c.n(),c.f()).getStatusCode().value());
+        var casoLiberado=datos(req("/api/scoring/casos/"+c.n().getCodigoCaso(),HttpMethod.GET,comite,null));
+        assertTrue(casoLiberado.path("familiasRechazadas").toString().contains(c.f().getCodigoCaso()));
+        assertFalse(java.util.stream.StreamSupport.stream(casoLiberado.path("familias").spliterator(),false).anyMatch(f->f.path("codigo").asText().equals(c.f().getCodigoCaso())));
+        assertEquals(200,aceptar(c.n(),otra.f()).getStatusCode().value());
+        assertEquals(409,aceptar(c.n(),tercera.f()).getStatusCode().value());
+        assertEquals(2,auditoria.findByCodigoCasoOrderByFechaAsc(c.n().getCodigoCaso()).stream().filter(e->"DISPONIBILIDAD_REVISADA".equals(e.getAccion())).count());
+    }
+
     @Test void cierreDePropuestaSinRespuestaNoInventaAceptacion(){Caso c=caso();long id=asignar(c);cerrar(id);var v=vinculaciones.findById(id).orElseThrow();assertNull(v.getFechaRespuesta());assertNull(v.getRespondidoPor());assertTrue(v.isReservaVigente());assertEquals(409,req("/api/vinculaciones/"+id+"/respuesta",HttpMethod.POST,c.token(),Map.of("respuesta","ACEPTAR")).getStatusCode().value());}
     @Test void cierreRequiereConfirmacionDatosValidosYRol(){
         Caso c=caso();long id=asignar(c);String ruta="/api/vinculaciones/"+id+"/cierre";
