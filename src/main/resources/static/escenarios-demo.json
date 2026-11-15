@@ -320,7 +320,7 @@
       "cantidadHermanos": 0,
       "hermanosDetalle": "",
       "contextoCultural": "",
-      "idiomaComunicacion": "Utiliza español en conversaciones cotidianas.",
+      "idiomaComunicacion": "Se comunica mediante gestos, sonidos y palabras iniciales; el entorno cuidador utiliza español.",
       "costumbresTradiciones": "Valora los relatos compartidos durante las reuniones familiares.",
       "vinculosCulturales": "Mantiene interés por actividades artísticas comunitarias.",
       "opinionCultural": "No se ha podido obtener su opinión sobre estos aspectos.",
@@ -358,11 +358,11 @@
       "cantidadHermanos": null,
       "hermanosDetalle": "Aún no se ha confirmado si tiene hermanos.",
       "contextoCultural": "",
-      "idiomaComunicacion": "Utiliza español y expresa interés por palabras de su comunidad.",
-      "costumbresTradiciones": "Le interesan las comidas y los juegos de las celebraciones comunitarias.",
-      "vinculosCulturales": "Disfruta los encuentros deportivos y recreativos de su comunidad.",
-      "opinionCultural": "No se ha podido obtener su opinión sobre estos aspectos.",
-      "recomendacionesCulturales": "Introducir las nuevas rutinas respetando sus tradiciones y su ritmo de adaptación."
+      "idiomaComunicacion": "Se comunica mediante llanto, mirada, sonidos y movimientos. El entorno cuidador utiliza español.",
+      "costumbresTradiciones": "El entorno cuidador refiere canciones y rutinas de cuidado que conviene conocer y preservar cuando contribuyan a su bienestar.",
+      "vinculosCulturales": "Se recomienda valorar la continuidad de las figuras cuidadoras y de los entornos conocidos durante los cambios de cuidado.",
+      "opinionCultural": "Por su etapa de desarrollo no se ha podido obtener su opinión verbal. Se requiere observar sus señales de bienestar y malestar.",
+      "recomendacionesCulturales": "Mantener una comunicación sensible a sus señales, conservar rutinas de cuidado seguras y acompañar los cambios gradualmente con orientación profesional."
     },
     {
       "unidadEdad": "MESES",
@@ -396,11 +396,11 @@
       "cantidadHermanos": null,
       "hermanosDetalle": "Aún no se ha confirmado si tiene hermanos.",
       "contextoCultural": "",
-      "idiomaComunicacion": "Se comunica en español con palabras breves y gestos.",
-      "costumbresTradiciones": "Disfruta las celebraciones familiares y la música tradicional.",
-      "vinculosCulturales": "Participa en actividades educativas de su entorno.",
-      "opinionCultural": "Desea continuar participando en actividades musicales.",
-      "recomendacionesCulturales": "Acompañar su comunicación con paciencia y mantener actividades familiares significativas."
+      "idiomaComunicacion": "Se comunica mediante llanto, mirada, sonidos y movimientos. El entorno cuidador utiliza español.",
+      "costumbresTradiciones": "El entorno cuidador refiere canciones y rutinas de cuidado que conviene conocer y preservar cuando contribuyan a su bienestar.",
+      "vinculosCulturales": "Se recomienda valorar la continuidad de las figuras cuidadoras y de los entornos conocidos durante los cambios de cuidado.",
+      "opinionCultural": "Por su etapa de desarrollo no se ha podido obtener su opinión verbal. Se requiere observar sus señales de bienestar y malestar.",
+      "recomendacionesCulturales": "Mantener una comunicación sensible a sus señales, conservar rutinas de cuidado seguras y acompañar los cambios gradualmente con orientación profesional."
     },
     {
       "unidadEdad": "MESES",
@@ -434,11 +434,11 @@
       "cantidadHermanos": null,
       "hermanosDetalle": "Aún no se ha confirmado si tiene hermanos.",
       "contextoCultural": "",
-      "idiomaComunicacion": "Utiliza español en conversaciones cotidianas.",
-      "costumbresTradiciones": "Valora los relatos compartidos durante las reuniones familiares.",
-      "vinculosCulturales": "Mantiene interés por actividades artísticas comunitarias.",
-      "opinionCultural": "Expresa interés en mantener sus juegos y celebraciones habituales.",
-      "recomendacionesCulturales": "Conocer sus preferencias y preservar sus vínculos comunitarios con acompañamiento profesional."
+      "idiomaComunicacion": "Se comunica mediante llanto, mirada, sonidos y movimientos. El entorno cuidador utiliza español.",
+      "costumbresTradiciones": "El entorno cuidador refiere canciones y rutinas de cuidado que conviene conocer y preservar cuando contribuyan a su bienestar.",
+      "vinculosCulturales": "Se recomienda valorar la continuidad de las figuras cuidadoras y de los entornos conocidos durante los cambios de cuidado.",
+      "opinionCultural": "Por su etapa de desarrollo no se ha podido obtener su opinión verbal. Se requiere observar sus señales de bienestar y malestar.",
+      "recomendacionesCulturales": "Mantener una comunicación sensible a sus señales, conservar rutinas de cuidado seguras y acompañar los cambios gradualmente con orientación profesional."
     }
   ],
   "familia": [
