@@ -59,7 +59,7 @@ const ContextoPsicologico={
  },
  informe(c){
   if(!c)return '';
-  const bloque=(icono,titulo,contenido)=>`<div class="pro-informe-bloque"><h4>${Profesionales.icono(icono)}${titulo}</h4>${contenido}</div>`;
+  const bloque=(icono,titulo,contenido)=>`<details class="detalle-grupo pro-informe-bloque"><summary>${Profesionales.icono(icono)}${titulo}</summary><div class="pro-informe-contenido">${contenido}</div></details>`;
   const texto=(titulo,v)=>v?`<p><strong>${titulo}</strong><br>${limpiarHtml(v)}</p>`:'';
   const lista=(valores,etiquetas)=>valores?.length?`<ul>${valores.map(v=>`<li>${limpiarHtml(etiquetas[v]||Profesionales.etiqueta(v))}</li>`).join('')}</ul>`:'';
   let html='';

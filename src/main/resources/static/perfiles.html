@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="perfiles.css">
 <link rel="stylesheet" href="calendly-theme.css">
 <link rel="stylesheet" href="profesionales.css">
+<link rel="stylesheet" href="sprint8-acabados.css">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -95,6 +96,7 @@
 const sesion = Sesion.requerir(['TRABAJADOR_SOCIAL', 'PSICOLOGO', 'COMITE']);
 const codigoEvaluacion = new URLSearchParams(location.search).get('caso');
 const codigoFamilia = new URLSearchParams(location.search).get('familia');
+if(codigoFamilia)document.body.classList.add('s8-acabado');
 const vistaSolicitudes = sesion?.rol === 'TRABAJADOR_SOCIAL' && new URLSearchParams(location.search).get('vista') === 'solicitudes';
 let expedientes = [], pagina = 1;
 let expedienteSeleccionado = null;
@@ -241,7 +243,7 @@ const CAMPOS_NINO = {
   alergias:'Alergias', alergiasDetalle:'Detalle de alergias', intoleranciaLactosa:'Intolerancia a la lactosa',
   condicionesSalud:'Condiciones de salud', condicionesSaludDetalle:'Detalle de salud', necesidadesApoyo:'Necesidades de apoyo',
   tieneHermanos:'Tiene hermanos', cantidadHermanos:'Cantidad de hermanos', hermanosDetalle:'Información de hermanos',
-  contextoCultural:'Contexto cultural', registradoPor:'Creador del expediente', fechaRegistro:'Fecha de registro',
+  idiomaComunicacion:'Idioma y comunicación',costumbresTradiciones:'Costumbres y tradiciones significativas',vinculosCulturales:'Vínculos culturales y comunitarios',opinionCultural:'Preferencias y opinión del niño',recomendacionesCulturales:'Recomendaciones de continuidad cultural',contextoCultural:'Contexto cultural', registradoPor:'Creador del expediente', fechaRegistro:'Fecha de registro',
   trabajadorSocialAsignado:'Responsable de trabajo social', psicologoAsignado:'Profesional de psicología',
   perfilCompleto:'Perfil completo', alertaMedica:'Alerta médica', bajaLogica:'Excluido del Match (seguimiento permitido)'
 };
@@ -250,7 +252,7 @@ const CAMPOS_FAMILIA = {
   notaRedApoyo:'Notas de apoyo', provincia:'Provincia', disponibilidadViaje:'Disponibilidad de viaje', notaDistancia:'Notas de distancia',
   edadMinimaAceptada:'Edad mínima', edadMaximaAceptada:'Edad máxima', notaRangoEdad:'Notas del rango de edad',
   disposicionHermanos:'Disposición a hermanos', notaHermanos:'Notas de hermanos', condicionesPuedeAcompanarHoy:'Salud: apoyo actual',
-  condicionesConApoyo:'Salud: con apoyo adicional', notaCondicionesSalud:'Notas de salud', continuidadCultural:'Apoyos culturales, lingüísticos y comunitarios',
+  condicionesConApoyo:'Salud: con apoyo adicional', notaCondicionesSalud:'Notas de salud', ...Object.fromEntries(Profesionales.culturaFamilia.map(([k,t])=>[k,t])), continuidadCultural:'Información cultural registrada anteriormente',
   registradoPor:'Responsable familiar', fechaRegistro:'Fecha de registro', perfilCompleto:'Entrevista completa',
   reevaluacionPendiente:'Reevaluación pendiente', numeroReevaluaciones:'Reevaluaciones completadas'
 };
@@ -305,12 +307,12 @@ async function cargarHistoria(){
      const unidad=d[antes?'unidadEdadAnterior':'unidadEdadNueva']||d.cambios?.unidadEdad?.[antes?'anterior':'nuevo']||'ANIOS';
      return Profesionales.edad({edad:v,unidadEdad:unidad});
    };
-   const cambios=Object.entries(d.cambios||{}).map(([campo,v])=>`<h4>${limpiarHtml(CAMPOS_NINO[campo]||'Dato del expediente')}</h4><div class="pro-cambio-valores"><span><strong>Antes</strong><br>${limpiarHtml(campo==='edad'?edadHistorica(v.anterior,true):valor(v.anterior))}</span><span><strong>Después</strong><br>${limpiarHtml(campo==='edad'?edadHistorica(v.nuevo,false):valor(v.nuevo))}</span></div>`).join('');
+   const cambios=Object.entries(d.cambios||{}).map(([campo,v])=>`<article class="pro-cambio"><h4>${limpiarHtml(CAMPOS_NINO[campo]||({evaluacion:'Evaluación',observaciones:'Observaciones',recomendaciones:'Recomendaciones',hallazgosProfesionales:'Valoración profesional',diagnosticoProfesional:'Diagnóstico',areasObservadas:'Áreas evaluadas',sinDiagnostico:'Sin diagnóstico',contextoEvaluacion:'Contexto de la evaluación'})[campo]||'Dato del expediente')}</h4><div class="pro-cambio-valores"><span><strong>Antes</strong><br>${limpiarHtml(campo==='edad'?edadHistorica(v.anterior,true):valor(v.anterior))}</span><span class="pro-cambio-flecha" aria-hidden="true">→</span><span><strong>Después</strong><br>${limpiarHtml(campo==='edad'?edadHistorica(v.nuevo,false):valor(v.nuevo))}</span></div></article>`).join('');
    const contextoDecision=d.familia?`<p><strong>Familia propuesta:</strong> ${limpiarHtml(d.familia)} · <strong>Resultado registrado:</strong> ${limpiarHtml(d.puntaje)} de 100 · <strong>Versión de criterios:</strong> ${limpiarHtml(d.versionPesos)}</p>`:'';
    const asignacion=(d.trabajadorSocial?`<p><strong>Trabajo social asignado:</strong> ${limpiarHtml(d.trabajadorSocial)}</p>`:'')+(d.psicologo?`<p><strong>Psicología asignada:</strong> ${limpiarHtml(d.psicologo)}</p>`:'');
-   const contenido=informe?Profesionales.informe(informe,false):contextoDecision+asignacion+(d.justificacion?`<p>${limpiarHtml(d.justificacion)}</p>`:'')+(campos?`<p>Campos modificados: ${campos}.</p>`:'')+cambios+(d.detalleParcial?'<p>No se conservó el detalle ampliado de todos los campos; la información actual está disponible en el expediente.</p>':'');
+   const contenido=contextoDecision+asignacion+(d.justificacion?`<p>${limpiarHtml(d.justificacion)}</p>`:'')+(campos?`<p>Campos modificados: ${campos}.</p>`:'')+cambios+(d.detalleParcial?'<p>No se conservó el detalle ampliado de todos los campos; la información actual está disponible en el expediente.</p>':'');
    const responsable=e.rol==='SISTEMA'?'Sistema':e.actor||'Responsable no registrado';
-   return `<li class="pro-evento"><div class="pro-evento-cabecera">${Profesionales.icono(icono)}<strong>${titulo}${e.version?' · Versión '+e.version:''}</strong></div><div class="pro-evento-meta"><span>${limpiarHtml(responsable)}</span><span>${limpiarHtml(e.rol==='SISTEMA'?'Sistema':e.rol==='OPERACION_TECNICA'?'Gestión del expediente':ROLES[e.rol]||'Rol no registrado')}</span><time>${limpiarHtml(m.fecha)} · ${limpiarHtml(m.hora)} · Panamá</time></div><p>${limpiarHtml(e.descripcion||'Actuación conservada en el expediente.')}</p>${contenido?`<details class="pro-evento-detalle"><summary>Ver información registrada</summary>${contenido}</details>`:''}</li>`;
+   return `<li class="pro-evento"><div class="pro-evento-cabecera">${Profesionales.icono(icono)}<strong>${titulo}${e.version?' · Versión '+e.version:''}</strong></div><div class="pro-evento-meta"><span>${limpiarHtml(responsable)}</span><span>${limpiarHtml(e.rol==='SISTEMA'?'Sistema':e.rol==='OPERACION_TECNICA'?'Gestión del expediente':ROLES[e.rol]||'Rol no registrado')}</span><time>${limpiarHtml(m.fecha)} · ${limpiarHtml(m.hora)} · Panamá</time></div><p>${limpiarHtml(e.descripcion||'Actuación conservada en el expediente.')}</p>${contenido?`<details class="pro-evento-detalle"><summary>Ver cambios</summary>${contenido}</details>`:''}</li>`;
  }).join('')||'<li>No hay actuaciones registradas.</li>';
 }
 async function cargarFamilia() {
@@ -318,7 +320,8 @@ async function cargarFamilia() {
   document.getElementById('tituloDetalle').textContent = 'Expediente familiar · ' + codigoFamilia;
   try {
     const datos = await leerApi(`/api/scoring/familias/${encodeURIComponent(codigoFamilia)}/expediente`);
-    document.getElementById('datosDetalle').innerHTML = detalleSecciones(datos,CAMPOS_FAMILIA,GRUPOS_FAMILIA);
+    document.getElementById('datosDetalle').innerHTML = (datos.reevaluacionPendiente?`<aside class="pro-aviso-reevaluaciones" role="status"><h3>${Profesionales.icono('reloj')}Revisión de entrevista pendiente</h3><p>La familia no recibe nuevas recomendaciones hasta completar su actualización.</p>${datos.apartadosReevaluacion?.length?`<p><strong>Apartados solicitados:</strong> ${datos.apartadosReevaluacion.map(limpiarHtml).join(', ')}.</p>`:''}${datos.observacionReevaluacion?`<p><strong>Justificación del Comité</strong></p><p class="pro-texto-registrado">${limpiarHtml(datos.observacionReevaluacion)}</p>`:''}</aside>`:'')+detalleSecciones(datos,CAMPOS_FAMILIA,GRUPOS_FAMILIA);
+    if(location.hash==='#apoyosCulturales'){const a=document.getElementById('apoyosCulturales');if(a){a.open=true;a.scrollIntoView({block:'start'});}}
     document.getElementById('datosDetalle').classList.add('pro-expedientes-completos');
   } catch(e) { document.getElementById('datosDetalle').textContent = e.message; }
 }
@@ -400,14 +403,18 @@ function pintarDatosEvaluacion(informe=null){
 }
 function actualizarDiagnostico(){const f=document.querySelector('[data-diagnostico-formal]'),activo=!document.getElementById('sinDiagnostico').checked;f.hidden=!activo;f.disabled=!activo;document.getElementById('diagnosticoProfesional').required=activo;}
 document.getElementById('sinDiagnostico').addEventListener('change',actualizarDiagnostico);
+let ubicacionesEdicion=[],apartadosEdicion=[];
+function restaurarEdicionInline(){for(const [nodo,marca] of ubicacionesEdicion.reverse()){marca.replaceWith(nodo);}ubicacionesEdicion=[];apartadosEdicion.forEach(n=>n.remove());apartadosEdicion=[];document.getElementById('formEvaluacion').classList.remove('pro-edicion-inline');}
+function moverEdicion(nodo,destino){const marca=document.createComment('posición original');nodo.before(marca);ubicacionesEdicion.push([nodo,marca]);destino.append(nodo);}
 function terminarCorreccion() {
+  restaurarEdicionInline();
   corrigiendoInforme=null; document.getElementById('formEvaluacion').reset();actualizarDiagnostico();ContextoPsicologico.cargar(null);Profesionales.marcarGuardado(document.getElementById('formEvaluacion'));
   pintarDatosEvaluacion();
   document.getElementById('guardarEvaluacion').textContent=corrigiendoInforme?'Guardar cambios':'Guardar evaluación'; document.getElementById('cancelarCorreccion').hidden=false;
 }
 document.getElementById('cancelarCorreccion').addEventListener('click',()=>{terminarCorreccion();document.getElementById('formEvaluacion').hidden=informesPsicologicos.some(e=>e.vigente);mostrarPanel('panelEvaluaciones');});
 document.querySelector('main').addEventListener('click',e=>{
-  const b=e.target.closest('[data-corregir]');if(!b)return;
+  const b=e.target.closest('[data-corregir]');if(!b||document.getElementById('formEvaluacion').classList.contains('pro-edicion-inline'))return;
   const informe=informesPsicologicos.find(x=>x.id===Number(b.dataset.corregir));if(!informe)return;
   corrigiendoInforme=informe.id;
   document.getElementById('evaluacionPsicologica').value=informe.evaluacion;
@@ -422,25 +429,52 @@ document.querySelector('main').addEventListener('click',e=>{
   pintarDatosEvaluacion(informe);
   document.getElementById('guardarEvaluacion').textContent=corrigiendoInforme?'Guardar cambios':'Guardar evaluación';document.getElementById('cancelarCorreccion').hidden=false;
   mostrarPanel('panelEvaluaciones');
-  document.getElementById('formEvaluacion').scrollIntoView({behavior:'smooth',block:'center'});
+  const form=document.getElementById('formEvaluacion'),articulo=document.querySelector('#evaluacionesVigentes .pro-informe');
+  if(articulo){const marca=document.createComment('posición del formulario');form.before(marca);ubicacionesEdicion.push([form,marca]);articulo.before(form);form.classList.add('pro-edicion-inline');
+   const bloques=[...form.children];moverEdicion(articulo,form);
+   const nombres={evaluacionPsicologica:'Evaluación',observacionesPsicologicas:'Observaciones',recomendacionesPsicologicas:'Recomendaciones profesionales',hallazgosProfesionales:'Valoración profesional',sinDiagnostico:'Diagnóstico',diagnosticoProfesional:'Diagnóstico',otroMetodo:'Métodos utilizados',detalleAcompanamiento:'Necesidades de acompañamiento'};
+   for(const bloque of bloques){
+    if(bloque.classList.contains('pro-evaluacion-datos'))continue;
+    if(bloque.classList.contains('pro-acciones')){moverEdicion(bloque,articulo.querySelector('.pro-informe-registro'));continue;}
+    const campo=bloque.querySelector('textarea,input');const titulo=nombres[campo?.id]||(bloque.querySelector('[name=areasObservadas]')?'Áreas evaluadas':bloque.querySelector('#apoyosEvaluacion')?'Necesidades de acompañamiento':bloque.querySelector('#metodosEvaluacion')?'Métodos utilizados':null);
+    if(!titulo)continue;
+    let seccion=[...articulo.querySelectorAll('.pro-informe-bloque')].find(n=>n.querySelector('summary')?.textContent.trim()===titulo || titulo==='Diagnóstico'&&n.querySelector('summary')?.textContent.trim()==='Diagnóstico profesional');
+    if(!seccion){seccion=document.createElement('details');seccion.className='detalle-grupo pro-informe-bloque';seccion.innerHTML=`<summary>${Profesionales.icono('informe')}${limpiarHtml(titulo)}</summary><div class="pro-informe-contenido"></div>`;articulo.querySelector('.pro-informe-bloques').append(seccion);apartadosEdicion.push(seccion);}
+    seccion.open=true;moverEdicion(bloque,seccion.querySelector('.pro-informe-contenido'));
+   }
+  }
 });
 const GRUPOS_NINO = {
  'Datos generales y escolaridad':['edad','nivelEscolar','gradoEscolar','rendimientoAcademico'],
  'Habilidades, gustos y personalidad':['habilidades','habilidadesDetalle','gustos','gustosDetalle','personalidad','personalidadDetalle'],
- 'Hermanos y contexto familiar':['tieneHermanos','cantidadHermanos','hermanosDetalle','contextoCultural'],
+ 'Hermanos y contexto familiar':['tieneHermanos','cantidadHermanos','hermanosDetalle'],
  'Salud y necesidades de apoyo':['alergias','alergiasDetalle','intoleranciaLactosa','condicionesSalud','condicionesSaludDetalle','necesidadesApoyo','alertaMedica'],
+ 'Identidad y continuidad cultural':['idiomaComunicacion','costumbresTradiciones','vinculosCulturales','opinionCultural','recomendacionesCulturales'],
  'Registro y profesionales responsables':['codigoCaso','numeroExpedienteInstitucional','registradoPor','fechaRegistro','trabajadorSocialAsignado','psicologoAsignado']
 };
 const GRUPOS_FAMILIA = {
  'Hogar y red de apoyo':['tipoFamilia','especificacionHogar','notaEstructuraHogar','redApoyo','notaRedApoyo'],
  'Preferencias consideradas por el Match':['edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad','disposicionHermanos','notaHermanos'],
  'Salud y logística':['condicionesPuedeAcompanarHoy','condicionesConApoyo','notaCondicionesSalud','provincia','disponibilidadViaje','notaDistancia'],
- 'Apoyos culturales y comunitarios':['continuidadCultural'],
+ 'Apoyos culturales y comunitarios':[...Profesionales.culturaFamilia.map(([k])=>k),'continuidadCultural'],
  'Registro y seguimiento':['codigoCaso','registradoPor','fechaRegistro','perfilCompleto','reevaluacionPendiente']
 };
+const CAMPOS_CULTURA=[
+ ['idiomaComunicacion','Idioma y comunicación','Indica el idioma que utiliza habitualmente el niño y si necesita algún apoyo para comunicarse'],
+ ['costumbresTradiciones','Costumbres y tradiciones significativas','Describe costumbres, celebraciones o tradiciones relevantes para su identidad y bienestar'],
+ ['vinculosCulturales','Vínculos culturales y comunitarios','Indica las actividades, espacios o vínculos comunitarios que sería importante preservar'],
+ ['opinionCultural','Preferencias y opinión del niño','Registra las preferencias expresadas por el niño sobre las costumbres y vínculos que desea mantener, según su edad y madurez'],
+ ['recomendacionesCulturales','Recomendaciones de continuidad cultural','Describe cómo una futura familia podría acompañar y respetar los aspectos culturales importantes para el niño']
+];
+function culturaDetalle(datos){
+ return `<details id="identidadCultural" class="detalle-grupo pro-detalle-amplio"><summary>${Profesionales.icono('personas')}Identidad y continuidad cultural</summary><div class="cultura-contenido">
+ ${datos.contextoCultural?`<aside class="cultura-antecedente"><h3>Información cultural registrada anteriormente</h3><p class="pro-texto-registrado">${limpiarHtml(datos.contextoCultural)}</p><p class="ayuda">Este antecedente se conserva sin reinterpretarlo ni repartirlo entre los nuevos campos.</p></aside>`:''}
+ <dl class="detalle-datos cultura-campos">${CAMPOS_CULTURA.map(([k,t,a])=>`<div><dt>${t}</dt><dd>${limpiarHtml(datos[k]||'Sin información registrada')}</dd><p class="ayuda">${a}.</p></div>`).join('')}</dl>
+ <p data-cultura-estado role="status"></p></div></details>`;
+}
 function detalleSecciones(datos,campos,grupos) {
- const aviso=grupos===GRUPOS_FAMILIA&&sesion.rol==='COMITE'?Profesionales.avisoReevaluaciones(datos.numeroReevaluaciones):'';
- return aviso+Object.entries(grupos).map(([titulo,keys],i)=>`<details class="detalle-grupo ${keys.length===1?'pro-detalle-amplio':''}"><summary>${Profesionales.icono(titulo==='Apoyos culturales y comunitarios'?'personas':i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
+ const aviso=grupos===GRUPOS_FAMILIA&&sesion.rol==='COMITE'?Profesionales.avisoInterrupcion(datos.antecedenteInterrupcion)+Profesionales.avisoReevaluaciones(datos.numeroReevaluaciones):'';
+ return aviso+Object.entries(grupos).map(([titulo,keys],i)=>titulo==='Identidad y continuidad cultural'?culturaDetalle(datos):`<details id="${titulo==='Identidad y continuidad cultural'?'identidadCultural':titulo==='Apoyos culturales y comunitarios'?'apoyosCulturales':'grupo-'+i}" class="detalle-grupo ${keys.length===1?'pro-detalle-amplio':''}"><summary>${Profesionales.icono(titulo==='Apoyos culturales y comunitarios'?'personas':i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
  detalleCampos(datos,Object.fromEntries(keys.map(k=>[k,campos[k]])))+'</details>').join('');
 }
 function pintarResumen(p){
@@ -477,6 +511,7 @@ document.getElementById('abrirSolicitud').addEventListener('click',()=>{document
 
 
 function configurarPestanas(){
+ const abrirCultura=location.hash==='#identidadCultural';
  const tabs=[['panelDetalle','informe','Información social'],['panelEvaluaciones','psicologia','Información psicológica'],...(['TRABAJADOR_SOCIAL','COMITE'].includes(sesion.rol)?[['panelSolicitudes','carpeta','Gestión del expediente']]:[]),['panelAuditoria','reloj','Historial de cambios']];
  if(sesion.rol==='PSICOLOGO')document.getElementById('panelSolicitudes').hidden=true;
  const nav=document.getElementById('pestanasExpediente');nav.hidden=false;
@@ -485,8 +520,10 @@ function configurarPestanas(){
  nav.querySelectorAll('button').forEach((b,i)=>{b.addEventListener('click',()=>mostrarPanel(b.dataset.panel));b.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const botones=[...nav.querySelectorAll('button')];const j=e.key==='Home'?0:e.key==='End'?botones.length-1:(i+(e.key==='ArrowRight'?1:-1)+botones.length)%botones.length;botones[j].focus();mostrarPanel(botones[j].dataset.panel);});});
  if(sesion.rol==='TRABAJADOR_SOCIAL'&&!document.getElementById('editarSocial'))document.getElementById('cabeceraInformacionSocial').insertAdjacentHTML('beforeend',`<a id="editarSocial" class="boton secundario chico" href="perfil.html?editar=${encodeURIComponent(codigoEvaluacion)}">${Profesionales.icono('informe')}Editar información social</a>`);
  mostrarPanel(tabs.some(([id])=>id===location.hash.slice(1))?location.hash.slice(1):(sesion.rol==='PSICOLOGO'?'panelEvaluaciones':'panelDetalle'));
+ if(abrirCultura){mostrarPanel('panelDetalle');const apartado=document.getElementById('identidadCultural');if(apartado){apartado.open=true;apartado.scrollIntoView({block:'start'});}}
 }
 function mostrarPanel(id){
+ document.body.classList.toggle('s8-acabado',Boolean(codigoFamilia)||id==='panelSolicitudes');
  document.querySelectorAll('[data-panel]').forEach(b=>{const activo=b.dataset.panel===id;b.setAttribute('aria-selected',String(activo));b.tabIndex=activo?0:-1;document.getElementById(b.dataset.panel).hidden=!activo;});
  history.replaceState(null,'','#'+id);
 }

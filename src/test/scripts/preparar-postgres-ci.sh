@@ -32,7 +32,10 @@ for archivo in \
     deploy/azure/sql/013-interrupciones-convivencia.sql \
     deploy/azure/sql/014-cierre-institucional.sql \
     deploy/azure/sql/015-pesos-programados-y-exclusiones.sql \
-    deploy/azure/sql/016-cierre-simplificado.sql; do
+    deploy/azure/sql/016-cierre-simplificado.sql \
+    deploy/azure/sql/017-continuidad-cultural.sql \
+    deploy/azure/sql/018-apoyos-familia-interrupcion.sql \
+    deploy/azure/sql/019-autorizacion-y-reevaluacion.sql; do
     confirmacion=AMPLIAR_SIN_BORRAR
     [[ $archivo != *010-* ]] || confirmacion=AGREGAR_DOCUMENTOS_SIN_REEMPLAZAR
     [[ $archivo != *012-* ]] || confirmacion=CREAR_VINCULACIONES_SIN_BORRAR
@@ -40,5 +43,8 @@ for archivo in \
     [[ $archivo != *014-* ]] || confirmacion=REGISTRAR_CIERRE_SIN_BORRAR
     [[ $archivo != *015-* ]] || confirmacion=PROGRAMAR_PESOS_SIN_BORRAR
     [[ $archivo != *016-* ]] || confirmacion=SIMPLIFICAR_CIERRE_SIN_BORRAR
+    [[ $archivo != *017-* ]] || confirmacion=AGREGAR_CULTURA_SIN_REINTERPRETAR
+    [[ $archivo != *018-* ]] || confirmacion=AMPLIAR_APOYOS_SIMPLIFICAR_INTERRUPCION
+    [[ $archivo != *019-* ]] || confirmacion=REGISTRAR_AUTORIZACION_Y_APARTADOS_SIN_BORRAR
     psql -X -v ON_ERROR_STOP=1 -v base_autorizada="$PGDATABASE" -v confirmacion="$confirmacion" -f "$raiz/$archivo"
 done

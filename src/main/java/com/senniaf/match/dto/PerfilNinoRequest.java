@@ -45,6 +45,17 @@ import java.util.List;
  * "necesidades".
  */
 public class PerfilNinoRequest {
+    @Size(max=10000,message="Cada campo cultural admite hasta 10.000 caracteres") private String idiomaComunicacion;
+    public String getIdiomaComunicacion(){return idiomaComunicacion;} public void setIdiomaComunicacion(String v){idiomaComunicacion=v;}
+    @Size(max=10000,message="Cada campo cultural admite hasta 10.000 caracteres") private String costumbresTradiciones;
+    public String getCostumbresTradiciones(){return costumbresTradiciones;} public void setCostumbresTradiciones(String v){costumbresTradiciones=v;}
+    @Size(max=10000,message="Cada campo cultural admite hasta 10.000 caracteres") private String vinculosCulturales;
+    public String getVinculosCulturales(){return vinculosCulturales;} public void setVinculosCulturales(String v){vinculosCulturales=v;}
+    @Size(max=10000,message="Cada campo cultural admite hasta 10.000 caracteres") private String opinionCultural;
+    public String getOpinionCultural(){return opinionCultural;} public void setOpinionCultural(String v){opinionCultural=v;}
+    @Size(max=10000,message="Cada campo cultural admite hasta 10.000 caracteres") private String recomendacionesCulturales;
+    public String getRecomendacionesCulturales(){return recomendacionesCulturales;} public void setRecomendacionesCulturales(String v){recomendacionesCulturales=v;}
+
 
     private String numeroExpedienteInstitucional;
     public String getNumeroExpedienteInstitucional() { return numeroExpedienteInstitucional; }

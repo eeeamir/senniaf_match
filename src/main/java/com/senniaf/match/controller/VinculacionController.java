@@ -13,8 +13,14 @@ public class VinculacionController {
     @GetMapping public List<Map<String,Object>> listar(@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@RequestParam(required=false) String estado,@RequestParam(required=false) String buscar){return service.listar(rol,actor,estado,buscar);}
     @GetMapping("/propias") public List<Map<String,Object>> propias(@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor){familia(rol);return service.propias(actor);}
     @GetMapping("/{id}") public Map<String,Object> detalle(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor){return service.detalle(id,rol,actor);}
+    @GetMapping("/{id}/informacion-asignada")
+    public org.springframework.http.ResponseEntity<Map<String,Object>> informacion(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor){
+        familia(rol);return org.springframework.http.ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore()).body(service.informacionAsignada(id,actor));
+    }
     public record Respuesta(String respuesta){}
     @PostMapping("/{id}/respuesta") public Map<String,Object> responder(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@RequestBody Respuesta request){familia(rol);return service.responder(id,actor,request==null?null:request.respuesta());}
+    @PostMapping("/{id}/autorizacion-preadoptiva")
+    public Map<String,Object> autorizacion(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@jakarta.validation.Valid @RequestBody com.senniaf.match.dto.AutorizacionPreadoptivaRequest solicitud){return service.registrarAutorizacion(id,rol,actor,solicitud);}
     @PostMapping("/{id}/interrupcion")
     public Map<String,Object> registrarInterrupcion(@PathVariable Long id,@RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor,@jakarta.validation.Valid @RequestBody com.senniaf.match.dto.InterrupcionRequest solicitud){return service.registrarInterrupcion(id,rol,actor,solicitud);}
     @PostMapping("/{id}/interrupcion/revision")

@@ -118,6 +118,12 @@ public class PerfilNinoService {
                 : request.getTieneHermanos() == com.senniaf.match.model.enums.SiNo.SI ? request.getCantidadHermanos() : null);
         perfil.setHermanosDetalle(request.getHermanosDetalle());
         perfil.setContextoCultural(request.getContextoCultural());
+        if(request.getIdiomaComunicacion()!=null)perfil.setIdiomaComunicacion(request.getIdiomaComunicacion());
+        if(request.getCostumbresTradiciones()!=null)perfil.setCostumbresTradiciones(request.getCostumbresTradiciones());
+        if(request.getVinculosCulturales()!=null)perfil.setVinculosCulturales(request.getVinculosCulturales());
+        if(request.getOpinionCultural()!=null)perfil.setOpinionCultural(request.getOpinionCultural());
+        if(request.getRecomendacionesCulturales()!=null)perfil.setRecomendacionesCulturales(request.getRecomendacionesCulturales());
+
     }
 
     public List<PerfilNino> listarPerfiles(String actor, String rol, boolean incluirInactivos) {
@@ -151,12 +157,21 @@ public class PerfilNinoService {
     @Transactional
     public PerfilNinoResponse actualizar(String codigo, String actor, PerfilNinoRequest request) {
         PerfilNino p = vinculadoParaActualizar(codigo, actor, "TRABAJADOR_SOCIAL");
+        if(request.getContextoCultural()!=null && !request.getContextoCultural().replace("\r\n","\n").equals(p.getContextoCultural()==null?"":p.getContextoCultural().replace("\r\n","\n")))
+            throw new IllegalArgumentException("El antecedente cultural se conserva sin cambios. Edita los cinco campos dentro de Información Social.");
+        request.setContextoCultural(p.getContextoCultural());
         boolean conservarEdadHistorica=Integer.valueOf(0).equals(p.getEdad())
                 && p.getUnidadEdad()==com.senniaf.match.model.enums.UnidadEdad.ANIOS;
         request.validarCoherencia(conservarEdadHistorica);
         var anteriores=datosSociales(p);
         PerfilNino propuesto=new PerfilNino();
         copiarDatos(propuesto,request);
+        if(request.getIdiomaComunicacion()==null)propuesto.setIdiomaComunicacion(p.getIdiomaComunicacion());
+        if(request.getCostumbresTradiciones()==null)propuesto.setCostumbresTradiciones(p.getCostumbresTradiciones());
+        if(request.getVinculosCulturales()==null)propuesto.setVinculosCulturales(p.getVinculosCulturales());
+        if(request.getOpinionCultural()==null)propuesto.setOpinionCultural(p.getOpinionCultural());
+        if(request.getRecomendacionesCulturales()==null)propuesto.setRecomendacionesCulturales(p.getRecomendacionesCulturales());
+
         propuesto.setPerfilCompleto(calcularSiEstaCompleto(request));
         propuesto.setAlertaMedica(calcularAlertaMedica(request));
         if(ContenidoComparable.iguales(anteriores,datosSociales(propuesto)))
@@ -167,6 +182,21 @@ public class PerfilNinoService {
         repositorio.save(p);
         auditar(codigo, actor, "EDICION", cambiosSociales(anteriores,datosSociales(p)));
         return new PerfilNinoResponse("Perfil actualizado correctamente", codigo, p.isPerfilCompleto(), p.isAlertaMedica());
+    }
+
+    @Transactional
+    public PerfilNinoResponse actualizarCultura(String codigo,String actor,com.senniaf.match.dto.ContinuidadCulturalRequest r){
+        var p=vinculadoParaActualizar(codigo,actor,"TRABAJADOR_SOCIAL");
+        var anteriores=datosSociales(p);
+        p.setIdiomaComunicacion(r.idiomaComunicacion());
+        p.setCostumbresTradiciones(r.costumbresTradiciones());
+        p.setVinculosCulturales(r.vinculosCulturales());
+        p.setOpinionCultural(r.opinionCultural());
+        p.setRecomendacionesCulturales(r.recomendacionesCulturales());
+        var actuales=datosSociales(p);
+        if(java.util.Objects.equals(anteriores,actuales))return new PerfilNinoResponse("No hay cambios culturales para guardar",codigo,p.isPerfilCompleto(),p.isAlertaMedica());
+        repositorio.save(p);auditar(codigo,actor,"EDICION",cambiosSociales(anteriores,actuales));
+        return new PerfilNinoResponse("Los cambios culturales se guardaron correctamente",codigo,p.isPerfilCompleto(),p.isAlertaMedica());
     }
 
     public List<EventoCaso> historial(String codigo, String actor, String rol) {

@@ -95,6 +95,14 @@ public class PerfilFamiliaService {
         if(p.getFechaRegistro()!=null)actividad.add(actividad("Entrevista registrada","Se recibió la información de tu hogar.",p.getFechaRegistro()));
         if(decisiones!=null)for(var d:decisiones.findByCodigoFamiliaOrderByFechaAsc(p.getCodigoCaso())) {
             if(d.getFecha()==null)continue;
+            if(p.isReevaluacionPendiente() && "REEVALUACION".equals(d.getDecision())){
+                var apartados=d.getApartadosReevaluacion();String observacion=d.getMotivo();
+                if(apartados==null && observacion!=null && observacion.startsWith("Apartados: ") && observacion.contains("\n\n")){
+                    var partes=observacion.split("\n\n",2);apartados=java.util.Arrays.asList(partes[0].substring(11).split(java.util.regex.Pattern.quote(" | ")));observacion=partes[1];
+                }
+                respuesta.setApartadosReevaluacion(apartados==null?List.of():apartados);
+                respuesta.setObservacionReevaluacion(observacion);
+            }
             if("ACEPTADA".equals(d.getDecision()))actividad.add(actividad("Propuesta enviada por el Comité","Consulta Mi vinculación para conocer el estado y registrar tu respuesta.",d.getFecha()));
             else if("REEVALUACION".equals(d.getDecision()))actividad.add(actividad("Revisión de entrevista solicitada","Se solicitó ampliar la información de la entrevista.",d.getFecha()));
         }
@@ -114,6 +122,8 @@ public class PerfilFamiliaService {
     }
 
     /** Vista institucional derivada del contador existente y de sus actuaciones, sin crear avisos persistentes duplicados. */
+    @Transactional(readOnly=true)
+    public java.util.List<String> reevaluacionesPendientes(){return repositorio.findAll().stream().filter(PerfilFamilia::isReevaluacionPendiente).map(PerfilFamilia::getCodigoCaso).sorted().toList();}
     @Transactional(readOnly=true)
     public java.util.List<java.util.Map<String,Object>> alertasReevaluaciones(){
         return repositorio.findAll().stream().filter(p->p.getNumeroReevaluaciones()>=3)
@@ -186,9 +196,14 @@ public class PerfilFamiliaService {
         perfil.setCondicionesPuedeAcompanarHoy(request.getCondicionesPuedeAcompanarHoy());
         perfil.setCondicionesConApoyo(request.getCondicionesConApoyo());
         perfil.setNotaCondicionesSalud(request.getNotaCondicionesSalud());
-        // Los clientes anteriores que omiten esta sección conservan el contenido histórico.
-        if (request.getContinuidadCultural()!=null)
-            perfil.setContinuidadCultural(request.getContinuidadCultural().strip());
+        // El texto anterior se conserva íntegro; no se reparte ni se sustituye en actualizaciones.
+        if (perfil.getId()==null) perfil.setContinuidadCultural(request.getContinuidadCultural());
+        if(request.getApoyoIdiomas()!=null) perfil.setApoyoIdiomas(request.getApoyoIdiomas());
+        if(request.getRespetoTradiciones()!=null) perfil.setRespetoTradiciones(request.getRespetoTradiciones());
+        if(request.getRecursosComunitarios()!=null) perfil.setRecursosComunitarios(request.getRecursosComunitarios());
+        if(request.getRespetoPreferencias()!=null) perfil.setRespetoPreferencias(request.getRespetoPreferencias());
+        if(request.getCompromisoCultural()!=null) perfil.setCompromisoCultural(request.getCompromisoCultural());
+
     }
 
     /** Perfil que la familia ya registró con su cédula, si existe. */

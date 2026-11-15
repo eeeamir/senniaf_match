@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="perfil.css">
 <link rel="stylesheet" href="calendly-theme.css">
 <link rel="stylesheet" href="profesionales.css">
+<link rel="stylesheet" href="sprint8-acabados.css">
 </head>
 
 
@@ -435,10 +436,10 @@
           </label>
 
           <textarea
-            id="contextoCultural"
+            aria-describedby="ayudaIdentidadCultural" id="contextoCultural"
             name="contextoCultural"
             placeholder="Describa vínculos de idioma, cultura o comunidad que convenga preservar."
-          ></textarea>
+          ></textarea><p class="ayuda" id="ayudaIdentidadCultural">Describe el idioma, las tradiciones, los vínculos comunitarios y las preferencias expresadas por el niño, junto con las orientaciones para su continuidad. Registra solo información conocida.</p>
 
           <div class="ayuda">
 
@@ -455,6 +456,7 @@
     </section>
 
 
+      <section class="grupo" id="edicionCulturalSocial"><h2>Identidad y continuidad cultural</h2><div class="fila"><div class="campo ancho"><label for="idiomaComunicacion">Idioma y comunicación <small>(opcional)</small></label><textarea id="idiomaComunicacion" name="idiomaComunicacion" rows="3" aria-describedby="ayuda-idiomaComunicacion"></textarea><p class="ayuda" id="ayuda-idiomaComunicacion">Indica el idioma que utiliza habitualmente el niño y si necesita algún apoyo para comunicarse.</p></div><div class="campo ancho"><label for="costumbresTradiciones">Costumbres y tradiciones significativas <small>(opcional)</small></label><textarea id="costumbresTradiciones" name="costumbresTradiciones" rows="3" aria-describedby="ayuda-costumbresTradiciones"></textarea><p class="ayuda" id="ayuda-costumbresTradiciones">Describe costumbres, celebraciones o tradiciones relevantes para su identidad y bienestar.</p></div><div class="campo ancho"><label for="vinculosCulturales">Vínculos culturales y comunitarios <small>(opcional)</small></label><textarea id="vinculosCulturales" name="vinculosCulturales" rows="3" aria-describedby="ayuda-vinculosCulturales"></textarea><p class="ayuda" id="ayuda-vinculosCulturales">Indica las actividades, espacios o vínculos comunitarios que sería importante preservar. No incluyas nombres completos, direcciones ni teléfonos de terceros.</p></div><div class="campo ancho"><label for="opinionCultural">Preferencias y opinión del niño <small>(opcional)</small></label><textarea id="opinionCultural" name="opinionCultural" rows="3" aria-describedby="ayuda-opinionCultural"></textarea><p class="ayuda" id="ayuda-opinionCultural">Registra las preferencias expresadas según su edad y madurez. Si no se ha podido obtener su opinión, puedes indicarlo sin inventar respuestas.</p></div><div class="campo ancho"><label for="recomendacionesCulturales">Recomendaciones de continuidad cultural <small>(opcional)</small></label><textarea id="recomendacionesCulturales" name="recomendacionesCulturales" rows="3" aria-describedby="ayuda-recomendacionesCulturales"></textarea><p class="ayuda" id="ayuda-recomendacionesCulturales">Describe cómo una futura familia podría acompañar y respetar los aspectos culturales importantes para el niño.</p></div></div></section>
       </div> <!-- fin datos del perfil -->
 
 
@@ -1060,11 +1062,13 @@
       <section class="grupo" id="seccionApoyosCulturales">
         <h2>Apoyos culturales y comunitarios</h2>
         <p class="ayuda">Cada niño o niña tiene una historia, costumbres y vínculos importantes. Comparte cómo tu familia podría acompañar y respetar esos aspectos durante su desarrollo.</p>
-        <div class="fila"><div class="campo ancho">
-          <label for="continuidadCultural">Apoyos culturales, lingüísticos y comunitarios (opcional)</label>
-          <textarea id="continuidadCultural" name="continuidadCultural" maxlength="2000" rows="5" aria-describedby="ayudaContinuidadCultural" placeholder="Cuéntanos cómo acompañarías sus vínculos culturales, su idioma y su comunidad."></textarea>
-          <p class="ayuda" id="ayudaContinuidadCultural">Esta información apoya la valoración humana del Comité. No modifica tu puntuación de compatibilidad.</p>
-        </div></div>
+        <aside id="antecedenteCulturalFamilia" class="cultura-antecedente" hidden><h3>Información cultural registrada anteriormente</h3><p class="pro-texto-registrado" data-texto-anterior></p></aside>
+        <div class="campo ancho apoyo-cultural-campo"><label for="apoyoIdiomas">Apoyo con idiomas y comunicación <small>(opcional)</small></label><textarea id="apoyoIdiomas" name="apoyoIdiomas" rows="4" aria-describedby="ayuda-apoyoIdiomas"></textarea><p class="ayuda" id="ayuda-apoyoIdiomas">¿Qué idiomas habla tu familia y cómo acompañaría a un niño que utiliza otro idioma?</p></div>
+        <div class="campo ancho apoyo-cultural-campo"><label for="respetoTradiciones">Respeto por costumbres y tradiciones <small>(opcional)</small></label><textarea id="respetoTradiciones" name="respetoTradiciones" rows="4" aria-describedby="ayuda-respetoTradiciones"></textarea><p class="ayuda" id="ayuda-respetoTradiciones">¿Cómo respetaría las costumbres, celebraciones y tradiciones importantes para el niño?</p></div>
+        <div class="campo ancho apoyo-cultural-campo"><label for="recursosComunitarios">Recursos y apoyos comunitarios <small>(opcional)</small></label><textarea id="recursosComunitarios" name="recursosComunitarios" rows="4" aria-describedby="ayuda-recursosComunitarios"></textarea><p class="ayuda" id="ayuda-recursosComunitarios">¿Con qué actividades, personas de apoyo o recursos comunitarios cuenta para acompañarlo?</p></div>
+        <div class="campo ancho apoyo-cultural-campo"><label for="respetoPreferencias">Respeto por las preferencias del niño <small>(opcional)</small></label><textarea id="respetoPreferencias" name="respetoPreferencias" rows="4" aria-describedby="ayuda-respetoPreferencias"></textarea><p class="ayuda" id="ayuda-respetoPreferencias">¿Cómo escucharía y tendría en cuenta sus preferencias culturales y sus vínculos importantes?</p></div>
+        <div class="campo ancho apoyo-cultural-campo"><label for="compromisoCultural">Compromiso de acompañamiento cultural <small>(opcional)</small></label><textarea id="compromisoCultural" name="compromisoCultural" rows="4" aria-describedby="ayuda-compromisoCultural"></textarea><p class="ayuda" id="ayuda-compromisoCultural">¿Qué acciones concretas realizaría para preservar su identidad y facilitar su adaptación?</p></div>
+        <p class="ayuda">Esta información apoya la valoración humana del Comité y no modifica la puntuación. Cada respuesta admite hasta 10.000 caracteres; un exceso se rechaza sin recortar el contenido. No incluyas direcciones ni teléfonos de terceros.</p>
       </section>
 
       <!-- ===============================================
@@ -1331,9 +1335,16 @@ formulario.addEventListener('submit', async (evento) => {
       ? Number(document.getElementById('cantidadHermanos').value)
       : null,
     hermanosDetalle: document.getElementById('hermanosDetalle').value,
-    contextoCultural: document.getElementById('contextoCultural').value
+    contextoCultural: document.getElementById('contextoCultural').value,
+    idiomaComunicacion:document.getElementById('idiomaComunicacion').value,
+    costumbresTradiciones:document.getElementById('costumbresTradiciones').value,
+    vinculosCulturales:document.getElementById('vinculosCulturales').value,
+    opinionCultural:document.getElementById('opinionCultural').value,
+    recomendacionesCulturales:document.getElementById('recomendacionesCulturales').value,
+
   };
 
+  ["idiomaComunicacion", "costumbresTradiciones", "vinculosCulturales", "opinionCultural", "recomendacionesCulturales"].forEach(k=>{const c=document.getElementById(k);c.setCustomValidity(c.value.length>10000?'Utiliza hasta 10.000 caracteres; el contenido no se recorta.':'');});
   if (!Profesionales.validarFormulario(formulario)) {
     formulario.querySelectorAll(':invalid').forEach(c=>c.closest('details')?.setAttribute('open',''));
     formulario.reportValidity();
@@ -1475,9 +1486,14 @@ formularioFamilia.addEventListener('submit', async (evento) => {
     condicionesPuedeAcompanarHoy: valoresMarcados('condicionesPuedeAcompanarHoy'),
     condicionesConApoyo: valoresMarcados('condicionesConApoyo'),
     notaCondicionesSalud: document.getElementById('notaCondicionesSalud').value,
-    continuidadCultural: document.getElementById('continuidadCultural').value,
+    apoyoIdiomas: document.getElementById('apoyoIdiomas').value,
+    respetoTradiciones: document.getElementById('respetoTradiciones').value,
+    recursosComunitarios: document.getElementById('recursosComunitarios').value,
+    respetoPreferencias: document.getElementById('respetoPreferencias').value,
+    compromisoCultural: document.getElementById('compromisoCultural').value,
   };
 
+  Profesionales.culturaFamilia.forEach(([k])=>{const c=document.getElementById(k);c.setCustomValidity(c.value.length>10000?'La respuesta supera 10.000 caracteres. Reduce su extensión para guardar sin recortes.':'');});
   if (!Profesionales.validarFormulario(formularioFamilia)) {
     formularioFamilia.reportValidity();
     btnRegistrarFamilia.disabled = false;
@@ -1576,14 +1592,16 @@ if (sesion) {
       fetch('/api/familias/mi-perfil/detalle', { headers: Sesion.encabezados() })
         .then(r => { if (!r.ok) throw new Error('No encontramos tu entrevista'); return r.json(); })
         .then(p => {
+          fetch('/api/familias/mi-perfil',{headers:Sesion.encabezados()}).then(r=>{if(!r.ok)throw new Error('No se pudo consultar la solicitud');return r.json();}).then(revision=>{if(revision.reevaluacionPendiente)document.getElementById('formularioFamilia').insertAdjacentHTML('afterbegin',`<aside class="familia-revision-pendiente"><h2>Revisión solicitada por el Comité</h2><p>${(revision.apartadosReevaluacion||[]).map(limpiarHtml).join(', ')}</p><p class="pro-texto-registrado">${limpiarHtml(revision.observacionReevaluacion||'')}</p></aside>`);}).catch(error=>{resultadoFamilia.textContent=error.message;});
           textoEnviarFamilia=p.reevaluacionPendiente?'Enviar correcciones':'Guardar cambios';
           btnRegistrarFamilia.textContent=textoEnviarFamilia;
           ['tipoFamilia','notaEstructuraHogar','notaRedApoyo','provincia','disponibilidadViaje',
            'notaDistancia','edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad',
-           'disposicionHermanos','notaHermanos','notaCondicionesSalud','especificacionHogar','continuidadCultural'].forEach(k => {
+           'disposicionHermanos','notaHermanos','notaCondicionesSalud','especificacionHogar','apoyoIdiomas','respetoTradiciones','recursosComunitarios','respetoPreferencias','compromisoCultural'].forEach(k => {
             const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
           });
           ['redApoyo','condicionesPuedeAcompanarHoy','condicionesConApoyo'].forEach(k => marcarValores(k, p[k] || []));
+          const antecedente=document.getElementById('antecedenteCulturalFamilia');antecedente.hidden=!p.continuidadCultural;antecedente.querySelector('[data-texto-anterior]').textContent=p.continuidadCultural||'';
           ReglasPerfil.refrescarFamilia();
           Profesionales.marcarGuardado(formularioFamilia);
           btnRegistrarFamilia.disabled = false;
@@ -1599,13 +1617,15 @@ if (sesion) {
     f.value = sesion.id;
     f.readOnly = true;
     const editarCodigo = new URLSearchParams(location.search).get('editar');
+    if (editarCodigo) document.getElementById('contextoCultural').readOnly=true;
+    if (editarCodigo) document.getElementById('ayudaIdentidadCultural').textContent='Este antecedente se conserva sin cambios. Edita los cinco campos de Identidad y continuidad cultural en este mismo formulario.';
     if (editarCodigo) document.getElementById('cancelarEdicionNino').href = `perfiles.html?caso=${encodeURIComponent(editarCodigo)}#panelDetalle`;
     if (editarCodigo) fetch(`/api/ninos/${encodeURIComponent(editarCodigo)}`, { headers: Sesion.encabezados() })
       .then(r => { if (!r.ok) throw new Error('No se puede editar ese caso'); return r.json(); })
       .then(p => {
         ['edad','unidadEdad','nivelEscolar','gradoEscolar','rendimientoAcademico','habilidadesDetalle',
           'gustosDetalle','personalidadDetalle','tieneHermanos','cantidadHermanos','hermanosDetalle',
-          'contextoCultural','alergiasDetalle','intoleranciaLactosa','condicionesSaludDetalle','necesidadesApoyo'].forEach(k => {
+          'idiomaComunicacion','costumbresTradiciones','vinculosCulturales','opinionCultural','recomendacionesCulturales','contextoCultural','alergiasDetalle','intoleranciaLactosa','condicionesSaludDetalle','necesidadesApoyo'].forEach(k => {
             const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
           });
         ['habilidades','gustos','personalidad','alergias','condicionesSalud'].forEach(k => marcarValores(k, p[k] || []));
@@ -1623,7 +1643,7 @@ if (sesion) {
   if (sesion.rol === 'TRABAJADOR_SOCIAL') {
     Profesionales.iniciar(sesion,sesion.rol==='FAMILIA'?'entrevista':'registro');
     Profesionales.organizarFormulario();
-  } else if(sesion.rol==='FAMILIA'){Profesionales.iniciar(sesion,'entrevista');}
+  } else if(sesion.rol==='FAMILIA'){document.body.classList.add('s8-acabado');Profesionales.iniciar(sesion,'entrevista');}
 }
 
 </script>

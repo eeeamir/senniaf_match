@@ -62,7 +62,7 @@ abstract class SoportePostgresIT {
     }
     ResponseEntity<String> req(String ruta,HttpMethod metodo,String token,Object cuerpo){
         if(metodo==HttpMethod.POST && ruta.startsWith("/api/scoring/casos/") && ruta.endsWith("/decisiones") && cuerpo instanceof Map<?,?> m && !m.containsKey("versionPesos")){
-            var copia=new LinkedHashMap<String,Object>();m.forEach((k,v)->copia.put(k.toString(),v));copia.put("versionPesos",datos(req("/api/scoring/pesos",HttpMethod.GET,comite,null)).path("version").asInt());cuerpo=copia;
+            var copia=new LinkedHashMap<String,Object>();m.forEach((k,v)->copia.put(k.toString(),v));if("REEVALUACION".equals(copia.get("decision"))){copia.putIfAbsent("apartados",List.of("Hogar y red de apoyo"));copia.putIfAbsent("categoria","ACLARACION");}copia.put("versionPesos",datos(req("/api/scoring/pesos",HttpMethod.GET,comite,null)).path("version").asInt());cuerpo=copia;
         }
         HttpHeaders h=new HttpHeaders();h.setContentType(MediaType.APPLICATION_JSON);if(token!=null)h.setBearerAuth(token);
         return http.exchange(ruta,metodo,new HttpEntity<>(cuerpo,h),String.class);
@@ -70,6 +70,7 @@ abstract class SoportePostgresIT {
     JsonNode datos(ResponseEntity<String> r){try{return json.readTree(r.getBody());}catch(Exception e){throw new AssertionError(e);}}
     String login(String id){var r=req("/api/auth/login",HttpMethod.POST,null,Map.of("identificador",id,"password",CLAVE));assertEquals(200,r.getStatusCode().value(),r.getBody());return datos(r).path("token").asText();}
     ResponseEntity<String> aceptar(PerfilNino n,PerfilFamilia f){return req("/api/scoring/casos/"+n.getCodigoCaso()+"/decisiones",HttpMethod.POST,comite,Map.of("familia",f.getCodigoCaso(),"decision","ACEPTADA","motivo","Revisión sintética favorable para la prueba HU19"));}
+    void autorizarInicio(long id){assertEquals(200,req("/api/vinculaciones/"+id+"/autorizacion-preadoptiva",HttpMethod.POST,comite,Map.of("referencia","RESOLUCION-SOLO-PRUEBA-LOCAL","fechaEmision",java.time.LocalDate.now(java.time.ZoneId.of("America/Panama")).toString(),"fechaInicioConvivencia",java.time.LocalDate.now(java.time.ZoneId.of("America/Panama")).toString(),"confirmacion",true)).getStatusCode().value());}
     long asignar(Caso c){var r=aceptar(c.n,c.f);assertEquals(200,r.getStatusCode().value(),r.getBody());return vinculaciones.findByFamiliaRegistradoPorOrderByIdDesc(c.f.getRegistradoPor()).get(0).getId();}
     List<Integer> simultaneas(Callable<ResponseEntity<String>> a,Callable<ResponseEntity<String>> b) throws Exception {
         ExecutorService pool=Executors.newFixedThreadPool(2);CountDownLatch listos=new CountDownLatch(2),salida=new CountDownLatch(1);

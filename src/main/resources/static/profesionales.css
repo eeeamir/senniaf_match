@@ -77,11 +77,11 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 #listaVinculaciones .chip{white-space:normal}
 @media(max-width:760px){#filtroVinculaciones .boton{width:100%}#contenido .pro-fila-titulo:has(.chip){flex-wrap:wrap}#contenido .chip{white-space:normal}}
 
-.pro-sidebar a .pro-vinculaciones-aviso{margin-left:auto;padding:2px 6px;border-radius:8px;background:#eaf2ff;color:#0866f5;font-size:11px;flex-shrink:0}
+
 .chip.vinculacion-pendiente{background:#eaf2ff;color:#1459a3}
 
-.pro-sidebar nav a:has(.pro-vinculaciones-aviso){display:grid;grid-template-columns:22px minmax(0,1fr);row-gap:5px}
-.pro-sidebar nav a .pro-vinculaciones-aviso{grid-column:2;justify-self:start;margin-left:0}
+
+
 @media(max-width:760px){
   .profesional .topbar-in{min-height:68px}
   .profesional .usuario{min-width:0;flex:1 0 120px}
@@ -111,3 +111,180 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 /* Tarjetas de vinculaciones compartidas por los cuatro roles. */
 .vinculaciones-lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,350px),1fr));gap:18px;align-items:stretch}.vinculaciones-lista>.tarjeta{min-width:0;margin:0}.vinculacion-tarjeta{display:flex;flex-direction:column;gap:16px;border:1px solid #dce7f5;box-shadow:0 5px 18px #174b7b08}.vinculacion-cabecera{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-bottom:14px;border-bottom:1px solid #e6edf6}.vinculacion-cabecera h2{display:flex;align-items:center;gap:8px;font-size:1.18rem}.vinculacion-cabecera .chip{font-size:.78rem;max-width:100%;white-space:normal}.vinculacion-resumen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:0}.vinculacion-resumen dt{font-size:.8rem;color:#52657b;display:flex;align-items:center;gap:6px}.vinculacion-resumen dd{margin:6px 0 0;font-weight:600;color:#193c65;overflow-wrap:anywhere}.vinculacion-resumen small{display:block;margin-top:5px;font-weight:400;color:#52657b}.vinculacion-siguiente{margin:0!important;padding:12px 14px;background:#f3f7fc;border-radius:12px;font-size:.92rem;line-height:1.55}.vinculacion-acciones{margin-top:auto;display:flex;flex-wrap:wrap;gap:10px;padding-top:2px}.vinculacion-informacion{border-top:1px solid #e6edf6;padding-top:14px}.vinculacion-informacion summary{color:#205b9b;font-weight:600;cursor:pointer}.vinculacion-general>.chip{margin-bottom:14px}.vinculacion-general>.detalle-datos{margin-bottom:0}
 @media(max-width:480px){.vinculaciones-lista{gap:14px}.vinculacion-resumen{gap:14px 10px}.vinculacion-cabecera{align-items:flex-start}.vinculacion-acciones .boton{flex:1;text-align:center;justify-content:center}.vinculacion-resumen dt{align-items:flex-start}}
+
+/* Seguimiento Sprint 8: presentación compartida sin modificar navegación global. */
+.vinculaciones-lista,
+.vinculacion-detalle {
+  --vin-azul: #e7f0ff;
+  --vin-menta: #def6ed;
+  --vin-lavanda: #eee6ff;
+  --vin-durazno: #fff0de;
+}
+.vinculaciones-lista { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.vinculacion-tarjeta { position: relative; overflow: hidden; padding: 26px!important; gap: 20px; }
+.vinculacion-tarjeta > * { position: relative; z-index: 1; }
+.vinculacion-tarjeta:nth-child(3n+2)::before,
+.vinculacion-acceso.menta::before {
+  content: ''; position: absolute; pointer-events: none; width: 110px; height: 110px;
+  border-radius: 50%; background: #e9f8f2; right: -60px; bottom: -65px;
+}
+.vinculacion-tarjeta:nth-child(3n)::before {
+  content: ''; position: absolute; pointer-events: none; width: 80px; height: 80px;
+  border-radius: 50%; background: #f5f0ff; left: -48px; top: 95px;
+}
+.vinculacion-cabecera { align-items: flex-start; gap: 14px; }
+.vinculacion-cabecera h2 { font-size: 1.2rem; gap: 12px; }
+.vinculacion-emblema {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 50px; height: 50px; border-radius: 50%; background: var(--vin-azul, #e7f0ff); color: #0866f5;
+}
+.vinculacion-emblema .pro-icono { width: 25px; height: 25px; margin: 0; }
+.vinculacion-tarjeta:nth-child(3n+2) .vinculacion-cabecera .vinculacion-emblema { background: var(--vin-menta); }
+.vinculacion-tarjeta:nth-child(3n) .vinculacion-cabecera .vinculacion-emblema { background: var(--vin-lavanda); }
+.vinculacion-resumen { gap: 20px 14px; }
+.vinculacion-acciones .boton { min-height: 42px; }
+#filtroVinculaciones { display: grid; grid-template-columns: minmax(170px, 1fr) minmax(220px, 2fr) auto; align-items: end; gap: 20px; }
+#filtroVinculaciones label { margin: 0; min-width: 0; }
+#filtroVinculaciones input, #filtroVinculaciones select { width: 100%; }
+#filtroVinculaciones .boton { margin-bottom: 0; }
+.vinculacion-detalle > .hero { margin-bottom: 30px; }
+.vinculacion-detalle .hero h1 { font-size: clamp(24px, 2.7vw, 36px); }
+.vinculacion-detalle .hero .pro-hero-icono { background: #eee8ff; }
+.vinculacion-estado-hero { position: relative; margin-top: 18px; z-index: 1; max-width: 80%; }
+.vinculacion-detalle > .tarjeta, .vinculacion-panel > .tarjeta { padding: 26px; margin: 0 0 30px; }
+.vinculacion-general .detalle-datos { margin-top: 10px; padding-bottom: 0; }
+.vinculacion-general dt { display: flex; align-items: center; gap: 9px; }
+.vinculacion-accesos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 0 0 30px; }
+.vinculacion-accesos > .vinculacion-acceso {
+  display: flex; gap: 16px; align-items: flex-start; min-width: 0; position: relative;
+  overflow: hidden; padding: 24px; margin: 0; border: 1px solid #dce7f5;
+}
+.vinculacion-acceso > * { position: relative; z-index: 1; }
+.vinculacion-acceso > div { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; height: 100%; }
+.vinculacion-acceso h2 { font-size: 16px!important; margin: 0 0 8px; }
+.vinculacion-acceso p { margin: 0 0 16px; overflow-wrap: anywhere; }
+.vinculacion-acceso .boton { margin-top: auto; }
+.menta > .vinculacion-emblema { background: var(--vin-menta, #def6ed); color: #00845e; }
+.lavanda > .vinculacion-emblema { background: var(--vin-lavanda, #eee6ff); color: #7850cb; }
+.durazno.vinculacion-emblema { background: var(--vin-durazno, #fff0de); color: #ac6b15; }
+#compatibilidadRegistrada { scroll-margin-top: 100px; }
+.vinculacion-historica .pro-seccion { margin-top: 20px; }
+.vinculacion-historica summary { cursor: pointer; color: #0866f5; padding: 12px 0; font-weight: 600; }
+.vinculacion-historica .tabla { overflow-x: auto; }
+.vinculacion-pestanas { margin: 0 0 24px; padding: 6px; border: 1px solid #dce7f5; border-radius: 16px; background: #fff; gap: 6px; }
+.vinculacion-pestanas button { flex: 1; justify-content: center; }
+.vinculacion-pestanas button[aria-selected=true] { background: #0866f5; color: #fff; }
+.vinculacion-panel[hidden] { display: none!important; }
+.vinculacion-etapas { list-style: none; padding: 0; margin: 26px 0; }
+.vinculacion-etapas > li { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: start; gap: 18px; position: relative; padding-bottom: 26px; }
+.vinculacion-etapas > li:not(:last-child)::before { content: ''; position: absolute; width: 2px; background: #d6e5fa; left: 17px; top: 34px; bottom: 0; }
+.vinculacion-hito { width: 36px; height: 36px; border: 2px solid #c3d9fa; border-radius: 50%; display: grid; place-items: center; background: #fff; color: #5c80b0; z-index: 1; }
+.registrada .vinculacion-hito { background: #00865e; border-color: #00865e; color: #fff; }
+.vinculacion-etapas h3, .vinculacion-historial h3 { margin: 0 0 8px; font-size: 16px; }
+.vinculacion-etapas p { margin: 0; line-height: 1.6; }
+.vinculacion-etapa-meta { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; font-size: 12px; color: #56769b; }
+.vinculacion-reportes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.profesional .vinculacion-reporte.detalle-grupo { margin: 0; align-self: start; }
+.vinculacion-reporte-contenido { padding: 0 24px 26px; }
+.vinculacion-reporte-contenido p { margin: 0 0 20px; line-height: 1.65; }
+.vinculacion-historial { list-style: none; padding: 0; margin: 24px 0 0; }
+.vinculacion-historial > li { display: flex; gap: 18px; position: relative; padding-bottom: 28px; }
+.vinculacion-historial > li:not(:last-child)::before { content: ''; position: absolute; left: 24px; top: 50px; bottom: 0; width: 2px; background: #e4ecf7; }
+.vinculacion-historial > li:nth-child(2n) .vinculacion-emblema { background: #eee6ff; color: #7850cb; }
+.vinculacion-historial p { margin: 10px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.vinculacion-evento-meta { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; color: #56769b; font-size: 13px; }
+.vinculacion-vacio { text-align: center; }
+.vinculacion-vacio .vinculacion-emblema { margin-bottom: 14px; }
+/* El informe actual y sus bloques siguen el patrón de tarjetas sociales. */
+.pro-panel-profesional #evaluacionesVigentes .pro-informe { padding: 0; border: 0; background: transparent; margin: 0; }
+.pro-panel-profesional .pro-informe-registro { padding: 24px; border: 1px solid #dce7f5; border-radius: 20px; background: #fff; margin-bottom: 24px; }
+.pro-panel-profesional .pro-informe-cabecera { margin-bottom: 0; }
+.pro-panel-profesional .pro-informe-meta { margin: 16px 0 0; }
+.profesional #panelEvaluaciones.pro-panel-profesional { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.pro-panel-profesional .pro-informe-bloque.detalle-grupo { background: #fff; padding: 0; margin: 0 0 24px; border-radius: 20px; }
+.pro-panel-profesional .pro-informe-contenido { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 28px; padding: 0 24px 24px; }
+.pro-panel-profesional .pro-informe-contenido > :only-child { grid-column: 1 / -1; }
+.pro-panel-profesional .pro-informe-contenido p, .pro-panel-profesional .pro-informe-contenido ul { margin-top: 0; margin-bottom: 0; }
+.pro-panel-profesional .detalle-grupo:nth-of-type(4n+2) > summary > .pro-icono { background: #def6ed; color: #00845e; }
+.pro-panel-profesional .detalle-grupo:nth-of-type(4n+3) > summary > .pro-icono { background: #eee6ff; color: #7850cb; }
+.pro-panel-profesional .detalle-grupo:nth-of-type(4n) > summary > .pro-icono { background: #fff0de; color: #ac6b15; }
+.pro-panel-profesional > .pro-fila-titulo { margin-bottom: 24px; }
+.pro-panel-profesional > .pro-fila-titulo .boton { margin-left: auto; }
+@media(max-width:1250px) {
+  .vinculaciones-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vinculacion-accesos > .vinculacion-acceso { flex-direction: column; }
+  .vinculacion-etapas > li { grid-template-columns: 36px minmax(0, 1fr); }
+  .vinculacion-etapa-meta { grid-column: 2; align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+}
+@media(max-width:850px) {
+  .vinculaciones-lista, .vinculacion-accesos, .vinculacion-reportes { grid-template-columns: 1fr; }
+  #filtroVinculaciones { grid-template-columns: 1fr; gap: 16px; }
+  .vinculacion-pestanas button { flex-basis: 40%; }
+  .vinculacion-accesos > .vinculacion-acceso { flex-direction: row; }
+  .vinculacion-estado-hero { max-width: 100%; }
+}
+@media(max-width:600px) {
+  .vinculacion-tarjeta { padding: 24px!important; }
+  .vinculacion-detalle > .tarjeta, .vinculacion-panel > .tarjeta { padding: 24px 20px; }
+  .vinculacion-etapas > li { gap: 12px; }
+  .vinculacion-historial > li { gap: 12px; }
+  .pro-panel-profesional .pro-informe-contenido { grid-template-columns: 1fr; padding: 0 20px 24px; }
+  .pro-panel-profesional .pro-informe-registro { padding: 22px 20px; }
+  .pro-panel-profesional > .pro-fila-titulo .boton { margin-left: 0; }
+}
+
+.vinculacion-detalle .pro-breadcrumb .pro-icono { transform: rotate(180deg); }
+.profesional .vinculacion-reporte summary .vinculacion-emblema .pro-icono { padding: 0; background: transparent; color: inherit; }
+.vinculacion-informacion > summary { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #b9d0f7; border-radius: 10px; padding: 10px 14px; background: #fff; }
+.pro-panel-profesional .pro-informe-cabecera h3 > .pro-icono { box-sizing: content-box; padding: 9px; border-radius: 11px; background: #eee6ff; color: #7850cb; }
+.vinculacion-detalle > .hero { min-height: 0; padding: 28px 32px; }
+.pro-panel-profesional .detalle-grupo[open] > summary::after,
+.vinculacion-reporte[open] > summary::after { transform: rotate(180deg); }
+
+.pro-panel-profesional #datosDetalle > .detalle-grupo { margin: 0 0 24px; }
+/* Correcciones puntuales del cierre de Sprint 8. */
+.pro-id-sesion{display:block;font-weight:400;font-size:11px;margin-top:3px}.vinculacion-cabecera .chip,.vinculacion-estado-hero .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px}.vinculacion-accesos{grid-template-columns:repeat(2,minmax(0,1fr))}.vinculaciones-lista:has(.vinculacion-familiar){grid-template-columns:1fr}.vinculacion-familiar .vinculacion-acciones{justify-content:flex-end}.vinculacion-familiar .familia-seguimiento{width:100%;padding:20px;border:1px solid #dce7f5;border-radius:16px}.pro-aviso-reevaluaciones.destacado,.pro-aviso-programacion{background:#fff8eb;border-color:#ebc77c}.pro-cambio-valores>span:last-child{background:#f0f6ff}.pro-edicion-inline{display:block!important}.pro-edicion-inline .pro-informe-contenido>p{display:none}.pro-edicion-inline .pro-form-bloque{margin:12px 0}.pro-evento{padding:18px;border:1px solid #dce7f5;border-radius:16px;margin-bottom:16px;background:white}
+@media(max-width:600px){.vinculacion-accesos{grid-template-columns:1fr}.familia-seguimiento .familia-etapas{grid-template-columns:1fr}}
+.pro-apartados-reevaluacion{display:grid;grid-template-columns:1fr 1fr;gap:12px;border:1px solid #dce7f5;border-radius:16px;padding:16px;margin:0 0 20px}.pro-apartados-reevaluacion label{display:flex;align-items:center;gap:10px;padding:14px;border:1px solid #dce7f5;border-radius:12px}.pro-apartados-reevaluacion input{width:auto}.pro-apartados-reevaluacion label:has(input:checked){background:#eaf2ff;border-color:#0866f5}@media(max-width:600px){.pro-apartados-reevaluacion{grid-template-columns:1fr}}
+/* Espaciado de iconos transversal, incluidos los avisos de varias líneas. */
+.profesional :is(.boton,.chip){gap:10px}.profesional .chip:has(>.pro-icono){display:inline-flex;align-items:center}.profesional :is(p.ayuda,p.mensaje):has(>.pro-icono:first-child){display:flex;align-items:flex-start;gap:10px}.profesional :is(p.ayuda,p.mensaje)>.pro-icono:first-child{flex:0 0 19px;margin-top:2px}.profesional :is(h1,h2,h3,h4,dt,dd)> .pro-icono{margin-inline-end:10px}.profesional :is(.boton,.chip,summary,.pro-evento-cabecera,.pro-informe-cabecera h3)>.pro-icono{margin-inline-end:0}#identidadCultural,#apoyosCulturales{scroll-margin-top:110px}#continuidadCultural{margin:12px 0}#ayudaContinuidadCultural{margin-top:12px;line-height:1.6}
+.familiar-amplia .vinculacion-familiar{padding:26px!important;gap:24px}.familia-identificacion,.familia-confirmacion{display:flex;align-items:flex-start;gap:16px}.familia-identificacion h2,.familia-confirmacion h3{margin:0 0 8px}.familia-identificacion p,.familia-confirmacion p{margin:0;line-height:1.6}.familia-confirmacion .menta{background:#def6ed;color:#00845e}.familia-propuesta-acciones{display:flex;align-items:center;justify-content:space-between;gap:24px}.familia-informacion-asignada{display:flex;align-items:center;gap:16px;flex:1}.familia-informacion-asignada h3{margin:0 0 8px}.familia-informacion-asignada p{margin:0;line-height:1.6}.familia-informacion-asignada .boton{margin-left:auto}.familia-respuesta{flex-shrink:0}.familia-respuesta p{margin:0 0 12px;color:#56769b}.familia-respuesta .pro-acciones{margin:0;display:flex;gap:12px}.familia-seguimiento{display:block!important;width:100%;padding:24px;border:1px solid #dce7f5;border-radius:18px}.familia-seguimiento>header{display:flex;align-items:center;gap:16px}.familia-seguimiento>header .chip{margin-left:auto}.familia-seguimiento h3{margin:0 0 8px}.familia-seguimiento p{margin:0;line-height:1.6}.familia-progreso{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;padding:0;margin:30px 8px;list-style:none}.familia-progreso li{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:14px;color:#7d91ab;min-width:0}.familia-progreso li:not(:last-child)::after{content:'';position:absolute;top:19px;left:52px;right:-12px;height:2px;background:#dce6f3}.familia-indicador{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#eaf0f7;color:#8095af;position:relative;z-index:1}.familia-indicador .pro-icono{width:19px;height:19px}.familia-progreso .actual{color:#153e63}.familia-progreso .actual .familia-indicador{color:#fff;background:#0866f5;box-shadow:0 0 0 5px #edf3ff}.familia-progreso .completado .familia-indicador{background:#def6ed;color:#00845e}.familia-progreso strong{line-height:1.5;font-size:14px}.familia-progreso small{font-size:12px}.familia-siguiente{display:flex;align-items:flex-start;gap:12px;padding:18px;background:#eff5ff;border-radius:14px}.familia-siguiente>span{color:#0866f5;flex:0 0 20px}.familia-siguiente p{margin-top:10px}.pro-edicion-inline .pro-evaluacion-datos{display:none}.pro-edicion-inline .pro-informe-contenido .pro-form-bloque{width:100%;grid-column:1/-1}.pro-edicion-inline .pro-informe-registro>.pro-acciones{margin-top:20px}.vinculacion-historial>li{padding:18px;border:1px solid #dce7f5;border-radius:16px;background:#fff;margin-bottom:16px}.vinculacion-historial>li::before{display:none}
+@media(max-width:1000px){.familia-propuesta-acciones{flex-direction:column;align-items:stretch}.familia-respuesta{align-self:flex-end}}@media(max-width:600px){.familia-identificacion{width:100%}.familia-informacion-asignada{flex-wrap:wrap}.familia-informacion-asignada .boton{margin-left:0}.familia-seguimiento>header{flex-wrap:wrap}.familia-seguimiento>header .chip{margin-left:0}.familia-progreso{grid-template-columns:1fr;margin:28px 0;gap:0}.familia-progreso li{display:grid;grid-template-columns:40px 1fr;gap:8px 16px;padding-bottom:24px}.familia-progreso li small{grid-column:2}.familia-progreso li .familia-indicador{grid-row:1/3}.familia-progreso li:not(:last-child)::after{left:19px;right:auto;top:46px;bottom:0;width:2px;height:auto}.familia-respuesta{align-self:stretch}.familia-respuesta .boton{flex:1}.familiar-amplia .vinculacion-familiar{padding:22px!important}}
+.pro-edicion-inline .pro-informe-contenido>ul{display:none}.pro-apartados-reevaluacion label>.pro-icono{box-sizing:content-box;padding:9px;background:#e8f0ff;border-radius:12px;flex-shrink:0}.pro-apartados-reevaluacion label:nth-of-type(2n)>.pro-icono{background:#e0f6ee;color:#00845e}.pro-apartados-reevaluacion legend{margin-bottom:14px}
+.vinculacion-familiar:has(.familia-confirmacion) .familia-informacion-asignada{padding:22px;border:1px solid #dce7f5;border-radius:18px}.familia-progreso :is(.actual,.pendiente) .familia-indicador>.pro-icono{display:none}.familia-progreso .actual .familia-indicador::after{content:'';width:15px;height:15px;border:2px solid white;border-radius:50%;box-shadow:inset 0 0 0 2px #0866f5;background:#fff}.familia-progreso .pendiente .familia-indicador::after{content:'';width:14px;height:14px;border-radius:50%;background:#8095af}
+.profesional summary:has(>.pro-icono){display:flex;align-items:center;gap:10px}.profesional summary:has(>.pro-icono)::after{content:'⌄';margin-inline-start:auto}.profesional details[open]>summary:has(>.pro-icono)::after{transform:rotate(180deg)}.profesional .mensaje:has(>.pro-icono){display:flex;align-items:flex-start;gap:10px}.profesional .mensaje>.pro-icono{flex:0 0 19px}
+#formEvaluacion.pro-edicion-inline .pro-informe-contenido .pro-form-bloque{padding:0;margin:0;border:0;background:transparent}#formEvaluacion.pro-edicion-inline .pro-informe-contenido .pro-form-bloque>h3{display:none}.pro-panel-profesional:has(.pro-edicion-inline) #editarPsicologia,.pro-edicion-inline #cargarEjemploPsicologico{display:none}
+.pro-dialogo:has(.pro-apartados-reevaluacion){width:min(900px,calc(100vw - 32px));max-width:900px}.pro-dialogo:has(.pro-apartados-reevaluacion) .pro-apartados-reevaluacion{grid-template-columns:repeat(3,minmax(0,1fr));padding:14px;gap:10px}.pro-dialogo:has(.pro-apartados-reevaluacion) .pro-motivos{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pro-dialogo:has(.pro-apartados-reevaluacion) .pro-motivo{margin:0;padding:10px;font-size:14px}.pro-dialogo:has(.pro-apartados-reevaluacion) textarea{min-height:100px}.pro-dialogo:has(.pro-apartados-reevaluacion) [data-apartados-cantidad]{margin:10px 0;font-size:13px}@media(max-width:750px){.pro-dialogo:has(.pro-apartados-reevaluacion) .pro-apartados-reevaluacion{grid-template-columns:1fr 1fr}}@media(max-width:500px){.pro-dialogo:has(.pro-apartados-reevaluacion) :is(.pro-apartados-reevaluacion,.pro-motivos){grid-template-columns:1fr}}
+.profesional dt:has(>.pro-icono){display:flex;align-items:center;gap:10px}.profesional dt>.pro-icono{margin-inline-end:0;flex-shrink:0}
+
+/* Avisos informativos: separación sin cambiar el contenido ni el diseño. */
+.profesional p:has(>.pro-icono:first-child){display:flex;align-items:flex-start;gap:10px}.profesional p>.pro-icono:first-child{flex:0 0 19px;margin-inline-end:0;margin-top:2px}
+/* Cinco valores culturales dentro del apartado social existente. */
+.cultura-contenido{padding:0 24px 24px}.cultura-antecedente{background:#f3f7fc;border-radius:14px;padding:18px;margin:0 0 24px}.cultura-antecedente h3{font-size:15px;margin:0 0 12px}.cultura-antecedente p{white-space:pre-wrap;overflow-wrap:anywhere}.profesional .cultura-campos.detalle-datos{padding:0;gap:0 28px}.cultura-campos>div{padding:20px 0!important}.cultura-campos .ayuda{font-size:12px;line-height:1.6;margin:12px 0 0}.cultura-formulario{display:grid;grid-template-columns:1fr 1fr;gap:28px}.cultura-formulario label{display:block;margin:0 0 12px}.cultura-formulario label small{font-weight:400;color:#6c87a4}.cultura-formulario textarea{width:100%;margin:0}.cultura-formulario .ayuda{margin:12px 0 0;line-height:1.6}.cultura-formulario>.ayuda,.cultura-formulario>[data-error],.cultura-formulario>.pro-acciones{grid-column:1/-1}.cultura-formulario [data-sin-opinion]{margin-top:14px;white-space:normal}.cultura-contenido .pro-acciones{margin-top:22px}@media(max-width:650px){.cultura-formulario,.profesional .cultura-campos.detalle-datos{grid-template-columns:1fr}.cultura-contenido{padding:0 20px 24px}}
+#continuidadCultural{margin-top:14px;margin-bottom:14px}#ayudaContinuidadCultural{margin-top:14px;line-height:1.6}
+.profesional #identidadCultural .cultura-campos.detalle-datos{grid-template-columns:repeat(2,minmax(0,1fr))}.cultura-campos>div:last-child,.cultura-formulario>div:nth-of-type(5){grid-column:1/-1}@media(max-width:650px){.profesional #identidadCultural .cultura-campos.detalle-datos{grid-template-columns:1fr}}
+#seccionApoyosCulturales>p.ayuda{margin:12px 0 24px;line-height:1.65}#seccionApoyosCulturales label[for=continuidadCultural]{display:block;margin:0 0 12px}#seccionApoyosCulturales #continuidadCultural{margin-top:0}
+
+/* Apoyos familiares en el apartado existente; avisos con icono separado. */
+#seccionApoyosCulturales .apoyo-cultural-campo{display:grid;gap:10px;margin:26px 0}#seccionApoyosCulturales .apoyo-cultural-campo label,#seccionApoyosCulturales .apoyo-cultural-campo .ayuda{margin:0}#seccionApoyosCulturales textarea{width:100%}.aviso-legal-familia{display:flex;align-items:flex-start;gap:10px}.aviso-legal-familia .pro-icono{flex-shrink:0}.familia-seguimiento{background:#fff}.pro-interrupcion-form select{width:100%}
+.pro-dialogo[aria-labelledby="tituloInterrupcion"] .pro-interrupcion-form{display:grid;gap:18px}.pro-dialogo[aria-labelledby="tituloInterrupcion"] .pro-interrupcion-form>label{display:grid;gap:8px}
+
+/* La separación de iconos es común a los cuatro roles, sin cambiar sus distribuciones. */
+.profesional .pro-modal-cabecera{align-items:center;gap:12px}
+.profesional .pro-modal-cabecera h2{margin:0;line-height:1.3}
+.profesional :is(.chip,.boton)> .pro-icono{flex-shrink:0}
+.profesional.s8-acabado .boton:has(>.pro-icono){display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.profesional .pro-acciones{gap:12px;align-items:center;justify-content:flex-end}
+.profesional .pro-acciones>.boton{margin-block:0}
+.profesional .pro-dialogo input:is([type=checkbox],[type=radio]){flex-shrink:0}
+.profesional .pro-error-campo{line-height:1.5}
+@media(min-width:761px) and (max-width:1000px){
+ .profesional .pro-panel-profesional>.pro-fila-titulo{flex-wrap:wrap;gap:12px}
+ .profesional .pro-panel-profesional>.pro-fila-titulo .boton{margin-left:0}
+}
+@media(min-width:761px) and (max-width:1000px){
+ .profesional .pro-resumen{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .profesional .pro-resumen .chip{max-width:100%;white-space:normal}
+}
+.familia-revision-pendiente{padding:16px 20px;border:1px solid #edcf91;border-radius:14px;background:#fff8e8;margin-bottom:20px}
+.familia-revision-pendiente h2{display:flex;align-items:center;gap:10px;font-size:18px;margin:0 0 10px}.familia-revision-pendiente p{line-height:1.6;margin:8px 0}.familia-revision-indicador{display:block;margin-top:5px;color:#946017;font-size:12px;font-weight:400}

@@ -105,12 +105,17 @@ public class PerfilNinoController {
     public java.util.List<?> auditoria(@PathVariable String codigo,
                       @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
         comprobarProfesional(rol); var eventos=service.historial(codigo, actor, rol);
-        return historial==null?eventos:historial.consultar(codigo,eventos);
+        return historial==null?eventos:historial.consultar(codigo,eventos,rol);
     }
     @PutMapping("/{codigo}")
     public PerfilNinoResponse editar(@PathVariable String codigo, @Valid @RequestBody PerfilNinoRequest r,
                     @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
         comprobarTrabajoSocial(rol); return service.actualizar(codigo, actor, r);
+    }
+    @PutMapping("/{codigo}/continuidad-cultural")
+    public PerfilNinoResponse editarCultura(@PathVariable String codigo,@Valid @RequestBody com.senniaf.match.dto.ContinuidadCulturalRequest r,
+            @RequestHeader("X-User-Role") String rol,@RequestHeader("X-User-Id") String actor){
+        comprobarTrabajoSocial(rol);return service.actualizarCultura(codigo,actor,r);
     }
     @DeleteMapping("/{codigo}")
     public Map<String, String> baja(@PathVariable String codigo,

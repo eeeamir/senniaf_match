@@ -99,6 +99,22 @@ public class PerfilFamiliaRequest {
      */
     @jakarta.validation.constraints.Size(max=2000,message="Los apoyos pueden tener hasta 2000 caracteres")
     private String continuidadCultural;
+    @jakarta.validation.constraints.Size(max=10000,message="Cada apoyo cultural admite hasta 10.000 caracteres")
+    private String apoyoIdiomas;
+    public String getApoyoIdiomas(){return apoyoIdiomas;} public void setApoyoIdiomas(String v){apoyoIdiomas=v;}
+    @jakarta.validation.constraints.Size(max=10000,message="Cada apoyo cultural admite hasta 10.000 caracteres")
+    private String respetoTradiciones;
+    public String getRespetoTradiciones(){return respetoTradiciones;} public void setRespetoTradiciones(String v){respetoTradiciones=v;}
+    @jakarta.validation.constraints.Size(max=10000,message="Cada apoyo cultural admite hasta 10.000 caracteres")
+    private String recursosComunitarios;
+    public String getRecursosComunitarios(){return recursosComunitarios;} public void setRecursosComunitarios(String v){recursosComunitarios=v;}
+    @jakarta.validation.constraints.Size(max=10000,message="Cada apoyo cultural admite hasta 10.000 caracteres")
+    private String respetoPreferencias;
+    public String getRespetoPreferencias(){return respetoPreferencias;} public void setRespetoPreferencias(String v){respetoPreferencias=v;}
+    @jakarta.validation.constraints.Size(max=10000,message="Cada apoyo cultural admite hasta 10.000 caracteres")
+    private String compromisoCultural;
+    public String getCompromisoCultural(){return compromisoCultural;} public void setCompromisoCultural(String v){compromisoCultural=v;}
+
 
     public TipoFamilia getTipoFamilia() {
         return tipoFamilia;

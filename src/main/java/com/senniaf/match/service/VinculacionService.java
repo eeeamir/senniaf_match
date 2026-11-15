@@ -30,6 +30,19 @@ public class VinculacionService {
         repo.saveAndFlush(v);
         auditar(v,decision.getFuncionario(),"VINCULACION_CREADA","El Comité aceptó la propuesta. Se creó la vinculación pendiente de respuesta familiar.");
     }
+    private boolean accesoInfantilFamiliar(Vinculacion v){
+        return v.isReservaVigente() && Set.of(Vinculacion.Estado.PENDIENTE_RESPUESTA,Vinculacion.Estado.RESPUESTA_ACEPTADA).contains(v.getEstado()) && interrupcion(v)==null;
+    }
+    /** Proyección cerrada: datos estructurados de la asignación, nunca entidades ni informes internos. */
+    public Map<String,Object> informacionAsignada(Long id,String actor){
+        var v=repo.findById(id).orElseThrow(()->new RolNoAutorizadoException("La información de esta asignación no está disponible"));
+        if(!actor.equals(v.getFamilia().getRegistradoPor()) || !accesoInfantilFamiliar(v))throw new RolNoAutorizadoException("El acceso a la información de esta asignación no está disponible");
+        var n=v.getNino();Map<String,Object> r=new LinkedHashMap<>();r.put("vinculacion", "VIN-"+v.getId());
+        r.put("edad",n.getEdad());r.put("unidadEdad",n.getUnidadEdad());r.put("nivelEscolar",n.getNivelEscolar());r.put("rendimientoAcademico",n.getRendimientoAcademico());
+        r.put("alergias",n.getAlergias());r.put("intoleranciaLactosa",n.getIntoleranciaLactosa());r.put("condicionesSalud",n.getCondicionesSalud());
+        r.put("habilidades",n.getHabilidades());r.put("gustos",n.getGustos());r.put("personalidad",n.getPersonalidad());
+        return r;
+    }
     public List<Map<String,Object>> propias(String actor){
         return repo.findByFamiliaRegistradoPorOrderByIdDesc(actor).stream().map(v->vista(v,true)).toList();
     }
@@ -48,6 +61,7 @@ public class VinculacionService {
         var interrupcion=interrupcion(v);
         r.put("compatibilidadOriginal",compatibilidadOriginal(v.getDecision()));
         r.put("interrupcion",interrupcion==null?null:detalleInterrupcion(interrupcion));
+        r.put("puedeRegistrarAutorizacion","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA && v.isReservaVigente() && interrupcion==null && v.getFechaInicioConvivencia()==null && !v.getNino().isCierrePorAdopcion());
         r.put("puedeCerrar","COMITE".equals(rol) && v.getEstado()!=Vinculacion.Estado.CERRADA && !rechazoPortal(v));
         r.put("puedeRevisarDisponibilidad","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.CERRADA);
         r.put("cierre",v.getFechaCierre()==null?null:datosCierre(v));
@@ -90,8 +104,12 @@ public class VinculacionService {
     }
     private Map<String,Object> vista(Vinculacion v,boolean familiar){
         var r=resumen(v);
-        // No hay una política documentada que autorice datos infantiles en el portal familiar.
-        if(familiar){r.remove("expedienteInfantil");r.remove("puntajeOriginal");r.remove("versionOriginal");}
+        // El portal usa una proyección separada; esta respuesta no incluye la entidad infantil.
+        if(familiar){r.put("puedeConsultarInformacion",accesoInfantilFamiliar(v));r.remove("expedienteInfantil");r.remove("puntajeOriginal");r.remove("versionOriginal");}
+        if(v.getFechaRegistroAutorizacion()!=null){
+            var a=new LinkedHashMap<String,Object>();a.put("fechaEmision",v.getFechaEmisionAutorizacion());a.put("fechaInicioConvivencia",v.getFechaInicioConvivencia());a.put("registradaEl",fecha(v.getFechaRegistroAutorizacion()));a.put("inicioRegistradoEl",fecha(v.getFechaRegistroInicio()));
+            if(!familiar){a.put("referencia",v.getReferenciaAutorizacion());a.put("responsable",v.getAutorizacionRegistradaPor());a.put("rol",v.getAutorizacionRol());a.put("inicioResponsable",v.getInicioRegistradoPor());a.put("inicioRol",v.getInicioRol());}r.put("autorizacionPreadoptiva",a);
+        }
         r.put("fechaRespuesta",fecha(v.getFechaRespuesta()));r.put("disponibilidad",!v.isReservaVigente()?"Pendiente de confirmar elegibilidad para Match":v.getEstado()==Vinculacion.Estado.RESPUESTA_RECHAZADA_PENDIENTE_CIERRE?"Reservado; pendiente de confirmación institucional":"Reservado por asignación vigente");
         r.put("siguientePaso",switch(v.getEstado()){
             case RECHAZADA_POR_FAMILIA -> "Tu respuesta quedó registrada. Gracias por revisar la propuesta. El equipo correspondiente podrá continuar con el seguimiento de tu expediente.";
@@ -120,6 +138,28 @@ public class VinculacionService {
         return r;
     }
     @Transactional
+    public Map<String,Object> registrarAutorizacion(Long id,String rol,String actor,com.senniaf.match.dto.AutorizacionPreadoptivaRequest r){
+        if(!"COMITE".equals(rol))throw new RolNoAutorizadoException("Solo el Comité registra la constancia de autorización institucional");
+        var v=repo.bloquear(id).orElseThrow(()->new IllegalArgumentException("La vinculación no está disponible"));
+        if(v.getEstado()!=Vinculacion.Estado.RESPUESTA_ACEPTADA || !v.isReservaVigente() || v.getNino().isCierrePorAdopcion() || interrupcion(v)!=null)
+            throw new IllegalStateException("Se requiere una propuesta aceptada y vigente, sin interrupción ni cierre");
+        if(r==null || !Boolean.TRUE.equals(r.confirmacion()) || r.fechaEmision()==null)throw new IllegalArgumentException("Confirma la autorización institucional y su fecha de emisión");
+        String referencia=texto(r.referencia(),5,200,"Identifica la resolución o autorización institucional existente");
+        var hoy=java.time.LocalDate.now(ZoneId.of("America/Panama"));
+        if(r.fechaEmision().isAfter(hoy))throw new IllegalArgumentException("La fecha de emisión no puede ser futura");
+        if(r.fechaInicioConvivencia()!=null && (r.fechaInicioConvivencia().isAfter(hoy) || r.fechaInicioConvivencia().isBefore(r.fechaEmision())))throw new IllegalArgumentException("El inicio efectivo debe estar entre la emisión de la autorización y hoy");
+        boolean nueva=v.getFechaRegistroAutorizacion()==null;
+        if(!nueva && (!referencia.equals(v.getReferenciaAutorizacion()) || !r.fechaEmision().equals(v.getFechaEmisionAutorizacion())))throw new IllegalStateException("La autorización registrada se conserva sin reemplazarla");
+        if(!nueva && (v.getFechaInicioConvivencia()!=null || r.fechaInicioConvivencia()==null))throw new IllegalStateException("La constancia ya está registrada; no hay un inicio efectivo nuevo para guardar");
+        var ahora=LocalDateTime.now();
+        if(nueva){v.setReferenciaAutorizacion(referencia);v.setFechaEmisionAutorizacion(r.fechaEmision());v.setAutorizacionRegistradaPor(actor);v.setAutorizacionRol(rol);v.setFechaRegistroAutorizacion(ahora);}
+        if(r.fechaInicioConvivencia()!=null){v.setFechaInicioConvivencia(r.fechaInicioConvivencia());v.setInicioRegistradoPor(actor);v.setInicioRol(rol);v.setFechaRegistroInicio(ahora);}
+        repo.saveAndFlush(v);
+        if(nueva)auditar(v,actor,"AUTORIZACION_PREADOPTIVA_REGISTRADA","El Comité dejó constancia de una autorización preadoptiva ya emitida por SENNIAF; el portal no concede la autorización.");
+        if(r.fechaInicioConvivencia()!=null)auditar(v,actor,"CONVIVENCIA_INICIADA","Se registró la fecha de inicio efectivo de la convivencia preadoptiva autorizada.");
+        return detalle(id,rol,actor);
+    }
+    @Transactional
     public Map<String,Object> registrarInterrupcion(Long id,String rol,String actor,com.senniaf.match.dto.InterrupcionRequest solicitud){
         if(!Set.of("TRABAJADOR_SOCIAL","PSICOLOGO").contains(rol))throw new RolNoAutorizadoException("Solo el profesional asignado puede registrar la interrupción");
         Vinculacion v=repo.bloquear(id).orElseThrow(()->new IllegalArgumentException("La vinculación no está disponible"));
@@ -127,11 +167,9 @@ public class VinculacionService {
         if(!reportable(v))throw new IllegalStateException("Esta vinculación no permite registrar una interrupción de convivencia");
         if(interrupcion(v)!=null)throw new IllegalStateException("Esta vinculación ya tiene una interrupción registrada. Consulta su revisión");
         LocalDateTime ahora=LocalDateTime.now();
-        if(solicitud==null || solicitud.fechaInterrupcion()==null || solicitud.fechaInterrupcion().isAfter(java.time.LocalDate.now(ZoneId.of("America/Panama")))
-                || solicitud.fechaInterrupcion().isBefore(fechaPanama(v.getFechaRespuesta())))
-            throw new IllegalArgumentException("La fecha debe estar entre la aceptación familiar y el día de hoy");
-        InterrupcionConvivencia i=new InterrupcionConvivencia();i.setVinculacion(v);i.setFechaInterrupcion(solicitud.fechaInterrupcion());
-        i.setReferenciaActuacion(texto(solicitud.referenciaActuacion(),5,200,"Indica la referencia institucional de la convivencia"));
+        if(solicitud==null || solicitud.motivo()==null)throw new IllegalArgumentException("Selecciona el motivo de la interrupción");
+        InterrupcionConvivencia i=new InterrupcionConvivencia();i.setVinculacion(v);i.setMotivo(solicitud.motivo());
+        // Fecha de registro e identidad proceden del servidor; no inventar fecha del hecho ni referencia.
         i.setJustificacion(texto(solicitud.justificacion(),10,2000,"Explica el motivo de la interrupción en 10 a 2000 caracteres"));
         i.setRegistradoPor(actor);i.setRolProfesional(rol);i.setFechaRegistro(ahora);interrupciones.saveAndFlush(i);
         auditar(v,actor,"INTERRUPCION_REGISTRADA","Se registró una interrupción de convivencia para revisión del Comité.");
@@ -198,11 +236,11 @@ public class VinculacionService {
         return v.getEstado()==Vinculacion.Estado.RECHAZADA_POR_FAMILIA || v.getEstado()==Vinculacion.Estado.RESPUESTA_RECHAZADA_PENDIENTE_CIERRE && !v.isReservaVigente() && v.getFechaCierre()==null && interrupcion(v)==null;
     }
     private Vinculacion.Estado estadoVisible(Vinculacion v){return rechazoPortal(v)?Vinculacion.Estado.RECHAZADA_POR_FAMILIA:v.getEstado();}
-    private boolean reportable(Vinculacion v){return v.isReservaVigente() && v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA && v.getFechaRespuesta()!=null && !v.getNino().isCierrePorAdopcion();}
+    private boolean reportable(Vinculacion v){return v.getFechaRegistroAutorizacion()!=null && v.getFechaInicioConvivencia()!=null && v.isReservaVigente() && v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA && v.getFechaRespuesta()!=null && !v.getNino().isCierrePorAdopcion();}
     private InterrupcionConvivencia interrupcion(Vinculacion v){return interrupciones==null?null:interrupciones.findByVinculacionId(v.getId()).orElse(null);}
     private Map<String,Object> detalleInterrupcion(InterrupcionConvivencia i){
         Map<String,Object> r=new LinkedHashMap<>();r.put("id",i.getId());r.put("fechaInterrupcion",i.getFechaInterrupcion());
-        r.put("referenciaActuacion",i.getReferenciaActuacion());r.put("justificacion",i.getJustificacion());r.put("registradoPor",i.getRegistradoPor());r.put("rolProfesional",i.getRolProfesional());r.put("fechaRegistro",fecha(i.getFechaRegistro()));
+        r.put("motivo",i.getMotivo());r.put("referenciaActuacion",i.getReferenciaActuacion());r.put("justificacion",i.getJustificacion());r.put("registradoPor",i.getRegistradoPor());r.put("rolProfesional",i.getRolProfesional());r.put("fechaRegistro",fecha(i.getFechaRegistro()));
         r.put("revisionJustificacion",i.getRevisionJustificacion());r.put("revisadoPor",i.getRevisadoPor());r.put("fechaRevision",fecha(i.getFechaRevision()));return r;
     }
     private String texto(String valor,int min,int max,String error){if(valor==null || valor.strip().length()<min || valor.length()>max)throw new IllegalArgumentException(error);return valor.strip();}
