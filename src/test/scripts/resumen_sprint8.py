@@ -1,9 +1,6 @@
 import glob
-import os
 import sys
 import xml.etree.ElementTree as ET
-
-DESTINO = os.path.join("target", "pruebas-sprint8-resumen.md")
 
 def grupo(nombre):
     for hu in ("HU19", "HU11", "HU12", "HU14", "HU13"):
@@ -52,10 +49,7 @@ def main():
         lineas.append(f"| Pruebas: {', '.join(sorted(set(fila['clases'])))} |  |  |  |  |  |  |")
     aprobadas = total["ejecutadas"] - total["fallos"] - total["errores"] - total["omitidas"]
     lineas += ["", f"**Total:** {total['ejecutadas']} ejecutadas, {aprobadas} aprobadas, {total['fallos']} fallos, {total['errores']} errores y {total['omitidas']} omitidas.", f"**Tiempo acumulado de reportes:** {total['segundos']:.2f} segundos.", f"**Resultado:** {'BUILD SUCCESS' if total['fallos'] + total['errores'] == 0 else 'REVISAR FALLOS'}"]
-    os.makedirs(os.path.dirname(DESTINO), exist_ok=True)
     contenido = "\n".join(lineas) + "\n"
-    with open(DESTINO, "w", encoding="utf-8") as archivo:
-        archivo.write(contenido)
     print(contenido)
     return 0 if total["fallos"] + total["errores"] == 0 else 1
 
