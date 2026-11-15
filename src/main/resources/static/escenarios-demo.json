@@ -34,7 +34,12 @@
       "tieneHermanos": "NO",
       "cantidadHermanos": 0,
       "hermanosDetalle": "No se identifican hermanos en el expediente simulado.",
-      "contextoCultural": ""
+      "contextoCultural": "",
+      "idiomaComunicacion": "Se comunica en español con palabras breves y gestos.",
+      "costumbresTradiciones": "Disfruta las celebraciones familiares y la música tradicional.",
+      "vinculosCulturales": "Participa en actividades educativas de su entorno.",
+      "opinionCultural": "No se ha podido obtener su opinión sobre estos aspectos.",
+      "recomendacionesCulturales": "Acompañar su comunicación con paciencia y mantener actividades familiares significativas."
     },
     {
       "unidadEdad": "ANIOS",
@@ -70,7 +75,12 @@
       "tieneHermanos": "SI",
       "cantidadHermanos": 1,
       "hermanosDetalle": "Mantiene contacto significativo con una hermana; revisar el vínculo con el equipo responsable.",
-      "contextoCultural": ""
+      "contextoCultural": "",
+      "idiomaComunicacion": "Utiliza español en conversaciones cotidianas.",
+      "costumbresTradiciones": "Valora los relatos compartidos durante las reuniones familiares.",
+      "vinculosCulturales": "Mantiene interés por actividades artísticas comunitarias.",
+      "opinionCultural": "Expresa interés en mantener sus juegos y celebraciones habituales.",
+      "recomendacionesCulturales": "Conocer sus preferencias y preservar sus vínculos comunitarios con acompañamiento profesional."
     },
     {
       "unidadEdad": "ANIOS",
@@ -106,7 +116,12 @@
       "tieneHermanos": "NO",
       "cantidadHermanos": 0,
       "hermanosDetalle": "No se registran hermanos en el escenario.",
-      "contextoCultural": ""
+      "contextoCultural": "",
+      "idiomaComunicacion": "Utiliza español y expresa interés por palabras de su comunidad.",
+      "costumbresTradiciones": "Le interesan las comidas y los juegos de las celebraciones comunitarias.",
+      "vinculosCulturales": "Disfruta los encuentros deportivos y recreativos de su comunidad.",
+      "opinionCultural": "Prefiere conservar sus actividades artísticas y recreativas.",
+      "recomendacionesCulturales": "Introducir las nuevas rutinas respetando sus tradiciones y su ritmo de adaptación."
     },
     {
       "unidadEdad": "ANIOS",
@@ -142,7 +157,12 @@
       "tieneHermanos": "SI",
       "cantidadHermanos": 2,
       "hermanosDetalle": "Dos hermanos con quienes comparte actividades; el equipo revisará las necesidades del vínculo.",
-      "contextoCultural": ""
+      "contextoCultural": "",
+      "idiomaComunicacion": "Se comunica en español con palabras breves y gestos.",
+      "costumbresTradiciones": "Disfruta las celebraciones familiares y la música tradicional.",
+      "vinculosCulturales": "Participa en actividades educativas de su entorno.",
+      "opinionCultural": "Desea continuar participando en actividades musicales.",
+      "recomendacionesCulturales": "Acompañar su comunicación con paciencia y mantener actividades familiares significativas."
     },
     {
       "unidadEdad": "ANIOS",
@@ -177,7 +197,12 @@
       "tieneHermanos": "NO_SABE",
       "cantidadHermanos": null,
       "hermanosDetalle": "Información familiar pendiente de completar; no equivale a ausencia de hermanos.",
-      "contextoCultural": ""
+      "contextoCultural": "",
+      "idiomaComunicacion": "Utiliza español en conversaciones cotidianas.",
+      "costumbresTradiciones": "Valora los relatos compartidos durante las reuniones familiares.",
+      "vinculosCulturales": "Mantiene interés por actividades artísticas comunitarias.",
+      "opinionCultural": "Expresa interés en mantener sus juegos y celebraciones habituales.",
+      "recomendacionesCulturales": "Conocer sus preferencias y preservar sus vínculos comunitarios con acompañamiento profesional."
     },
     {
       "unidadEdad": "ANIOS",
@@ -213,7 +238,12 @@
       "tieneHermanos": "SI",
       "cantidadHermanos": 1,
       "hermanosDetalle": "Conservar el contacto autorizado con su hermano.",
-      "contextoCultural": ""
+      "contextoCultural": "",
+      "idiomaComunicacion": "Utiliza español y expresa interés por palabras de su comunidad.",
+      "costumbresTradiciones": "Le interesan las comidas y los juegos de las celebraciones comunitarias.",
+      "vinculosCulturales": "Disfruta los encuentros deportivos y recreativos de su comunidad.",
+      "opinionCultural": "Prefiere conservar sus actividades artísticas y recreativas.",
+      "recomendacionesCulturales": "Introducir las nuevas rutinas respetando sus tradiciones y su ritmo de adaptación."
     },
     {
       "unidadEdad": "ANIOS",
@@ -249,7 +279,12 @@
       "tieneHermanos": "NO_SABE",
       "cantidadHermanos": null,
       "hermanosDetalle": "Pendiente verificar el contexto familiar.",
-      "contextoCultural": ""
+      "contextoCultural": "",
+      "idiomaComunicacion": "Se comunica en español con palabras breves y gestos.",
+      "costumbresTradiciones": "Disfruta las celebraciones familiares y la música tradicional.",
+      "vinculosCulturales": "Participa en actividades educativas de su entorno.",
+      "opinionCultural": "Desea continuar participando en actividades musicales.",
+      "recomendacionesCulturales": "Acompañar su comunicación con paciencia y mantener actividades familiares significativas."
     },
     {
       "unidadEdad": "ANIOS",
@@ -284,7 +319,12 @@
       "tieneHermanos": "NO",
       "cantidadHermanos": 0,
       "hermanosDetalle": "",
-      "contextoCultural": ""
+      "contextoCultural": "",
+      "idiomaComunicacion": "Utiliza español en conversaciones cotidianas.",
+      "costumbresTradiciones": "Valora los relatos compartidos durante las reuniones familiares.",
+      "vinculosCulturales": "Mantiene interés por actividades artísticas comunitarias.",
+      "opinionCultural": "No se ha podido obtener su opinión sobre estos aspectos.",
+      "recomendacionesCulturales": "Conocer sus preferencias y preservar sus vínculos comunitarios con acompañamiento profesional."
     },
     {
       "unidadEdad": "MESES",
@@ -317,7 +357,12 @@
       "tieneHermanos": "NO_SABE",
       "cantidadHermanos": null,
       "hermanosDetalle": "Aún no se ha confirmado si tiene hermanos.",
-      "contextoCultural": ""
+      "contextoCultural": "",
+      "idiomaComunicacion": "Utiliza español y expresa interés por palabras de su comunidad.",
+      "costumbresTradiciones": "Le interesan las comidas y los juegos de las celebraciones comunitarias.",
+      "vinculosCulturales": "Disfruta los encuentros deportivos y recreativos de su comunidad.",
+      "opinionCultural": "No se ha podido obtener su opinión sobre estos aspectos.",
+      "recomendacionesCulturales": "Introducir las nuevas rutinas respetando sus tradiciones y su ritmo de adaptación."
     },
     {
       "unidadEdad": "MESES",
@@ -350,7 +395,12 @@
       "tieneHermanos": "NO_SABE",
       "cantidadHermanos": null,
       "hermanosDetalle": "Aún no se ha confirmado si tiene hermanos.",
-      "contextoCultural": ""
+      "contextoCultural": "",
+      "idiomaComunicacion": "Se comunica en español con palabras breves y gestos.",
+      "costumbresTradiciones": "Disfruta las celebraciones familiares y la música tradicional.",
+      "vinculosCulturales": "Participa en actividades educativas de su entorno.",
+      "opinionCultural": "Desea continuar participando en actividades musicales.",
+      "recomendacionesCulturales": "Acompañar su comunicación con paciencia y mantener actividades familiares significativas."
     },
     {
       "unidadEdad": "MESES",
@@ -383,7 +433,12 @@
       "tieneHermanos": "NO_SABE",
       "cantidadHermanos": null,
       "hermanosDetalle": "Aún no se ha confirmado si tiene hermanos.",
-      "contextoCultural": ""
+      "contextoCultural": "",
+      "idiomaComunicacion": "Utiliza español en conversaciones cotidianas.",
+      "costumbresTradiciones": "Valora los relatos compartidos durante las reuniones familiares.",
+      "vinculosCulturales": "Mantiene interés por actividades artísticas comunitarias.",
+      "opinionCultural": "Expresa interés en mantener sus juegos y celebraciones habituales.",
+      "recomendacionesCulturales": "Conocer sus preferencias y preservar sus vínculos comunitarios con acompañamiento profesional."
     }
   ],
   "familia": [
@@ -411,11 +466,11 @@
         "DIABETES"
       ],
       "notaCondicionesSalud": "Cuentan con organización para controles de asma; solicitan capacitación para diabetes.",
-      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
-      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
-      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
-      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
-      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
+      "apoyoIdiomas": "En casa hablamos español; buscaríamos orientación para acompañar otro idioma.",
+      "respetoTradiciones": "Proponemos conocer sus celebraciones e incorporarlas de forma respetuosa.",
+      "recursosComunitarios": "Disponemos de actividades educativas y recreativas en nuestro entorno.",
+      "respetoPreferencias": "Escucharíamos sus preferencias sin exigirle adoptar nuestras costumbres.",
+      "compromisoCultural": "Mantendríamos espacios de conversación y pediríamos orientación profesional. Buscaremos cuentos en su idioma habitual."
     },
     {
       "tipoFamilia": "MONOPARENTAL",
@@ -439,11 +494,11 @@
         "ASMA"
       ],
       "notaCondicionesSalud": "Solicita orientación y capacitación antes de asumir cuidados de asma.",
-      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
-      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
-      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
-      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
-      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
+      "apoyoIdiomas": "Nos apoyaríamos en recursos educativos y mediación lingüística si fueran necesarios.",
+      "respetoTradiciones": "Compartiríamos relatos, música y comidas importantes para su historia.",
+      "recursosComunitarios": "Buscaríamos talleres artísticos y espacios culturales accesibles.",
+      "respetoPreferencias": "Acordaríamos las actividades culturales según sus intereses y madurez.",
+      "compromisoCultural": "Organizaríamos tiempo para sus actividades significativas y revisaríamos juntos su adaptación. Mantendremos contacto con espacios culturales autorizados."
     },
     {
       "tipoFamilia": "FAMILIA_EXTENDIDA",
@@ -469,11 +524,11 @@
         "DISCAPACIDAD_FISICA"
       ],
       "notaCondicionesSalud": "Puede acompañar controles de asma; solicita valoración de accesibilidad para otras necesidades.",
-      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
-      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
-      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
-      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
-      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
+      "apoyoIdiomas": "Escucharíamos su forma habitual de comunicarse y aprenderíamos expresiones de su idioma.",
+      "respetoTradiciones": "Consultaríamos qué costumbres desea preservar antes de introducir cambios.",
+      "recursosComunitarios": "Podemos acompañar su participación en actividades deportivas y comunitarias.",
+      "respetoPreferencias": "Le ofreceríamos opciones para decidir qué celebraciones y vínculos desea mantener.",
+      "compromisoCultural": "Acompañaríamos la preservación de su identidad respetando su ritmo y sus decisiones. Acordaremos celebraciones significativas."
     },
     {
       "tipoFamilia": "OTRA",
@@ -498,11 +553,11 @@
         "ASMA"
       ],
       "notaCondicionesSalud": "Declaran recursos de comunicación accesible y disponibilidad para capacitación.",
-      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
-      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
-      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
-      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
-      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
+      "apoyoIdiomas": "En casa hablamos español; buscaríamos orientación para acompañar otro idioma.",
+      "respetoTradiciones": "Proponemos conocer sus celebraciones e incorporarlas de forma respetuosa.",
+      "recursosComunitarios": "Disponemos de actividades educativas y recreativas en nuestro entorno.",
+      "respetoPreferencias": "Escucharíamos sus preferencias sin exigirle adoptar nuestras costumbres.",
+      "compromisoCultural": "Mantendríamos espacios de conversación y pediríamos orientación profesional. Ofreceremos talleres musicales cuando le interesen."
     },
     {
       "tipoFamilia": "MONOPARENTAL",
@@ -526,11 +581,11 @@
         "TDAH"
       ],
       "notaCondicionesSalud": "No declara experiencia previa; requiere capacitación y construcción de apoyos.",
-      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
-      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
-      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
-      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
-      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
+      "apoyoIdiomas": "Nos apoyaríamos en recursos educativos y mediación lingüística si fueran necesarios.",
+      "respetoTradiciones": "Compartiríamos relatos, música y comidas importantes para su historia.",
+      "recursosComunitarios": "Buscaríamos talleres artísticos y espacios culturales accesibles.",
+      "respetoPreferencias": "Acordaríamos las actividades culturales según sus intereses y madurez.",
+      "compromisoCultural": "Organizaríamos tiempo para sus actividades significativas y revisaríamos juntos su adaptación. Respetaremos sus rutinas y espacios de expresión."
     },
     {
       "tipoFamilia": "PAREJA",
@@ -557,11 +612,11 @@
         "EPILEPSIA"
       ],
       "notaCondicionesSalud": "Puede organizar controles regulares y solicita capacitación adicional cuando se requiera.",
-      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
-      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
-      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
-      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
-      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
+      "apoyoIdiomas": "Escucharíamos su forma habitual de comunicarse y aprenderíamos expresiones de su idioma.",
+      "respetoTradiciones": "Consultaríamos qué costumbres desea preservar antes de introducir cambios.",
+      "recursosComunitarios": "Podemos acompañar su participación en actividades deportivas y comunitarias.",
+      "respetoPreferencias": "Le ofreceríamos opciones para decidir qué celebraciones y vínculos desea mantener.",
+      "compromisoCultural": "Acompañaríamos la preservación de su identidad respetando su ritmo y sus decisiones. Consultaremos recursos de mediación intercultural."
     },
     {
       "tipoFamilia": "FAMILIA_EXTENDIDA",
@@ -586,11 +641,11 @@
         "TEA"
       ],
       "notaCondicionesSalud": "Solicita formación antes de declarar capacidad para acompañar necesidades de desarrollo.",
-      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
-      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
-      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
-      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
-      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
+      "apoyoIdiomas": "En casa hablamos español; buscaríamos orientación para acompañar otro idioma.",
+      "respetoTradiciones": "Proponemos conocer sus celebraciones e incorporarlas de forma respetuosa.",
+      "recursosComunitarios": "Disponemos de actividades educativas y recreativas en nuestro entorno.",
+      "respetoPreferencias": "Escucharíamos sus preferencias sin exigirle adoptar nuestras costumbres.",
+      "compromisoCultural": "Mantendríamos espacios de conversación y pediríamos orientación profesional. Acompañaremos actividades recreativas de su comunidad."
     },
     {
       "tipoFamilia": "PAREJA",
@@ -616,11 +671,11 @@
         "DISCAPACIDAD_AUDITIVA"
       ],
       "notaCondicionesSalud": "Solicita capacitación y revisión de recursos de accesibilidad antes de asumir esos cuidados.",
-      "apoyoIdiomas": "Nuestra familia está dispuesta a buscar apoyo lingüístico cuando sea necesario y a respetar el idioma que forme parte de la identidad del niño.",
-      "respetoTradiciones": "Nos comprometemos a conocer y respetar las costumbres y tradiciones importantes para el niño, incorporándolas a la vida familiar de manera respetuosa.",
-      "recursosComunitarios": "Podemos apoyarnos en actividades educativas, culturales y comunitarias que contribuyan a mantener los vínculos significativos del niño.",
-      "respetoPreferencias": "Escucharíamos sus preferencias y procuraríamos que participe en las decisiones relacionadas con sus costumbres y actividades culturales, de acuerdo con su edad y madurez.",
-      "compromisoCultural": "Nos comprometemos a acompañar al niño en la preservación de su identidad y a buscar orientación profesional cuando sea necesario."
+      "apoyoIdiomas": "Nos apoyaríamos en recursos educativos y mediación lingüística si fueran necesarios.",
+      "respetoTradiciones": "Compartiríamos relatos, música y comidas importantes para su historia.",
+      "recursosComunitarios": "Buscaríamos talleres artísticos y espacios culturales accesibles.",
+      "respetoPreferencias": "Acordaríamos las actividades culturales según sus intereses y madurez.",
+      "compromisoCultural": "Organizaríamos tiempo para sus actividades significativas y revisaríamos juntos su adaptación. Revisaremos juntos los apoyos que necesita."
     }
   ],
   "psicologico": [

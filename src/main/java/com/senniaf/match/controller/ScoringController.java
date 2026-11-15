@@ -15,6 +15,8 @@ public class ScoringController {
     public ScoringController(ScoringService scoring) { this(scoring,null); }
     @org.springframework.beans.factory.annotation.Autowired
     public ScoringController(ScoringService scoring,com.senniaf.match.service.PerfilFamiliaService familias) { this.scoring = scoring;this.familias=familias; }
+    @GetMapping("/reevaluaciones-pendientes")
+    public List<String> pendientes(@RequestHeader("X-User-Role") String rol){comite(rol);return familias.reevaluacionesPendientes();}
     @GetMapping("/reevaluaciones")
     public List<Map<String,Object>> reevaluaciones(@RequestHeader("X-User-Role") String rol){comite(rol);return familias.alertasReevaluaciones();}
     private void comite(String rol) {

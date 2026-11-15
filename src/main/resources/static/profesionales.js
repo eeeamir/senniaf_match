@@ -3,6 +3,7 @@ const Profesionales = {
   culturaFamilia: [["apoyoIdiomas", "Apoyo con idiomas y comunicación", "¿Qué idiomas habla tu familia y cómo acompañaría a un niño que utiliza otro idioma?"], ["respetoTradiciones", "Respeto por costumbres y tradiciones", "¿Cómo respetaría las costumbres, celebraciones y tradiciones importantes para el niño?"], ["recursosComunitarios", "Recursos y apoyos comunitarios", "¿Con qué actividades, personas de apoyo o recursos comunitarios cuenta para acompañarlo?"], ["respetoPreferencias", "Respeto por las preferencias del niño", "¿Cómo escucharía y tendría en cuenta sus preferencias culturales y sus vínculos importantes?"], ["compromisoCultural", "Compromiso de acompañamiento cultural", "¿Qué acciones concretas realizaría para preservar su identidad y facilitar su adaptación?"]],
   icono(nombre) {
     const trazos = {
+      ubicacion:'M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0 M15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
       'heart-handshake':'M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8 M12 5.7 8.5 9.2a1.8 1.8 0 0 0 2.5 2.5l1.5-1.5 5 5 M7 14l4 4 M10 12l5 5',
       refrescar:'M20 8a8 8 0 0 0-14-3L3 8 M3 3v5h5 M4 16a8 8 0 0 0 14 3l3-3 M21 21v-5h-5',
       vinculacion:'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2',

@@ -1592,6 +1592,7 @@ if (sesion) {
       fetch('/api/familias/mi-perfil/detalle', { headers: Sesion.encabezados() })
         .then(r => { if (!r.ok) throw new Error('No encontramos tu entrevista'); return r.json(); })
         .then(p => {
+          fetch('/api/familias/mi-perfil',{headers:Sesion.encabezados()}).then(r=>{if(!r.ok)throw new Error('No se pudo consultar la solicitud');return r.json();}).then(revision=>{if(revision.reevaluacionPendiente)document.getElementById('formularioFamilia').insertAdjacentHTML('afterbegin',`<aside class="familia-revision-pendiente"><h2>Revisión solicitada por el Comité</h2><p>${(revision.apartadosReevaluacion||[]).map(limpiarHtml).join(', ')}</p><p class="pro-texto-registrado">${limpiarHtml(revision.observacionReevaluacion||'')}</p></aside>`);}).catch(error=>{resultadoFamilia.textContent=error.message;});
           textoEnviarFamilia=p.reevaluacionPendiente?'Enviar correcciones':'Guardar cambios';
           btnRegistrarFamilia.textContent=textoEnviarFamilia;
           ['tipoFamilia','notaEstructuraHogar','notaRedApoyo','provincia','disponibilidadViaje',

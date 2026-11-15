@@ -100,7 +100,7 @@ public class PerfilFamiliaService {
                 if(apartados==null && observacion!=null && observacion.startsWith("Apartados: ") && observacion.contains("\n\n")){
                     var partes=observacion.split("\n\n",2);apartados=java.util.Arrays.asList(partes[0].substring(11).split(java.util.regex.Pattern.quote(" | ")));observacion=partes[1];
                 }
-                if(apartados!=null)respuesta.setApartadosReevaluacion(apartados);
+                respuesta.setApartadosReevaluacion(apartados==null?List.of():apartados);
                 respuesta.setObservacionReevaluacion(observacion);
             }
             if("ACEPTADA".equals(d.getDecision()))actividad.add(actividad("Propuesta enviada por el Comité","Consulta Mi vinculación para conocer el estado y registrar tu respuesta.",d.getFecha()));
@@ -122,6 +122,8 @@ public class PerfilFamiliaService {
     }
 
     /** Vista institucional derivada del contador existente y de sus actuaciones, sin crear avisos persistentes duplicados. */
+    @Transactional(readOnly=true)
+    public java.util.List<String> reevaluacionesPendientes(){return repositorio.findAll().stream().filter(PerfilFamilia::isReevaluacionPendiente).map(PerfilFamilia::getCodigoCaso).sorted().toList();}
     @Transactional(readOnly=true)
     public java.util.List<java.util.Map<String,Object>> alertasReevaluaciones(){
         return repositorio.findAll().stream().filter(p->p.getNumeroReevaluaciones()>=3)

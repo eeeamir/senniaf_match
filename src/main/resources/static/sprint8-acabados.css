@@ -199,3 +199,17 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 .s8-acabado .familia-interrupcion .vinculacion-emblema{width:36px;height:36px;background:#ddeBff;color:#2365aa;flex-shrink:0}
 .s8-acabado .familia-interrupcion h3{font-size:16px}
 .s8-acabado #contenido>.mensaje.exito{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border:1px solid #c4e5d0;border-radius:12px;background:#dff5e8;color:#22623d}
+.s8-acabado .familia-entrevista-seccion>summary{background:#fff!important}
+.s8-acabado .familia-entrevista-seccion:nth-of-type(1) .pro-simbolo{background:#e7f8f1;color:#087a59}
+.s8-acabado .familia-entrevista-seccion:nth-of-type(2) .pro-simbolo{background:#f0e9ff;color:#7145ad}
+.s8-acabado .familia-entrevista-seccion:nth-of-type(3) .pro-simbolo{background:#ddeBff;color:#1763c2}
+.s8-acabado .familia-entrevista-seccion:nth-of-type(4) .pro-simbolo{background:#e7f8f1;color:#087a59}
+.s8-acabado .familia-entrevista-seccion:nth-of-type(5) .pro-simbolo{background:#ffe8db;color:#a75a12}
+.s8-acabado .pro-pesos-vigentes>div{background:#fff!important;display:grid;gap:8px;align-content:start}
+.peso-icono{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#ddeBff;color:#1763c2}
+.peso-hermanos,.peso-apoyo{background:#e7f8f1;color:#087a59}.peso-salud{background:#f0e9ff;color:#7145ad}.peso-logistica{background:#ffe8db;color:#a75a12}
+.s8-acabado #seccionApoyosCulturales>h2{background:#fff}
+.s8-acabado:has(#buscarCompatibilidad) .hero::before{display:none}
+.s8-acabado #compatibilidadRegistrada{padding-block:18px}
+.s8-acabado #compatibilidadRegistrada p{margin-block:8px}
+.s8-acabado #compatibilidadRegistrada .detalle-datos>div{padding-block:10px}

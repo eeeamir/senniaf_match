@@ -11,7 +11,7 @@ const Comite = {
       if(this.vista==='criterios'){await this.criterios();return;}
       if(this.vista==='reevaluaciones'){location.replace('match.html?vista=compatibilidad');return;}
       this.casos=await this.api('/api/scoring/casos');this.programacion=await this.api('/api/scoring/pesos/programacion');
-      if(this.vista==='compatibilidad'){if(this.codigo&&this.familia)await this.analisis();else this.compatibilidad();}
+      if(this.vista==='compatibilidad'){this.revisionesPendientes=await this.api('/api/scoring/reevaluaciones-pendientes');if(this.codigo&&this.familia)await this.analisis();else this.compatibilidad();}
       else this.inicio();
     }catch(e){this.contenido.innerHTML=Profesionales.encabezado('Panel del Comité','Consulta las propuestas y solicitudes.','personas')+`<p class="mensaje error" role="alert">${limpiarHtml(e.message)}</p>`;}
   },
@@ -30,7 +30,7 @@ const Comite = {
   },
   compatibilidad(){
     const seleccionado=this.codigo?this.casos.filter(c=>c.codigo===this.codigo):this.casos;
-    this.contenido.innerHTML=Profesionales.encabezado('Análisis de compatibilidad','Revisa las familias propuestas para cada expediente infantil.','salud')+this.avisoProgramacion(this.programacion?.pendiente)+`
+    this.contenido.innerHTML=Profesionales.encabezado('Análisis de compatibilidad','Revisa las familias propuestas para cada expediente infantil.','salud')+this.avisoProgramacion(this.programacion?.pendiente)+(this.revisionesPendientes?.length?`<p class="ayuda">${this.icono('informacion')} En revisión de entrevista: ${this.revisionesPendientes.map(c=>limpiarHtml(c)).join(', ')}. Estas familias no reciben nuevas recomendaciones hasta completar su actualización.</p>`:'')+`
       ${this.codigo?'<p><a href="match.html?vista=compatibilidad">← Ver todos los expedientes</a></p>':''}
       <div class="pro-herramientas"><label class="pro-buscar">${this.icono('buscar')}<input id="buscarCompatibilidad" type="search" placeholder="Buscar expediente infantil…" aria-label="Buscar expediente infantil"></label><select id="ordenCompatibilidad" aria-label="Orden de compatibilidad"><option value="mayor">Mayor compatibilidad</option><option value="menor">Menor compatibilidad</option></select></div><div id="propuestasComite"></div>`;
     const pintar=()=>{
@@ -77,7 +77,7 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
       alGuardar:async datos=>{
         if(tipo==='REEVALUACION'){
           this.codigo=null;this.familia=null;this.vista='compatibilidad';history.replaceState(null,'','match.html?vista=compatibilidad');
-          try{this.casos=await this.api('/api/scoring/casos');this.compatibilidad();}
+          try{this.casos=await this.api('/api/scoring/casos');this.revisionesPendientes=await this.api('/api/scoring/reevaluaciones-pendientes');this.compatibilidad();}
           catch(error){this.contenido.innerHTML=Profesionales.encabezado('Análisis de compatibilidad','Consulta las propuestas disponibles.','salud');const pendiente=document.createElement('p');Profesionales.mensaje(pendiente,'La solicitud quedó guardada. No se pudo actualizar el listado: '+error.message,'aviso');this.contenido.append(pendiente);}
           const aviso=document.createElement('p');Profesionales.mensaje(aviso,'La solicitud de reevaluación se registró correctamente','exito');this.contenido.prepend(aviso);return;
         }
@@ -107,7 +107,7 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
     this.programacion=agenda;
     this.contenido.innerHTML=Profesionales.encabezado('Configuración de pesos','Consulta los criterios vigentes y programa los próximos cambios.','criterios')+this.avisoProgramacion(agenda.pendiente,'completo')+`
       <section class="tarjeta"><h2>${this.icono('criterios')}Pesos actualmente vigentes</h2><p>Los cinco factores conservan una escala de 100 puntos. Los cambios se programan con al menos 24 horas de anticipación y se activan a las 7:00 a. m., hora de Panamá.</p>
-      <div class="pro-pesos-vigentes">${Object.entries(FACTORES).map(([k,f])=>`<div><span>${limpiarHtml(f.n)}</span><strong>${pesos[k]} puntos</strong></div>`).join('')}</div>
+      <div class="pro-pesos-vigentes">${Object.entries(FACTORES).map(([k,f])=>`<div><span class="peso-icono peso-${k}">${this.icono(({edad:'calendario',hermanos:'personas',salud:'salud',apoyo:'personas',logistica:'ubicacion'})[k])}</span><span>${limpiarHtml(f.n)}</span><strong>${pesos[k]} puntos</strong></div>`).join('')}</div>
       ${agenda.pendiente?'<p class="ayuda">Hay una actualización pendiente. Consulta sus valores y fecha antes de realizar otro cambio.</p>':`<details class="pro-seccion"><summary>${this.icono('calendario')}Programar nuevos pesos</summary><form id="formPesos">${Object.entries(FACTORES).map(([k,f])=>`<div class="pro-ajuste-fila"><span class="pro-simbolo">${this.icono(k==='edad'?'calendario':k==='salud'?'salud':k==='logistica'?'hogar':'personas')}</span><label for="peso-${k}">${limpiarHtml(f.n)}</label><input id="peso-${k}" type="number" name="${k}" value="${pesos[k]}" min="0" max="100" step="1" required></div>`).join('')}<div class="pro-ajuste-total"><span>Suma de los criterios</span><strong id="sumaPesos">100 / 100</strong></div><p class="ayuda">Introduce números enteros entre 0 y 100 que sumen exactamente 100.</p><label for="justificacionPesos">Justificación del cambio</label><textarea id="justificacionPesos" minlength="10" maxlength="300" required rows="4"></textarea><p class="ayuda">${this.icono('informacion')}La fecha se calcula en el servidor; la hora de activación siempre será las 7:00 a. m. de Panamá.</p><div class="pro-acciones"><button class="boton secundario" type="reset">Cancelar</button><button class="boton" type="submit">Revisar programación</button></div></form></details>`}
       <p id="pesoEstado" role="status"></p><div id="confirmacionProgramacion"></div></section>
       <section class="tarjeta"><details class="pro-historial-pesos"><summary>${this.icono('reloj')}Historial de ajustes</summary>${historial.length?`<ul class="familia-actividad">${[...historial].reverse().map(h=>{const c=h.cambio;return `<li><h3><span class="chip ${c.estado==='PENDIENTE'?'vinculacion-pendiente':''}">${this.icono(c.estado==='PENDIENTE'?'reloj':'comprobar')}${c.estado==='PENDIENTE'?'Cambio programado':c.estado==='APLICADA'?'Cambio aplicado':'Pesos actualizados'}</span></h3><p>${this.icono('persona')}${limpiarHtml(h.autor)} · ${limpiarHtml(Profesionales.fecha(h.fecha))}</p><p>Configuración ${c.versionAnterior} → ${c.versionNueva}</p><ul>${Object.entries(FACTORES).filter(([k])=>c.anteriores?.[k]!==c.nuevos?.[k]).map(([k,f])=>`<li>${limpiarHtml(f.n)}: ${c.anteriores[k]} → ${c.nuevos[k]} puntos</li>`).join('')}</ul>${c.activarEl?`<p>Fecha prevista: ${limpiarHtml(this.fechaProgramada(c.activarEl))}</p>`:''}${c.activadaEl?`<p>Aplicación efectiva: ${limpiarHtml(this.fechaProgramada(c.activadaEl))}</p>`:''}<p>${limpiarHtml(c.justificacion||'Sin justificación registrada en este antecedente.')}</p></li>`;}).join('')}</ul>`:'<p>No hay ajustes registrados.</p>'}</details></section>`;

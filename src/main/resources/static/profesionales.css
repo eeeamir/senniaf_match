@@ -286,3 +286,5 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
  .profesional .pro-resumen{grid-template-columns:repeat(2,minmax(0,1fr))}
  .profesional .pro-resumen .chip{max-width:100%;white-space:normal}
 }
+.familia-revision-pendiente{padding:16px 20px;border:1px solid #edcf91;border-radius:14px;background:#fff8e8;margin-bottom:20px}
+.familia-revision-pendiente h2{display:flex;align-items:center;gap:10px;font-size:18px;margin:0 0 10px}.familia-revision-pendiente p{line-height:1.6;margin:8px 0}.familia-revision-indicador{display:block;margin-top:5px;color:#946017;font-size:12px;font-weight:400}
