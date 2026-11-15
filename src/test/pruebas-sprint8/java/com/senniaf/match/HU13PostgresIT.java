@@ -1,14 +1,12 @@
 package com.senniaf.match;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.http.*;
 import java.util.*;
 import java.time.*;
 import static org.junit.jupiter.api.Assertions.*;
 @org.springframework.test.annotation.DirtiesContext(classMode=org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 @org.springframework.context.annotation.Import(PruebasProgramacionConfig.class)
-@EnabledIfEnvironmentVariable(named="HU19_TEST_DB_URL",matches="jdbc:postgresql://127\\.0\\.0\\.1:[0-9]+/hu19_[a-z_]+")
 class HU13PostgresIT extends SoportePostgresIT {
  @org.springframework.beans.factory.annotation.Autowired PruebasProgramacionConfig.Reloj reloj;
  @org.springframework.beans.factory.annotation.Autowired com.senniaf.match.service.PesosProgramadosService servicioProgramado;

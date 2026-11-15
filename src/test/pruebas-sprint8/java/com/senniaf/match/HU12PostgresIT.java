@@ -1,12 +1,10 @@
 package com.senniaf.match;
 
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.http.HttpMethod;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@EnabledIfEnvironmentVariable(named="HU19_TEST_DB_URL",matches="jdbc:postgresql://127\\.0\\.0\\.1:[0-9]+/hu19_[a-z_]+")
 class HU12PostgresIT extends SoportePostgresIT {
     static final List<String> CAMPOS=List.of("apoyoIdiomas","respetoTradiciones","recursosComunitarios","respetoPreferencias","compromisoCultural");
     @SuppressWarnings("unchecked") Map<String,Object> entrevista(Caso c){return json.convertValue(datos(req("/api/familias/mi-perfil/detalle",HttpMethod.GET,c.token(),null)),Map.class);}

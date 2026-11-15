@@ -1,13 +1,11 @@
 package com.senniaf.match;
 
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.http.HttpMethod;
 import java.time.*;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@EnabledIfEnvironmentVariable(named="HU19_TEST_DB_URL",matches="jdbc:postgresql://127\\.0\\.0\\.1:[0-9]+/hu19_[a-z_]+")
 class HU11PostgresIT extends SoportePostgresIT {
     Map<String,Object> informe(){return Map.of("motivo","ADAPTACION","justificacion","Se registra una interrupción sintética para revisión institucional");}
     long aceptada(Caso c){long id=asignar(c);assertEquals(200,req("/api/vinculaciones/"+id+"/respuesta",HttpMethod.POST,c.token(),Map.of("respuesta","ACEPTAR")).getStatusCode().value());autorizarInicio(id);return id;}
