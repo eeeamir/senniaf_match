@@ -13,7 +13,7 @@ def leer_reportes():
     for patron in ("target/surefire-reports/TEST-*.xml", "target/failsafe-reports/TEST-*.xml"):
         for archivo in glob.glob(patron):
             raiz = ET.parse(archivo).getroot()
-            nombre = raiz.attrib.get("name", os.path.basename(archivo))
+            nombre = raiz.attrib.get("name", archivo.rsplit("/", 1)[-1].rsplit("\\", 1)[-1])
             clase = nombre.rsplit(".", 1)[-1]
             if patron.startswith("target/surefire") and clase not in ("VinculacionDecisionTest", "VinculacionServiceTest"):
                 continue
