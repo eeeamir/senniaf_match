@@ -31,9 +31,21 @@ La evaluación de Sprint 8 usa las mismas dimensiones de calidad tomadas como re
 | Fiabilidad | Persistencia, auditoría, concurrencia, unicidad y no duplicación | Incluidas en las 36 | 0 fallos y 0 errores |
 | Eficiencia de rendimiento | Ejecución de la suite contra PostgreSQL 16.15 | 105 | 102 s de ejecución total |
 
+### Clasificación principal
+
+Cada método de prueba se clasifica según todas las métricas que realmente
+cubre. El script
+`src/test/scripts/resumen_sprint8.py` genera el desglose por HU (`HU19`,
+`HU11`, `HU12`, `HU13`, `HU14`) y por `Pruebas adicionales`, con los cuatro
+grupos (adecuación funcional, fiabilidad, eficiencia de rendimiento y
+seguridad). También genera el resumen final con ejecutadas, aprobadas, fallos,
+errores y omitidas. Como una prueba puede cubrir varias métricas, los
+subtotales por métrica no se suman entre sí para calcular el total real de
+pruebas.
+
 ### Resultado estadístico reproducido
 
-La última ejecución de `mvn "-Psprint8,e2e" verify` produjo:
+La tabla de resultados se genera en cada ejecución de `mvn "-Psprint8,e2e" verify`.
 
 | Grupo | Ejecutadas | Aprobadas | Fallos | Errores | Omitidas | Tasa de aprobación |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
