@@ -17,6 +17,11 @@ def leer_reportes():
         for archivo in glob.glob(patron):
             raiz = ET.parse(archivo).getroot()
             nombre = raiz.attrib.get("name", os.path.basename(archivo))
+            clase = nombre.rsplit(".", 1)[-1]
+            if patron.startswith("target/surefire") and clase not in ("VinculacionDecisionTest", "VinculacionServiceTest"):
+                continue
+            if patron.startswith("target/failsafe") and not clase.startswith("HU"):
+                continue
             clave = grupo(nombre)
             fila = datos.setdefault(clave, {"ejecutadas": 0, "fallos": 0, "errores": 0, "omitidas": 0, "segundos": 0.0, "clases": []})
             ejecutadas = int(raiz.attrib.get("tests", 0))
@@ -28,7 +33,7 @@ def leer_reportes():
             fila["errores"] += errores
             fila["omitidas"] += omitidas
             fila["segundos"] += float(raiz.attrib.get("time", 0))
-            fila["clases"].append(nombre.rsplit(".", 1)[-1])
+            fila["clases"].append(clase)
     return datos
 
 def main():
