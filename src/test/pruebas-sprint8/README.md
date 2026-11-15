@@ -29,7 +29,7 @@ La evaluación de Sprint 8 usa las mismas dimensiones de calidad tomadas como re
 | Adecuación funcional | Vinculaciones, interrupciones, continuidad cultural, reevaluaciones y pesos | 36 | 100% aprobadas |
 | Seguridad | Roles, sesiones, asignaciones, privacidad y cabeceras falsificadas | Incluidas en las 36 | 0 accesos indebidos observados |
 | Fiabilidad | Persistencia, auditoría, concurrencia, unicidad y no duplicación | Incluidas en las 36 | 0 fallos y 0 errores |
-| Eficiencia de rendimiento | Ejecución de la suite contra PostgreSQL 16.15 | 55 | 71.1 s de ejecución total |
+| Eficiencia de rendimiento | Ejecución de la suite contra PostgreSQL 16.15 | 85 | 95 s de ejecución total |
 
 ### Resultado estadístico reproducido
 
@@ -37,10 +37,10 @@ La última ejecución de `mvn "-Psprint8,e2e" verify` produjo:
 
 | Grupo | Ejecutadas | Aprobadas | Fallos | Errores | Omitidas | Tasa de aprobación |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Unitarias de servicios | 19 | 19 | 0 | 0 | 0 | 100% |
+| Unitarias de servicios | 49 | 49 | 0 | 0 | 0 | 100% |
 | Integración PostgreSQL/HTTP | 36 | 36 | 0 | 0 | 0 | 100% |
-| **Total Sprint 8** | **55** | **55** | **0** | **0** | **0** | **100%** |
+| **Total Sprint 8** | **85** | **85** | **0** | **0** | **0** | **100%** |
 
-Distribución de integración por funcionalidad: HU19 8, HU11 9, HU12 5, HU14 6 y HU13 8. El tiempo total observado fue 1 minuto 11.1 segundos, equivalente a un promedio global aproximado de 1.29 segundos por prueba; este promedio incluye el arranque y cierre de los contextos Spring Boot y no representa el tiempo aislado de cada caso.
+Distribución de integración por funcionalidad: HU19 8, HU11 9, HU12 5, HU14 6 y HU13 8. Las 30 pruebas unitarias adicionales cubren respuestas inválidas, actores y roles no autorizados, filtros, búsquedas y detalles ajenos. En la ejecución ampliada, Maven tardó 1 minuto 35 segundos y los reportes acumularon 81.79 segundos, aproximadamente 0.96 segundos por caso; este tiempo incluye el arranque y cierre de los contextos Spring Boot.
 
 Las pruebas se ejecutan con información sintética en una base aislada. No modifican funcionalidades de producción ni apuntan a la base habitual.

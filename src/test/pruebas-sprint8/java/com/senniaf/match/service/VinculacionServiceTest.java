@@ -4,6 +4,8 @@ import com.senniaf.match.model.*;
 import com.senniaf.match.repository.*;
 import com.senniaf.match.security.RolNoAutorizadoException;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -50,6 +52,45 @@ class VinculacionServiceTest {
         when(auditoria.findByCodigoCasoOrderByFechaAsc("NNA-001")).thenReturn(List.of(vacio,e));
         var historial=(List<?>)service.detalle(1L,"COMITE","CM-1").get("historial");
         assertEquals(1,historial.size());assertEquals("Respuesta registrada",((Map<?,?>)historial.get(0)).get("resumen"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"","CERRADA","ACEPTAR ","ACEPTACION","RECHAZADA"})
+    void respuestasFueraDelContratoNoEscriben(String respuesta){
+        assertThrows(IllegalArgumentException.class,()->service.responder(1L,"FAMILIA-1",respuesta));
+        verify(repo,never()).bloquear(anyLong());verify(repo,never()).save(any());verifyNoInteractions(auditoria);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"OTRA","FAMILIA-2","TS-1","", "null"})
+    void actoresFamiliaresNoAutorizadosNoResponden(String actor){
+        assertThrows(RolNoAutorizadoException.class,()->service.responder(1L,actor,"ACEPTAR"));
+        verify(repo,never()).save(any());verifyNoInteractions(auditoria);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"","ADMIN","FAMILIA","ANONIMO","TRABAJADOR_SOCIAL_X"})
+    void rolesFueraDelEquipoNoListanVinculaciones(String rol){
+        assertThrows(RolNoAutorizadoException.class,()->service.listar(rol,"CM-1",null,null));
+        verify(repo,never()).findAllByOrderByIdDesc();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"INEXISTENTE","CERRADA_X","ACEPTADA_X","PENDIENTE_X","RECHAZADA_X"})
+    void estadosDesconocidosNoAmplianResultados(String estado){
+        assertTrue(service.listar("COMITE","CM-1",estado,null).isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"NNA-999","FAM-999","VIN-999","otro caso","<script>alert(1)</script>"})
+    void busquedasSinCoincidenciaNoExponenRegistros(String busqueda){
+        assertTrue(service.listar("COMITE","CM-1",null,busqueda).isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"OTRA","FAMILIA-2","TS-2","PS-2","ANONIMO"})
+    void detalleDeActorAjenoEsRechazado(String actor){
+        assertThrows(RolNoAutorizadoException.class,()->service.detalle(1L,"TRABAJADOR_SOCIAL",actor));
     }
 
 }
