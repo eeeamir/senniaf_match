@@ -10,12 +10,37 @@ Esta carpeta contiene únicamente las pruebas nuevas de las funcionalidades impl
 
 Las pruebas conservan los paquetes Java originales y se agregan al ciclo Maven solo mediante el perfil `sprint8`.
 
-## Ejecutar todas las pruebas
+## Ejecutar todas las pruebas de Sprint 8
 
-Para ejecutar las pruebas unitarias y de integración de Sprint 7 y Sprint 8:
+Este comando ejecuta exclusivamente las pruebas ubicadas en `pruebas-sprint8`, incluyendo unitarias e integración PostgreSQL:
 
-```bash
-mvn -Psprint7,sprint8,e2e verify
+```powershell
+mvn "-Psprint8,e2e" verify
 ```
 
-Las pruebas que requieren PostgreSQL deben usar una base aislada de pruebas y las variables de entorno documentadas por cada integración.
+La base aislada predeterminada es `hu19_ci` en PostgreSQL local. Las variables de entorno pueden sobrescribir esa configuración.
+
+## Métricas ISO 25010 y resultados
+
+La evaluación de Sprint 8 usa las mismas dimensiones de calidad tomadas como referencia en Sprint 7:
+
+| Métrica | Alcance nuevo evaluado | Pruebas | Resultado |
+| --- | --- | ---: | --- |
+| Adecuación funcional | Vinculaciones, interrupciones, continuidad cultural, reevaluaciones y pesos | 36 | 100% aprobadas |
+| Seguridad | Roles, sesiones, asignaciones, privacidad y cabeceras falsificadas | Incluidas en las 36 | 0 accesos indebidos observados |
+| Fiabilidad | Persistencia, auditoría, concurrencia, unicidad y no duplicación | Incluidas en las 36 | 0 fallos y 0 errores |
+| Eficiencia de rendimiento | Ejecución de la suite contra PostgreSQL 16.15 | 55 | 71.1 s de ejecución total |
+
+### Resultado estadístico reproducido
+
+La última ejecución de `mvn "-Psprint8,e2e" verify` produjo:
+
+| Grupo | Ejecutadas | Aprobadas | Fallos | Errores | Omitidas | Tasa de aprobación |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Unitarias de servicios | 19 | 19 | 0 | 0 | 0 | 100% |
+| Integración PostgreSQL/HTTP | 36 | 36 | 0 | 0 | 0 | 100% |
+| **Total Sprint 8** | **55** | **55** | **0** | **0** | **0** | **100%** |
+
+Distribución de integración por funcionalidad: HU19 8, HU11 9, HU12 5, HU14 6 y HU13 8. El tiempo total observado fue 1 minuto 11.1 segundos, equivalente a un promedio global aproximado de 1.29 segundos por prueba; este promedio incluye el arranque y cierre de los contextos Spring Boot y no representa el tiempo aislado de cada caso.
+
+Las pruebas se ejecutan con información sintética en una base aislada. No modifican funcionalidades de producción ni apuntan a la base habitual.
