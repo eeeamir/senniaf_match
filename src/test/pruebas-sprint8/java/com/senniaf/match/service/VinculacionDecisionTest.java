@@ -3,6 +3,8 @@ package com.senniaf.match.service;
 import com.senniaf.match.model.*;
 import com.senniaf.match.repository.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.test.util.ReflectionTestUtils;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,4 +31,32 @@ class VinculacionDecisionTest {
     @Test void reservaInfantilBloqueaOtraAceptacion(){when(reservas.existsByNinoCodigoCasoAndReservaVigenteTrue("NNA-001")).thenReturn(true);assertThrows(IllegalStateException.class,()->service.decidir("NNA-001","FAM-001","ACEPTADA","Revisión favorable del Comité","CM-1"));verifyNoInteractions(vinculaciones);}
     @Test void propuestaYaNoElegibleNoSeAcepta(){n.setBajaLogica(true);assertThrows(IllegalStateException.class,()->service.decidir("NNA-001","FAM-001","ACEPTADA","Revisión favorable del Comité","CM-1"));verifyNoInteractions(vinculaciones);}
     @Test void conservaSolicitudReevaluacion(){service.decidir("NNA-001","FAM-001","REEVALUACION","Completar información de entrevista","CM-1");assertTrue(f.isReevaluacionPendiente());verify(familias).save(f);verifyNoInteractions(vinculaciones);}
+
+    @ParameterizedTest
+    @ValueSource(strings={"","ACEPTAR","RECHAZADA","PENDIENTE","CERRADA"})
+    void decisionesFueraDelContratoSonRechazadas(String decision){
+        assertThrows(IllegalArgumentException.class,()->service.decidir("NNA-001","FAM-001",decision,"Motivo sintético válido","CM-1"));
+        verifyNoInteractions(decisiones,vinculaciones);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"","corto","         ","123456789","123456789"})
+    void motivosFueraDeLimitesNoGeneranAuditoria(String motivo){
+        assertThrows(IllegalArgumentException.class,()->service.decidir("NNA-001","FAM-001","DESCARTADA",motivo,"CM-1"));
+        verifyNoInteractions(decisiones,vinculaciones);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"INEXISTENTE","","NO_APLICA","OTRA_CATEGORIA","DESCONOCIDA"})
+    void categoriasDeReevaluacionInvalidasSonRechazadas(String categoria){
+        assertThrows(IllegalArgumentException.class,()->service.decidir("NNA-001","FAM-001","REEVALUACION","Completar información de entrevista","CM-1",1,List.of("Hogar y red de apoyo"),categoria));
+        verifyNoInteractions(decisiones,vinculaciones);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"NNA-404","NNA-000","CASO-AJENO","<script>","null"})
+    void expedientesInfantilesInexistentesNoSeProcesan(String codigo){
+        assertThrows(IllegalArgumentException.class,()->service.decidir(codigo,"FAM-001","DESCARTADA","Motivo sintético válido","CM-1"));
+        verifyNoInteractions(decisiones,vinculaciones);
+    }
 }

@@ -3,13 +3,11 @@ package com.senniaf.match;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.senniaf.match.model.EventoCaso;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.http.HttpMethod;
 import java.time.LocalDateTime;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@EnabledIfEnvironmentVariable(named="HU19_TEST_DB_URL",matches="jdbc:postgresql://127\\.0\\.0\\.1:[0-9]+/hu19_[a-z_]+")
 class HU14PostgresIT extends SoportePostgresIT {
     @SuppressWarnings("unchecked") Map<String,Object> entrevista(Caso c){return json.convertValue(datos(req("/api/familias/mi-perfil/detalle",HttpMethod.GET,c.token(),null)),Map.class);}
     void solicitar(Caso c){var r=req("/api/scoring/casos/"+c.n().getCodigoCaso()+"/decisiones",HttpMethod.POST,comite,Map.of("familia",c.f().getCodigoCaso(),"decision","REEVALUACION","motivo","Ampliar la entrevista para una revisión humana del caso"));assertEquals(200,r.getStatusCode().value(),r.getBody());}

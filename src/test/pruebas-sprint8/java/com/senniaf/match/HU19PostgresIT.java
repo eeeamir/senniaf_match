@@ -7,7 +7,6 @@ import com.senniaf.match.model.enums.*;
 import com.senniaf.match.repository.*;
 import com.senniaf.match.service.ScoringService;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -23,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /** Solo se habilita expresamente en una base desechable hu19_ y con esquema SQL migrado. */
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT)
-@EnabledIfEnvironmentVariable(named="HU19_TEST_DB_URL",matches="jdbc:postgresql://127\\.0\\.0\\.1:[0-9]+/hu19_[a-z_]+")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HU19PostgresIT extends SoportePostgresIT {
     @Test void respuestaPersisteYExpedientesSeConservan(){

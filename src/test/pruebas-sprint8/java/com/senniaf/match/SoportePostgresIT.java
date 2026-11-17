@@ -26,8 +26,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class SoportePostgresIT {
     @DynamicPropertySource static void configurar(DynamicPropertyRegistry r){
-        r.add("spring.datasource.url",()->System.getenv("HU19_TEST_DB_URL"));
-        r.add("spring.datasource.username",()->System.getenv().getOrDefault("HU19_TEST_DB_USER","hu19_test"));r.add("spring.datasource.password",()->System.getenv().getOrDefault("HU19_TEST_DB_PASSWORD",""));
+        r.add("spring.datasource.url",()->System.getenv().getOrDefault("HU19_TEST_DB_URL","jdbc:postgresql://127.0.0.1:5432/hu19_ci"));
+        r.add("spring.datasource.username",()->System.getenv().getOrDefault("HU19_TEST_DB_USER","senniaf_app"));r.add("spring.datasource.password",()->System.getenv().getOrDefault("HU19_TEST_DB_PASSWORD","12345"));
         r.add("spring.jpa.hibernate.ddl-auto",()->"validate");r.add("senniaf.demo.habilitado",()->false);
         r.add("senniaf.correo.habilitado",()->false);r.add("senniaf.seguridad.limite-auth",()->1000);
     }
