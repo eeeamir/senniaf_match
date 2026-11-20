@@ -223,8 +223,18 @@ const Vinculaciones = {
         titulo: 'Acompañamiento e interrelación iniciados',
         fecha: aceptada ? v.fechaRespuesta : null,
       },
-      { titulo: 'Autorización preadoptiva registrada', fecha: autorizacion?.registradaEl },
-      { titulo: 'Inicio de convivencia registrado', fecha: autorizacion?.inicioRegistradoEl },
+      {
+        titulo: 'Autorización preadoptiva registrada',
+        fecha: autorizacion?.registradaEl,
+        detalle: autorizacion?.fechaEmision
+          ? 'Fecha de emisión: ' + Profesionales.fechaCivil(autorizacion.fechaEmision) : '',
+      },
+      {
+        titulo: 'Inicio de convivencia registrado',
+        fecha: autorizacion?.inicioRegistradoEl,
+        detalle: autorizacion?.fechaInicioConvivencia
+          ? 'Inicio efectivo: ' + Profesionales.fechaCivil(autorizacion.fechaInicioConvivencia) : '',
+      },
       { titulo: 'Interrupción registrada', fecha: v.seguimientoFamiliar?.interrupcionRegistradaEl },
       {
         titulo: 'Revisión del Comité registrada',
@@ -236,7 +246,7 @@ const Vinculaciones = {
       },
     ]
       .filter((e) => e.fecha)
-      .map((e) => ({ ...e, descripcion: v.codigo }));
+      .map((e) => ({ ...e, descripcion: [v.codigo, e.detalle].filter(Boolean).join(' · ') }));
     return { estado, mensaje, accion, etapas, eventos };
   },
   progresoFamiliar(v) {
@@ -271,7 +281,8 @@ const Vinculaciones = {
           .map(
             (evento) => `
           <li><strong>${limpiarHtml(evento.titulo)}</strong>
-            <time>${limpiarHtml(Profesionales.fecha(evento.fecha))}</time></li>
+            <time>${limpiarHtml(Profesionales.fecha(evento.fecha))}</time>
+            ${evento.detalle ? `<p>${limpiarHtml(evento.detalle)}</p>` : ''}</li>
         `,
           )
           .join('')}
