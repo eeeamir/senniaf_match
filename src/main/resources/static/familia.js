@@ -1,51 +1,179 @@
 /* Presentación familiar: reutiliza la entrevista y expone únicamente actividad autorizada del caso propio. */
 const Familia = {
- async mostrar(sesion) {
-  if(this.cargando)return;this.cargando=true;
-  const solicitada=new URLSearchParams(location.search).get('vista');
-  const vista=['entrevista','propuesta','historial'].includes(solicitada)?solicitada:'inicio';
-  document.body.classList.toggle('s8-acabado',vista!=='inicio');
-  Profesionales.iniciar(sesion,vista);
-  try {
-   const r=await fetch('/api/familias/mi-perfil',{headers:Sesion.encabezados(),cache:'no-store'});
-   if(r.status===401)return Sesion.salir();
-   if(!r.ok && r.status!==404)throw new Error('No se pudo consultar tu proceso. Inténtalo de nuevo.');
-   const sinEntrevista=r.status===404;
-   if(sinEntrevista && vista==='entrevista')return location.replace('perfil.html');
-   const vinculaciones=await Vinculaciones.api('/api/vinculaciones/propias');
-   document.querySelectorAll('[data-asignacion-info]').forEach(d=>{if(!vinculaciones.some(v=>String(v.id)===d.dataset.asignacionInfo&&v.puedeConsultarInformacion))d.close();});
-   const pendiente=vinculaciones.find(v=>v.estado==='PENDIENTE_RESPUESTA');
-   const p=sinEntrevista?{perfilCompleto:false,actividad:[]}:await r.json();
-   const enlaceEntrevista=sinEntrevista?'perfil.html':'perfil.html?reevaluacion=1';
-   let version=JSON.stringify([vista,p,vinculaciones]);
-   // Evita redibujar información idéntica y conserva los desplegables abiertos durante el refresco.
-   if(version===this.version && vista!=='entrevista')return;
-   let entrevista='';
-   if(vista==='entrevista'){
-    const d=await fetch('/api/familias/mi-perfil/detalle',{headers:Sesion.encabezados(),cache:'no-store'});
-    if(d.status===401)return Sesion.salir();
-    if(!d.ok)throw new Error('No se pudo consultar tu entrevista.');
-    const datos=await d.json();entrevista=this.entrevista(datos,p);
-    version=JSON.stringify([vista,p,datos,vinculaciones]);
-    if(version===this.version)return;
-   }
-   this.version=version;
-   const eventos=[...(p.actividad||[]),...vinculaciones.flatMap(v=>{const a=v.autorizacionPreadoptiva;return a?[{titulo:'Autorización preadoptiva registrada',descripcion:'Autorización emitida: '+Profesionales.fechaCivil(a.fechaEmision)+'. El equipo registró su existencia en el sistema.',fecha:a.registradaEl},...(a.inicioRegistradoEl?[{titulo:'Inicio de convivencia registrado',descripcion:'Inicio efectivo: '+Profesionales.fechaCivil(a.fechaInicioConvivencia)+'. El equipo registró el inicio de la convivencia autorizada.',fecha:a.inicioRegistradoEl}]:[])]:[];}),...vinculaciones.filter(v=>v.fechaRespuesta).map(v=>({titulo:v.estado==='CERRADA'?'Respuesta registrada':v.estado==='RECHAZADA_POR_FAMILIA'||v.estado==='RESPUESTA_RECHAZADA_PENDIENTE_CIERRE'?'Propuesta rechazada':'Propuesta aceptada',descripcion:'Tu respuesta a la propuesta quedó registrada.',fecha:v.fechaRespuesta}))].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha)),ultimo=eventos[0];
-   const estado=vinculaciones.length?Vinculaciones.estados[vinculaciones[0].estado]:p.vinculacionAceptada?'Propuesta enviada por el Comité':p.reevaluacionPendiente?'Entrevista en revisión':p.perfilCompleto?'Disponible para ser considerada':'Entrevista incompleta';
-   const accion=vinculaciones.length?vinculaciones[0].siguientePaso:sinEntrevista?'Completa tu entrevista para iniciar el proceso.':p.vinculacionAceptada?'Espera la orientación del equipo SENNIAF sobre los siguientes pasos.':p.reevaluacionPendiente||!p.perfilCompleto?'Revisa y completa tu entrevista.':'Espera la revisión de propuestas por el Comité.';
-   const etapas=['Entrevista enviada','Perfil completo','Disponible para ser considerada','Revisión del Comité','Mi vinculación'];
-   const actual=sinEntrevista?0:p.vinculacionAceptada?4:p.reevaluacionPendiente||!p.perfilCompleto?1:2;
-   const proceso=`<section class="tarjeta"><div class="pro-fila-titulo"><h2>${Profesionales.icono('solicitudes')} Estado del proceso de adopción</h2><span class="chip">${limpiarHtml(estado)}</span></div><ol class="familia-etapas">${etapas.map((t,i)=>`<li class="${i<actual?'completado':i===actual?'actual':'pendiente'}" ${i===actual?'aria-current="step"':''}><span class="familia-paso">${i<actual?Profesionales.icono('comprobar'):i+1}</span><strong>${t}</strong><small>${i<actual?'Completado':i===actual?'Etapa actual':'Pendiente'}</small></li>`).join('')}</ol>${p.reevaluacionPendiente||!p.perfilCompleto?`<a class="boton" href="${enlaceEntrevista}">${p.perfilCompleto?'Revisar entrevista':'Completar mi entrevista'}</a>`:''}</section>`;
-   const propuesta=Vinculaciones.familiar(vinculaciones);
-   const actividad=(todos=false)=>todos&&!eventos.length?`<section class="tarjeta"><div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('reloj')}</span><h2>Todavía no hay actualizaciones.</h2></div><p>Aquí podrás consultar los cambios y las comunicaciones relacionadas con tu proceso cuando estén disponibles.</p>${p.numeroReevaluaciones?`<p class="ayuda">Reevaluaciones completadas: ${Number(p.numeroReevaluaciones)}. Solo se muestran fechas que quedaron registradas.</p>`:''}</section>`:`<section class="tarjeta"><div class="pro-fila-titulo"><div><h2>${Profesionales.icono('reloj')} ${todos?'Actualizaciones registradas':'Actividad reciente'}</h2>${todos?'':'<p>Últimas actualizaciones registradas en tu proceso.</p>'}</div>${todos?'':'<a class="boton secundario chico" href="match.html?vista=historial">Ver historial completo →</a>'}</div><ul class="familia-actividad">${eventos.length?eventos.slice(0,todos?eventos.length:3).map(e=>`<li><strong>${limpiarHtml(e.titulo)}</strong><time>${limpiarHtml(Profesionales.fecha(e.fecha))} · Panamá</time><p>${limpiarHtml(e.descripcion)}</p></li>`).join(''):'<li>Todavía no hay actuaciones disponibles.</li>'}</ul>${todos&&p.numeroReevaluaciones?`<p class="ayuda">Reevaluaciones completadas: ${Number(p.numeroReevaluaciones)}. Solo se muestran fechas que quedaron registradas.</p>`:''}</section>`;
-   const resumen=`<div class="familia-resumen">${[['carpeta','Estado actual',estado],['calendario','Última actualización',ultimo?Profesionales.fecha(ultimo.fecha):'Sin actualizaciones registradas'],['comprobar','Próxima acción',accion]].map(([i,t,v])=>`<section class="tarjeta"><span class="pro-simbolo">${Profesionales.icono(i)}</span><h3>${t}</h3><p>${limpiarHtml(v)}</p></section>`).join('')}</div>`;
-   const pantallas={inicio:['Bienvenida, familia','Consulta el estado de tu proceso de adopción, las etapas y las actualizaciones registradas.','hogar'],entrevista:['Mi entrevista','Consulta las respuestas de tu hogar y actualízalas cuando cambie tu situación.','informe'],propuesta:['Mi vinculación','Consulta el resultado comunicado a tu familia y los siguientes pasos.','vinculacion'],historial:['Historial de mi proceso','Consulta las actualizaciones registradas durante tu proceso de adopción','reloj']};
-   const [titulo,descripcion,icono]=pantallas[vista];
-   document.getElementById('contenido').innerHTML=Profesionales.encabezado(titulo,descripcion,icono)+(pendiente&&vista!=='propuesta'?`<section class="tarjeta" role="status">${Profesionales.icono('informacion')} Tienes una propuesta pendiente de respuesta. <a href="match.html?vista=propuesta">Consultar mi vinculación</a></section>`:'')+(['inicio','entrevista'].includes(vista)?this.avisoReevaluacion(p):'')+(vista==='entrevista'?entrevista:vista==='historial'?Vinculaciones.progresoFamiliar(vinculaciones[0])+actividad(true):vista==='propuesta'?propuesta:proceso+resumen+actividad());
-   Vinculaciones.enlazarRespuestas(sesion);
-  }catch(e){this.version=null;document.getElementById('contenido').innerHTML=`<section class="tarjeta"><p role="alert">${limpiarHtml(e.message)}</p></section>`;}
-  finally{this.cargando=false;}
- },
+  async mostrar(sesion) {
+    if (this.cargando) return;
+    this.cargando = true;
+    const solicitada = new URLSearchParams(location.search).get('vista');
+    const vista = ['entrevista', 'propuesta', 'historial'].includes(solicitada)
+      ? solicitada
+      : 'inicio';
+    document.body.classList.toggle('s8-acabado', vista !== 'inicio');
+    Profesionales.iniciar(sesion, vista);
+    try {
+      const r = await fetch('/api/familias/mi-perfil', {
+        headers: Sesion.encabezados(),
+        cache: 'no-store',
+      });
+      if (r.status === 401) return Sesion.salir();
+      if (!r.ok && r.status !== 404)
+        throw new Error('No se pudo consultar tu proceso. Inténtalo de nuevo.');
+      const sinEntrevista = r.status === 404;
+      if (sinEntrevista && vista === 'entrevista') return location.replace('perfil.html');
+      const vinculaciones = await Vinculaciones.api('/api/vinculaciones/propias');
+      document.querySelectorAll('[data-asignacion-info]').forEach((d) => {
+        if (
+          !vinculaciones.some(
+            (v) => String(v.id) === d.dataset.asignacionInfo && v.puedeConsultarInformacion,
+          )
+        )
+          d.close();
+      });
+      const pendiente = vinculaciones.find((v) => v.estado === 'PENDIENTE_RESPUESTA');
+      const p = sinEntrevista ? { perfilCompleto: false, actividad: [] } : await r.json();
+      const enlaceEntrevista = sinEntrevista ? 'perfil.html' : 'perfil.html?reevaluacion=1';
+      let version = JSON.stringify([vista, p, vinculaciones]);
+      // Evita redibujar información idéntica y conserva los desplegables abiertos durante el refresco.
+      if (version === this.version && vista !== 'entrevista') return;
+      let entrevista = '';
+      if (vista === 'entrevista') {
+        const d = await fetch('/api/familias/mi-perfil/detalle', {
+          headers: Sesion.encabezados(),
+          cache: 'no-store',
+        });
+        if (d.status === 401) return Sesion.salir();
+        if (!d.ok) throw new Error('No se pudo consultar tu entrevista.');
+        const datos = await d.json();
+        entrevista = this.entrevista(datos, p);
+        version = JSON.stringify([vista, p, datos, vinculaciones]);
+        if (version === this.version) return;
+      }
+      this.version = version;
+      const vigente = Vinculaciones.seleccionarVinculacion(vinculaciones);
+      const progreso = Vinculaciones.obtenerProgreso(vigente);
+      const eventos = [
+        ...(p.actividad || []),
+        ...vinculaciones.flatMap((v) => Vinculaciones.obtenerProgreso(v).eventos),
+      ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      const ultimo = progreso
+        ? [...progreso.eventos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0]
+        : eventos[0];
+      let estado = 'Entrevista incompleta';
+      let accion = 'Revisa y completa tu entrevista.';
+      if (p.perfilCompleto) {
+        estado = 'En espera de una propuesta del Comité';
+        accion = 'El Comité revisará las propuestas según los requisitos y la disponibilidad institucional.';
+      }
+      if (p.reevaluacionPendiente) {
+        estado = 'Entrevista en revisión';
+        accion = 'Revisa y completa tu entrevista.';
+      }
+      if (sinEntrevista) accion = 'Completa tu entrevista para iniciar el proceso.';
+      if (progreso) {
+        estado = progreso.estado;
+        accion = progreso.accion;
+      }
+      const proceso = progreso
+        ? `<section class="tarjeta">${Vinculaciones.progresoFamiliar(vigente)}</section>`
+        : `
+      <section class="tarjeta">
+        <h2>${Profesionales.icono('solicitudes')}Preparación del expediente familiar</h2>
+        <p>${limpiarHtml(estado)}</p>
+        <p>Todavía no tienes una propuesta registrada.</p>
+        ${
+          p.reevaluacionPendiente || !p.perfilCompleto
+            ? `
+          <a class="boton" href="${enlaceEntrevista}">
+            ${p.perfilCompleto ? 'Revisar entrevista' : 'Completar mi entrevista'}
+          </a>`
+            : ''
+        }
+      </section>`;
+      const propuesta = Vinculaciones.familiar(vinculaciones);
+      const actividad = (todos = false) => {
+        const visibles = todos ? eventos : eventos.slice(0, 3);
+        return `
+          <section class="tarjeta">
+            <div class="pro-fila-titulo">
+              <h2>${Profesionales.icono('reloj')}
+                ${todos ? 'Actualizaciones registradas' : 'Actividad reciente'}</h2>
+              ${todos ? '' : `
+                <a class="boton secundario chico" href="match.html?vista=historial">
+                  Ver historial completo →
+                </a>`}
+            </div>
+            <ul class="familia-actividad">
+              ${visibles.map(evento => `
+                <li>
+                  <strong>${limpiarHtml(evento.titulo)}</strong>
+                  <time>${limpiarHtml(Profesionales.fecha(evento.fecha))} · Panamá</time>
+                  <p>${limpiarHtml(evento.descripcion)}</p>
+                </li>`).join('') || '<li>Todavía no hay actuaciones disponibles.</li>'}
+            </ul>
+            ${todos && p.numeroReevaluaciones ? `
+              <p class="ayuda">Reevaluaciones completadas: ${Number(p.numeroReevaluaciones)}.
+                Solo se muestran fechas que quedaron registradas.</p>` : ''}
+          </section>`;
+      };
+      const tarjetas = [
+        ['carpeta', 'Estado actual', estado],
+        ['calendario', 'Última actualización', ultimo
+          ? ultimo.titulo + ' · ' + Profesionales.fecha(ultimo.fecha)
+          : 'Sin actualizaciones registradas'],
+        ['comprobar', 'Próxima acción', accion]
+      ];
+      const resumen = `
+        <div class="familia-resumen">
+          ${tarjetas.map(([icono, titulo, texto]) => `
+            <section class="tarjeta">
+              <span class="pro-simbolo">${Profesionales.icono(icono)}</span>
+              <h3>${titulo}</h3><p>${limpiarHtml(texto)}</p>
+            </section>`).join('')}
+        </div>`;
+      const pantallas = {
+        inicio: [
+          'Bienvenida, familia',
+          'Consulta el estado de tu proceso de adopción, las etapas y las actualizaciones registradas.',
+          'hogar',
+        ],
+        entrevista: [
+          'Mi entrevista',
+          'Consulta las respuestas de tu hogar y actualízalas cuando cambie tu situación.',
+          'informe',
+        ],
+        propuesta: [
+          'Mi vinculación',
+          'Consulta el resultado comunicado a tu familia y los siguientes pasos.',
+          'vinculacion',
+        ],
+        historial: [
+          'Historial de mi proceso',
+          'Consulta las actualizaciones registradas durante tu proceso de adopción',
+          'reloj',
+        ],
+      };
+      const [titulo, descripcion, icono] = pantallas[vista];
+      let contenidoVista = proceso + resumen + actividad();
+      if (vista === 'entrevista') contenidoVista = entrevista;
+      if (vista === 'historial') contenidoVista = actividad(true);
+      if (vista === 'propuesta') contenidoVista = propuesta;
+      const avisoPropuesta = pendiente && vista !== 'propuesta' ? `
+        <section class="tarjeta" role="status">
+          ${Profesionales.icono('informacion')} Tienes una propuesta pendiente de respuesta.
+          <a href="match.html?vista=propuesta">Consultar mi vinculación</a>
+        </section>` : '';
+      document.getElementById('contenido').innerHTML =
+        Profesionales.encabezado(titulo, descripcion, icono) + avisoPropuesta
+        + (['inicio', 'entrevista'].includes(vista) ? this.avisoReevaluacion(p) : '')
+        + contenidoVista;
+      Vinculaciones.enlazarRespuestas(sesion);
+    } catch (e) {
+      this.version = null;
+      document.getElementById('contenido').innerHTML =
+        `<section class="tarjeta"><p role="alert">${limpiarHtml(e.message)}</p></section>`;
+    } finally {
+      this.cargando = false;
+    }
+  },
  avisoReevaluacion(p){
   if(!p.reevaluacionPendiente)return '';
   return `<aside class="tarjeta familia-revision-pendiente" role="status"><h2>${Profesionales.icono('solicitudes')}Tienes una actualización pendiente en tu entrevista</h2><p>El Comité solicitó revisar algunos apartados de tu entrevista para continuar con la evaluación de tu expediente.</p>${p.apartadosReevaluacion?.length?`<ul>${p.apartadosReevaluacion.map(t=>`<li>${limpiarHtml(t)}</li>`).join('')}</ul>`:''}<p class="pro-texto-registrado">${limpiarHtml(p.observacionReevaluacion||'Consulta la solicitud con el equipo responsable si necesitas orientación.')}</p><a class="boton secundario" href="match.html?vista=entrevista">Revisar mi entrevista</a></aside>`;

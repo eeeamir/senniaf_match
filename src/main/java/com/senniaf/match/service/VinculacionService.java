@@ -134,6 +134,30 @@ public class VinculacionService {
             r.put("siguientePaso",familiar?"Tu respuesta quedó registrada. Gracias por revisar la propuesta. El equipo correspondiente podrá continuar con el seguimiento de tu expediente.":"La propuesta del portal fue rechazada. Esta combinación queda fuera de las recomendaciones automáticas, sin cambiar la idoneidad de los expedientes.");
             r.put("disponibilidad","Sin reserva por esta propuesta; se mantienen los requisitos vigentes de cada expediente.");
         }
+        if (familiar) {
+            // Solo fechas y respuesta del caso propio; no se exponen informes ni justificaciones internas.
+            Map<String, Object> seguimientoFamiliar = new LinkedHashMap<>();
+            if (seguimiento != null) {
+                seguimientoFamiliar.put("interrupcionRegistradaEl", fecha(seguimiento.getFechaRegistro()));
+                seguimientoFamiliar.put("revisionRegistradaEl", fecha(seguimiento.getFechaRevision()));
+            }
+            seguimientoFamiliar.put("cierreRegistradoEl", fecha(v.getFechaRegistroCierre()));
+            r.put("seguimientoFamiliar", seguimientoFamiliar);
+            if (v.getEstado() == Vinculacion.Estado.CERRADA && v.getFechaRespuesta() != null) {
+                auditoria.findByCodigoCasoOrderByFechaAsc(v.getNino().getCodigoCaso()).stream()
+                    .filter(e -> "RESPUESTA_FAMILIAR".equals(e.getAccion()))
+                    .filter(e -> detalleEvento(e).path("vinculacionId").asLong(-1) == v.getId())
+                    .map(e -> detalleEvento(e).path("estado").asText(""))
+                    .forEach(estadoRespuesta -> {
+                        if ("RESPUESTA_ACEPTADA".equals(estadoRespuesta)) {
+                            r.put("respuestaFamiliar", "ACEPTADA");
+                        } else if (Set.of("RECHAZADA_POR_FAMILIA", "RESPUESTA_RECHAZADA_PENDIENTE_CIERRE")
+                                .contains(estadoRespuesta)) {
+                            r.put("respuestaFamiliar", "RECHAZADA");
+                        }
+                    });
+            }
+        }
         if(!familiar){r.put("decisionComite",Map.of("decision",v.getDecision().getDecision(),"responsable",v.getDecision().getFuncionario(),"fecha",fecha(v.getDecision().getFecha()),"motivo",v.getDecision().getMotivo()));r.put("respondidoPor",v.getRespondidoPor());}
         return r;
     }
