@@ -429,10 +429,10 @@
         </div>
 
 
-        <div class="campo ancho">
+        <div class="campo ancho" id="campoContextoCultural" hidden>
 
           <label for="contextoCultural">
-            Continuidad cultural o comunitaria
+            Información cultural registrada anteriormente
           </label>
 
           <textarea
@@ -1601,7 +1601,11 @@ if (sesion) {
             const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
           });
           ['redApoyo','condicionesPuedeAcompanarHoy','condicionesConApoyo'].forEach(k => marcarValores(k, p[k] || []));
-          const antecedente=document.getElementById('antecedenteCulturalFamilia');antecedente.hidden=!p.continuidadCultural;antecedente.querySelector('[data-texto-anterior]').textContent=p.continuidadCultural||'';
+          const antecedente = document.getElementById('antecedenteCulturalFamilia');
+          antecedente.hidden = !Profesionales.mostrarAntecedenteCultural(
+            p.continuidadCultural, p, Profesionales.culturaFamilia.map(([campo]) => campo)
+          );
+          antecedente.querySelector('[data-texto-anterior]').textContent = p.continuidadCultural || '';
           ReglasPerfil.refrescarFamilia();
           Profesionales.marcarGuardado(formularioFamilia);
           btnRegistrarFamilia.disabled = false;
@@ -1628,6 +1632,10 @@ if (sesion) {
           'idiomaComunicacion','costumbresTradiciones','vinculosCulturales','opinionCultural','recomendacionesCulturales','contextoCultural','alergiasDetalle','intoleranciaLactosa','condicionesSaludDetalle','necesidadesApoyo'].forEach(k => {
             const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
           });
+        document.getElementById('campoContextoCultural').hidden = !Profesionales.mostrarAntecedenteCultural(
+          p.contextoCultural, p,
+          ['idiomaComunicacion', 'costumbresTradiciones', 'vinculosCulturales', 'opinionCultural', 'recomendacionesCulturales']
+        );
         ['habilidades','gustos','personalidad','alergias','condicionesSalud'].forEach(k => marcarValores(k, p[k] || []));
         document.getElementById('unidadEdad').value=p.unidadEdad||'ANIOS';
         document.getElementById('edad').dataset.historicaSinMeses=String(p.edad===0&&p.unidadEdad!=='MESES');

@@ -178,12 +178,115 @@ const Familia = {
   if(!p.reevaluacionPendiente)return '';
   return `<aside class="tarjeta familia-revision-pendiente" role="status"><h2>${Profesionales.icono('solicitudes')}Tienes una actualización pendiente en tu entrevista</h2><p>El Comité solicitó revisar algunos apartados de tu entrevista para continuar con la evaluación de tu expediente.</p>${p.apartadosReevaluacion?.length?`<ul>${p.apartadosReevaluacion.map(t=>`<li>${limpiarHtml(t)}</li>`).join('')}</ul>`:''}<p class="pro-texto-registrado">${limpiarHtml(p.observacionReevaluacion||'Consulta la solicitud con el equipo responsable si necesitas orientación.')}</p><a class="boton secundario" href="match.html?vista=entrevista">Revisar mi entrevista</a></aside>`;
  },
- entrevista(d,p){
-  const grupos={ 'Hogar y red de apoyo':['tipoFamilia','especificacionHogar','notaEstructuraHogar','redApoyo','notaRedApoyo'], 'Preferencias familiares':['edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad','disposicionHermanos','notaHermanos'], 'Salud y acompañamiento':['condicionesPuedeAcompanarHoy','condicionesConApoyo','notaCondicionesSalud'], 'Disponibilidad y entorno':['provincia','disponibilidadViaje','notaDistancia'], 'Apoyos culturales y comunitarios':[...Profesionales.culturaFamilia.map(([k])=>k),'continuidadCultural'] };
-  const etiquetas={...Object.fromEntries(Profesionales.culturaFamilia.map(([k,t])=>[k,t])),tipoFamilia:'Composición del hogar',especificacionHogar:'Descripción de otra estructura del hogar',notaEstructuraHogar:'Características familiares',redApoyo:'Red de apoyo',notaRedApoyo:'Organización del apoyo',edadMinimaAceptada:'Edad mínima',edadMaximaAceptada:'Edad máxima',notaRangoEdad:'Acompañamiento según la edad',disposicionHermanos:'Disposición ante hermanos',notaHermanos:'Vínculos entre hermanos',condicionesPuedeAcompanarHoy:'Capacidad actual',condicionesConApoyo:'Con apoyo adicional',notaCondicionesSalud:'Cuidados y acompañamiento',provincia:'Provincia',disponibilidadViaje:'Disponibilidad de viaje',notaDistancia:'Desplazamientos',continuidadCultural:'Información cultural registrada anteriormente'};
-  const observacion=p.reevaluacionPendiente?p.observacionReevaluacion||'':'';
-  const seleccion=p.apartadosReevaluacion||[];
-  const iconos=['personas','estrella','salud','hogar','personas'];
-  return `<section class="tarjeta familia-entrevista-resumen"><div><span class="pro-capsula">${p.perfilCompleto?'Entrevista registrada':'Entrevista incompleta'}</span><h2>${limpiarHtml(p.codigoCaso)}</h2><p>${p.reevaluacionPendiente?'El Comité solicitó revisar tu entrevista. Atiende los apartados señalados antes de enviar las correcciones.':'Puedes actualizar tu entrevista cuando cambie la situación de tu hogar.'}</p></div><a class="boton" href="perfil.html?reevaluacion=1">${Profesionales.icono('informe')}${p.perfilCompleto?'Editar entrevista':'Completar mi entrevista'}</a></section>`+Object.entries(grupos).map(([titulo,campos],i)=>`<details class="familia-entrevista-seccion ${campos.length===1?'pro-detalle-amplio':''}"><summary><span class="pro-simbolo">${Profesionales.icono(iconos[i])}</span><span>${titulo}${seleccion.includes(titulo)?'<small class="familia-revision-indicador">Revisión solicitada</small>':''}</span><span class="familia-desplegar" aria-hidden="true">⌄</span></summary><dl class="detalle-datos">${campos.filter(k=>k!=='especificacionHogar'||d.tipoFamilia==='OTRA').map(k=>`<div><dt>${etiquetas[k]}</dt><dd>${limpiarHtml(d[k]==null||d[k]===''?'Sin información registrada':Array.isArray(d[k])?(d[k].length?d[k].map(v=>Profesionales.etiqueta(v)).join(', '):'Sin condiciones específicas declaradas'):typeof d[k]==='number'?d[k]:/^[A-Z_]+$/.test(d[k])?Profesionales.etiqueta(d[k]):d[k])}</dd></div>`).join('')}</dl></details>`).join('');
- }
+  entrevista(d, p) {
+    const grupos = {
+      'Hogar y red de apoyo': [
+        'tipoFamilia',
+        'especificacionHogar',
+        'notaEstructuraHogar',
+        'redApoyo',
+        'notaRedApoyo',
+      ],
+      'Preferencias familiares': [
+        'edadMinimaAceptada',
+        'edadMaximaAceptada',
+        'notaRangoEdad',
+        'disposicionHermanos',
+        'notaHermanos',
+      ],
+      'Salud y acompañamiento': [
+        'condicionesPuedeAcompanarHoy',
+        'condicionesConApoyo',
+        'notaCondicionesSalud',
+      ],
+      'Disponibilidad y entorno': ['provincia', 'disponibilidadViaje', 'notaDistancia'],
+      'Apoyos culturales y comunitarios': [
+        ...Profesionales.culturaFamilia.map(([k]) => k),
+        'continuidadCultural',
+      ],
+    };
+    const etiquetas = {
+      ...Object.fromEntries(Profesionales.culturaFamilia.map(([k, t]) => [k, t])),
+      tipoFamilia: 'Composición del hogar',
+      especificacionHogar: 'Descripción de otra estructura del hogar',
+      notaEstructuraHogar: 'Características familiares',
+      redApoyo: 'Red de apoyo',
+      notaRedApoyo: 'Organización del apoyo',
+      edadMinimaAceptada: 'Edad mínima',
+      edadMaximaAceptada: 'Edad máxima',
+      notaRangoEdad: 'Acompañamiento según la edad',
+      disposicionHermanos: 'Disposición ante hermanos',
+      notaHermanos: 'Vínculos entre hermanos',
+      condicionesPuedeAcompanarHoy: 'Capacidad actual',
+      condicionesConApoyo: 'Con apoyo adicional',
+      notaCondicionesSalud: 'Cuidados y acompañamiento',
+      provincia: 'Provincia',
+      disponibilidadViaje: 'Disponibilidad de viaje',
+      notaDistancia: 'Desplazamientos',
+      continuidadCultural: 'Información cultural registrada anteriormente',
+    };
+    const seleccion = p.apartadosReevaluacion || [];
+    const iconos = ['personas', 'estrella', 'salud', 'hogar', 'personas'];
+    const contenido = Object.entries(grupos)
+      .map(([titulo, campos], indice) => {
+        const visibles = campos.filter((campo) => {
+          if (campo === 'especificacionHogar') return d.tipoFamilia === 'OTRA';
+          if (campo === 'continuidadCultural') {
+            return Profesionales.mostrarAntecedenteCultural(
+              d.continuidadCultural,
+              d,
+              Profesionales.culturaFamilia.map(([clave]) => clave),
+            );
+          }
+          return true;
+        });
+        return `
+      <details class="familia-entrevista-seccion">
+        <summary>
+          <span class="pro-simbolo">${Profesionales.icono(iconos[indice])}</span>
+          <span>${titulo}${
+            seleccion.includes(titulo)
+              ? '<small class="familia-revision-indicador">Revisión solicitada</small>'
+              : ''
+          }</span>
+          <span class="familia-desplegar" aria-hidden="true">⌄</span>
+        </summary>
+        <dl class="detalle-datos">
+          ${visibles
+            .map(
+              (campo) => `
+            <div><dt>${etiquetas[campo]}</dt>
+              <dd>${limpiarHtml(this.valorEntrevista(d[campo]))}</dd></div>`,
+            )
+            .join('')}
+        </dl>
+      </details>`;
+      })
+      .join('');
+    return `
+    <section class="tarjeta familia-entrevista-resumen">
+      <div>
+        <span class="pro-capsula">${p.perfilCompleto ? 'Entrevista registrada' : 'Entrevista incompleta'}</span>
+        <h2>${limpiarHtml(p.codigoCaso)}</h2>
+        <p>${
+          p.reevaluacionPendiente
+            ? 'El Comité solicitó revisar tu entrevista. Atiende los apartados señalados antes de enviar las correcciones.'
+            : 'Puedes actualizar tu entrevista cuando cambie la situación de tu hogar.'
+        }</p>
+      </div>
+      <a class="boton" href="perfil.html?reevaluacion=1">
+        ${Profesionales.icono('informe')}${p.perfilCompleto ? 'Editar entrevista' : 'Completar mi entrevista'}
+      </a>
+    </section>${contenido}`;
+  },
+  valorEntrevista(valor) {
+    if (valor == null || valor === '') return 'Sin información registrada';
+    if (Array.isArray(valor)) {
+      return valor.length
+        ? valor.map((item) => Profesionales.etiqueta(item)).join(', ')
+        : 'Sin condiciones específicas declaradas';
+    }
+    if (typeof valor === 'number') return valor;
+    return /^[A-Z_]+$/.test(valor) ? Profesionales.etiqueta(valor) : valor;
+  },
 };

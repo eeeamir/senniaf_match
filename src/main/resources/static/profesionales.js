@@ -118,6 +118,14 @@ const Profesionales = {
     const bloque=document.createElement('div');bloque.className='pro-sugerencias';bloque.setAttribute('aria-label','Sugerencias para redactar');
     opciones.forEach(([titulo,texto])=>{const b=document.createElement('button');b.type='button';b.className='pro-sugerencia';b.textContent=titulo;b.onclick=()=>{campo.value=texto;campo.dispatchEvent(new Event('input',{bubbles:true}));campo.focus();};bloque.append(b);});campo.insertAdjacentElement('afterend',bloque);
   },
+  mostrarAntecedenteCultural(valor, datos, campos) {
+    const normalizar = (texto) =>
+      String(texto || '')
+        .trim()
+        .replace(/\s+/g, ' ');
+    const anterior = normalizar(valor);
+    return Boolean(anterior) && !campos.some((campo) => normalizar(datos[campo]) === anterior);
+  },
   avisoReevaluaciones(numero){
     const n=Number.isInteger(Number(numero))&&Number(numero)>=0?Number(numero):0;
     if(n<3)return '';

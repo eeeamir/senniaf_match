@@ -466,16 +466,54 @@ const CAMPOS_CULTURA=[
  ['opinionCultural','Preferencias y opinión del niño','Registra las preferencias expresadas por el niño sobre las costumbres y vínculos que desea mantener, según su edad y madurez'],
  ['recomendacionesCulturales','Recomendaciones de continuidad cultural','Describe cómo una futura familia podría acompañar y respetar los aspectos culturales importantes para el niño']
 ];
-function culturaDetalle(datos){
- return `<details id="identidadCultural" class="detalle-grupo pro-detalle-amplio"><summary>${Profesionales.icono('personas')}Identidad y continuidad cultural</summary><div class="cultura-contenido">
- ${datos.contextoCultural?`<aside class="cultura-antecedente"><h3>Información cultural registrada anteriormente</h3><p class="pro-texto-registrado">${limpiarHtml(datos.contextoCultural)}</p><p class="ayuda">Este antecedente se conserva sin reinterpretarlo ni repartirlo entre los nuevos campos.</p></aside>`:''}
- <dl class="detalle-datos cultura-campos">${CAMPOS_CULTURA.map(([k,t,a])=>`<div><dt>${t}</dt><dd>${limpiarHtml(datos[k]||'Sin información registrada')}</dd><p class="ayuda">${a}.</p></div>`).join('')}</dl>
- <p data-cultura-estado role="status"></p></div></details>`;
+function culturaDetalle(datos) {
+  const mostrarAnterior = Profesionales.mostrarAntecedenteCultural(
+    datos.contextoCultural, datos, CAMPOS_CULTURA.map(([campo]) => campo)
+  );
+  return `
+    <details id="identidadCultural" class="detalle-grupo pro-detalle-amplio">
+      <summary>${Profesionales.icono('personas')}Identidad y continuidad cultural</summary>
+      <div class="cultura-contenido">
+        ${mostrarAnterior ? `
+          <aside class="cultura-antecedente">
+            <h3>Información cultural registrada anteriormente</h3>
+            <p class="pro-texto-registrado">${limpiarHtml(datos.contextoCultural)}</p>
+            <p class="ayuda">Este antecedente se conserva sin reinterpretarlo
+              ni repartirlo entre los nuevos campos.</p>
+          </aside>` : ''}
+        <dl class="detalle-datos cultura-campos">
+          ${CAMPOS_CULTURA.map(([campo, titulo, ayuda]) => `
+            <div>
+              <dt>${titulo}</dt><dd>${limpiarHtml(datos[campo] || 'Sin información registrada')}</dd>
+              <p class="ayuda">${ayuda}.</p>
+            </div>`).join('')}
+        </dl>
+        <p data-cultura-estado role="status"></p>
+      </div>
+    </details>`;
 }
-function detalleSecciones(datos,campos,grupos) {
- const aviso=grupos===GRUPOS_FAMILIA&&sesion.rol==='COMITE'?Profesionales.avisoInterrupcion(datos.antecedenteInterrupcion)+Profesionales.avisoReevaluaciones(datos.numeroReevaluaciones):'';
- return aviso+Object.entries(grupos).map(([titulo,keys],i)=>titulo==='Identidad y continuidad cultural'?culturaDetalle(datos):`<details id="${titulo==='Identidad y continuidad cultural'?'identidadCultural':titulo==='Apoyos culturales y comunitarios'?'apoyosCulturales':'grupo-'+i}" class="detalle-grupo ${keys.length===1?'pro-detalle-amplio':''}"><summary>${Profesionales.icono(titulo==='Apoyos culturales y comunitarios'?'personas':i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
- detalleCampos(datos,Object.fromEntries(keys.map(k=>[k,campos[k]])))+'</details>').join('');
+function detalleSecciones(datos, campos, grupos) {
+  let aviso = '';
+  if (grupos === GRUPOS_FAMILIA && sesion.rol === 'COMITE') {
+    aviso = Profesionales.avisoInterrupcion(datos.antecedenteInterrupcion)
+      + Profesionales.avisoReevaluaciones(datos.numeroReevaluaciones);
+  }
+  const secciones = Object.entries(grupos).map(([titulo, claves], indice) => {
+    if (titulo === 'Identidad y continuidad cultural') return culturaDetalle(datos);
+    const esCultura = titulo === 'Apoyos culturales y comunitarios';
+    const identificador = esCultura ? 'apoyosCulturales' : 'grupo-' + indice;
+    const icono = esCultura ? 'personas' : ['escuela', 'estrella', 'personas'][indice] || 'informe';
+    const visibles = claves.filter(campo => campo !== 'continuidadCultural'
+      || Profesionales.mostrarAntecedenteCultural(
+        datos.continuidadCultural, datos, Profesionales.culturaFamilia.map(([clave]) => clave)
+      ));
+    return `
+      <details id="${identificador}" class="detalle-grupo ${claves.length === 1 ? 'pro-detalle-amplio' : ''}">
+        <summary>${Profesionales.icono(icono)}${limpiarHtml(titulo)}</summary>
+        ${detalleCampos(datos, Object.fromEntries(visibles.map(campo => [campo, campos[campo]])))}
+      </details>`;
+  });
+  return aviso + secciones.join('');
 }
 function pintarResumen(p){
  const r=document.getElementById('resumenExpediente');r.hidden=false;r.innerHTML=`<div>Expediente<strong>${limpiarHtml(p.codigoCaso)}</strong></div><div>Edad<strong>${limpiarHtml(Profesionales.edad(p))}</strong></div><div>Escolaridad<strong>${limpiarHtml(Profesionales.etiqueta(p.nivelEscolar))}</strong></div><div>Estado<strong><span class="chip">${Profesionales.estado(p)}</span></strong></div>`;
