@@ -126,10 +126,15 @@ const Profesionales = {
     const anterior = normalizar(valor);
     return Boolean(anterior) && !campos.some((campo) => normalizar(datos[campo]) === anterior);
   },
-  avisoReevaluaciones(numero){
-    const n=Number.isInteger(Number(numero))&&Number(numero)>=0?Number(numero):0;
-    if(n<3)return '';
-    return `<aside class="pro-aviso-reevaluaciones ${n>=3?'destacado':''}"><h3>${this.icono('informacion')}Historial de reevaluaciones</h3><p>Esta familia registra <strong>${n} reevaluaciones completadas</strong>. ${n>=3?'Revisa sus antecedentes antes de continuar. Aviso para revisión humana, sin sanción automática.':'Las solicitudes pendientes no se incluyen en esta cantidad.'}</p></aside>`;
+  avisoReevaluaciones(numero) {
+    const cantidad = Number(numero);
+    if (!Number.isInteger(cantidad) || cantidad <= 0) return '';
+    return `
+      <aside class="pro-aviso-reevaluaciones">
+        <h3>${this.icono('informacion')}Historial de reevaluaciones</h3>
+        <p>Reevaluaciones completadas: <strong>${cantidad}</strong>.
+          Las solicitudes pendientes no se incluyen en esta cantidad.</p>
+      </aside>`;
   },
   avisoInterrupcion(antecedente){
     if(!antecedente?.revisada)return '';
