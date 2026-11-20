@@ -174,7 +174,7 @@ const passwordAcceso=$('loginPassword'),avisoCopia=$('avisoCopiaPassword');
 function advertirCopia(valor) {
  const extra=/\p{Cc}|\p{Cf}/u.test(valor)||/^\s|\s$/u.test(valor)||valor.normalize('NFKC')!==valor;
  avisoCopia.hidden=!extra;
- avisoCopia.textContent=extra?'El texto contiene espacios en los extremos, saltos de línea o caracteres con otra representación. Copia solo la contraseña, sin etiquetas ni comillas añadidas; puedes mostrarla para revisarla. No la modificamos automáticamente.':'';
+ avisoCopia.textContent=extra?'Revisa si los espacios o caracteres especiales forman parte de tu contraseña. Usa «Mostrar contraseña» para comprobarla. El texto se conserva tal como lo ingresaste.':'';
 }
 passwordAcceso.addEventListener('input',()=>advertirCopia(passwordAcceso.value));
 passwordAcceso.addEventListener('paste',evento=>{
