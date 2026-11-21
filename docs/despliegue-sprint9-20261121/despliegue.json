@@ -1,0 +1,24 @@
+{
+  "sha256": "d19726ebcb44b5895ab350b596fc53006bc05b4b3774a19c3382cf1154fba067",
+  "commit": "8628cea8b6101345529422329f8f3746cb099439",
+  "jarActivo": "/srv/senniaf/releases/d19726ebcb44b5895ab350b596fc53006bc05b4b3774a19c3382cf1154fba067.jar",
+  "jarAnterior": "/srv/senniaf/releases/b9e4d1021ca70c2413352e444f4db34b64c86d68e4668936785a89bf21cdf562.jar",
+  "respaldoPremigracion": {
+    "ruta": "/var/backups/senniaf/20261121T192050Z.LAcuLv.dump",
+    "sha256": "c7d19a44504c259c097a4424b1b1f5dc1327b5975a9f23915d978ea62c58572b",
+    "lecturaCompleta": true,
+    "bytes": 171495
+  },
+  "respaldosActualizador": [
+    {
+      "ruta": "/var/backups/senniaf/20261121T192051Z.8SH58q.dump",
+      "sha256": "6dc5657ffd3904f4d74b63364714f99d41afc3fb2618fc34c827aa322eb39967",
+      "lecturaCompleta": true
+    }
+  ],
+  "migracion020": "COMMIT; esquema completo t; dos tablas vacías",
+  "tablasAnterioresConservadas": 20,
+  "configuracionAjenaPreservada": true,
+  "finUTC": "2026-11-21T19:21:06.764915+00:00",
+  "evidenciaRemota": "/var/backups/senniaf/operacion-sprint9-20261121-8628cea"
+}

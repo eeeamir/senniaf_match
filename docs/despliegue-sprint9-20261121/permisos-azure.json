@@ -1,0 +1,61 @@
+{
+  "TS": {
+    "/api/citas": {
+      "estado": 200,
+      "ms": 477.15
+    },
+    "/api/scoring/pesos": {
+      "estado": 403,
+      "ms": 450.75
+    },
+    "/api/ninos": {
+      "estado": 200,
+      "ms": 463.02
+    }
+  },
+  "PS": {
+    "/api/citas": {
+      "estado": 403,
+      "ms": 446.49
+    },
+    "/api/scoring/pesos": {
+      "estado": 403,
+      "ms": 447.89
+    },
+    "/api/ninos": {
+      "estado": 200,
+      "ms": 468.17
+    }
+  },
+  "CM": {
+    "/api/citas": {
+      "estado": 403,
+      "ms": 448.77
+    },
+    "/api/scoring/pesos": {
+      "estado": 200,
+      "ms": 475.12
+    },
+    "/api/ninos": {
+      "estado": 200,
+      "ms": 481.69
+    }
+  },
+  "FAMILIA": {
+    "/api/citas": {
+      "estado": 200,
+      "ms": 449.86
+    },
+    "/api/scoring/pesos": {
+      "estado": 403,
+      "ms": 475.88
+    },
+    "/api/ninos": {
+      "estado": 403,
+      "ms": 460.05
+    }
+  },
+  "sinSesion": {
+    "estado": 401
+  }
+}

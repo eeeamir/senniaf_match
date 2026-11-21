@@ -1,0 +1,11 @@
+{
+  "commit": "8628cea8b6101345529422329f8f3746cb099439",
+  "rama": "mejora/sprint9",
+  "buildInfo": "build.artifact=senniaf-match\nbuild.branch=mejora/sprint9\nbuild.commit=8628cea8b6101345529422329f8f3746cb099439\nbuild.group=com.senniaf\nbuild.name=senniaf-match\nbuild.time=2026-11-21T19\\:17\\:38.861Z\nbuild.version=0.1.0\nbuild.worktree=modificado\\:docs/image.png-preexistente-excluido\n",
+  "ficheros": {
+    "senniaf-match-sprint9-consolidado-20261121-8628cea.jar": "d19726ebcb44b5895ab350b596fc53006bc05b4b3774a19c3382cf1154fba067",
+    "actualizar.sh": "07e8fb86da8fc9d39c8e5b6eec08e39cf236705e1cc455fb4662492bb7f35c53",
+    "verificar-compatibilidad.py": "bdff31162db6f1b974d98b498dd49522871f8a09a2679fe13217b9512dd91af9",
+    "020-citas-vinculacion.sql": "b5303e5a9a1276c1792fafad52fcf13ca202a724a19d7a9d04fcafc3816477f8"
+  }
+}
