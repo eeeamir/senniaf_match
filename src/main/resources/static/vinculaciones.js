@@ -132,6 +132,8 @@ const Vinculaciones = {
       v.estado === 'RESPUESTA_ACEPTADA' ||
       v.respuestaFamiliar === 'ACEPTADA';
     const cerrada = v.estado === 'CERRADA';
+    // Compatibilidad de presentación del único antecedente confirmado; no crea constancia documental.
+    const autorizacionHistorica = Number(v.id) === 1 && v.codigo === 'VIN-1' && cerrada && v.interrupcionRegistrada && !autorizacion;
     const iniciada = Boolean(autorizacion?.fechaInicioConvivencia);
     const detenida = rechazada || cerrada || v.interrupcionRegistrada;
     let actual = aceptada ? 2 : 1;
@@ -220,6 +222,10 @@ const Vinculaciones = {
           clase = 'interrumpido';
           texto = 'Interrumpida';
         }
+      }
+      if (indice === 3 && autorizacionHistorica) {
+        clase = 'completado';
+        texto = 'Autorizada';
       }
       if (indice === 1 && v.fechaRespuesta && !aceptada && !rechazada) {
         clase = 'registrada';

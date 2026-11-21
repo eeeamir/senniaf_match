@@ -116,7 +116,7 @@ const Citas = {
 
         <div class="citas-acciones">${c.acciones.map(a => `<button type="button" class="boton ${['RECHAZAR', 'PROPONER', 'OTRO_HORARIO', 'CANCELAR'].includes(a) ? 'secundario' : ''}" data-accion="${a}" data-cita="${Number(c.id)}">${Profesionales.icono(({ACEPTAR:'comprobar',RECHAZAR:'cerrar',PROPONER:'calendario',ACEPTAR_PROPUESTA:'comprobar',OTRO_HORARIO:'calendario',CANCELAR:'cerrar',REALIZADA:'comprobar'})[a])}${limpiarHtml(a === 'CANCELAR' && c.estado === 'CONFIRMADA' ? 'Cancelar cita' : this.acciones[a][0])}</button>`).join('')}</div>
         <p class="citas-actualizada">Última actualización: ${limpiarHtml(this.fechaHora(c.actualizada))}</p>
-        <details class="citas-historial" data-historial="${Number(c.id)}"><summary>${Profesionales.icono('reloj')}Ver historial</summary><div data-eventos></div></details></article>`;
+        <details class="citas-historial" data-historial="${Number(c.id)}"><summary class="citas-historial-titulo"><span>${Profesionales.icono('reloj')}Ver historial</span><svg class="citas-chevron" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary><div data-eventos></div></details></article>`;
     }).join('');
     lista.querySelectorAll('[data-accion]').forEach(b => b.addEventListener('click', () => this.dialogo(b.dataset.accion, this.solicitudes.find(c => c.id === Number(b.dataset.cita)))));
     lista.querySelectorAll('[data-historial]').forEach(d => d.addEventListener('toggle', async () => {

@@ -85,3 +85,12 @@
 .citas-pagina .citas-acciones [data-accion="CANCELAR"] { color: #a12232; border-color: #e8b9bf; }
 @media(max-width:1000px) { .citas-pagina .citas-datos { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media(max-width:600px) { .citas-pagina .citas-datos { grid-template-columns: 1fr; } }
+
+.citas-pagina .citas-historial > summary.citas-historial-titulo { display: flex; align-items: center; justify-content: space-between; gap: 16px; list-style: none; }
+.citas-pagina .citas-historial > summary::marker { content: ''; }
+.citas-pagina .citas-historial > summary::-webkit-details-marker { display: none; }
+.citas-pagina .citas-historial > summary::after { content: none; }
+.citas-pagina .citas-historial-titulo > span { display: inline-flex; align-items: center; gap: 8px; }
+.citas-pagina .citas-historial-titulo > span .pro-icono { margin: 0; }
+.citas-pagina .citas-historial-titulo .citas-chevron { width: 22px; height: 22px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.citas-pagina .citas-historial[open] > summary .citas-chevron { transform: rotate(180deg); }

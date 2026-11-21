@@ -43,3 +43,13 @@ test('Autoría familiar y fecha del hecho se muestran solo cuando constan',()=>{
  const e=V.obtenerProgreso(v).etapas[4];assert.match(e.detalle,/La familia registró/);assert.equal(e.fechaHecho,'2026-11-19');
  assert.equal(V.obtenerProgreso({...base,estado:'CERRADA',interrupcionRegistrada:true}).etapas[4].fechaHecho,undefined);
 });
+
+test('VIN-1 muestra avance histórico autorizado sin crear documentos ni fechas',()=>{
+ const v={id:1,codigo:'VIN-1',estado:'CERRADA',interrupcionRegistrada:true,fechaCreacion:fecha,fechaRespuesta:fecha};
+ const antes=JSON.stringify(v),p=V.obtenerProgreso(v);assert.equal(p.etapas[3].texto,'Autorizada');assert.equal(p.etapas[3].clase,'completado');
+ assert.equal(p.etapas[4].texto,'Interrumpida');assert.equal(p.estado,'Vinculación cerrada');assert.equal(JSON.stringify(v),antes);
+ assert.ok(!V.proceso(v).includes('Autorización no documentada en este antecedente'));
+});
+test('Compatibilidad de VIN-1 no autoriza otras vinculaciones ni estados nuevos',()=>{
+ for(const v of [{id:2,codigo:'VIN-2',estado:'CERRADA',interrupcionRegistrada:true},{id:1,codigo:'VIN-1',estado:'RESPUESTA_ACEPTADA',interrupcionRegistrada:true},{id:1,codigo:'VIN-1',estado:'CERRADA',interrupcionRegistrada:false}])assert.notEqual(V.obtenerProgreso(v).etapas[3].texto,'Autorizada');
+});

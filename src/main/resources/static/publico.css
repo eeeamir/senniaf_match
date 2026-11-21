@@ -6,14 +6,13 @@
 .publico-marca img { display: block; width: 235px; height: 78px; object-fit: contain; }
 .publico-nav { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .publico-nav a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 12px; border: 1px solid transparent; border-radius: 10px; color: #0b3558; font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap; }
-.publico-nav a[aria-current], .publico-nav .publico-registro { color: #0054cc; }
-.publico-nav .publico-registro { background: #f0f5ff; border-color: #ccddff; }
+.publico-nav a[aria-current="page"] { color: #0054cc; background: #f0f5ff; border-color: #ccddff; }
 .publico-nav a:hover { background: #eaf2ff; color: #00449f; }
 .publico-barra a:focus-visible { outline: 3px solid #0054cc; outline-offset: 3px; }
 body.acceso-publico { display: block; padding: 0; }
 .acceso-publico .escena { width: min(1200px,calc(100% - 48px)); margin: 40px auto; }
-.inicio-publico .publico-regreso { margin-bottom: 40px; }
-.publico-regreso a { color: #0054cc; display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
+.inicio-publico .publico-regreso { margin: 0 0 24px; }
+.publico-regreso a { color: #0054cc; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-weight: 700; }
 @media(max-width:900px) {
  .publico-barra-interior { flex-wrap: wrap; gap: 0; padding-bottom: 12px; }
 }
@@ -25,3 +24,7 @@ body.acceso-publico { display: block; padding: 0; }
  .acceso-publico .escena { width: calc(100% - 32px); margin: 24px auto; }
 }
 .acceso-publico input::placeholder { color: #476788; opacity: 1; }
+
+.acceso-publico .marca { padding-top: 24px; }
+.publico-regreso .inicio-icono { width: 20px; height: 20px; }
+@media(max-width:640px) { .acceso-publico .marca { padding-top: 8px; } }

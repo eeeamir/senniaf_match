@@ -2,6 +2,9 @@
 (() => {
   const nav = document.querySelector('.publico-nav');
   if (!nav) return;
+  history.scrollRestoration = 'manual';
+  const alInicio = () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  addEventListener('pageshow', alInicio);
   const acceso = document.body.classList.contains('acceso-publico');
   const actualizar = () => {
     const registro = acceso && document.getElementById('vistaLogin')?.hidden;
@@ -14,13 +17,13 @@
   if (acceso) {
     const abrir = () => {
       document.querySelector(`[data-ir="${location.hash === '#registro' ? 'vistaRegistro' : 'vistaLogin'}"]`)?.click();
-      actualizar();
+      actualizar(); alInicio();
     };
     nav.querySelectorAll('[data-acceso]').forEach(a => a.addEventListener('click', e => {
       e.preventDefault(); history.pushState(null, '', a.getAttribute('href')); abrir();
     }));
     addEventListener('hashchange', abrir); addEventListener('popstate', abrir);
-    const observer = new MutationObserver(actualizar);
+    const observer = new MutationObserver(() => { actualizar(); alInicio(); });
     ['vistaLogin', 'vistaRegistro', 'vistaCodigo'].forEach(id => {
       const e = document.getElementById(id); if (e) observer.observe(e, { attributes: true, attributeFilter: ['hidden'] });
     });

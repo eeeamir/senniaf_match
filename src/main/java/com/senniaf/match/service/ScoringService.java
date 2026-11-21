@@ -345,8 +345,12 @@ public class ScoringService {
             Map<String,Object> r = new LinkedHashMap<>();
             r.put("familia", d.getCodigoFamilia()); r.put("decision", d.getDecision());
             r.put("motivo", d.getMotivo()); r.put("por", d.getFuncionario()); r.put("fecha", d.getFecha()==null?null:d.getFecha().atZone(java.time.ZoneId.systemDefault()).toOffsetDateTime());
-            r.put("puntaje", d.getPuntaje()); r.put("versionPesos", d.getVersionPesos());
-            r.put("contextoScoring", d.getContextoScoring() == null ? null : decodificar(d.getContextoScoring()));
+            Object contextoGuardado = d.getContextoScoring() == null ? null : decodificar(d.getContextoScoring());
+            boolean sinCalculo = "REEVALUACION".equals(d.getDecision()) && contextoGuardado instanceof Map<?,?> contexto
+                    && Boolean.TRUE.equals(contexto.get("sinCalculo"));
+            r.put("sinCalculo", sinCalculo);
+            r.put("puntaje", sinCalculo ? null : d.getPuntaje()); r.put("versionPesos", d.getVersionPesos());
+            r.put("contextoScoring", sinCalculo ? null : contextoGuardado);
             return r;
         }).toList();
     }
@@ -387,18 +391,25 @@ public class ScoringService {
         d.setCodigoNino(codigoNino); d.setCodigoFamilia(codigoFamilia); d.setDecision(decision);
         d.setApartadosReevaluacion(apartados==null?null:List.copyOf(apartados));d.setCategoriaReevaluacion(categoria);
         d.setMotivo(motivo.trim()); d.setFuncionario(funcionario); d.setFecha(LocalDateTime.now());
-        Map<String,Object> calculo = candidato(n,f,p);
-        d.setPuntaje((int)calculo.get("puntaje")); d.setVersionPesos(p.getVersion());
-        Map<String,Object> contexto = new LinkedHashMap<>();
-        contexto.put("reglas", calculo.get("reglas"));
-        contexto.put("estadosFactores", calculo.get("estadosFactores"));
-        contexto.put("maximoAplicable", calculo.get("maximoAplicable"));
-        contexto.put("pesoEvaluado", calculo.get("pesoEvaluado"));
-        contexto.put("pesos", valoresPesos(p)); contexto.put("factores",calculo.get("f"));
-        contexto.put("edadNino",n.getEdad()); contexto.put("edadMinimaFamilia",f.getEdadMinimaAceptada());
-        contexto.put("unidadEdadNino",n.getUnidadEdad());
-        contexto.put("edadMaximaFamilia",f.getEdadMaximaAceptada()); contexto.put("version",p.getVersion());
-        d.setContextoScoring(codificar(contexto));
+        if ("REEVALUACION".equals(decision)) {
+            // El esquema exige un entero; la proyección lo expone como no calculado, nunca como cero puntos.
+            d.setPuntaje(0);
+            d.setVersionPesos(p.getVersion());
+            d.setContextoScoring(codificar(Map.of("tipo","SOLICITUD_REEVALUACION","sinCalculo",true)));
+        } else {
+            Map<String,Object> calculo = candidato(n,f,p);
+            d.setPuntaje((int)calculo.get("puntaje")); d.setVersionPesos(p.getVersion());
+            Map<String,Object> contexto = new LinkedHashMap<>();
+            contexto.put("reglas", calculo.get("reglas"));
+            contexto.put("estadosFactores", calculo.get("estadosFactores"));
+            contexto.put("maximoAplicable", calculo.get("maximoAplicable"));
+            contexto.put("pesoEvaluado", calculo.get("pesoEvaluado"));
+            contexto.put("pesos", valoresPesos(p)); contexto.put("factores",calculo.get("f"));
+            contexto.put("edadNino",n.getEdad()); contexto.put("edadMinimaFamilia",f.getEdadMinimaAceptada());
+            contexto.put("unidadEdadNino",n.getUnidadEdad());
+            contexto.put("edadMaximaFamilia",f.getEdadMaximaAceptada()); contexto.put("version",p.getVersion());
+            d.setContextoScoring(codificar(contexto));
+        }
         decisiones.save(d);
         if (decision.equals("ACEPTADA")) vinculaciones.crear(d,n,f);
         if (decision.equals("REEVALUACION")) {
