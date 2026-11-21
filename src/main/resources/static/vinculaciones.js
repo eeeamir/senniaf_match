@@ -461,9 +461,6 @@ const Vinculaciones = {
               </div>
             </li>`).join('')}
         </ol>
-        ${v.fechaRespuesta && v.respondidoPor ? `
-          <p>Respuesta registrada por ${limpiarHtml(v.respondidoPor)}
-            · ${limpiarHtml(Profesionales.fecha(v.fechaRespuesta))}</p>` : ''}
       </section>`;
   },
   historialConDecision(v) {
@@ -564,6 +561,10 @@ const Vinculaciones = {
     return `
       <section class="tarjeta vinculacion-autorizacion">
         <h2>${Profesionales.icono('informe')}Registro de autorización preadoptiva</h2>
+        <p>
+          Registra una autorización previamente emitida por la autoridad competente
+          para continuar con el proceso de vinculación
+        </p>
         ${autorizacion ? `
           <dl class="detalle-datos">
             <div><dt>Resolución o autorización institucional</dt>
