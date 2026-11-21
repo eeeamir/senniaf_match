@@ -70,5 +70,18 @@ class CompatibilidadDespliegueTest(unittest.TestCase):
         self.assertTrue(modulo.compatible(self.actual,"t","t","t","t")[0])
         self.assertFalse(modulo.compatible(self.actual,"t","t","t","incompleto")[0])
 
+
+    def test_citas_requieren_020_confirmada(self):
+        with zipfile.ZipFile(self.actual, "a") as jar:
+            jar.writestr("BOOT-INF/classes/com/senniaf/match/model/CitaVinculacion.class", b"fixture")
+        self.assertFalse(modulo.compatible(self.actual, "t")[0])
+        self.assertTrue(modulo.compatible(self.actual, "t", esquema_citas="t")[0])
+
+    def test_citas_incompletas_no_publican(self):
+        self.assertFalse(modulo.compatible(self.actual, "t", esquema_citas="incompleto")[0])
+
+    def test_020_aditiva_conserva_recuperacion_del_codigo_compatible_anterior(self):
+        self.assertTrue(modulo.compatible(self.actual, "t", esquema_citas="t")[0])
+
 if __name__ == "__main__":
     unittest.main()
