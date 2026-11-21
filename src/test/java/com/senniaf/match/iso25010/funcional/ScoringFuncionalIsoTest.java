@@ -15,7 +15,16 @@ import java.util.*;
 class ScoringFuncionalIsoTest {
   private ScoringService service;
   @BeforeEach void setup(){ service=new ScoringService(mock(PerfilNinoRepository.class),mock(PerfilFamiliaRepository.class),mock(DecisionComiteRepository.class),mock(PesosScoringRepository.class)); }
-  private PerfilNino n(int edad, SiNo hermanos){ var n=new PerfilNino(); n.setCodigoCaso("N-01"); n.setEdad(edad); n.setTieneHermanos(hermanos); n.setCondicionesSalud(List.of(CondicionSalud.NINGUNA_CONOCIDA)); return n; }
+  private PerfilNino n(int edad, SiNo hermanos) {
+    var n = new PerfilNino();
+    n.setCodigoCaso("N-01");
+    n.setEdad(edad);
+    n.setTieneHermanos(hermanos);
+    n.setCondicionesSalud(List.of(CondicionSalud.NINGUNA_CONOCIDA));
+    n.setAlergias(List.of(Alergia.NINGUNA_CONOCIDA));
+    n.setIntoleranciaLactosa(RespuestaSiNoNoSabe.NO);
+    return n;
+  }
   private PerfilFamilia f(int min,int max, DisponibilidadViaje viaje, DisposicionHermanos disp){ var f=new PerfilFamilia(); f.setCodigoCaso("F-01"); f.setEdadMinimaAceptada(min); f.setEdadMaximaAceptada(max); f.setDisponibilidadViaje(viaje); f.setDisposicionHermanos(disp); f.setRedApoyo(List.of(FuenteApoyo.PAREJA)); return f; }
   private PesosScoring p(){ return new PesosScoring(); }
   @Test void FUN01_noAcreditaHermanosNiSaludNoAplicables(){ var r=service.candidato(n(8,SiNo.NO),f(6,10,DisponibilidadViaje.ALTA,DisposicionHermanos.DISPUESTA),p()); assertEquals(40,r.get("puntaje")); assertEquals(40,r.get("maximoAplicable")); }
