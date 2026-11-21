@@ -32,6 +32,9 @@ public final class AnalizadorTextoCompatibilidad {
 
     private record Concepto(String id, String nombre, Dominio dominio, Pattern expresion) {}
     private static final Map<String, Concepto> VOCABULARIO = vocabulario();
+    private static final String ACCION_INFINITIVA = "(?:acompanar|atender|cuidar|apoyar|asistir|llevar|"
+            + "seguir|administrar|ayudar|recibir|acoger|criar|viajar|trasladar|desplazar|facilitar|ofrecer)"
+            + "(?:l[oa]s?|me|nos)?";
     private static final Pattern CLAUSULAS = Pattern.compile(
             "\\b(?:pero|sin embargo|aunque)\\b|(?:,|\\by\\b)\\s*(?=(?:no\\s+)?"
                     + "(?:puedo|podemos|podria|podriamos|necesita|requiere|tiene|presenta|el nino|la nina)\\b)"
@@ -48,11 +51,13 @@ public final class AnalizadorTextoCompatibilidad {
                     + "estoy dispuest[oa] a|estamos dispuest[oa]s a|"
                     + "estoy preparad[oa] para|estamos preparad[oa]s para|"
                     + "tengo capacidad para|tenemos capacidad para|"
-                    + "me comprometo a|nos comprometemos a)\\s+"
-                    + "(?:acompanar|atender|cuidar|apoyar|asistir|llevar|seguir|administrar|ayudar|"
-                    + "recibir|acoger|criar|viajar|trasladar|desplazar)(?:l[oa]s?|me|nos)?"
+                    + "me comprometo a|nos comprometemos a|nuestra familia puede|"
+                    + "no (?:tengo|tenemos) (?:dificultades|impedimentos) para)\\s+"
+                    + ACCION_INFINITIVA
                     + "|acompano|acompanamos|atiendo|atendemos|cuido|cuidamos|apoyamos|"
                     + "asistimos|llevamos|ayudamos|recibimos|viajo|viajamos)\\b");
+    private static final Pattern ACCION_COORDINADA = Pattern.compile(
+            "\\b(y|ni)\\s+(?:(no|nunca|jamas|tampoco)\\s+)?" + ACCION_INFINITIVA + "\\b");
     private static final Pattern TERCERO = Pattern.compile(
             "\\b(?:mis?|sus?|nuestros?|nuestras?|el|la) (?:herman[oa]s?|madres?|padres?|hij[oa]s?|sobrin[oa]s?|tios?|tias?|abuel[oa]s?|pareja|amig[oa]s?)\\b"
                     + "|\\b(?:otra persona|otro nino|un familiar)\\b");
@@ -67,9 +72,14 @@ public final class AnalizadorTextoCompatibilidad {
             "actualmente", "ahora", "hoy", "tambien", "ademas", "que", "se");
     private static final Pattern NEGACION_RED = Pattern.compile(
             "\\b(?:no|nunca|jamas|tampoco)\\s+(?:(?:contamos|cuento|disponemos|dispongo|tenemos|tengo)"
-                    + "|nos (?:ayuda|apoya|ayudan|apoyan))\\b");
+                    + "|nos (?:ayuda|apoya|ayudan|apoyan)|(?:puede|pueden) (?:ayudarnos|apoyarnos))\\b");
+    private static final Pattern FAMILIAR_CONCRETO = Pattern.compile(
+            "\\b(?:mi|mis|nuestro|nuestra|nuestros|nuestras) (?:herman[oa]s?|madres?|padres?|"
+                    + "sobrin[oa]s?|tios?|tias?|abuel[oa]s?)\\b");
+    private static final Pattern NEGACION_RED_GLOBAL = Pattern.compile(
+            "\\b(?:no|nunca|jamas|tampoco) (?:contamos|cuento|disponemos|dispongo|tenemos|tengo)\\b");
     private static final Pattern CONDICION_NEGADA = Pattern.compile(
-            "\\bsi (?:no|nunca|tampoco)\\s+(?:contamos|cuento|recibimos|recibo|tenemos|tengo|"
+            "\\bsi (?:no|nunca|jamas|tampoco)\\s+(?:contamos|cuento|recibimos|recibo|tenemos|tengo|"
                     + "disponemos|dispongo|hay)\\b");
     private static final Pattern CONDICION_INCIERTA = Pattern.compile(
             "\\b(?:si|siempre que|a condicion de|solo cuando|a menos que|salvo que)\\b");
@@ -78,7 +88,8 @@ public final class AnalizadorTextoCompatibilidad {
     private static final Pattern RED_DECLARADA = Pattern.compile(
             "\\b(?:(?:no|nunca|jamas|tampoco)\\s+)?(?:contamos|cuento|disponemos|dispongo) con\\b"
                     + "|\\b(?:(?:no|nunca|jamas|tampoco)\\s+)?(?:tenemos|tengo) (?:una )?red de apoyo\\b"
-                    + "|\\bnos (?:ayuda|apoya|ayudan|apoyan)\\b");
+                    + "|\\bnos (?:ayuda|apoya|ayudan|apoyan)\\b"
+                    + "|\\b(?:puede|pueden) (?:ayudarnos|apoyarnos)\\b");
 
     public Analisis necesidades(PerfilNino n) {
         Acumulador datos = new Acumulador();
@@ -146,9 +157,28 @@ public final class AnalizadorTextoCompatibilidad {
         analizarCampo(datos, "notaCondicionesSalud", f.getNotaCondicionesSalud(),
                 EnumSet.of(Dominio.SALUD), false);
         analizarCampo(datos, "notaHermanos", f.getNotaHermanos(), EnumSet.of(Dominio.HERMANOS), false);
-        analizarCampo(datos, "notaRedApoyo", f.getNotaRedApoyo(), EnumSet.of(Dominio.RED), false);
+        analizarRed(datos, f);
         analizarCampo(datos, "notaDistancia", f.getNotaDistancia(), EnumSet.of(Dominio.LOGISTICA), false);
         return datos.resultado();
+    }
+
+    private void analizarRed(Acumulador datos, PerfilFamilia familia) {
+        Acumulador notas = new Acumulador();
+        analizarCampo(notas, "notaRedApoyo", familia.getNotaRedApoyo(), EnumSet.of(Dominio.RED), false);
+        boolean fuenteIndependiente = familia.getRedApoyo() != null && familia.getRedApoyo().stream()
+                .anyMatch(f -> f == FuenteApoyo.PAREJA || f == FuenteApoyo.AMISTADES_O_COMUNIDAD);
+        notas.datos.forEach((concepto, evidencias) -> evidencias.forEach(evidencia -> {
+            String texto = normalizar(evidencia.original());
+            boolean limitacionParticular = concepto.id().equals("RED_APOYO") && fuenteIndependiente
+                    && FAMILIAR_CONCRETO.matcher(texto).find()
+                    && !NEGACION_RED_GLOBAL.matcher(texto).find()
+                    && evidencia.declaracion() != Declaracion.ACTUAL;
+            // La limitación de un familiar no invalida otra fuente de apoyo declarada.
+            datos.agregar(concepto, limitacionParticular
+                    ? new Evidencia(evidencia.campo(), evidencia.original(), Declaracion.INSUFICIENTE, evidencia.origen())
+                    : evidencia);
+        }));
+        notas.sinCorrespondencia.forEach(e -> datos.sinCorrespondencia(e.campo(), e.original()));
     }
 
     public Analisis analizarTexto(String campo, String original, Dominio dominio, boolean necesidad) {
@@ -288,7 +318,24 @@ public final class AnalizadorTextoCompatibilidad {
             if (candidata.start() <= posicion) accion = candidata;
         }
         if (accion.group(1) != null) return Declaracion.NEGATIVA;
-        Declaracion condicion = interpretarCondicion(texto, accion.end());
+        int inicioAmbito = 0;
+        int finAmbito = texto.length();
+        int finAccion = accion.end();
+        boolean negada = false;
+        var coordinadas = ACCION_COORDINADA.matcher(texto);
+        while (coordinadas.find()) {
+            if (coordinadas.start() < accion.end()) continue;
+            if (coordinadas.start() > posicion) {
+                finAmbito = coordinadas.start();
+                break;
+            }
+            inicioAmbito = coordinadas.start();
+            finAccion = coordinadas.end();
+            negada = coordinadas.group(1).equals("ni") || coordinadas.group(2) != null;
+        }
+        if (negada) return Declaracion.NEGATIVA;
+        Declaracion condicion = interpretarCondicion(texto.substring(inicioAmbito, finAmbito),
+                finAccion - inicioAmbito);
         if (condicion != Declaracion.ACTUAL) return condicion;
         if (accion.group().matches(".*\\b(?:podria|podriamos|podre|podremos)\\b.*")) {
             return Declaracion.AMBIGUA;
@@ -358,7 +405,9 @@ public final class AnalizadorTextoCompatibilidad {
                 "terapias? (?:de|del) lenguaje");
         definir(conceptos, "FISIOTERAPIA", "Fisioterapia", Dominio.SALUD, "fisioterapias?|terapias? fisicas?");
         definir(conceptos, "TERAPIA_OCUPACIONAL", "Terapia ocupacional", Dominio.SALUD,
-                "terapias? ocupacionales?");
+                "terapias? ocupacional(?:es)?");
+        definir(conceptos, "ACOMPANAMIENTO_PSICOLOGICO", "Acompañamiento psicológico", Dominio.SALUD,
+                "acompanamiento psicologico|sesion(?:es)? psicologicas?|terapias? psicologicas?");
         definir(conceptos, "HERMANOS", "Acompañamiento de hermanos", Dominio.HERMANOS,
                 "herman[oa]s?|grupo de hermanos|ubicacion conjunta|permanecer juntos");
         definir(conceptos, "RED_APOYO", "Red de apoyo", Dominio.RED,
