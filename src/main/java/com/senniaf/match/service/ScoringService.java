@@ -23,6 +23,8 @@ public class ScoringService {
     private final PesosScoringRepository pesosRepo;
     private final EventoCasoRepository auditoria;
     private final AnalizadorTextoCompatibilidad analizador = new AnalizadorTextoCompatibilidad();
+    @org.springframework.beans.factory.annotation.Autowired
+    private EvaluacionPsicologicaRepository evaluaciones;
     private final com.fasterxml.jackson.databind.ObjectMapper json = new com.fasterxml.jackson.databind.ObjectMapper();
 
     public ScoringService(PerfilNinoRepository ninos, PerfilFamiliaRepository familias,
@@ -79,7 +81,7 @@ public class ScoringService {
                                     Set<Par> rechazadas,
                                     Map<PerfilFamilia, AnalizadorTextoCompatibilidad.Analisis> capacidadesFamilias) {
         boolean aceptada = ninoReservado(n.getCodigoCaso());
-        var analisisNecesidades = analizador.necesidades(n);
+        var analisisNecesidades = analizarNecesidades(n);
         var candidatas = aceptada ? java.util.stream.Stream.<PerfilFamilia>empty() : disponibles.stream();
         List<Map<String, Object>> ranking = candidatas
                 .filter(f -> !rechazadas.contains(new Par(n.getCodigoCaso(), f.getCodigoCaso())))
@@ -131,7 +133,13 @@ public class ScoringService {
      * Se informa el máximo aplicable para no confundir falta de evidencia con incompatibilidad.
      */
     public Map<String, Object> candidato(PerfilNino n, PerfilFamilia f, PesosScoring p) {
-        return candidato(n, f, p, analizador.necesidades(n), analizador.capacidades(f));
+        return candidato(n, f, p, analizarNecesidades(n), analizador.capacidades(f));
+    }
+
+    private AnalizadorTextoCompatibilidad.Analisis analizarNecesidades(PerfilNino n) {
+        var informes = evaluaciones == null ? List.<EvaluacionPsicologica>of()
+                : evaluaciones.findByExpedienteCodigoCasoOrderByFechaDescIdDesc(n.getCodigoCaso());
+        return analizador.necesidades(n, informes);
     }
 
     private Map<String, Object> candidato(PerfilNino n, PerfilFamilia f, PesosScoring p,
@@ -173,7 +181,7 @@ public class ScoringService {
         result.put("provincia", f.getProvincia() == null ? "Sin indicar" : f.getProvincia().name());
         result.put("puntaje", total); result.put("f", factores); result.put("estadosFactores", estados);
         result.put("maximoAplicable", 100 - noAplicables); result.put("pesoEvaluado", pesoEvaluado);
-        result.put("reglas", "EVIDENCIA_TEXTO_5");
+        result.put("reglas", "EVIDENCIA_TEXTO_6");
         result.put("evidenciasCompatibilidad", Map.of("necesidades", necesidades, "capacidades", capacidades));
         result.put("reevaluaciones", f.getNumeroReevaluaciones());
         result.put("antecedenteInterrupcion",antecedenteInterrupcion(f.getCodigoCaso()));
