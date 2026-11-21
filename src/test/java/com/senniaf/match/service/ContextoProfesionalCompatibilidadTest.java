@@ -38,6 +38,7 @@ class ContextoProfesionalCompatibilidadTest {
         assertEquals(anterior.getRecomendaciones(), informes.get(1).recomendaciones());
         var motor = new ScoringService(repositorio, mock(PerfilFamiliaRepository.class),
                 mock(DecisionComiteRepository.class), mock(PesosScoringRepository.class));
+        ReflectionTestUtils.setField(motor, "evaluaciones", evaluaciones);
         var resultado = motor.candidato(n, PerfilesCompatibilidad.familia(), new com.senniaf.match.model.PesosScoring());
         assertEquals("NO_APLICA", ((Map<?, ?>) resultado.get("estadosFactores")).get("salud"));
         verify(evaluaciones, never()).save(any());

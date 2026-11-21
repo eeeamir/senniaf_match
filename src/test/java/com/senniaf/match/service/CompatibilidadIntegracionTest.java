@@ -20,6 +20,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.test.util.ReflectionTestUtils;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.containsString;
 
 @SpringBootTest(classes = CompatibilidadIntegracionTest.Config.class,
         properties = {"debug=false", "logging.level.root=WARN", "logging.level.org.springframework=WARN"})
@@ -43,6 +46,7 @@ class CompatibilidadIntegracionTest {
     @MockitoBean VinculacionService vinculaciones;
     @MockitoBean PesosProgramadosService programados;
     @MockitoBean PerfilFamiliaService familiasService;
+    @MockitoBean EvaluacionPsicologicaRepository evaluaciones;
     private PerfilNino n;
     private PerfilFamilia f;
     private PesosScoring pesos;
@@ -70,7 +74,7 @@ class CompatibilidadIntegracionTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].familias[0].f.salud[0]").value(35))
                 .andExpect(jsonPath("$[0].familias[0].puntaje").value(75))
-                .andExpect(jsonPath("$[0].familias[0].reglas").value("EVIDENCIA_TEXTO_5"))
+                .andExpect(jsonPath("$[0].familias[0].reglas").value("EVIDENCIA_TEXTO_6"))
                 .andExpect(jsonPath("$[0].familias[0].maximoAplicable").value(75))
                 .andExpect(jsonPath("$[0].familias[0].estadosFactores.hermanos").value("NO_APLICA"))
                 .andExpect(jsonPath("$[0].familias[0].evidenciasCompatibilidad.necesidades.conceptos.TERAPIA_LENGUAJE.evidencias[0].campo").value("necesidadesApoyo"));
@@ -138,6 +142,27 @@ class CompatibilidadIntegracionTest {
         verify(ninos, never()).save(any());
         verify(familias, never()).save(any());
         verify(decisiones, never()).save(any());
+    }
+
+    @Test
+    void recomendacionVigenteAlcanzaElDesgloseSinPublicarElInformeCompleto() throws Exception {
+        var e = new EvaluacionPsicologica();
+        ReflectionTestUtils.setField(e, "id", 100L);
+        e.setExpediente(n);
+        e.setNumeroVersion(1);
+        e.setRecomendaciones("Requiere acompañamiento psicológico. TEXTO CLINICO PRIVADO");
+        e.setEvaluacion("INFORME COMPLETO PRIVADO");
+        when(evaluaciones.findByExpedienteCodigoCasoOrderByFechaDescIdDesc(n.getCodigoCaso())).thenReturn(List.of(e));
+        f.setNotaCondicionesSalud("Tenemos disponibilidad para asistir con el niño a terapia psicológica");
+        mvc.perform(get("/api/scoring/casos/PRUEBA-N").header("X-User-Role", "COMITE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.familias[0].f.salud[0]").value(35))
+                .andExpect(jsonPath("$.familias[0].evidenciasCompatibilidad.necesidades.conceptos.ACOMPANAMIENTO_PSICOLOGICO.evidencias[0].campo")
+                        .value("recomendacionesPsicologicas:100:v1"))
+                .andExpect(content().string(not(containsString("TEXTO CLINICO PRIVADO"))))
+                .andExpect(content().string(not(containsString("INFORME COMPLETO PRIVADO"))));
+        verify(evaluaciones, times(1)).findByExpedienteCodigoCasoOrderByFechaDescIdDesc(n.getCodigoCaso());
+        verify(evaluaciones, never()).save(any());
     }
 
     @Test

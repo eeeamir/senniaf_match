@@ -229,7 +229,7 @@ class CompatibilidadMotorTest {
     }
 
     @ParameterizedTest
-    @CsvSource(delimiter = '|', value = {"Necesita una rutina estable|35", "Requiere apoyo educativo individualizado|0"})
+    @CsvSource(delimiter = '|', value = {"Necesita una rutina estable|35", "Requiere apoyo educativo individualizado|35"})
     void necesidadesSocialesSoloAcreditanConceptosConRegla(String necesidad, int esperado) {
         n.setNecesidadesApoyo(necesidad);
         f.setNotaCondicionesSalud("Podemos mantener horarios y rutinas constantes. Podemos ofrecer apoyo educativo individualizado");
