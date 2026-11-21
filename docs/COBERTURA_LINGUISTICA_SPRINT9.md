@@ -1,5 +1,7 @@
 # Cobertura lingüística — verificación del motor EVIDENCIA_TEXTO_6
 
+Este informe conserva la referencia anterior a la corrección. El resultado posterior se documenta en [CORRECCION_LINGUISTICA_SPRINT9.md](CORRECCION_LINGUISTICA_SPRINT9.md).
+
 Código examinado: `78a2ee0e5d8d03ae14726b7560c5c4e3b9e4dc12`. Producción sin cambios locales: **True**.
 
 ## A. Inventario y técnicas

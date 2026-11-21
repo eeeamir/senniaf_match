@@ -74,7 +74,7 @@ class CompatibilidadIntegracionTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].familias[0].f.salud[0]").value(35))
                 .andExpect(jsonPath("$[0].familias[0].puntaje").value(75))
-                .andExpect(jsonPath("$[0].familias[0].reglas").value("EVIDENCIA_TEXTO_6"))
+                .andExpect(jsonPath("$[0].familias[0].reglas").value("EVIDENCIA_TEXTO_7"))
                 .andExpect(jsonPath("$[0].familias[0].maximoAplicable").value(75))
                 .andExpect(jsonPath("$[0].familias[0].estadosFactores.hermanos").value("NO_APLICA"))
                 .andExpect(jsonPath("$[0].familias[0].evidenciasCompatibilidad.necesidades.conceptos.TERAPIA_LENGUAJE.evidencias[0].campo").value("necesidadesApoyo"));
