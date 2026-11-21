@@ -44,7 +44,7 @@ public final class AnalizadorTextoCompatibilidad {
             "\\b(?:con (?:apoyo|ayuda|capacitacion|formacion|asistencia)"
                     + "|si (?:contamos|cuento|recibimos|recibo|tenemos|tengo|disponemos|dispongo|hay)\\b.{3,})");
     private static final Pattern CAPACIDAD = Pattern.compile(
-            "\\b(?:(no)\\s+)?(?:(?:puedo|podemos|podria|podriamos|podre|podremos|"
+            "\\b(?:(no|nunca|jamas|tampoco)\\s+)?(?:(?:puedo|podemos|podria|podriamos|podre|podremos|"
                     + "estoy dispuest[oa] a|estamos dispuest[oa]s a|"
                     + "estoy preparad[oa] para|estamos preparad[oa]s para|"
                     + "tengo capacidad para|tenemos capacidad para|"
@@ -66,12 +66,18 @@ public final class AnalizadorTextoCompatibilidad {
             "nino", "nina", "adolescente", "menor", "paciente", "no", "nunca", "jamas",
             "actualmente", "ahora", "hoy", "tambien", "ademas", "que", "se");
     private static final Pattern NEGACION_RED = Pattern.compile(
-            "\\bno (?:contamos|cuento|disponemos|dispongo|tenemos|tengo)\\b");
+            "\\b(?:no|nunca|jamas|tampoco)\\s+(?:(?:contamos|cuento|disponemos|dispongo|tenemos|tengo)"
+                    + "|nos (?:ayuda|apoya|ayudan|apoyan))\\b");
+    private static final Pattern CONDICION_NEGADA = Pattern.compile(
+            "\\bsi (?:no|nunca|tampoco)\\s+(?:contamos|cuento|recibimos|recibo|tenemos|tengo|"
+                    + "disponemos|dispongo|hay)\\b");
+    private static final Pattern CONDICION_INCIERTA = Pattern.compile(
+            "\\b(?:si|siempre que|a condicion de|solo cuando|a menos que|salvo que)\\b");
     private static final Pattern ANAFORA = Pattern.compile(
             "\\b(?:acompanarl[oa]s?|atenderl[oa]s?|cuidarl[oa]s?|esas terapias|esa condicion)\\b");
     private static final Pattern RED_DECLARADA = Pattern.compile(
-            "\\b(?:no\\s+)?(?:contamos|cuento|disponemos|dispongo) con\\b"
-                    + "|\\b(?:no\\s+)?(?:tenemos|tengo) (?:una )?red de apoyo\\b"
+            "\\b(?:(?:no|nunca|jamas|tampoco)\\s+)?(?:contamos|cuento|disponemos|dispongo) con\\b"
+                    + "|\\b(?:(?:no|nunca|jamas|tampoco)\\s+)?(?:tenemos|tengo) (?:una )?red de apoyo\\b"
                     + "|\\bnos (?:ayuda|apoya|ayudan|apoyan)\\b");
 
     public Analisis necesidades(PerfilNino n) {
@@ -201,7 +207,8 @@ public final class AnalizadorTextoCompatibilidad {
             List<Concepto> anteriores = List.of();
             boolean antecedentePropio = false;
             boolean condicionPrevia = oracion.stripLeading().matches("(?i)^si\\b.*");
-            boolean condicionIdentificada = CONDICION.matcher(normalizar(oracion)).find();
+            boolean condicionIdentificada = CONDICION.matcher(normalizar(oracion)).find()
+                    && !CONDICION_NEGADA.matcher(normalizar(oracion)).find();
             for (String fragmento : CLAUSULAS.split(normalizarSeparadores(oracion))) {
                 String texto = normalizar(fragmento);
                 if (texto.isBlank()) continue;
@@ -267,9 +274,10 @@ public final class AnalizadorTextoCompatibilidad {
             }
             return Declaracion.NECESIDAD;
         }
-        if (concepto.dominio() == Dominio.RED && RED_DECLARADA.matcher(texto).find()) {
+        var declaracionRed = RED_DECLARADA.matcher(texto);
+        if (concepto.dominio() == Dominio.RED && declaracionRed.find()) {
             if (NEGACION_RED.matcher(texto).find()) return Declaracion.NEGATIVA;
-            return CONDICION.matcher(texto).find() ? Declaracion.CON_APOYO : Declaracion.ACTUAL;
+            return interpretarCondicion(texto, declaracionRed.end());
         }
         if (tercero) return Declaracion.INSUFICIENTE;
         if (NEGACION_DIRECTA.matcher(anterior).find()) return Declaracion.NEGATIVA;
@@ -280,15 +288,19 @@ public final class AnalizadorTextoCompatibilidad {
             if (candidata.start() <= posicion) accion = candidata;
         }
         if (accion.group(1) != null) return Declaracion.NEGATIVA;
-        if (CONDICION.matcher(texto).find()) return Declaracion.CON_APOYO;
-        String posterior = texto.substring(accion.end());
-        if (posterior.matches(".*\\b(?:si|siempre que|a condicion de|solo cuando|a menos que|salvo que)\\b.*")) {
-            return Declaracion.AMBIGUA;
-        }
+        Declaracion condicion = interpretarCondicion(texto, accion.end());
+        if (condicion != Declaracion.ACTUAL) return condicion;
         if (accion.group().matches(".*\\b(?:podria|podriamos|podre|podremos)\\b.*")) {
             return Declaracion.AMBIGUA;
         }
         return Declaracion.ACTUAL;
+    }
+
+    private Declaracion interpretarCondicion(String texto, int finAccion) {
+        if (CONDICION_NEGADA.matcher(texto).find()) return Declaracion.AMBIGUA;
+        if (CONDICION.matcher(texto).find()) return Declaracion.CON_APOYO;
+        return CONDICION_INCIERTA.matcher(texto.substring(finAccion)).find()
+                ? Declaracion.AMBIGUA : Declaracion.ACTUAL;
     }
 
     private boolean necesidadSinEquivalencia(String texto) {
