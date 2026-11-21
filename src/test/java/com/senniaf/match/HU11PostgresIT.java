@@ -73,11 +73,11 @@ class HU11PostgresIT extends SoportePostgresIT {
         assertTrue((boolean)scoring.antecedenteInterrupcion(c.f().getCodigoCaso()).get("revisada"));assertTrue((boolean)scoring.antecedenteInterrupcion(c.f().getCodigoCaso()).get("cierrePendiente"));
         assertEquals(403,req(ruta+"/informacion-asignada",HttpMethod.GET,c.token(),null).getStatusCode().value());assertEquals(puntaje,scoring.candidato(c.n(),c.f(),scoring.pesos()).get("puntaje"));
         assertEquals(200,req(ruta+"/cierre",HttpMethod.POST,comite,Map.of("motivo","Cierre institucional confirmado solo en esta prueba local","confirmacionAutoridad",true)).getStatusCode().value());
+        assertThrows(org.springframework.dao.DataIntegrityViolationException.class,()->jdbc.update("insert into decisiones_comite(codigo_nino,codigo_familia,decision,motivo,funcionario,fecha,puntaje,version_pesos) values (?,?,'ACEPTADA','Nueva propuesta que no debe registrarse','HU19-CM',CURRENT_TIMESTAMP,50,1)",c.n().getCodigoCaso(),c.f().getCodigoCaso()));
         for(String expediente:List.of("NINO","FAMILIA"))assertEquals(200,req(ruta+"/disponibilidad",HttpMethod.POST,comite,Map.of("expediente",expediente,"justificacion","Revisión local separada de disponibilidad y elegibilidad")).getStatusCode().value());
         assertFalse((boolean)scoring.antecedenteInterrupcion(c.f().getCodigoCaso()).get("cierrePendiente"));
-        var ranking=json.valueToTree(scoring.caso(c.n().getCodigoCaso())).path("familias");assertFalse(java.util.stream.StreamSupport.stream(ranking.spliterator(),false).anyMatch(f->c.f().getCodigoCaso().equals(f.path("codigo").asText())));
-        assertEquals(409,aceptar(c.n(),c.f()).getStatusCode().value());
-        assertThrows(org.springframework.dao.DataIntegrityViolationException.class,()->jdbc.update("insert into decisiones_comite(codigo_nino,codigo_familia,decision,motivo,funcionario,fecha,puntaje,version_pesos) values (?,?,'ACEPTADA','Nueva propuesta que no debe registrarse','HU19-CM',CURRENT_TIMESTAMP,50,1)",c.n().getCodigoCaso(),c.f().getCodigoCaso()));
+        var ranking=json.valueToTree(scoring.caso(c.n().getCodigoCaso())).path("familias");assertTrue(java.util.stream.StreamSupport.stream(ranking.spliterator(),false).anyMatch(f->c.f().getCodigoCaso().equals(f.path("codigo").asText())));
+        assertEquals(200,aceptar(c.n(),c.f()).getStatusCode().value());
     }
     @Test void reevaluacionConservaApartadosEIndicaObservacionNatural(){
         Caso c=caso();var cuerpo=new HashMap<String,Object>();cuerpo.put("familia",c.f().getCodigoCaso());cuerpo.put("decision","REEVALUACION");cuerpo.put("motivo","Se solicita ampliar los apoyos culturales y la información del hogar.");cuerpo.put("apartados",List.of("Hogar y red de apoyo","Apoyos culturales y comunitarios"));cuerpo.put("categoria","INCOMPLETA");

@@ -26,7 +26,7 @@ class CierreInstitucionalPostgresIT extends SoportePostgresIT {
         assertEquals(puntaje,scoring.candidato(c.n(),familias.findById(c.f().getId()).orElseThrow(),scoring.pesos()).get("puntaje"));
         var propia=req("/api/vinculaciones/propias",HttpMethod.GET,c.token(),null);assertFalse(propia.getBody().contains(c.n().getCodigoCaso()));assertFalse(propia.getBody().contains("ACT-CIERRE"));assertEquals(403,req("/api/ninos/"+c.n().getCodigoCaso(),HttpMethod.GET,c.token(),null).getStatusCode().value());
     }
-    @Test void familiaVuelveAntesQueNinoSinRepetirParejaInterrumpidaNiEludirNuevaReserva(){
+    @Test void familiaVuelveAntesQueNinoSinEludirNuevaReserva(){
         Caso c=caso(),otra=caso(),tercera=caso();long id=asignar(c);
         assertEquals(200,req("/api/vinculaciones/"+id+"/respuesta",HttpMethod.POST,c.token(),Map.of("respuesta","ACEPTAR")).getStatusCode().value());
         autorizarInicio(id);
@@ -46,7 +46,8 @@ class CierreInstitucionalPostgresIT extends SoportePostgresIT {
         assertEquals(409,aceptar(tercera.n(),c.f()).getStatusCode().value());
         assertEquals(409,aceptar(c.n(),c.f()).getStatusCode().value());
         var casoLiberado=datos(req("/api/scoring/casos/"+c.n().getCodigoCaso(),HttpMethod.GET,comite,null));
-        assertTrue(casoLiberado.path("familiasRechazadas").toString().contains(c.f().getCodigoCaso()));
+        // La historia revisada ya no excluye el par; la nueva reserva de la familia sí impide recomendarlo.
+        assertFalse(casoLiberado.path("familiasRechazadas").toString().contains(c.f().getCodigoCaso()));
         assertFalse(java.util.stream.StreamSupport.stream(casoLiberado.path("familias").spliterator(),false).anyMatch(f->f.path("codigo").asText().equals(c.f().getCodigoCaso())));
         assertEquals(200,aceptar(c.n(),otra.f()).getStatusCode().value());
         assertEquals(409,aceptar(c.n(),tercera.f()).getStatusCode().value());

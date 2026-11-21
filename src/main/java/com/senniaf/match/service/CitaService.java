@@ -57,9 +57,19 @@ public class CitaService {
     public Map<String,Object> opciones(String rol,String actor) {
         rol(rol);var datos="FAMILIA".equals(rol)?vinculaciones.findByFamiliaRegistradoPorOrderByIdDesc(actor):citas.vinculacionesDelProfesional(actor);
         var permitidas=datos.stream().map(v->{Map<String,Object> r=new LinkedHashMap<>();r.put("id",v.getId());r.put("codigo","VIN-"+v.getId());
-            r.put("habilitada",habilitada(v) && profesionalValido(v.getNino().getTrabajadorSocialAsignado()));return r;}).toList();
+            r.put("habilitada",habilitada(v) && profesionalValido(v.getNino().getTrabajadorSocialAsignado()));
+            r.put("motivoNoDisponible",motivoNoDisponible(v));return r;}).toList();
         return Map.of("vinculaciones",permitidas,"configurada",horario.configurado(),"hoy",LocalDate.now(reloj.withZone(HorarioCitas.ZONA)),
                 "zona","America/Panama","duracionDefecto",120,"paso",horario.paso());
+    }
+    private String motivoNoDisponible(Vinculacion v) {
+        if(v.getEstado()==Vinculacion.Estado.CERRADA)return "Tu vinculación se encuentra cerrada. Por este motivo, no es posible solicitar nuevas citas relacionadas con este proceso.";
+        if(interrupciones.findByVinculacionId(v.getId()).isPresent())return "La convivencia tiene una interrupción registrada. No es posible solicitar nuevas citas para este proceso.";
+        if(v.getEstado()!=Vinculacion.Estado.RESPUESTA_ACEPTADA)return "La propuesta debe estar aceptada para solicitar citas.";
+        if(!v.isReservaVigente())return "Esta vinculación ya no está habilitada para solicitar citas.";
+        if(v.getNino().isBajaLogica() || v.getNino().isCierrePorAdopcion())return "El expediente no está habilitado para solicitar citas en esta vinculación.";
+        if(!profesionalValido(v.getNino().getTrabajadorSocialAsignado()))return "Es necesario contar con un trabajador social asignado y habilitado para solicitar citas.";
+        return "";
     }
     public List<String> disponibilidad(Long vin,String fecha,int duracion,String rol,String actor) {
         rol(rol);var v=vinculaciones.findById(vin).orElseThrow(this::sinAcceso);autorizar(v,rol,actor);exigirHabilitada(v);

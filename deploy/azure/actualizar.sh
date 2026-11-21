@@ -30,9 +30,11 @@ SELECT CASE WHEN
  THEN 't' WHEN to_regclass('public.citas_vinculacion') IS NULL AND to_regclass('public.citas_historial') IS NULL THEN 'f' ELSE 'incompleto' END;
 SQL_CITAS
 )
+# 021 mantiene el historial, pero exige código que respete la revisión de disponibilidad.
+esquema_reingreso=$(runuser -u postgres -- psql -X -d senniaf_demo -Atqc "SELECT CASE WHEN to_regprocedure('public.validar_combinacion_interrumpida()') IS NULL THEN 'f' WHEN obj_description(to_regprocedure('public.validar_combinacion_interrumpida()'),'pg_proc')='senniaf-reingreso-revisado-021' THEN 't' ELSE 'f' END")
 IFS='|' read -r esquema_vinculaciones esquema_interrupciones esquema_cierre esquema_refuerzos esquema_cierre_servidor esquema_cultura esquema_apoyos esquema_autorizacion <<< "$esquema"
 compatible() {
-    python3 "$(dirname "$0")/verificar-compatibilidad.py" "$1" "$esquema_vinculaciones" "$esquema_interrupciones" "$esquema_cierre" "$esquema_refuerzos" "$esquema_cierre_servidor" "$esquema_cultura" "$esquema_apoyos" "$esquema_autorizacion" "$esquema_citas"
+    python3 "$(dirname "$0")/verificar-compatibilidad.py" "$1" "$esquema_vinculaciones" "$esquema_interrupciones" "$esquema_cierre" "$esquema_refuerzos" "$esquema_cierre_servidor" "$esquema_cultura" "$esquema_apoyos" "$esquema_autorizacion" "$esquema_citas" "$esquema_reingreso"
 }
 compatible "$artefacto" || exit 1
 # Respaldo consistente antes de la intervención; no se sustituye el volumen ni la configuración.
