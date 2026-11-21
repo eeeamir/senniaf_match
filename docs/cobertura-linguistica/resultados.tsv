@@ -1,0 +1,146 @@
+id	concepto	dominio	texto	fuente	grupo	esperado	actual	declaracion	resultado	puntosSalud	estadoSalud	necesidadesEnDenominador
+C01	ASMA	SALUD	Podemos acompañar asma	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C02	DIABETES	SALUD	Podemos acompañar diabetes	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C03	EPILEPSIA	SALUD	Podemos acompañar epilepsia	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C04	TDAH	SALUD	Podemos acompañar TDAH	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C05	TEA	SALUD	Podemos acompañar TEA	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C06	DISCAPACIDAD_FISICA	SALUD	Podemos acompañar discapacidad física	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C07	DISCAPACIDAD_INTELECTUAL	SALUD	Podemos acompañar discapacidad intelectual	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C08	DISCAPACIDAD_VISUAL	SALUD	Podemos acompañar discapacidad visual	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C09	DISCAPACIDAD_AUDITIVA	SALUD	Podemos acompañar discapacidad auditiva	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C10	INTOLERANCIA_LACTOSA	SALUD	Podemos acompañar intolerancia a la lactosa	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C11	ALERGIA_ALIMENTARIA	SALUD	Podemos acompañar alergia alimentaria	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C12	ALERGIA_MEDICAMENTOS	SALUD	Podemos acompañar alergia a medicamentos	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C13	ALERGIA_AMBIENTAL_POLEN	SALUD	Podemos acompañar alergia al polen	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C14	ALERGIA_PICADURA_INSECTOS	SALUD	Podemos acompañar alergia a picaduras de insectos	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C15	TERAPIA_LENGUAJE	SALUD	Podemos acompañar terapia del lenguaje	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C16	FISIOTERAPIA	SALUD	Podemos acompañar fisioterapia	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C17	TERAPIA_OCUPACIONAL	SALUD	Podemos acompañar terapia ocupacional	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C18	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Podemos acompañar acompañamiento psicológico	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C19	RUTINA_ESTABLE	SALUD	Podemos acompañar rutinas estables	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C20	ACOMPANAMIENTO_EMOCIONAL	SALUD	Podemos acompañar apoyo emocional	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C21	APOYO_ADAPTACION	SALUD	Podemos acompañar apoyo durante su adaptación	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C22	SUPERVISION_COTIDIANA	SALUD	Podemos acompañar supervisión cotidiana	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C23	SUPERVISION_PERMANENTE	SALUD	Podemos acompañar supervisión permanente	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C24	APOYO_EDUCATIVO_INDIVIDUALIZADO	SALUD	Podemos acompañar apoyo educativo individualizado	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C25	APOYO_EDUCATIVO_ESPECIALIZADO	SALUD	Podemos acompañar apoyo educativo especializado	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C26	AYUDA_TAREAS	SALUD	Podemos acompañar ayuda con las tareas	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C27	SEGUIMIENTO_ESCOLAR	SALUD	Podemos acompañar seguimiento educativo	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C28	REFUERZO_ESCOLAR	SALUD	Podemos acompañar refuerzo escolar	familia	control	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+C29	HERMANOS	HERMANOS	Podemos acompañar hermanos	familia	control	1.0	1.0	ACTUAL	VP			
+C30	RED_APOYO	RED	Contamos con una red de apoyo	familia	control	1.0	1.0	ACTUAL	VP			
+C31	CUIDADOS_DIARIOS	RED	Contamos con una persona de apoyo que puede acompañarlo en actividades cotidianas	familia	control	1.0	1.0	ACTUAL	VP			
+C32	VIAJE	LOGISTICA	Podemos viajar	familia	control	1.0	1.0	ACTUAL	VP			
+C33	VISITAS	LOGISTICA	Podemos recibir visitas	familia	control	1.0	1.0	ACTUAL	VP			
+D01	HERMANOS	HERMANOS	Estamos dispuestos a recibir a los hermanitos juntos	familia	independiente	1.0	0.0	AUSENTE	FN			
+D02	RED_APOYO	RED	Tenemos personas que nos pueden ayudar en el día a día	familia	independiente	1.0	0.0	AUSENTE	FN			
+D03	CUIDADOS_DIARIOS	RED	Contamos con una persona que puede ayudar con los quehaceres diarios del niño	familia	independiente	1.0	0.0	AUSENTE	FN			
+D04	VIAJE	LOGISTICA	Tenemos disponibilidad para trasladarnos	familia	independiente	1.0	1.0	ACTUAL	VP			
+D05	VISITAS	LOGISTICA	Estamos disponibles para recibir las visitas	familia	independiente	1.0	0.0	INSUFICIENTE	FN			
+L01	ASMA	SALUD	No podemos acompañar asma	familia	contexto	0.0	0.0	NEGATIVA	VN	0	EVALUADO	
+L02	ASMA	SALUD	No siempre podemos acompañar asma	familia	contexto	0.0	1.0	ACTUAL	FP	35	EVALUADO	
+L03	ASMA	SALUD	Antes acompañamos a un niño con asma	familia	contexto	0.0	1.0	ACTUAL	FP	35	EVALUADO	
+L04	ASMA	SALUD	No tenemos ningún impedimento para acompañar asma	familia	contexto	1.0	0.0	INSUFICIENTE	FN	0	DESCONOCIDO	
+L05	ASMA	SALUD	Podemos acompañar asma si contamos con apoyo	familia	contexto	0.5	0.5	CON_APOYO	VP	18	EVALUADO	
+L06	ASMA	SALUD	Podemos acompañar asma si no contamos con apoyo	familia	contexto	0.0	0.0	AMBIGUA	VN	0	DESCONOCIDO	
+L07	ASMA	SALUD	Tal vez podamos acompañar asma	familia	contexto	0.0	0.0	AMBIGUA	VN	0	DESCONOCIDO	
+L08	ASMA	SALUD	Podemos acompañar asma sin apoyo adicional	familia	contexto	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+L09	ASMA	SALUD	Podemos acompañar asma si fuera posible	familia	contexto	0.0	0.0	AMBIGUA	VN	0	DESCONOCIDO	
+L10	ASMA	SALUD	Mi hermana tiene asma	familia	contexto	0.0	0.0	INSUFICIENTE	VN	0	DESCONOCIDO	
+L11	ASMA	SALUD	Mi hermana tiene asma, pero podemos acompañar a un niño con asma	familia	contexto	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+L12	ASMA	SALUD	Podemos acompañar asma. No podemos acompañar asma	familia	contexto	0.0	0.0	AMBIGUA	VN	0	DESCONOCIDO	
+L13	ASMA	SALUD	No podemos acompañar asma. Podemos acompañar asma	familia	contexto	0.0	0.0	AMBIGUA	VN	0	DESCONOCIDO	
+L14	ACOMPANAMIENTO_PSICOLOGICO	SALUD	En el pasado acompañamos terapias psicológicas	familia	contexto	0.0	1.0	ACTUAL	FP	35	EVALUADO	
+L15	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Podemos ofrecer apoyo emocional	familia	contexto	0.0	0.0	AUSENTE	VN	0	EVALUADO	
+L16	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Mi hermano es psicólogo	familia	contexto	0.0	0.0	AUSENTE	VN	0	EVALUADO	
+L17	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Podemos acompañar sesiones psicológicas con apoyo	familia	contexto	0.5	0.5	CON_APOYO	VP	18	EVALUADO	
+L18	ACOMPANAMIENTO_PSICOLOGICO	SALUD	No siempre podemos acompañar terapia psicológica	familia	contexto	0.0	1.0	ACTUAL	FP	35	EVALUADO	
+L19	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Podemos pagar un psicólogo	familia	contexto	0.0	0.0	AUSENTE	VN	0	EVALUADO	
+L20	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Podemos facilitar que continúe su atención psicológica si recibimos apoyo	familia	contexto	0.5	0.0	AUSENTE	FN	0	DESCONOCIDO	
+L21	RUTINA_ESTABLE	SALUD	Tenemos una familia responsable y cariñosa	familia	contexto	0.0	0.0	AUSENTE	VN	0	EVALUADO	
+L22	RUTINA_ESTABLE	SALUD	Podemos mantener horarios constantes y no ofrecer apoyo emocional	familia	contexto	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+L23	SUPERVISION_PERMANENTE	SALUD	Podemos acompañarlo a diario	familia	contexto	0.0	0.0	AUSENTE	VN	0	DESCONOCIDO	
+L24	APOYO_EDUCATIVO_ESPECIALIZADO	SALUD	Podemos ayudarlo con las tareas	familia	contexto	0.0	0.0	AUSENTE	VN	0	EVALUADO	
+L25	AYUDA_TAREAS	SALUD	Mi hijo hace sus tareas solo	familia	contexto	0.0	0.0	AUSENTE	VN	0	EVALUADO	
+L26	ACOMPANAMIENTO_EMOCIONAL	SALUD	Somos personas cariñosas	familia	contexto	0.0	0.0	AUSENTE	VN	0	EVALUADO	
+L27	APOYO_ADAPTACION	SALUD	Quizás podríamos acompañarlo durante su adaptación	familia	contexto	0.0	0.0	AMBIGUA	VN	0	DESCONOCIDO	
+L28	SUPERVISION_COTIDIANA	SALUD	Podemos estar pendientes de él todos los días	familia	ambiguo	0.0	0.0	AUSENTE	VN	0	EVALUADO	
+V01	ASMA	SALUD	Nos podemos hacer cargo de un niño con asma	familia	independiente	1.0	0.0	INSUFICIENTE	FN	0	DESCONOCIDO	
+V02	ASMA	SALUD	Podemos atender el asma y seguir las indicaciones de su médico	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V03	DIABETES	SALUD	Estamos en condiciones de cuidar a un niño con diabetes	familia	independiente	1.0	0.0	INSUFICIENTE	FN	0	DESCONOCIDO	
+V04	DIABETES	SALUD	Podemos ayudarlo a seguir su tratamiento para la diabetes	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V05	EPILEPSIA	SALUD	Tenemos disposición para atender a un niño con epilepsia	familia	independiente	1.0	0.0	INSUFICIENTE	FN	0	DESCONOCIDO	
+V06	TDAH	SALUD	Podemos apoyar al niño con déficit de atención e hiperactividad	familia	independiente	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V07	TEA	SALUD	Podemos acompañar a un niño dentro del espectro autista	familia	independiente	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V08	DISCAPACIDAD_FISICA	SALUD	Nos sentimos capaces de cuidar a un niño con discapacidad física	familia	independiente	1.0	0.0	INSUFICIENTE	FN	0	DESCONOCIDO	
+V09	DISCAPACIDAD_INTELECTUAL	SALUD	Tenemos capacidad para cuidar de un niño con discapacidad intelectual	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V10	DISCAPACIDAD_VISUAL	SALUD	Podemos asistir a un niño con discapacidad visual en su día a día	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V11	DISCAPACIDAD_AUDITIVA	SALUD	Estamos disponibles para acompañar a un niño con discapacidad auditiva	familia	independiente	1.0	0.0	INSUFICIENTE	FN	0	DESCONOCIDO	
+V12	INTOLERANCIA_LACTOSA	SALUD	Podemos atender a un niño intolerante a la lactosa	familia	independiente	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V13	ALERGIA_ALIMENTARIA	SALUD	Podemos cuidar a un niño con alergias a los alimentos	familia	independiente	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V14	ALERGIA_MEDICAMENTOS	SALUD	Podemos acompañar al niño si tiene alergia a los medicamentos	familia	independiente	1.0	0.0	AMBIGUA	FN	0	DESCONOCIDO	
+V15	ALERGIA_AMBIENTAL_POLEN	SALUD	Podemos atender a un niño alérgico al polen	familia	independiente	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V16	ALERGIA_PICADURA_INSECTOS	SALUD	Podemos cuidar a un niño alérgico a las picaduras de insectos	familia	independiente	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V17	TERAPIA_LENGUAJE	SALUD	Tenemos disponibilidad para llevarlo a sus terapias del lenguaje	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V18	FISIOTERAPIA	SALUD	Podemos llevarlo donde el fisioterapeuta para sus sesiones de fisioterapia	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V19	TERAPIA_OCUPACIONAL	SALUD	Estamos disponibles para acompañarlo a terapia ocupacional	familia	independiente	1.0	0.0	INSUFICIENTE	FN	0	DESCONOCIDO	
+V20	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Podemos acompañarlo a terapia psicológica	familia	ejemplo_usuario	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V21	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Podemos llevarlo a sus citas con el psicólogo	familia	ejemplo_usuario	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V22	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Tenemos disponibilidad para asistir con él a sesiones de psicología	familia	ejemplo_usuario	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V23	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Podemos facilitar que continúe su atención psicológica	familia	ejemplo_usuario	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V24	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Podemos acompañarlo durante su tratamiento psicológico	familia	ejemplo_usuario	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V25	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Podemos ir con él al psicólogo	familia	independiente	1.0	0.0	AUSENTE	FN	0	EVALUADO	
+V26	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Estamos disponibles para acompañarlo a sesiones psicológicas	familia	independiente	1.0	0.0	INSUFICIENTE	FN	0	DESCONOCIDO	
+V27	RUTINA_ESTABLE	SALUD	Podemos mantener una rutina fija todos los días	familia	independiente	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V28	RUTINA_ESTABLE	SALUD	Podemos organizar horarios regulares para sus actividades	familia	independiente	1.0	0.0	AUSENTE	FN	0	EVALUADO	
+V29	RUTINA_ESTABLE	SALUD	Mantenemos horarios constantes y podemos acompañarlo	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V30	ACOMPANAMIENTO_EMOCIONAL	SALUD	Podemos darle apoyo emocional cuando lo necesite	familia	independiente	1.0	0.0	INSUFICIENTE	FN	0	DESCONOCIDO	
+V31	ACOMPANAMIENTO_EMOCIONAL	SALUD	Podemos apoyarlo emocionalmente durante su adaptación	familia	independiente	1.0	0.0	AUSENTE	FN	0	EVALUADO	
+V32	APOYO_ADAPTACION	SALUD	Podemos apoyarlo para que se acostumbre al nuevo hogar	familia	independiente	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V33	APOYO_ADAPTACION	SALUD	Podemos ayudarlo a adaptarse al hogar	familia	independiente	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V34	APOYO_ADAPTACION	SALUD	Podemos acompañarlo en su proceso de adaptación	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V35	SUPERVISION_COTIDIANA	SALUD	Podemos vigilarlo todos los días	familia	independiente	1.0	0.0	AUSENTE	FN	0	EVALUADO	
+V36	SUPERVISION_COTIDIANA	SALUD	Podemos supervisarlo diariamente	familia	independiente	1.0	0.0	AUSENTE	FN	0	EVALUADO	
+V37	SUPERVISION_PERMANENTE	SALUD	Podemos supervisarlo las veinticuatro horas	familia	independiente	1.0	0.0	AUSENTE	FN	0	EVALUADO	
+V38	SUPERVISION_PERMANENTE	SALUD	Podemos garantizar supervisión las 24 horas	familia	independiente	1.0	0.0	INSUFICIENTE	FN	0	DESCONOCIDO	
+V39	APOYO_EDUCATIVO_INDIVIDUALIZADO	SALUD	Podemos brindarle apoyo educativo individualizado	familia	independiente	1.0	0.0	INSUFICIENTE	FN	0	DESCONOCIDO	
+V40	APOYO_EDUCATIVO_INDIVIDUALIZADO	SALUD	Podemos ofrecer acompañamiento escolar individualizado	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V41	APOYO_EDUCATIVO_ESPECIALIZADO	SALUD	Tenemos disponibilidad para facilitar apoyo escolar especializado	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V42	AYUDA_TAREAS	SALUD	Podemos echarle una mano con sus tareas escolares	familia	independiente	1.0	0.0	AUSENTE	FN	0	EVALUADO	
+V43	AYUDA_TAREAS	SALUD	Podemos ayudarlo a hacer las tareas de la escuela	familia	independiente	1.0	0.0	AUSENTE	FN	0	DESCONOCIDO	
+V44	AYUDA_TAREAS	SALUD	Podemos ayudarlo con sus tareas	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V45	SEGUIMIENTO_ESCOLAR	SALUD	Podemos estar pendientes de sus actividades escolares	familia	independiente	1.0	0.0	AUSENTE	FN	0	EVALUADO	
+V46	SEGUIMIENTO_ESCOLAR	SALUD	Podemos realizar seguimiento de sus actividades escolares	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+V47	REFUERZO_ESCOLAR	SALUD	Podemos llevarlo a sus clases de refuerzo escolar	familia	independiente	1.0	1.0	ACTUAL	VP	35	EVALUADO	
+N01	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Necesita acompañamiento psicológico	perfil	necesidad	1.0	1.0	NECESIDAD	VP			1
+N02	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Necesita que lo lleven a sus citas con el psicólogo	perfil	necesidad	1.0	0.0	AUSENTE	FN			0
+N03	SUPERVISION_COTIDIANA	SALUD	Precisa que una persona lo vigile todos los días	perfil	necesidad	1.0	0.0	AUSENTE	FN			0
+N04	AYUDA_TAREAS	SALUD	Necesita ayuda para hacer las tareas de la escuela	perfil	necesidad	1.0	0.0	AUSENTE	FN			0
+N05	ASMA	SALUD	Se ha descartado el asma	perfil	necesidad	0.0	1.0	NECESIDAD	FP			1
+N06	ACOMPANAMIENTO_PSICOLOGICO	SALUD	No requiere terapia psicológica	perfil	necesidad	0.0	0.0	NEGATIVA	VN			0
+N07	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Su hermana requiere terapia psicológica	perfil	necesidad	0.0	0.0	INSUFICIENTE	VN			0
+N08	ACOMPANAMIENTO_PSICOLOGICO	SALUD	¿Requiere terapia psicológica?	perfil	necesidad	0.0	1.0	NECESIDAD	FP			1
+N09	ACOMPANAMIENTO_EMOCIONAL	SALUD	Requiere apoyo emocional si llega a necesitarlo	perfil	necesidad	0.0	1.0	NECESIDAD	FP			1
+N10	RUTINA_ESTABLE	SALUD	Necesita una rutina fija todos los días	perfil	necesidad	1.0	0.0	AUSENTE	FN			0
+N11	RUTINA_ESTABLE	SALUD	Le gusta mantener rutinas estables	perfil	necesidad	0.0	0.0	INSUFICIENTE	VN			0
+N12	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Antecedentes de terapia psicológica	perfil	necesidad	0.0	0.0	INSUFICIENTE	VN			0
+N13	ASMA	SALUD	Actualmente no presenta asma	perfil	necesidad	0.0	0.0	NEGATIVA	VN			0
+N14	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Necesita seguimiento psicológico	perfil	necesidad	1.0	1.0	NECESIDAD	VP			1
+N15	APOYO_EDUCATIVO_INDIVIDUALIZADO	SALUD	Requiere un apoyo uno a uno para aprender	perfil	necesidad	1.0	0.0	AUSENTE	FN			0
+N16	NECESIDAD_SIN_PRECISAR	SALUD	Requiere tratamiento especializado	perfil	necesidad	1.0	1.0	AMBIGUA	VP			1
+N01	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Necesita acompañamiento psicológico	recomendacion	necesidad	1.0	1.0	NECESIDAD	VP			1
+N02	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Necesita que lo lleven a sus citas con el psicólogo	recomendacion	necesidad	1.0	0.0	AUSENTE	FN			0
+N03	SUPERVISION_COTIDIANA	SALUD	Precisa que una persona lo vigile todos los días	recomendacion	necesidad	1.0	0.0	AUSENTE	FN			0
+N04	AYUDA_TAREAS	SALUD	Necesita ayuda para hacer las tareas de la escuela	recomendacion	necesidad	1.0	0.0	AUSENTE	FN			0
+N05	ASMA	SALUD	Se ha descartado el asma	recomendacion	necesidad	0.0	0.0	AUSENTE	VN			0
+N06	ACOMPANAMIENTO_PSICOLOGICO	SALUD	No requiere terapia psicológica	recomendacion	necesidad	0.0	0.0	NEGATIVA	VN			0
+N07	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Su hermana requiere terapia psicológica	recomendacion	necesidad	0.0	0.0	AUSENTE	VN			0
+N08	ACOMPANAMIENTO_PSICOLOGICO	SALUD	¿Requiere terapia psicológica?	recomendacion	necesidad	0.0	0.0	AUSENTE	VN			0
+N09	ACOMPANAMIENTO_EMOCIONAL	SALUD	Requiere apoyo emocional si llega a necesitarlo	recomendacion	necesidad	0.0	0.0	AUSENTE	VN			0
+N10	RUTINA_ESTABLE	SALUD	Necesita una rutina fija todos los días	recomendacion	necesidad	1.0	0.0	AUSENTE	FN			0
+N11	RUTINA_ESTABLE	SALUD	Le gusta mantener rutinas estables	recomendacion	necesidad	0.0	0.0	AUSENTE	VN			0
+N12	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Antecedentes de terapia psicológica	recomendacion	necesidad	0.0	0.0	AUSENTE	VN			0
+N13	ASMA	SALUD	Actualmente no presenta asma	recomendacion	necesidad	0.0	0.0	AUSENTE	VN			0
+N14	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Necesita seguimiento psicológico	recomendacion	necesidad	1.0	1.0	NECESIDAD	VP			1
+N15	APOYO_EDUCATIVO_INDIVIDUALIZADO	SALUD	Requiere un apoyo uno a uno para aprender	recomendacion	necesidad	1.0	0.0	AUSENTE	FN			0
+N16	NECESIDAD_SIN_PRECISAR	SALUD	Requiere tratamiento especializado	recomendacion	necesidad	1.0	1.0	AMBIGUA	VP			1

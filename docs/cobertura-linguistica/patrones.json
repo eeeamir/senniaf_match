@@ -1,0 +1,86 @@
+{
+  "ACCION_COORDINADA": {
+    "expresion": "\\b(y|ni)\\s+(?:(no|nunca|jamas|tampoco)\\s+)?(?:acompanar|atender|cuidar|apoyar|asistir|llevar|seguir|administrar|ayudar|recibir|acoger|criar|viajar|trasladar|desplazar|facilitar|ofrecer|mantener|proporcionar|realizar)(?:l[oa]s?|me|nos)?\\b",
+    "flags": 0
+  },
+  "ANAFORA": {
+    "expresion": "\\b(?:acompanarl[oa]s?|atenderl[oa]s?|cuidarl[oa]s?|esas terapias|esa condicion)\\b",
+    "flags": 0
+  },
+  "CAPACIDAD": {
+    "expresion": "\\b(?:(no|nunca|jamas|tampoco)\\s+)?(?:(?:puedo|podemos|podria|podriamos|podre|podremos|estoy dispuest[oa] a|estamos dispuest[oa]s a|estoy preparad[oa] para|estamos preparad[oa]s para|tengo capacidad para|tenemos capacidad para|tengo disponibilidad para|tenemos disponibilidad para|me comprometo a|nos comprometemos a|nuestra familia puede|la familia puede|no (?:tengo|tenemos) (?:dificultades|impedimentos) para)\\s+(?:acompanar|atender|cuidar|apoyar|asistir|llevar|seguir|administrar|ayudar|recibir|acoger|criar|viajar|trasladar|desplazar|facilitar|ofrecer|mantener|proporcionar|realizar)(?:l[oa]s?|me|nos)?|acompano|acompanamos|atiendo|atendemos|cuido|cuidamos|apoyamos|asistimos|llevamos|ayudamos|recibimos|viajo|viajamos|mantengo|mantenemos|ofrezco|ofrecemos|proporciono|proporcionamos)\\b",
+    "flags": 0
+  },
+  "CAPACIDAD_CUIDADOS_RED": {
+    "expresion": "\\b(?:(no|nunca|jamas|tampoco)\\s+)?(puede|pueden|podria|podrian)\\s+(?:acompanar|ayudar|cuidar|atender)(?:l[oa]s?|nos)?\\b",
+    "flags": 0
+  },
+  "CLAUSULAS": {
+    "expresion": "\\b(?:pero|sin embargo|aunque)\\b|(?:,|\\by\\b)\\s*(?=(?:no\\s+)?(?:puedo|podemos|podria|podriamos|necesita|requiere|tiene|presenta|valorar|evaluar|continuar|el nino|la nina)\\b)|,\\s*(?=no\\b)",
+    "flags": 66
+  },
+  "CONDICION": {
+    "expresion": "\\b(?:con (?:apoyo|ayuda|capacitacion|formacion|asistencia)|si (?:contamos|cuento|recibimos|recibo|tenemos|tengo|disponemos|dispongo|hay)\\b.{3,})",
+    "flags": 0
+  },
+  "CONDICION_INCIERTA": {
+    "expresion": "\\b(?:si|siempre que|a condicion de|solo cuando|a menos que|salvo que)\\b",
+    "flags": 0
+  },
+  "CONDICION_NEGADA": {
+    "expresion": "\\bsi (?:no|nunca|jamas|tampoco)\\s+(?:contamos|cuento|recibimos|recibo|tenemos|tengo|disponemos|dispongo|hay)\\b",
+    "flags": 0
+  },
+  "DUDA": {
+    "expresion": "\\b(?:tal vez|quizas|quiza|puede que|no se si|no se como|no sabemos si|no sabemos como|no tengo claro|no tenemos claro|no estoy segur[oa]|no estamos seguros|posible|posiblemente|se sospecha|por confirmar|descartar|si fuera posible|si pudiera|intentaria|nos gustaria|me gustaria)\\b",
+    "flags": 0
+  },
+  "FAMILIAR_CONCRETO": {
+    "expresion": "\\b(?:mi|mis|nuestro|nuestra|nuestros|nuestras) (?:herman[oa]s?|madres?|padres?|sobrin[oa]s?|tios?|tias?|abuel[oa]s?)\\b",
+    "flags": 0
+  },
+  "NECESIDAD_DESCARTADA": {
+    "expresion": "\\b(?:se descarto|descartad[oa]|ya no (?:requiere|necesita)|dejo de (?:necesitar|requerir))\\b",
+    "flags": 0
+  },
+  "NECESIDAD_EXPLICITA": {
+    "expresion": "\\b(?:necesita|requiere|precisa|necesidad de|continuar|se recomienda(?:n)?)\\b",
+    "flags": 0
+  },
+  "NEGACION_DIRECTA": {
+    "expresion": "\\b(?:sin|excepto|no|ni)\\s+(?:(?:el|la|los|las|diagnostico de)\\s+)?$",
+    "flags": 0
+  },
+  "NEGACION_RED": {
+    "expresion": "\\b(?:no|nunca|jamas|tampoco)\\s+(?:(?:contamos|cuento|disponemos|dispongo|tenemos|tengo)|nos (?:ayuda|apoya|ayudan|apoyan)|(?:puede|pueden) (?:ayudarnos|apoyarnos))\\b",
+    "flags": 0
+  },
+  "NEGACION_RED_GLOBAL": {
+    "expresion": "\\b(?:no|nunca|jamas|tampoco) (?:contamos|cuento|disponemos|dispongo|tenemos|tengo)\\b",
+    "flags": 0
+  },
+  "PREDICADO_NECESIDAD": {
+    "expresion": "\\b((?:no|nunca|jamas)\\s+)?(?:tiene|presenta|requiere|necesita|precisa|padece)\\b",
+    "flags": 0
+  },
+  "RECOMENDACION_CONDICIONAL": {
+    "expresion": "\\bsi\\b",
+    "flags": 2
+  },
+  "RECOMENDACION_HIPOTETICA": {
+    "expresion": "\\b(?:valorar|evaluar si|posible|posiblemente|quizas|quiza|se sospecha|hipotesis|por confirmar)\\b",
+    "flags": 0
+  },
+  "RED_DECLARADA": {
+    "expresion": "\\b(?:(?:no|nunca|jamas|tampoco)\\s+)?(?:contamos|cuento|disponemos|dispongo) con\\b|\\b(?:(?:no|nunca|jamas|tampoco)\\s+)?(?:tenemos|tengo) (?:una )?red de apoyo\\b|\\bnos (?:ayuda|apoya|ayudan|apoyan)\\b|\\b(?:puede|pueden) (?:ayudarnos|apoyarnos)\\b",
+    "flags": 0
+  },
+  "SUJETO_CLINICO": {
+    "expresion": "\\b([a-z]+)\\s+(?:tiene|presenta|padece)\\b",
+    "flags": 0
+  },
+  "TERCERO": {
+    "expresion": "\\b(?:mis?|sus?|nuestros?|nuestras?|el|la) (?:herman[oa]s?|madres?|padres?|hij[oa]s?|sobrin[oa]s?|tios?|tias?|abuel[oa]s?|pareja|amig[oa]s?)\\b|\\b(?:otra persona|otro nino|un familiar)\\b",
+    "flags": 0
+  }
+}
