@@ -22,20 +22,20 @@ const Vinculaciones = {
     const rechazado = ['RECHAZADA_POR_FAMILIA', 'RESPUESTA_RECHAZADA_PENDIENTE_CIERRE']
       .includes(v.estado);
     let icono = 'comprobar';
-    let clase = '';
+    let clase = v.estado === 'RESPUESTA_ACEPTADA' ? 'vinculacion-positiva' : '';
     if (v.estado === 'PENDIENTE_RESPUESTA') {
       icono = 'reloj';
       clase = 'vinculacion-pendiente';
     } else if (rechazado || v.estado === 'CERRADA') {
       icono = rechazado ? 'advertencia' : 'informacion';
-      clase = 'retirado';
+      clase = rechazado ? 'vinculacion-negativa' : 'retirado';
     }
     const etiqueta = familiar && v.estado === 'RESPUESTA_ACEPTADA'
       ? 'Propuesta aceptada' : this.estados[v.estado] || v.estado;
     return `
       <div class="vinculacion-estados">
         <span class="chip ${clase}">${Profesionales.icono(icono)}${limpiarHtml(etiqueta)}</span>
-        ${v.interrupcionRegistrada ? `
+        ${v.interrupcionRegistrada && v.estado !== 'CERRADA' ? `
           <span class="chip retirado vinculacion-antecedente">
             ${Profesionales.icono('advertencia')}
             ${v.interrupcionPendiente ? 'Interrupción pendiente de revisión' : 'Interrupción revisada'}
@@ -124,13 +124,13 @@ const Vinculaciones = {
   obtenerProgreso(v) {
     if (!v) return null;
     const autorizacion = v.autorizacionPreadoptiva;
+    const seguimiento = v.seguimientoFamiliar || {};
     const rechazada =
       ['RECHAZADA_POR_FAMILIA', 'RESPUESTA_RECHAZADA_PENDIENTE_CIERRE'].includes(v.estado) ||
       v.respuestaFamiliar === 'RECHAZADA';
     const aceptada =
       v.estado === 'RESPUESTA_ACEPTADA' ||
-      v.respuestaFamiliar === 'ACEPTADA' ||
-      Boolean(autorizacion);
+      v.respuestaFamiliar === 'ACEPTADA';
     const cerrada = v.estado === 'CERRADA';
     const iniciada = Boolean(autorizacion?.fechaInicioConvivencia);
     const detenida = rechazada || cerrada || v.interrupcionRegistrada;
@@ -174,7 +174,8 @@ const Vinculaciones = {
         ? 'Esperar el resultado de la revisión institucional'
         : 'Consulta las actuaciones registradas. El equipo institucional te orientará sobre los siguientes pasos.';
     }
-    if (cerrada && !v.interrupcionPendiente) {
+    if (cerrada) {
+      mensaje = v.interrupcionRegistrada ? 'El cierre institucional quedó registrado. La interrupción se conserva en el historial.' : 'El cierre institucional quedó registrado.';
       estado = 'Vinculación cerrada';
       accion =
         'No hay acciones pendientes de tu parte en esta vinculación. La disponibilidad requiere revisión institucional independiente.';
@@ -191,7 +192,7 @@ const Vinculaciones = {
       let texto = detenida ? 'No iniciada' : 'Pendiente';
       if (indice === 0) {
         clase = 'completado';
-        texto = 'Completada';
+        texto = 'Propuesta registrada';
       } else if (indice === 1 && (aceptada || rechazada)) {
         clase = rechazada ? 'interrumpido' : 'completado';
         texto = rechazada ? 'Rechazada' : 'Aceptada';
@@ -204,6 +205,8 @@ const Vinculaciones = {
       } else if (indice === 4 && iniciada) {
         clase = v.interrupcionRegistrada ? 'interrumpido' : cerrada ? 'registrada' : 'actual';
         texto = v.interrupcionRegistrada ? 'Convivencia interrumpida' : 'Inicio registrado';
+      } else if (indice === 4 && autorizacion && !iniciada) {
+        texto = 'No iniciada';
       } else if (!detenida && indice === actual) {
         clase = 'actual';
         texto = 'Etapa actual';
@@ -211,18 +214,25 @@ const Vinculaciones = {
       if (v.interrupcionRegistrada) {
         if ((indice === 3 && !autorizacion) || (indice === 2 && !aceptada)) {
           clase = 'sin-constancia';
-          texto = 'Sin constancia registrada';
+          texto = indice === 3 ? 'Autorización no documentada en este antecedente' : 'Sin actuación específica registrada';
         }
-        if (indice === 4 && !iniciada) {
-          clase = 'sin-constancia';
-          texto = 'Información histórica no disponible';
+        if (indice === 4) {
+          clase = 'interrumpido';
+          texto = 'Interrumpida';
         }
       }
       if (indice === 1 && v.fechaRespuesta && !aceptada && !rechazada) {
         clase = 'registrada';
         texto = 'Respuesta registrada';
       }
-      return { titulo, clase, texto };
+      const rolInterrupcion = seguimiento.interrupcionRol || v.interrupcion?.rolProfesional;
+      const detalle = indice === 4 && v.interrupcionRegistrada
+        ? rolInterrupcion === 'FAMILIA' ? 'La familia registró la interrupción de la convivencia.'
+          : rolInterrupcion === 'TRABAJADOR_SOCIAL' ? 'Trabajo Social registró la interrupción de la convivencia.'
+          : rolInterrupcion === 'PSICOLOGO' ? 'Psicología registró la interrupción de la convivencia.'
+          : 'La interrupción de la convivencia quedó registrada.' : '';
+      const fechaHecho = indice === 4 && v.interrupcionRegistrada ? seguimiento.fechaInterrupcion || v.interrupcion?.fechaInterrupcion : null;
+      return { titulo, clase, texto, detalle, fechaHecho };
     });
     const eventos = [
       { titulo: 'Propuesta registrada', fecha: v.fechaCreacion },
@@ -278,8 +288,8 @@ const Vinculaciones = {
             .map(
               (etapa, indice) => `
             <li class="${etapa.clase}" ${etapa.clase === 'actual' ? 'aria-current="step"' : ''}>
-              <span class="familia-paso">${etapa.clase === 'completado' ? Profesionales.icono('comprobar') : indice + 1}</span>
-              <strong>${etapa.titulo}</strong><small>${etapa.texto}</small>
+              <span class="familia-paso">${etapa.clase === 'interrumpido' ? Profesionales.icono('advertencia') : etapa.clase === 'completado' ? Profesionales.icono('comprobar') : indice + 1}</span>
+              <strong>${etapa.titulo}</strong><small>${etapa.texto}</small>${etapa.detalle ? `<small class="familia-etapa-detalle">${limpiarHtml(etapa.detalle)}</small>` : ''}${etapa.fechaHecho ? `<small class="familia-etapa-detalle">Fecha de interrupción: ${limpiarHtml(Profesionales.fechaCivil(etapa.fechaHecho))}</small>` : ''}
             </li>
           `,
             )
@@ -289,28 +299,16 @@ const Vinculaciones = {
       </section>`;
   },
   eventosFamiliares(v) {
-    const eventos = this.obtenerProgreso(v).eventos;
-    return `
-      <ol class="familia-actividad">
-        ${eventos
-          .map(
-            (evento) => `
-          <li><strong>${limpiarHtml(evento.titulo)}</strong>
-            <time>${limpiarHtml(Profesionales.fecha(evento.fecha))}</time>
-            ${evento.detalle ? `<p>${limpiarHtml(evento.detalle)}</p>` : ''}</li>
-        `,
-          )
-          .join('')}
-      </ol>`;
+    return this.lineaTiempo(this.obtenerProgreso(v).eventos);
   },
   async informacionFamiliar(id){
     try{
       const datos=await this.api(`/api/vinculaciones/${encodeURIComponent(id)}/informacion-asignada`);
-      const d=document.createElement('dialog');d.className='pro-dialogo';d.dataset.asignacionInfo=String(id);d.setAttribute('aria-label','Información del niño asignado');
+      const d=document.createElement('dialog');d.className='pro-dialogo vinculacion-informacion-dialogo';d.dataset.asignacionInfo=String(id);d.setAttribute('aria-label','Información del niño asignado');
       const etiquetas={edad:'Edad',unidadEdad:'Unidad de edad',nivelEscolar:'Escolaridad',rendimientoAcademico:'Rendimiento académico',alergias:'Alergias registradas',intoleranciaLactosa:'Intolerancia a la lactosa',condicionesSalud:'Condiciones de salud registradas',habilidades:'Habilidades',gustos:'Intereses',personalidad:'Características personales registradas'};
       const valor=v=>v==null?'No disponible':Array.isArray(v)?v.length?v.map(x=>Profesionales.etiqueta(x)).join(', '):'Sin información registrada':Profesionales.etiqueta(v);
-      d.innerHTML=`<h2>${Profesionales.icono('informe')}Información del niño asignado</h2><p>${limpiarHtml(datos.vinculacion)}</p><dl class="detalle-datos">${Object.entries(etiquetas).map(([k,t])=>`<div><dt>${t}</dt><dd>${limpiarHtml(k==='unidadEdad'&&datos[k]==='ANIOS'?'Años':valor(datos[k]))}</dd></div>`).join('')}</dl><p class="ayuda">${Profesionales.icono('informacion')}Esta consulta contiene los datos estructurados disponibles de la asignación. El equipo responsable te orientará sobre la información médica, psicológica y educativa que requiera explicación adicional.</p><button type="button" class="boton secundario" data-cerrar>Cerrar</button>`;
-      d.onclose=()=>d.remove();d.querySelector('[data-cerrar]').onclick=()=>d.close();document.body.append(d);d.showModal();
+      d.innerHTML=`<h2 tabindex="-1">${Profesionales.icono('informe')}Información del niño asignado</h2><p>${limpiarHtml(datos.vinculacion)}</p><dl class="detalle-datos">${Object.entries(etiquetas).map(([k,t])=>`<div><dt>${t}</dt><dd>${limpiarHtml(k==='unidadEdad'&&datos[k]==='ANIOS'?'Años':valor(datos[k]))}</dd></div>`).join('')}</dl><p class="ayuda">${Profesionales.icono('informacion')}Esta consulta contiene los datos estructurados disponibles de la asignación. El equipo responsable te orientará sobre la información médica, psicológica y educativa que requiera explicación adicional.</p><button type="button" class="boton secundario" data-cerrar>Cerrar</button>`;
+      d.onclose=()=>d.remove();d.querySelector('[data-cerrar]').onclick=()=>d.close();document.body.append(d);d.showModal();d.querySelector('h2').focus({preventScroll:true});d.scrollTop=0;
     }catch(e){const aviso=document.createElement('p');aviso.className='mensaje error';aviso.setAttribute('role','alert');aviso.textContent=e.message;document.querySelector('#contenido').prepend(aviso);}
   },
   descripcion(v){
@@ -443,20 +441,20 @@ const Vinculaciones = {
       v.fechaCreacion, v.fechaRespuesta,
       progreso.etapas[2].texto === 'Iniciada' || progreso.etapas[2].clase === 'actual'
         ? v.fechaRespuesta : null,
-      autorizacion?.registradaEl, autorizacion?.inicioRegistradoEl
+      autorizacion?.registradaEl, v.interrupcionRegistrada ? v.seguimientoFamiliar?.interrupcionRegistradaEl || v.interrupcion?.fechaRegistro : autorizacion?.inicioRegistradoEl
     ];
     return `
       <section class="tarjeta">
         <h2>${Profesionales.icono('solicitudes')}Etapas del proceso</h2>
         <ol class="vinculacion-etapas">
           ${progreso.etapas.map((etapa, indice) => `
-            <li class="${fechas[indice] ? 'registrada' : ''}">
+            <li class="${etapa.clase}">
               <span class="vinculacion-hito">
-                ${Profesionales.icono(fechas[indice] ? 'comprobar' : 'informacion')}
+                ${Profesionales.icono(etapa.clase === 'interrumpido' ? 'advertencia' : etapa.clase === 'completado' ? 'comprobar' : 'informacion')}
               </span>
-              <div><h3>${etapa.titulo}</h3></div>
+              <div><h3>${etapa.titulo}</h3>${etapa.detalle ? `<p>${limpiarHtml(etapa.detalle)}</p>` : ''}${etapa.fechaHecho ? `<p>Fecha de interrupción: ${limpiarHtml(Profesionales.fechaCivil(etapa.fechaHecho))}</p>` : ''}</div>
               <div class="vinculacion-etapa-meta">
-                <span class="chip ${fechas[indice] ? '' : 'retirado'}">${etapa.texto}</span>
+                <span class="chip ${etapa.clase === 'interrumpido' ? 'vinculacion-negativa' : etapa.clase === 'completado' ? 'vinculacion-positiva' : 'retirado'}">${etapa.texto}</span>
                 ${fechas[indice] ? `<time>${limpiarHtml(Profesionales.fecha(fechas[indice]))}</time>` : ''}
               </div>
             </li>`).join('')}
@@ -481,30 +479,18 @@ const Vinculaciones = {
   reportes(enlaceNino){
     return `<div class="vinculacion-reportes">${[['informe','Seguimiento social','Convivencia, adaptación familiar, condiciones de cuidado y necesidades de acompañamiento.','menta'],['psicologia','Seguimiento psicológico','Adaptación emocional, vínculo afectivo y acompañamiento psicológico.','lavanda']].map(([i,t,d,color])=>`<details class="detalle-grupo vinculacion-reporte ${color}"><summary><span class="vinculacion-emblema">${Profesionales.icono(i)}</span>${t}</summary><div class="vinculacion-reporte-contenido"><p>${d}</p><p>No hay informes periódicos de seguimiento registrados en este apartado.</p></div></details>`).join('')}</div>`;
   },
+  lineaTiempo(eventos) {
+    if (!eventos.length) return '<p>No hay movimientos adicionales registrados.</p>';
+    return `<ol class="vinculacion-linea">${eventos.map(evento => `<li>
+      <span class="vinculacion-punto" aria-hidden="true"><i></i></span>
+      <h3>${limpiarHtml(evento.titulo || Profesionales.etiqueta(evento.accion))}</h3>
+      <span class="vinculacion-conector" aria-hidden="true"></span>
+      <div class="vinculacion-evento"><p class="vinculacion-evento-meta">${evento.responsable ? `${Profesionales.icono('persona')}${limpiarHtml(evento.responsable)} · ` : ''}<time>${limpiarHtml(Profesionales.fecha(evento.fecha))}${evento.zona ? ' · ' + limpiarHtml(evento.zona) : ''}</time></p>
+      ${evento.resumen || evento.detalle ? `<p>${limpiarHtml(evento.resumen || evento.detalle)}</p>` : ''}</div>
+    </li>`).join('')}</ol>`;
+  },
   historial(eventos) {
-    return `
-      <section class="tarjeta">
-        <h2>${Profesionales.icono('reloj')}Historial de cambios</h2>
-        <ol class="vinculacion-historial">
-          ${eventos.map(evento => {
-            let icono = 'reloj';
-            if (evento.accion?.includes('INTERRUPCION')) icono = 'advertencia';
-            if (evento.accion?.includes('CIERRE')) icono = 'informe';
-            return `
-              <li>
-                <span class="vinculacion-emblema">${Profesionales.icono(icono)}</span>
-                <div>
-                  <h3>${limpiarHtml(evento.titulo || Profesionales.etiqueta(evento.accion))}</h3>
-                  <p class="vinculacion-evento-meta">
-                    ${Profesionales.icono('persona')}${limpiarHtml(evento.responsable)}
-                    <time>${limpiarHtml(Profesionales.fecha(evento.fecha))}</time>
-                  </p>
-                  <p>${limpiarHtml(evento.resumen)}</p>
-                </div>
-              </li>`;
-          }).join('') || '<li>No hay movimientos adicionales registrados.</li>'}
-        </ol>
-      </section>`;
+    return `<section class="tarjeta"><h2>${Profesionales.icono('reloj')}Historial de cambios</h2>${this.lineaTiempo(eventos)}</section>`;
   },
   compatibilidadOriginal(h,fecha){
     if(!h)return '<section id="compatibilidadRegistrada" class="tarjeta"><h2>Compatibilidad original</h2><p>No hay análisis histórico disponible.</p></section>';
@@ -512,15 +498,24 @@ const Vinculaciones = {
     return `<section id="compatibilidadRegistrada" class="tarjeta vinculacion-historica"><div class="pro-fila-titulo"><div><h2>${Profesionales.icono('criterios')}Compatibilidad original</h2><p>Se conserva el análisis registrado al aceptar esta propuesta.</p><span class="chip">Versión de criterios: ${dato(h.version)}</span> <span class="chip retirado">Resultado histórico</span></div><div class="pro-puntaje">${dato(h.puntaje)}<small>/100</small></div></div>
       ${fecha?`<p class="ayuda">${Profesionales.icono('calendario')}${limpiarHtml(Profesionales.fecha(fecha))}</p>`:''}<details class="pro-seccion"><summary>${Profesionales.icono('consulta')}Ver desglose de compatibilidad</summary><div class="tabla"><table><thead><tr><th>Factor</th><th>Peso original</th><th>Puntos</th><th>Fundamento registrado</th></tr></thead><tbody>${Object.entries(factores).map(([k,n])=>`<tr><td>${n}</td><td>${dato(c.pesos?.[k])}</td><td>${dato(c.factores?.[k]?.[0])}</td><td>${dato(c.factores?.[k]?.[1])}</td></tr>`).join('')}</tbody></table></div>${!h.contexto?'<p class="ayuda">Este antecedente no conserva el desglose. No se sustituye por un cálculo nuevo.</p>':''}<p class="ayuda">Máximo aplicable registrado: ${dato(c.maximoAplicable)} · Peso evaluado: ${dato(c.pesoEvaluado)}</p></details></section>`;
   },
-  panelCierre(v){
-    if(!v.cierre && !v.puedeCerrar)return '';
-    const x=v.cierre;
-    return `<section class="tarjeta"><h2>${Profesionales.icono('informe')}Cierre institucional</h2>
-      <p>El Comité registra la confirmación de la autoridad competente. Este registro no autoriza legalmente el cierre ni formaliza una adopción.</p>
-      ${x?`<dl class="detalle-datos"><div><dt>Fecha del cierre</dt><dd>${limpiarHtml(x.fecha)}</dd></div>${x.referencia?`<div><dt>Referencia institucional registrada</dt><dd>${limpiarHtml(x.referencia)}</dd></div>`:''}${x.autoridad?`<div><dt>Autoridad registrada</dt><dd>${limpiarHtml(x.autoridad)}</dd></div>`:''}</dl><p class="pro-texto-registrado">${limpiarHtml(x.motivo)}</p><p>${limpiarHtml(x.registradoPor)} · ${limpiarHtml(Profesionales.fecha(x.registradoEl))}</p>
-      <h3>Revisión independiente de los expedientes</h3><p>El cierre no devuelve automáticamente los expedientes al Match. Cada uno requiere revisión de disponibilidad y elegibilidad.</p>
-      ${[['NINO','Expediente infantil',x.ninoLiberado],['FAMILIA','Expediente familiar',x.familiaLiberada]].map(([k,n,revisado])=>`<p><strong>${n}:</strong> ${revisado?'Revisión registrada; sujeto a las condiciones vigentes de Match.':'Reserva conservada; pendiente de revisión.'}</p>${v.puedeRevisarDisponibilidad&&!revisado?`<button class="boton secundario" data-disponibilidad="${k}">${Profesionales.icono('consulta')}Revisar ${n.toLowerCase()}</button>`:''}`).join('')}`:''}
-      ${v.puedeCerrar?`<button class="boton secundario" data-cierre>${Profesionales.icono('informe')}Registrar cierre institucional</button>`:''}</section>`;
+  panelCierre(v) {
+    if (!v.cierre && !v.puedeCerrar) return '';
+    const x = v.cierre;
+    const estados = {
+      PENDIENTE_REVISION: ['Pendiente de revisión', 'El Comité debe revisar su disponibilidad antes de volver al Match.', 'reloj'],
+      DISPONIBLE: ['Disponibilidad autorizada', 'Puede participar en nuevas propuestas si cumple las condiciones vigentes.', 'comprobar'],
+      NO_ELEGIBLE: ['Requiere completar condiciones', 'La revisión está registrada; el expediente todavía no cumple las condiciones vigentes.', 'informacion'],
+      ASIGNADO: ['Con otra asignación vigente', 'No participa en nuevas propuestas mientras conserve esa asignación.', 'vinculacion']
+    };
+    return `<section class="tarjeta vinculacion-cierre"><h2>${Profesionales.icono('informe')}Cierre institucional</h2>
+      <div class="vinculacion-cierre-resumen"><span class="chip retirado">${Profesionales.icono(x ? 'informacion' : 'reloj')}${x ? 'Cierre registrado' : 'Pendiente de cierre'}</span>
+      ${x ? `<dl class="detalle-datos"><div><dt>Fecha del cierre</dt><dd>${limpiarHtml(Profesionales.fechaCivil(x.fecha))}</dd></div><div><dt>Responsable del registro</dt><dd>${limpiarHtml(x.registradoPor)}</dd></div><div><dt>Registro</dt><dd>${limpiarHtml(Profesionales.fecha(x.registradoEl))}</dd></div>${x.referencia ? `<div><dt>Referencia institucional</dt><dd>${limpiarHtml(x.referencia)}</dd></div>` : ''}${x.autoridad ? `<div><dt>Autoridad registrada</dt><dd>${limpiarHtml(x.autoridad)}</dd></div>` : ''}</dl><p class="pro-texto-registrado">${limpiarHtml(x.motivo)}</p>` : '<p>El Comité registra un cierre respaldado por la actuación de la autoridad competente.</p>'}</div>
+      ${x ? `<section class="vinculacion-disponibilidad"><h3>Estado de los expedientes</h3><div class="vinculacion-expedientes">${[['NINO','Expediente infantil',x.ninoLiberado,x.estadoInfantil,v.expedienteInfantil],['FAMILIA','Expediente familiar',x.familiaLiberada,x.estadoFamiliar,v.expedienteFamiliar]].map(([k,n,revisado,estado,codigo]) => {
+        const info = estados[estado] || estados[revisado ? 'DISPONIBLE' : 'PENDIENTE_REVISION'];
+        return `<article><h4>${Profesionales.icono(k === 'NINO' ? 'carpeta' : 'personas')}${n}</h4><strong>${info[0]}</strong><p>${info[1]}</p><div class="pro-acciones">${v.puedeRevisarDisponibilidad && !revisado ? `<button class="boton secundario" data-disponibilidad="${k}">${Profesionales.icono('consulta')}Revisar disponibilidad</button>` : ''}<a class="boton secundario" href="perfiles.html?${k === 'NINO' ? 'caso' : 'familia'}=${encodeURIComponent(codigo)}&origen=vinculacion&vinculacionOrigen=${Number(v.id)}">Consultar expediente</a></div></article>`;
+      }).join('')}</div></section><aside class="vinculacion-proximo"><h3>${Profesionales.icono('flecha')}Próximo paso</h3><p>Después del cierre, los expedientes del niño y de la familia se revisan por separado. Una vez autorizados, podrán volver a participar en nuevas propuestas de compatibilidad si cumplen las condiciones vigentes.</p></aside>` : ''}
+      ${v.puedeCerrar ? `<button class="boton secundario" data-cierre>${Profesionales.icono('informe')}Registrar cierre institucional</button>` : ''}
+      <p class="ayuda">Este registro no sustituye la actuación de la autoridad competente ni formaliza una adopción.</p></section>`;
   },
   registrarCierre(c,v,sesion){
     if(document.querySelector('[data-dialogo-cierre]'))return;

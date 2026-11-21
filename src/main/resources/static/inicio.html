@@ -8,6 +8,8 @@
 <link rel="stylesheet" href="senniaf.css">
 <link rel="stylesheet" href="calendly-theme.css">
 <link rel="stylesheet" href="inicio.css">
+<link rel="stylesheet" href="publico.css">
+<script src="publico.js" defer></script>
 </head>
 <body class="inicio-publico">
 <a class="inicio-saltar" href="#contenido">Saltar al contenido</a>
@@ -24,16 +26,13 @@
 <symbol id="icono-destello" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M5 5l14 14M5 19l14-14"/></symbol>
 <symbol id="icono-flecha" viewBox="0 0 24 24"><path d="M12 4v16m-5-5 5 5 5-5"/></symbol>
 <symbol id="icono-acceso" viewBox="0 0 24 24"><path d="M6 18 18 6M7 6h11v11"/></symbol></defs></svg>
-<header class="inicio-barra">
-  <div class="inicio-contenedor inicio-barra-interior">
-    <a class="inicio-marca" href="inicio.html" aria-label="SENNIAF Match · Inicio"><img src="img/logo.png" alt="SENNIAF Match" width="2171" height="724"></a>
-    <nav class="inicio-nav" aria-label="Navegación pública">
-      <a href="inicio.html" aria-current="page">Inicio</a>
-      <a href="index.html">Iniciar sesión</a>
-      <a class="inicio-registro" href="index.html#registro">Registrarse</a>
-    </nav>
-  </div>
-</header>
+<header class="publico-barra"><div class="publico-contenedor publico-barra-interior">
+  <a class="publico-marca" href="inicio.html" aria-label="SENNIAF Match · Inicio"><img src="img/logo.png" alt="SENNIAF Match" width="2171" height="724"></a>
+  <nav class="publico-nav" aria-label="Navegación pública">
+    <a href="inicio.html">Inicio</a><a href="conocer-sistema.html">Conocer el sistema</a>
+    <a href="index.html" data-acceso="login">Iniciar sesión</a><a class="publico-registro" href="index.html#registro" data-acceso="registro">Registrarse</a>
+  </nav>
+</div></header>
 <main id="contenido" tabindex="-1">
   <section class="inicio-portada" aria-labelledby="titulo-inicio">
     <div class="inicio-contenedor inicio-columnas">
@@ -42,7 +41,7 @@
         <h1 id="titulo-inicio">Información que conecta.<br><span>Decisiones que importan.</span></h1>
         <p class="inicio-descripcion">SENNIAF Match facilita el seguimiento de expedientes y apoya al Comité de Adopciones en el análisis de compatibilidad, manteniendo la participación de los profesionales responsables.</p>
         <div class="inicio-acciones">
-          <a class="inicio-boton" href="#conocer-sistema">Conocer el sistema <svg class="inicio-icono" aria-hidden="true" focusable="false"><use href="#icono-flecha"/></svg></a>
+          <a class="inicio-boton" href="conocer-sistema.html">Conocer el sistema <svg class="inicio-icono" aria-hidden="true" focusable="false"><use href="#icono-flecha"/></svg></a>
           <a class="inicio-acceso" href="index.html">Iniciar sesión <svg class="inicio-icono" aria-hidden="true" focusable="false"><use href="#icono-acceso"/></svg></a>
         </div>
       </div>
@@ -62,18 +61,6 @@
         </div>
         <p class="inicio-criterio"><svg class="inicio-icono" aria-hidden="true" focusable="false"><use href="#icono-escudo"/></svg><span>El criterio profesional permanece en el centro de cada decisión.</span></p>
       </div>
-    </div>
-  </section>
-  <section id="conocer-sistema" class="inicio-sistema" aria-labelledby="titulo-sistema" tabindex="-1">
-    <div class="inicio-contenedor">
-      <div class="inicio-sistema-cabecera">
-        <div><p class="inicio-etiqueta">CONOCE EL SISTEMA</p><h2 id="titulo-sistema">Un espacio, diferentes formas de participar.</h2></div>
-        <p>Conoce las herramientas disponibles según tu tipo de acceso.</p>
-      </div>
-      <div class="inicio-roles"><article class="inicio-rol inicio-rol-comite" aria-labelledby="rol-comite"><span class="inicio-rol-icono"><svg class="inicio-icono" aria-hidden="true" focusable="false"><use href="#icono-balanza"/></svg></span><h3 id="rol-comite">Comité de Adopciones</h3><p>Consulta expedientes y resultados de compatibilidad para apoyar sus valoraciones.</p></article>
-<article class="inicio-rol" aria-labelledby="rol-social"><span class="inicio-rol-icono"><svg class="inicio-icono" aria-hidden="true" focusable="false"><use href="#icono-documento"/></svg></span><h3 id="rol-social">Trabajo Social</h3><p>Da seguimiento a los expedientes y gestiona las citas con las familias.</p></article>
-<article class="inicio-rol" aria-labelledby="rol-psicologia"><span class="inicio-rol-icono"><svg class="inicio-icono" aria-hidden="true" focusable="false"><use href="#icono-cerebro"/></svg></span><h3 id="rol-psicologia">Psicología</h3><p>Registra evaluaciones y recomendaciones profesionales.</p></article>
-<article class="inicio-rol" aria-labelledby="rol-familias"><span class="inicio-rol-icono"><svg class="inicio-icono" aria-hidden="true" focusable="false"><use href="#icono-persona"/></svg></span><h3 id="rol-familias">Familias</h3><p>Completan su entrevista, consultan su proceso y participan en la vinculación, incluyendo las citas.</p></article></div>
     </div>
   </section>
 </main>

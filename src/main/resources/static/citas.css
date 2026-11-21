@@ -68,3 +68,20 @@
 }
 
 .citas-pagina .hero p, .citas-pagina .citas-resumen p { color: #476788; }
+
+.citas-pagina .citas-contexto:not(:empty) { display: flex; gap: 16px; padding: 20px; border: 1px solid #c8dcfa; border-radius: 16px; background: #eff5ff; margin: 0 0 28px; }
+.citas-pagina .citas-contexto > .pro-icono { width: 24px; height: 24px; flex-shrink: 0; color: #0054cc; }
+.citas-pagina .citas-contexto h2 { margin: 0 0 8px; font-size: 18px; color: #0b3558; }
+.citas-pagina .citas-contexto p, .citas-pagina .citas-explicacion { color: #476788; margin: 0; }
+.citas-pagina .citas-explicacion { margin-top: 18px; max-width: 70ch; }
+.citas-pagina .citas-datos { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.citas-pagina .citas-datos dt { display: flex; align-items: center; gap: 8px; }
+.citas-pagina .citas-datos .pro-icono { width: 18px; height: 18px; flex-shrink: 0; }
+.citas-pagina .citas-mensaje { padding: 20px; border: 1px solid #dce7f5; border-radius: 14px; }
+.citas-pagina .citas-mensaje strong { display: flex; align-items: center; gap: 10px; }
+.citas-pagina .citas-estado-RECHAZADA { background: #fff0f0; color: #a12232; }
+.citas-pagina .citas-historial summary .pro-icono { width: 18px; height: 18px; vertical-align: middle; margin-right: 8px; }
+.citas-pagina .citas-eventos summary { font-size: 14px; font-weight: 400; }
+.citas-pagina .citas-acciones [data-accion="CANCELAR"] { color: #a12232; border-color: #e8b9bf; }
+@media(max-width:1000px) { .citas-pagina .citas-datos { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) { .citas-pagina .citas-datos { grid-template-columns: 1fr; } }

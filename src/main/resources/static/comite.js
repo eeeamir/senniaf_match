@@ -16,7 +16,7 @@ const Comite = {
     }catch(e){this.contenido.innerHTML=Profesionales.encabezado('Panel del Comité','Consulta las propuestas y solicitudes.','personas')+`<p class="mensaje error" role="alert">${limpiarHtml(e.message)}</p>`;}
   },
   async api(ruta,opciones={}) {
-    const r=await fetch(ruta,{...opciones,headers:Sesion.encabezados({'Content-Type':'application/json'})});const datos=await r.json();
+    const r=await fetch(ruta,{...opciones,cache:'no-store',headers:Sesion.encabezados({'Content-Type':'application/json'})});const datos=await r.json();
     if(!r.ok){const error=new Error(datos.mensaje||'No se pudo cargar la información. Inténtalo de nuevo.');error.estado=r.status;throw error;}return datos;
   },
   icono(n){return Profesionales.icono(n);},
@@ -59,13 +59,34 @@ const Comite = {
     this.contenido.innerHTML=`<p class="pro-breadcrumb"><a href="${this.vinculo(caso.codigo)}">← Volver a compatibilidad</a></p>`+Profesionales.encabezado(caso.codigo+' y '+familia.codigo,'Revisa los dos expedientes y los criterios utilizados para esta propuesta.','salud')+this.avisoProgramacion(this.programacion?.pendiente,'mini')+`
       <section class="tarjeta pro-analisis-resumen"><div class="pro-circulo"><strong>${familia.puntaje}</strong><small>de 100</small></div><div><h3>Resultado de compatibilidad</h3><p>Se acreditan puntos solo con información evaluada. Máximo aplicable: ${familia.maximoAplicable??100}; peso evaluado: ${familia.pesoEvaluado??100}. Los factores no aplicables o desconocidos no suman ni redistribuyen puntos.</p></div><span class="chip">${this.estadoInformacion(familia)}</span></section>
       ${Profesionales.avisoInterrupcion(familia.antecedenteInterrupcion)}<div class="pro-dashboard">${tarjeta('Expediente infantil',caso.codigo,gruposNino,`perfiles.html?caso=${encodeURIComponent(caso.codigo)}&origen=match&familiaOrigen=${encodeURIComponent(familia.codigo)}`)}${tarjeta('Expediente familiar',familia.codigo,gruposFamilia,`perfiles.html?familia=${encodeURIComponent(familia.codigo)}&casoOrigen=${encodeURIComponent(caso.codigo)}&origen=match`,'verde')}</div>
-      <section class="tarjeta pro-seccion"><details><summary><strong>Cómo se calculó la compatibilidad</strong></summary><p>Revisa cada criterio del análisis.</p><div class="tabla"><table><thead><tr><th>Criterio</th><th>Puntos</th><th>Estado</th><th>Razón</th></tr></thead><tbody>${Object.entries(familia.f).map(([k,[p,nota]])=>`<tr><td>${limpiarHtml(FACTORES[k]?.n||k)}</td><td>${p} de ${pesos[k]}</td><td>${limpiarHtml(Profesionales.etiqueta(familia.estadosFactores?.[k]||'EVALUADO'))}</td><td>${limpiarHtml(nota)}</td></tr>`).join('')}</tbody></table></div></details></section>
+      <section class="tarjeta pro-seccion"><div class="pro-acciones"><button type="button" class="boton secundario" id="reevaluarCompatibilidad">${this.icono('refrescar')}Reevaluar</button></div><p id="estadoReevaluacion" role="status" aria-live="polite"></p><details><summary><strong>Cómo se calculó la compatibilidad</strong></summary><p>Revisa cada criterio del análisis.</p><div class="tabla"><table><thead><tr><th>Criterio</th><th>Puntos</th><th>Estado</th><th>Razón</th></tr></thead><tbody>${Object.entries(familia.f).map(([k,[p,nota]])=>`<tr><td>${limpiarHtml(FACTORES[k]?.n||k)}</td><td>${p} de ${pesos[k]}</td><td>${limpiarHtml(Profesionales.etiqueta(familia.estadosFactores?.[k]||'EVALUADO'))}</td><td>${limpiarHtml(nota)}</td></tr>`).join('')}</tbody></table></div></details></section>
 ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
       <section class="tarjeta pro-seccion"><h2>Decisión del Comité</h2><p>${bloqueado?'Este expediente ya tiene una propuesta aceptada.':'Selecciona la acción que corresponde a esta propuesta.'}</p>${bloqueado?'':`<div class="pro-acciones"><button class="boton" type="button" data-decision="ACEPTADA">${this.icono('comprobar')}Aceptar propuesta</button><button class="boton secundario" type="button" data-decision="DESCARTADA">Rechazar propuesta</button><button class="boton secundario" type="button" data-decision="REEVALUACION">Solicitar reevaluación</button></div>`}<p id="estadoDecision" role="status"></p></section>
 
       <a class="boton secundario" href="${this.vinculo(caso.codigo)}">← Volver a compatibilidad</a>`;
 
+    this.contenido.querySelector('#reevaluarCompatibilidad')?.addEventListener('click', () => this.reevaluar());
     this.contenido.querySelectorAll('[data-decision]').forEach(b=>b.addEventListener('click',()=>this.decidir(caso,familia,b.dataset.decision)));
+  },
+  async reevaluar() {
+    if (this.reevaluando) return;
+    this.reevaluando = true;
+    const aviso = document.getElementById('estadoReevaluacion');
+    aviso.textContent = 'Actualizando el análisis…';
+    this.contenido.querySelectorAll('#reevaluarCompatibilidad,[data-decision]').forEach(b => b.disabled = true);
+    try {
+      const actual = await this.api('/api/scoring/casos/' + encodeURIComponent(this.codigo));
+      this.casos = this.casos.map(c => c.codigo === actual.codigo ? actual : c);
+      await this.analisis();
+      const estado = document.getElementById('estadoReevaluacion');
+      if (estado) estado.textContent = 'Análisis actualizado con la información vigente.';
+      document.getElementById('reevaluarCompatibilidad')?.focus();
+    } catch (e) {
+      aviso.textContent = 'No se pudo actualizar el análisis. El resultado mostrado corresponde a la consulta anterior. ' + e.message;
+    } finally {
+      this.reevaluando = false;
+      this.contenido.querySelectorAll('#reevaluarCompatibilidad,[data-decision]').forEach(b => b.disabled = false);
+    }
   },
   decidir(caso,familia,tipo){
     const motivos={

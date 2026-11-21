@@ -101,14 +101,7 @@ const Familia = {
                   Ver historial completo →
                 </a>`}
             </div>
-            <ul class="familia-actividad">
-              ${visibles.map(evento => `
-                <li>
-                  <strong>${limpiarHtml(evento.titulo)}</strong>
-                  <time>${limpiarHtml(Profesionales.fecha(evento.fecha))} · Panamá</time>
-                  <p>${limpiarHtml(evento.descripcion)}</p>
-                </li>`).join('') || '<li>Todavía no hay actuaciones disponibles.</li>'}
-            </ul>
+            ${visibles.length ? Vinculaciones.lineaTiempo(visibles.map(evento => ({...evento, resumen: evento.descripcion, zona: 'Panamá'}))) : '<p>Todavía no hay actuaciones disponibles.</p>'}
             ${todos && p.numeroReevaluaciones ? `
               <p class="ayuda">Reevaluaciones completadas: ${Number(p.numeroReevaluaciones)}.
                 Solo se muestran fechas que quedaron registradas.</p>` : ''}

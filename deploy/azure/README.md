@@ -179,3 +179,9 @@ Versión activa comprobada: commit `8628cea8b6101345529422329f8f3746cb099439`, S
 El horario provisional del prototipo se configura mediante `SENNIAF_CITAS_FRANJAS` y `SENNIAF_CITAS_INTERVALO_MINUTOS`: lunes–viernes 08:00–16:00, pasos de 30 minutos, zona America/Panama. No es un horario oficial de SENNIAF. Sin configuración válida no se deben confirmar citas. El actualizador y auxiliar incluyen ahora la comprobación de 020; deben conservarse juntos. El JAR anterior `b9e4d1021ca70c2413352e444f4db34b64c86d68e4668936785a89bf21cdf562` permanece intacto y se verificó compatible para recuperación de código, sin borrar las tablas nuevas ni restaurar la base.
 
 [Informe vigente, respaldos, 1141 pruebas, integridad, verificaciones y límites](../../docs/DESPLIEGUE_CONSOLIDADO_SPRINT9.md). Las notas anteriores con migraciones pendientes se conservan como antecedentes históricos.
+
+## Correcciones posteriores al despliegue — 021 pendiente, solo local
+
+La corrección del reingreso revisado requiere `021-reingreso-revisado.sql`: mantiene los antecedentes y permite reevaluar el par interrumpido únicamente después de su cierre y de la revisión independiente de ambos expedientes. Las exclusiones expresas y las condiciones de elegibilidad siguen vigentes. No se ejecutó en Azure durante esta tarea. Ver [impacto previo](../../docs/REVISION_REINGRESO_SPRINT9.md) e [informe de correcciones](../../docs/CORRECCIONES_POSTDESPLIEGUE_SPRINT9.md).
+
+Una futura publicación autorizada debe aplicar 021 explícitamente con respaldo verificado, `ON_ERROR_STOP=1`, base autorizada y `confirmacion=PERMITIR_REINGRESO_REVISADO_SIN_BORRAR`, y usar juntos el actualizador/auxiliar revisados. Se exige la marca `senniaf-reingreso-revisado.properties`; el JAR anterior aplica una regla funcional diferente y el auxiliar no lo admite automáticamente sobre 021. No borrar antecedentes, revertir datos ni restaurar la base para recuperar código.

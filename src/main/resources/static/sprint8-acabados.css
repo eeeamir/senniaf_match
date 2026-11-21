@@ -246,8 +246,9 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 }
 
 .familia-etapas .interrumpido .familia-paso {
-  background: #fff0e5;
-  color: #8c4515;
+  background: #fff0f0;
+  color: #a12232;
+  border-color: #a12232;
 }
 
 .familia-etapas .registrada .familia-paso {
@@ -314,3 +315,11 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 .etiqueta-obligatoria-final {
   white-space: nowrap;
 }
+
+.s8-acabado .chip.vinculacion-negativa { background: #fff0f0; color: #a12232; }
+.s8-acabado .chip.vinculacion-positiva { background: #eaf6ee; color: #21633b; }
+.s8-acabado .vinculacion-etapas .interrumpido .vinculacion-hito { background: #fff0f0; border-color: #a12232; color: #a12232; }
+.s8-acabado .vinculacion-etapas .completado .vinculacion-hito { background: #21633b; border-color: #21633b; color: #fff; }
+.s8-acabado .familia-etapas .interrumpido .familia-paso { background: #fff0f0; color: #a12232; border-color: #a12232; }
+.s8-acabado .familia-etapas .interrumpido small { color: #a12232; }
+.s8-acabado .vinculacion-cierre p, .s8-acabado .vinculacion-linea p { color: #476788; }

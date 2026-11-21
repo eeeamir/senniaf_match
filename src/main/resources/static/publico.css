@@ -1,0 +1,27 @@
+.publico-barra { background: #fff; border-bottom: 1px solid #dce7f4; color: #0b3558; width: 100%; position: relative; z-index: 2; }
+.publico-barra * { box-sizing: border-box; }
+.publico-contenedor { width: min(1200px,calc(100% - 64px)); margin-inline: auto; }
+.publico-barra-interior { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 84px; }
+.publico-marca { display: inline-flex; flex-shrink: 0; border-radius: 8px; }
+.publico-marca img { display: block; width: 235px; height: 78px; object-fit: contain; }
+.publico-nav { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.publico-nav a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 12px; border: 1px solid transparent; border-radius: 10px; color: #0b3558; font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.publico-nav a[aria-current], .publico-nav .publico-registro { color: #0054cc; }
+.publico-nav .publico-registro { background: #f0f5ff; border-color: #ccddff; }
+.publico-nav a:hover { background: #eaf2ff; color: #00449f; }
+.publico-barra a:focus-visible { outline: 3px solid #0054cc; outline-offset: 3px; }
+body.acceso-publico { display: block; padding: 0; }
+.acceso-publico .escena { width: min(1200px,calc(100% - 48px)); margin: 40px auto; }
+.inicio-publico .publico-regreso { margin-bottom: 40px; }
+.publico-regreso a { color: #0054cc; display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
+@media(max-width:900px) {
+ .publico-barra-interior { flex-wrap: wrap; gap: 0; padding-bottom: 12px; }
+}
+@media(max-width:640px) {
+ .publico-contenedor { width: calc(100% - 32px); }
+ .publico-marca img { width: 210px; height: 70px; }
+ .publico-nav { width: 100%; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px 8px; }
+ .publico-nav a { padding-inline: 6px; }
+ .acceso-publico .escena { width: calc(100% - 32px); margin: 24px auto; }
+}
+.acceso-publico input::placeholder { color: #476788; opacity: 1; }

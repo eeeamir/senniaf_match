@@ -45,11 +45,12 @@ jobs:
           cache: maven
       - name: Comprobar recursos web y compatibilidad del actualizador
         run: |
-          for archivo in comite.js familia.js profesionales.js vinculaciones.js citas.js; do
+          for archivo in comite.js familia.js profesionales.js vinculaciones.js citas.js publico.js; do
             node --check "src/main/resources/static/$archivo"
           done
           bash -n deploy/azure/actualizar.sh src/test/scripts/preparar-postgres-ci.sh
           python3 src/test/scripts/test_compatibilidad_despliegue.py
+          node --test src/test/scripts/test_vistas_sprint9.cjs
       - name: Preparar esquema y permisos en la base aislada
         run: bash src/test/scripts/preparar-postgres-ci.sh
       - name: Compilar y ejecutar pruebas unitarias e integración

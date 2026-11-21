@@ -31,7 +31,7 @@ const Citas = {
     PROPONER: ['Proponer otra fecha', 'Proponer nueva fecha', 'Enviar propuesta'],
     ACEPTAR_PROPUESTA: ['Aceptar nueva fecha', 'Aceptar nueva fecha', 'Confirmar aceptación'],
     OTRO_HORARIO: ['Solicitar otro horario', 'Solicitar otro horario', 'Enviar propuesta'],
-    CANCELAR: ['Cancelar', 'Cancelar cita', 'Confirmar cancelación'],
+    CANCELAR: ['Cancelar solicitud', 'Cancelar solicitud', 'Confirmar cancelación'],
     REALIZADA: ['Marcar realizada', 'Registrar cita realizada', 'Confirmar realización'],
   },
   async api(ruta, opciones = {}) {
@@ -62,7 +62,7 @@ const Citas = {
         <option value="TODAS">Todas</option>${Object.entries(this.estados).map(([k, [n]]) => `<option value="${k}">${limpiarHtml(n)}</option>`).join('')}
       </select></label><div class="pro-acciones">${this.familia ? '<button type="button" class="boton" id="solicitarCita" aria-describedby="contextoCitas" disabled>Solicitar cita</button>' : ''}
       <button type="button" class="boton secundario" id="actualizarCitas">Actualizar</button></div></div>
-      <p id="contextoCitas" class="citas-contexto"></p>
+      <aside id="contextoCitas" class="citas-contexto" role="status"></aside>
       <section aria-labelledby="tituloSolicitudes"><h2 class="pro-subtitulo" id="tituloSolicitudes">${this.familia ? 'Mis solicitudes' : 'Solicitudes de las familias'}</h2><div id="listaCitas" class="citas-lista"></div></section>`;
     this.filtro = document.getElementById('filtroCitas');
     this.filtro.value = this.familia ? 'TODAS' : 'PENDIENTE';
@@ -81,9 +81,9 @@ const Citas = {
       this.disponibles = habilitadas.filter(v => !abiertas.has(v.id));
       let contexto = '';
       if (!this.opciones.configurada) contexto = 'Los horarios de citas todavía no están habilitados.';
-      else if (this.familia && !habilitadas.length) contexto = 'Podrás solicitar citas cuando tu vinculación esté aceptada y habilitada, con un trabajador social asignado.';
+      else if (this.familia && !habilitadas.length) contexto = this.opciones.vinculaciones[0]?.motivoNoDisponible || 'Necesitas una vinculación aceptada y habilitada, con un trabajador social asignado, para solicitar citas.';
       else if (this.familia && !this.disponibles.length) contexto = 'Ya tienes una solicitud pendiente para tu vinculación. Puedes consultarla en Mis solicitudes.';
-      document.getElementById('contextoCitas').textContent = contexto;
+      document.getElementById('contextoCitas').innerHTML = contexto ? `${Profesionales.icono('informacion')}<div><h2>Solicitud de citas no disponible</h2><p>${limpiarHtml(contexto)}</p></div>` : '';
       const solicitar = document.getElementById('solicitarCita');
       if (solicitar) solicitar.disabled = !this.opciones.configurada || !this.disponibles.length;
       this.pintar();
@@ -104,17 +104,19 @@ const Citas = {
     }
     lista.innerHTML = visibles.map(c => {
       const estado = this.estados[c.estado];
+      const explicacion = this.familia ? ({PENDIENTE:'Tu solicitud fue enviada y está pendiente de respuesta de Trabajo Social.',CONFIRMADA:'Tu cita está confirmada para el horario acordado.',CAMBIO_PROPUESTO:'Trabajo Social propuso un nuevo horario. Revisa la propuesta y responde.',RECHAZADA:'Trabajo Social rechazó esta solicitud. Consulta su respuesta.',CANCELADA:'Esta solicitud fue cancelada y ya no está activa.',REALIZADA:'La cita se completó.'})[c.estado] : ({PENDIENTE:'Revisa la solicitud y responde a la familia.',CONFIRMADA:'El horario está confirmado.',CAMBIO_PROPUESTO:'La propuesta está pendiente de respuesta de la familia.',RECHAZADA:'La solicitud fue rechazada.',CANCELADA:'La solicitud ya no está activa.',REALIZADA:'La cita se completó.'})[c.estado];
       return `<article class="tarjeta citas-tarjeta" id="cita-${Number(c.id)}" tabindex="-1">
         <header class="citas-cabecera"><div><p>${limpiarHtml(c.vinculacion)}${this.familia ? '' : ' · Familia ' + limpiarHtml(c.familia)}</p><h2>${limpiarHtml(this.motivos[c.motivo]?.[0] || 'Solicitud de cita')}</h2></div>
         <span class="citas-estado citas-estado-${limpiarHtml(c.estado)}">${Profesionales.icono(estado[1])}${limpiarHtml(estado[0])}</span></header>
-        <dl class="citas-datos"><div><dt>${['CONFIRMADA', 'REALIZADA'].includes(c.estado) ? 'Fecha acordada' : ['PENDIENTE', 'CAMBIO_PROPUESTO'].includes(c.estado) ? 'Fecha propuesta' : 'Fecha registrada'}</dt><dd>${limpiarHtml(this.fecha(c.inicio))}</dd></div>
-        <div><dt>Hora · Panamá</dt><dd>${limpiarHtml(this.hora(c.hora))} – ${limpiarHtml(this.horaInstante(c.fin))}</dd></div>
-        <div><dt>Duración${['PENDIENTE', 'CAMBIO_PROPUESTO'].includes(c.estado) ? ' estimada' : ''}</dt><dd>${c.duracion === 60 ? '1 hora' : '2 horas'}</dd></div></dl>
-        <div class="citas-mensaje"><strong>${c.ultimoRol === 'TRABAJADOR_SOCIAL' ? 'Respuesta de Trabajo Social' : this.familia ? 'Tu mensaje' : 'Mensaje de la familia'}</strong><p>${limpiarHtml(c.mensaje)}</p></div>
-        ${c.respuesta && c.respuesta !== c.mensaje ? `<div class="citas-mensaje"><strong>Respuesta anterior de Trabajo Social</strong><p>${limpiarHtml(c.respuesta)}</p></div>` : ''}
-        <div class="citas-acciones">${c.acciones.map(a => `<button type="button" class="boton ${['RECHAZAR', 'PROPONER', 'OTRO_HORARIO', 'CANCELAR'].includes(a) ? 'secundario' : ''}" data-accion="${a}" data-cita="${Number(c.id)}">${limpiarHtml(this.acciones[a][0])}</button>`).join('')}</div>
+        <p class="citas-explicacion">${limpiarHtml(explicacion)}</p>
+        <dl class="citas-datos"><div><dt>${Profesionales.icono('calendario')}${['CONFIRMADA', 'REALIZADA'].includes(c.estado) ? 'Fecha acordada' : ['PENDIENTE', 'CAMBIO_PROPUESTO'].includes(c.estado) ? 'Fecha propuesta' : 'Fecha registrada'}</dt><dd>${limpiarHtml(this.fecha(c.inicio))}</dd></div>
+        <div><dt>${Profesionales.icono('reloj')}Inicio · Panamá</dt><dd>${limpiarHtml(this.hora(c.hora))}</dd></div><div><dt>${Profesionales.icono('reloj')}Finalización</dt><dd>${limpiarHtml(this.horaInstante(c.fin))}</dd></div>
+        <div><dt>${Profesionales.icono('reloj')}Duración${['PENDIENTE', 'CAMBIO_PROPUESTO'].includes(c.estado) ? ' estimada' : ''}</dt><dd>${c.duracion === 60 ? '1 hora' : '2 horas'}</dd></div></dl>
+        <div class="citas-mensaje"><strong>${Profesionales.icono('informe')}${c.ultimoRol === 'TRABAJADOR_SOCIAL' ? 'Respuesta de Trabajo Social' : this.familia ? 'Tu mensaje' : 'Mensaje de la familia'}</strong><p>${limpiarHtml(c.mensaje)}</p></div>
+
+        <div class="citas-acciones">${c.acciones.map(a => `<button type="button" class="boton ${['RECHAZAR', 'PROPONER', 'OTRO_HORARIO', 'CANCELAR'].includes(a) ? 'secundario' : ''}" data-accion="${a}" data-cita="${Number(c.id)}">${Profesionales.icono(({ACEPTAR:'comprobar',RECHAZAR:'cerrar',PROPONER:'calendario',ACEPTAR_PROPUESTA:'comprobar',OTRO_HORARIO:'calendario',CANCELAR:'cerrar',REALIZADA:'comprobar'})[a])}${limpiarHtml(a === 'CANCELAR' && c.estado === 'CONFIRMADA' ? 'Cancelar cita' : this.acciones[a][0])}</button>`).join('')}</div>
         <p class="citas-actualizada">Última actualización: ${limpiarHtml(this.fechaHora(c.actualizada))}</p>
-        <details class="citas-historial" data-historial="${Number(c.id)}"><summary>Ver historial</summary><div data-eventos></div></details></article>`;
+        <details class="citas-historial" data-historial="${Number(c.id)}"><summary>${Profesionales.icono('reloj')}Ver historial</summary><div data-eventos></div></details></article>`;
     }).join('');
     lista.querySelectorAll('[data-accion]').forEach(b => b.addEventListener('click', () => this.dialogo(b.dataset.accion, this.solicitudes.find(c => c.id === Number(b.dataset.cita)))));
     lista.querySelectorAll('[data-historial]').forEach(d => d.addEventListener('toggle', async () => {
@@ -122,7 +124,12 @@ const Citas = {
       d.dataset.cargado = 'si'; const bloque = d.querySelector('[data-eventos]'); bloque.textContent = 'Consultando historial…';
       try {
         const c = await this.api('/api/citas/' + Number(d.dataset.historial));
-        bloque.innerHTML = `<ol class="citas-eventos">${c.historial.map(e => `<li><strong>${limpiarHtml(e.actor)} · ${limpiarHtml(this.estados[e.estado]?.[0] || e.estado)}</strong><p>${limpiarHtml(this.fechaHora(e.fechaAccion))}</p><p>${limpiarHtml(this.fechaHora(e.inicio))} – ${limpiarHtml(this.horaInstante(e.fin))} · ${e.duracion === 60 ? '1 hora' : '2 horas'}</p><p>${limpiarHtml(e.mensaje)}</p></li>`).join('')}</ol>`;
+        const acciones = {SOLICITAR:'Solicitud enviada',ACEPTAR:'Cita confirmada',RECHAZAR:'Solicitud rechazada',PROPONER:'Nuevo horario propuesto',ACEPTAR_PROPUESTA:'Propuesta aceptada',OTRO_HORARIO:'Otro horario solicitado',CANCELAR:'Cancelación registrada',REALIZADA:'Cita realizada'};
+        bloque.innerHTML = `<ol class="citas-eventos">${c.historial.map((e, i) => {
+          const anterior = c.historial[i - 1];
+          const cambioHorario = !anterior || e.inicio !== anterior.inicio || e.fin !== anterior.fin;
+          return `<li><strong>${limpiarHtml(acciones[e.accion] || this.estados[e.estado]?.[0] || e.estado)}</strong><p>${limpiarHtml(e.actor)} · ${limpiarHtml(this.fechaHora(e.fechaAccion))}</p>${cambioHorario ? `<p>${Profesionales.icono('calendario')}${limpiarHtml(this.fechaHora(e.inicio))} – ${limpiarHtml(this.horaInstante(e.fin))}</p>` : ''}<details><summary>Ver mensaje registrado</summary><p>${limpiarHtml(e.mensaje)}</p></details></li>`;
+        }).join('')}</ol>`;
       } catch (e) { bloque.textContent = e.message; delete d.dataset.cargado; }
     }));
   },
@@ -136,7 +143,7 @@ const Citas = {
     const motivos = nueva ? this.motivos : accion === 'RECHAZAR' ? this.rechazos : accion === 'PROPONER' ? this.cambios : null;
     const inicioFoco = document.activeElement;
     const d = document.createElement('dialog'); d.className = 'pro-dialogo citas-dialogo'; d.setAttribute('aria-labelledby', 'tituloDialogoCita');
-    const titulo = nueva ? 'Solicitar cita' : this.acciones[accion][1];
+    const titulo = nueva ? 'Solicitar cita' : accion === 'CANCELAR' && cita.estado === 'CONFIRMADA' ? 'Cancelar cita' : this.acciones[accion][1];
     const campo = (id, nombre, control) => `<div class="citas-campo"><label for="${id}">${nombre}</label>${control}</div>`;
     const duracionInicial = editarDuracion || nueva ? 120 : cita?.duracion || 120;
     const vinInicial = nueva ? this.disponibles[0]?.id : cita.vinculacionId;

@@ -137,11 +137,3 @@ const Sesion = {
     return 'perfil.html';
   }
 };
-
-
-// Entrada pública al registro: utiliza la navegación y los formularios existentes.
-if (location.pathname.endsWith('/index.html') && location.hash === '#registro') {
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelector('[data-ir="vistaRegistro"]')?.click();
-  }, { once: true });
-}
