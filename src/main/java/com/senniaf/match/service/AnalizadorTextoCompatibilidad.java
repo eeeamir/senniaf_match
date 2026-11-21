@@ -32,8 +32,12 @@ public final class AnalizadorTextoCompatibilidad {
 
     private record Concepto(String id, String nombre, Dominio dominio, Pattern expresion) {}
     private static final Map<String, Concepto> VOCABULARIO = vocabulario();
+    private static final Set<String> ACOMPANAMIENTO_COTIDIANO = Set.of("RUTINA_ESTABLE",
+            "ACOMPANAMIENTO_EMOCIONAL", "APOYO_ADAPTACION", "SUPERVISION_COTIDIANA");
+    private static final Pattern NECESIDAD_EXPLICITA = Pattern.compile(
+            "\\b(?:necesita|requiere|precisa|necesidad de)\\b");
     private static final String ACCION_INFINITIVA = "(?:acompanar|atender|cuidar|apoyar|asistir|llevar|"
-            + "seguir|administrar|ayudar|recibir|acoger|criar|viajar|trasladar|desplazar|facilitar|ofrecer)"
+            + "seguir|administrar|ayudar|recibir|acoger|criar|viajar|trasladar|desplazar|facilitar|ofrecer|mantener|proporcionar)"
             + "(?:l[oa]s?|me|nos)?";
     private static final Pattern CLAUSULAS = Pattern.compile(
             "\\b(?:pero|sin embargo|aunque)\\b|(?:,|\\by\\b)\\s*(?=(?:no\\s+)?"
@@ -51,11 +55,12 @@ public final class AnalizadorTextoCompatibilidad {
                     + "estoy dispuest[oa] a|estamos dispuest[oa]s a|"
                     + "estoy preparad[oa] para|estamos preparad[oa]s para|"
                     + "tengo capacidad para|tenemos capacidad para|"
-                    + "me comprometo a|nos comprometemos a|nuestra familia puede|"
+                    + "me comprometo a|nos comprometemos a|nuestra familia puede|la familia puede|"
                     + "no (?:tengo|tenemos) (?:dificultades|impedimentos) para)\\s+"
                     + ACCION_INFINITIVA
                     + "|acompano|acompanamos|atiendo|atendemos|cuido|cuidamos|apoyamos|"
-                    + "asistimos|llevamos|ayudamos|recibimos|viajo|viajamos)\\b");
+                    + "asistimos|llevamos|ayudamos|recibimos|viajo|viajamos|mantengo|mantenemos|"
+                    + "ofrezco|ofrecemos|proporciono|proporcionamos)\\b");
     private static final Pattern ACCION_COORDINADA = Pattern.compile(
             "\\b(y|ni)\\s+(?:(no|nunca|jamas|tampoco)\\s+)?" + ACCION_INFINITIVA + "\\b");
     private static final Pattern TERCERO = Pattern.compile(
@@ -156,10 +161,22 @@ public final class AnalizadorTextoCompatibilidad {
         }
         analizarCampo(datos, "notaCondicionesSalud", f.getNotaCondicionesSalud(),
                 EnumSet.of(Dominio.SALUD), false);
+        analizarAcompanamientoCotidiano(datos, "notaRedApoyo", f.getNotaRedApoyo());
+        analizarAcompanamientoCotidiano(datos, "notaEstructuraHogar", f.getNotaEstructuraHogar());
         analizarCampo(datos, "notaHermanos", f.getNotaHermanos(), EnumSet.of(Dominio.HERMANOS), false);
         analizarRed(datos, f);
         analizarCampo(datos, "notaDistancia", f.getNotaDistancia(), EnumSet.of(Dominio.LOGISTICA), false);
         return datos.resultado();
+    }
+
+    private void analizarAcompanamientoCotidiano(Acumulador datos, String campo, String texto) {
+        Acumulador notas = new Acumulador();
+        analizarCampo(notas, campo, texto, EnumSet.of(Dominio.SALUD), false);
+        notas.datos.forEach((concepto, evidencias) -> {
+            if (ACOMPANAMIENTO_COTIDIANO.contains(concepto.id())) {
+                evidencias.forEach(e -> datos.agregar(concepto, e));
+            }
+        });
     }
 
     private void analizarRed(Acumulador datos, PerfilFamilia familia) {
@@ -302,6 +319,8 @@ public final class AnalizadorTextoCompatibilidad {
             if (texto.matches(".*\\b(?:antecedentes de|historia de|antes tuvo|antes tenia)\\b.*")) {
                 return Declaracion.INSUFICIENTE;
             }
+            if (ACOMPANAMIENTO_COTIDIANO.contains(concepto.id())
+                    && !NECESIDAD_EXPLICITA.matcher(anterior).find()) return Declaracion.INSUFICIENTE;
             return Declaracion.NECESIDAD;
         }
         var declaracionRed = RED_DECLARADA.matcher(texto);
@@ -408,6 +427,14 @@ public final class AnalizadorTextoCompatibilidad {
                 "terapias? ocupacional(?:es)?");
         definir(conceptos, "ACOMPANAMIENTO_PSICOLOGICO", "Acompañamiento psicológico", Dominio.SALUD,
                 "acompanamiento psicologico|sesion(?:es)? psicologicas?|terapias? psicologicas?");
+        definir(conceptos, "RUTINA_ESTABLE", "Rutinas estables", Dominio.SALUD,
+                "rutinas? (?:(?:diarias?|cotidianas?) )?(?:estables?|constantes?)|horarios? (?:estables?|constantes?)");
+        definir(conceptos, "ACOMPANAMIENTO_EMOCIONAL", "Acompañamiento emocional", Dominio.SALUD,
+                "(?:acompanamiento|apoyo) emocional(?: especific[oa])?");
+        definir(conceptos, "APOYO_ADAPTACION", "Apoyo durante la adaptación", Dominio.SALUD,
+                "proceso de adaptacion|(?:su|la) adaptacion|apoyo para adaptarse");
+        definir(conceptos, "SUPERVISION_COTIDIANA", "Supervisión cotidiana", Dominio.SALUD,
+                "supervision (?:cotidiana|diaria)|(?:supervision y acompanamiento|acompanamiento y supervision) (?:diario|cotidiano)");
         definir(conceptos, "HERMANOS", "Acompañamiento de hermanos", Dominio.HERMANOS,
                 "herman[oa]s?|grupo de hermanos|ubicacion conjunta|permanecer juntos");
         definir(conceptos, "RED_APOYO", "Red de apoyo", Dominio.RED,

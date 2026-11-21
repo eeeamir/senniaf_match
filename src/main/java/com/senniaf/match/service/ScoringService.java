@@ -173,7 +173,7 @@ public class ScoringService {
         result.put("provincia", f.getProvincia() == null ? "Sin indicar" : f.getProvincia().name());
         result.put("puntaje", total); result.put("f", factores); result.put("estadosFactores", estados);
         result.put("maximoAplicable", 100 - noAplicables); result.put("pesoEvaluado", pesoEvaluado);
-        result.put("reglas", "EVIDENCIA_TEXTO_4");
+        result.put("reglas", "EVIDENCIA_TEXTO_5");
         result.put("evidenciasCompatibilidad", Map.of("necesidades", necesidades, "capacidades", capacidades));
         result.put("reevaluaciones", f.getNumeroReevaluaciones());
         result.put("antecedenteInterrupcion",antecedenteInterrupcion(f.getCodigoCaso()));
