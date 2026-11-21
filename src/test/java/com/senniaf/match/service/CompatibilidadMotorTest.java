@@ -229,11 +229,11 @@ class CompatibilidadMotorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"Necesita una rutina estable", "Requiere apoyo educativo individualizado"})
-    void necesidadesSocialesSinReglaNoInventanCobertura(String necesidad) {
+    @CsvSource(delimiter = '|', value = {"Necesita una rutina estable|35", "Requiere apoyo educativo individualizado|0"})
+    void necesidadesSocialesSoloAcreditanConceptosConRegla(String necesidad, int esperado) {
         n.setNecesidadesApoyo(necesidad);
         f.setNotaCondicionesSalud("Podemos mantener horarios y rutinas constantes. Podemos ofrecer apoyo educativo individualizado");
-        assertEquals(0, puntos(resultado(), "salud"));
+        assertEquals(esperado, puntos(resultado(), "salud"));
     }
 
     @Test

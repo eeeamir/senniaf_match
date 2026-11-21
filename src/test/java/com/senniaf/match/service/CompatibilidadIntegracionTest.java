@@ -70,7 +70,7 @@ class CompatibilidadIntegracionTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].familias[0].f.salud[0]").value(35))
                 .andExpect(jsonPath("$[0].familias[0].puntaje").value(75))
-                .andExpect(jsonPath("$[0].familias[0].reglas").value("EVIDENCIA_TEXTO_4"))
+                .andExpect(jsonPath("$[0].familias[0].reglas").value("EVIDENCIA_TEXTO_5"))
                 .andExpect(jsonPath("$[0].familias[0].maximoAplicable").value(75))
                 .andExpect(jsonPath("$[0].familias[0].estadosFactores.hermanos").value("NO_APLICA"))
                 .andExpect(jsonPath("$[0].familias[0].evidenciasCompatibilidad.necesidades.conceptos.TERAPIA_LENGUAJE.evidencias[0].campo").value("necesidadesApoyo"));
@@ -120,6 +120,24 @@ class CompatibilidadIntegracionTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.familias[0].f.salud[0]").value(35))
                 .andExpect(jsonPath("$.familias[0].evidenciasCompatibilidad.necesidades.conceptos.ACOMPANAMIENTO_PSICOLOGICO.evidencias[0].campo").value("necesidadesApoyo"));
+    }
+
+    @Test
+    void notasDelHogarYRedProducenCoberturaSocialRealSinDuplicarla() throws Exception {
+        n.setNecesidadesApoyo("Necesita rutinas estables. Requiere acompañamiento emocional");
+        n.setCondicionesSaludDetalle("Necesita una rutina diaria estable");
+        f.setNotaEstructuraHogar("Podemos mantener horarios constantes");
+        f.setNotaRedApoyo("Podemos ofrecer apoyo emocional con apoyo adicional");
+        mvc.perform(get("/api/scoring/casos/PRUEBA-N").header("X-User-Role", "COMITE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.familias[0].f.salud[0]").value(26))
+                .andExpect(jsonPath("$.familias[0].f.apoyo[0]").value(16))
+                .andExpect(jsonPath("$.familias[0].puntaje").value(66))
+                .andExpect(jsonPath("$.familias[0].evidenciasCompatibilidad.capacidades.conceptos.RUTINA_ESTABLE.evidencias[0].campo").value("notaEstructuraHogar"))
+                .andExpect(jsonPath("$.familias[0].evidenciasCompatibilidad.capacidades.conceptos.ACOMPANAMIENTO_EMOCIONAL.evidencias[0].campo").value("notaRedApoyo"));
+        verify(ninos, never()).save(any());
+        verify(familias, never()).save(any());
+        verify(decisiones, never()).save(any());
     }
 
     @Test
