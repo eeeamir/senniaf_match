@@ -132,8 +132,7 @@ const Profesionales = {
     return `
       <aside class="pro-aviso-reevaluaciones">
         <h3>${this.icono('informacion')}Historial de reevaluaciones</h3>
-        <p>Reevaluaciones completadas: <strong>${cantidad}</strong>.
-          Las solicitudes pendientes no se incluyen en esta cantidad.</p>
+        <p>Reevaluaciones completadas: <strong>${cantidad}</strong></p>
       </aside>`;
   },
   avisoInterrupcion(antecedente){

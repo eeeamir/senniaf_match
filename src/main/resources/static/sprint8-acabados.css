@@ -69,8 +69,6 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 .s8-acabado #seccionApoyosCulturales .apoyo-cultural-campo label{align-self:start;line-height:1.5;padding-top:8px}
 .s8-acabado #seccionApoyosCulturales .apoyo-cultural-campo textarea{width:100%;min-height:84px;height:96px;border:1px solid #d0ddec;border-radius:11px;background:#fff;resize:vertical;font-size:14px;line-height:1.55;padding:12px}
 .s8-acabado #seccionApoyosCulturales .apoyo-cultural-campo .ayuda{grid-column:2;line-height:1.5;font-size:12px;color:#56708d}
-.s8-acabado #seccionApoyosCulturales .cultura-antecedente{background:#edf4ff;border:1px solid #dce8f9;border-radius:13px;padding:16px;margin:0 24px 20px}
-.s8-acabado #seccionApoyosCulturales .cultura-antecedente h3{font-size:14px;margin:0 0 8px}
 .s8-acabado :is(.pro-acciones,.vinculacion-cabecera h2,.pro-fila-titulo h2){gap:10px}
 @media(max-width:700px){
  .s8-acabado .hero::before{width:100px;height:100px;right:-50px;top:-65px}
@@ -164,7 +162,6 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
  .s8-acabado .pro-aviso-interrupcion{padding:12px;gap:8px}
  .s8-acabado .pro-expedientes-completos>.detalle-grupo>summary{padding:14px 16px;min-height:72px}
  .s8-acabado #seccionApoyosCulturales>p.ayuda{padding-inline:20px}
- .s8-acabado #seccionApoyosCulturales .cultura-antecedente{margin-inline:20px}
 }
 @media(min-width:761px) and (max-width:1100px){
  .s8-acabado main,.s8-acabado main.ancho{padding-inline:24px}
@@ -306,3 +303,14 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
   font-size: 0.75rem;
 }
 
+.profesional #propuestasComite + .pro-familias-reevaluacion {
+  margin-top: 28px;
+}
+
+#formularioFamilia label[for="disponibilidadViaje"] {
+  display: block;
+}
+
+.etiqueta-obligatoria-final {
+  white-space: nowrap;
+}
