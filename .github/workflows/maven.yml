@@ -45,7 +45,7 @@ jobs:
           cache: maven
       - name: Comprobar recursos web y compatibilidad del actualizador
         run: |
-          for archivo in comite.js familia.js profesionales.js vinculaciones.js; do
+          for archivo in comite.js familia.js profesionales.js vinculaciones.js citas.js; do
             node --check "src/main/resources/static/$archivo"
           done
           bash -n deploy/azure/actualizar.sh src/test/scripts/preparar-postgres-ci.sh

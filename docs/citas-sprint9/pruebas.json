@@ -1,0 +1,233 @@
+{
+  "java": {
+    "tests": 1069,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "clases": [
+    {
+      "name": "com.senniaf.match.CitasPostgresIT",
+      "tests": "18",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.controller.PerfilFamiliaControllerTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.controller.PerfilNinoControllerTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.controller.VinculacionControllerTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.iso25010.eficiencia.ScoringEficienciaIsoTest",
+      "tests": "10",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.iso25010.fiabilidad.ScoringFiabilidadIsoTest",
+      "tests": "15",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.iso25010.funcional.ScoringFuncionalIsoTest",
+      "tests": "42",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.iso25010.seguridad.FamiliaExpedienteIsoTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.iso25010.seguridad.NinosAccesoIsoTest",
+      "tests": "52",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.iso25010.seguridad.SeguridadIsoTest",
+      "tests": "65",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.AcompanamientoSocialCompatibilidadTest",
+      "tests": "132",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.AnalizadorTextoCompatibilidadTest",
+      "tests": "38",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.ApoyoCotidianoDeclaradoTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.CitaServiceTest",
+      "tests": "26",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.CoberturaLinguisticaVerificacionTest",
+      "tests": "145",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.CompatibilidadIntegracionTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.CompatibilidadMotorTest",
+      "tests": "286",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.ContextoLinguisticoCorreccionTest",
+      "tests": "29",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.ContextoProfesionalCompatibilidadTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.CorpusCompatibilidadTest",
+      "tests": "68",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.EducacionCompatibilidadTest",
+      "tests": "9",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.HorarioCitasTest",
+      "tests": "29",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.ImpactoLinguisticoVerificacionTest",
+      "tests": "12",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.PerfilFamiliaServiceTest",
+      "tests": "9",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.PerfilNinoServiceTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.ProgramacionFechaTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.ProporcionalidadCompatibilidadTest",
+      "tests": "10",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.RecomendacionesCompatibilidadTest",
+      "tests": "19",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.ScoringReevaluacionServiceTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.VinculacionDecisionTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.senniaf.match.service.VinculacionServiceTest",
+      "tests": "13",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "compatibilidadPython": {
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

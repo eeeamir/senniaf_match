@@ -67,10 +67,10 @@ const Profesionales = {
     if(!['TRABAJADOR_SOCIAL','PSICOLOGO','COMITE','FAMILIA'].includes(s?.rol)||document.getElementById('navegacionProfesional'))return;
     document.body.classList.add('profesional');
     const opciones=s.rol==='FAMILIA'
-      ? [['inicio','match.html','inicio','Inicio'],['entrevista','match.html?vista=entrevista','informe','Mi entrevista'],['propuesta','match.html?vista=propuesta','vinculacion','Mi vinculación'],['historial','match.html?vista=historial','reloj','Historial']]
+      ? [['inicio','match.html','inicio','Inicio'],['entrevista','match.html?vista=entrevista','informe','Mi entrevista'],['propuesta','match.html?vista=propuesta','vinculacion','Mi vinculación'],['citas','citas.html','calendario','Mis citas'],['historial','match.html?vista=historial','reloj','Historial']]
       : s.rol==='COMITE'
       ? [['inicio','match.html','inicio','Inicio'],['compatibilidad','match.html?vista=compatibilidad','salud','Compatibilidad'],['solicitudes','match.html?vista=solicitudes','solicitudes','Solicitudes'],['criterios','match.html?vista=criterios','criterios','Criterios']]
-      : [['inicio','funcionario.html','inicio','Inicio'],['expedientes','perfiles.html','carpeta','Mis expedientes'],...(s.rol==='TRABAJADOR_SOCIAL'?[['registro','perfil.html','nuevo','Registrar perfil']]:[])];
+      : [['inicio','funcionario.html','inicio','Inicio'],['expedientes','perfiles.html','carpeta','Mis expedientes'],...(s.rol==='TRABAJADOR_SOCIAL'?[['registro','perfil.html','nuevo','Registrar perfil'],['citas','citas.html','calendario','Gestión de citas']]:[])];
     if(s.rol!=='FAMILIA')opciones.push(['vinculaciones','vinculaciones.html','vinculacion','Vinculaciones']);
     const nav=document.createElement('aside');nav.className='pro-sidebar';nav.id='navegacionProfesional';
     nav.innerHTML=`<nav aria-label="Navegación principal">${opciones.map(([clave,href,icono,texto])=>`<a href="${href}" ${seleccionado===clave?'aria-current="page"':''}>${this.icono(icono)}<span>${texto}</span></a>`).join('')}</nav><div class="pro-sidebar-pie"><button type="button" id="proSalir">${this.icono('salir')}Cerrar sesión</button></div>`;
