@@ -1,0 +1,1029 @@
+{
+  "layouts": [
+    {
+      "width": 1920,
+      "scrollWidth": 1905,
+      "height": 1080,
+      "bodyHeight": 1594,
+      "grid": "588px 588px",
+      "gap": "24px",
+      "headers": [
+        {
+          "text": "Información que conecta.\nDecisiones que importan.",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 352.5,
+          "y": 215.703125,
+          "width": 604.796875,
+          "height": 259.8125,
+          "right": 957.296875,
+          "bottom": 475.515625
+        },
+        {
+          "text": "Una plataforma para colaborar",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 1105.5,
+          "y": 182,
+          "width": 350,
+          "height": 61.59375,
+          "right": 1455.5,
+          "bottom": 243.59375
+        },
+        {
+          "text": "Un espacio, diferentes formas de participar.",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 352.5,
+          "y": 901.40625,
+          "width": 576.109375,
+          "height": 86.375,
+          "right": 928.609375,
+          "bottom": 987.78125
+        },
+        {
+          "text": "Comité de Adopciones",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "x": 377.5,
+          "y": 1112.78125,
+          "width": 538,
+          "height": 25.1875,
+          "right": 915.5,
+          "bottom": 1137.96875
+        },
+        {
+          "text": "Trabajo Social",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 989.5,
+          "y": 1112.78125,
+          "width": 538,
+          "height": 25.1875,
+          "right": 1527.5,
+          "bottom": 1137.96875
+        },
+        {
+          "text": "Psicología",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 377.5,
+          "y": 1340.96875,
+          "width": 538,
+          "height": 25.1875,
+          "right": 915.5,
+          "bottom": 1366.15625
+        },
+        {
+          "text": "Familias",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 989.5,
+          "y": 1340.96875,
+          "width": 538,
+          "height": 25.1875,
+          "right": 1527.5,
+          "bottom": 1366.15625
+        }
+      ],
+      "cards": [
+        {
+          "rect": {
+            "x": 352.5,
+            "y": 1019.78125,
+            "width": 588,
+            "height": 204.1875,
+            "right": 940.5,
+            "bottom": 1223.96875
+          },
+          "padding": "24px",
+          "color": "rgb(255, 255, 255)",
+          "descriptionColor": "rgb(240, 245, 255)",
+          "background": "rgb(18, 63, 107)"
+        },
+        {
+          "rect": {
+            "x": 964.5,
+            "y": 1019.78125,
+            "width": 588,
+            "height": 204.1875,
+            "right": 1552.5,
+            "bottom": 1223.96875
+          },
+          "padding": "24px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "rect": {
+            "x": 352.5,
+            "y": 1247.96875,
+            "width": 588,
+            "height": 204.1875,
+            "right": 940.5,
+            "bottom": 1452.15625
+          },
+          "padding": "24px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "rect": {
+            "x": 964.5,
+            "y": 1247.96875,
+            "width": 588,
+            "height": 204.1875,
+            "right": 1552.5,
+            "bottom": 1452.15625
+          },
+          "padding": "24px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        }
+      ],
+      "containers": [
+        {
+          "x": 352.5,
+          "y": 0,
+          "width": 1200,
+          "height": 84,
+          "right": 1552.5,
+          "bottom": 84
+        },
+        {
+          "x": 352.5,
+          "y": 149,
+          "width": 1200,
+          "height": 583.609375,
+          "right": 1552.5,
+          "bottom": 732.609375
+        },
+        {
+          "x": 352.5,
+          "y": 868.609375,
+          "width": 1200,
+          "height": 583.546875,
+          "right": 1552.5,
+          "bottom": 1452.15625
+        },
+        {
+          "x": 352.5,
+          "y": 1549.15625,
+          "width": 1200,
+          "height": 20.796875,
+          "right": 1552.5,
+          "bottom": 1569.953125
+        }
+      ],
+      "visual": {
+        "x": 1072.5,
+        "y": 149,
+        "width": 480,
+        "height": 583.609375,
+        "right": 1552.5,
+        "bottom": 732.609375
+      },
+      "overflow": []
+    },
+    {
+      "width": 1366,
+      "scrollWidth": 1351,
+      "height": 768,
+      "bodyHeight": 1594,
+      "grid": "588px 588px",
+      "gap": "24px",
+      "headers": [
+        {
+          "text": "Información que conecta.\nDecisiones que importan.",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 75.5,
+          "y": 223.234375,
+          "width": 611.109375,
+          "height": 244.75,
+          "right": 686.609375,
+          "bottom": 467.984375
+        },
+        {
+          "text": "Una plataforma para colaborar",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 828.5,
+          "y": 182,
+          "width": 350,
+          "height": 61.59375,
+          "right": 1178.5,
+          "bottom": 243.59375
+        },
+        {
+          "text": "Un espacio, diferentes formas de participar.",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 75.5,
+          "y": 901.40625,
+          "width": 576.109375,
+          "height": 86.375,
+          "right": 651.609375,
+          "bottom": 987.78125
+        },
+        {
+          "text": "Comité de Adopciones",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "x": 100.5,
+          "y": 1112.78125,
+          "width": 538,
+          "height": 25.1875,
+          "right": 638.5,
+          "bottom": 1137.96875
+        },
+        {
+          "text": "Trabajo Social",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 712.5,
+          "y": 1112.78125,
+          "width": 538,
+          "height": 25.1875,
+          "right": 1250.5,
+          "bottom": 1137.96875
+        },
+        {
+          "text": "Psicología",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 100.5,
+          "y": 1340.96875,
+          "width": 538,
+          "height": 25.1875,
+          "right": 638.5,
+          "bottom": 1366.15625
+        },
+        {
+          "text": "Familias",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 712.5,
+          "y": 1340.96875,
+          "width": 538,
+          "height": 25.1875,
+          "right": 1250.5,
+          "bottom": 1366.15625
+        }
+      ],
+      "cards": [
+        {
+          "rect": {
+            "x": 75.5,
+            "y": 1019.78125,
+            "width": 588,
+            "height": 204.1875,
+            "right": 663.5,
+            "bottom": 1223.96875
+          },
+          "padding": "24px",
+          "color": "rgb(255, 255, 255)",
+          "descriptionColor": "rgb(240, 245, 255)",
+          "background": "rgb(18, 63, 107)"
+        },
+        {
+          "rect": {
+            "x": 687.5,
+            "y": 1019.78125,
+            "width": 588,
+            "height": 204.1875,
+            "right": 1275.5,
+            "bottom": 1223.96875
+          },
+          "padding": "24px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "rect": {
+            "x": 75.5,
+            "y": 1247.96875,
+            "width": 588,
+            "height": 204.1875,
+            "right": 663.5,
+            "bottom": 1452.15625
+          },
+          "padding": "24px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "rect": {
+            "x": 687.5,
+            "y": 1247.96875,
+            "width": 588,
+            "height": 204.1875,
+            "right": 1275.5,
+            "bottom": 1452.15625
+          },
+          "padding": "24px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        }
+      ],
+      "containers": [
+        {
+          "x": 75.5,
+          "y": 0,
+          "width": 1200,
+          "height": 84,
+          "right": 1275.5,
+          "bottom": 84
+        },
+        {
+          "x": 75.5,
+          "y": 149,
+          "width": 1200,
+          "height": 583.609375,
+          "right": 1275.5,
+          "bottom": 732.609375
+        },
+        {
+          "x": 75.5,
+          "y": 868.609375,
+          "width": 1200,
+          "height": 583.546875,
+          "right": 1275.5,
+          "bottom": 1452.15625
+        },
+        {
+          "x": 75.5,
+          "y": 1549.15625,
+          "width": 1200,
+          "height": 20.796875,
+          "right": 1275.5,
+          "bottom": 1569.953125
+        }
+      ],
+      "visual": {
+        "x": 795.5,
+        "y": 149,
+        "width": 480,
+        "height": 583.609375,
+        "right": 1275.5,
+        "bottom": 732.609375
+      },
+      "overflow": []
+    },
+    {
+      "width": 768,
+      "scrollWidth": 753,
+      "height": 1024,
+      "bodyHeight": 2073,
+      "grid": "332.5px 332.5px",
+      "gap": "24px",
+      "headers": [
+        {
+          "text": "Información que conecta.\nDecisiones que importan.",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 32,
+          "y": 193.796875,
+          "width": 650,
+          "height": 89.59375,
+          "right": 682,
+          "bottom": 283.390625
+        },
+        {
+          "text": "Una plataforma para colaborar",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 169.5,
+          "y": 595.578125,
+          "width": 350,
+          "height": 61.59375,
+          "right": 519.5,
+          "bottom": 657.171875
+        },
+        {
+          "text": "Un espacio, diferentes formas de participar.",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 32,
+          "y": 1314.984375,
+          "width": 332.5,
+          "height": 100.78125,
+          "right": 364.5,
+          "bottom": 1415.765625
+        },
+        {
+          "text": "Comité de Adopciones",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "x": 57,
+          "y": 1540.765625,
+          "width": 282.5,
+          "height": 25.1875,
+          "right": 339.5,
+          "bottom": 1565.953125
+        },
+        {
+          "text": "Trabajo Social",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 413.5,
+          "y": 1540.765625,
+          "width": 282.5,
+          "height": 25.1875,
+          "right": 696,
+          "bottom": 1565.953125
+        },
+        {
+          "text": "Psicología",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 57,
+          "y": 1794.453125,
+          "width": 282.5,
+          "height": 25.1875,
+          "right": 339.5,
+          "bottom": 1819.640625
+        },
+        {
+          "text": "Familias",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 413.5,
+          "y": 1794.453125,
+          "width": 282.5,
+          "height": 25.1875,
+          "right": 696,
+          "bottom": 1819.640625
+        }
+      ],
+      "cards": [
+        {
+          "rect": {
+            "x": 32,
+            "y": 1447.765625,
+            "width": 332.5,
+            "height": 229.6875,
+            "right": 364.5,
+            "bottom": 1677.453125
+          },
+          "padding": "24px",
+          "color": "rgb(255, 255, 255)",
+          "descriptionColor": "rgb(240, 245, 255)",
+          "background": "rgb(18, 63, 107)"
+        },
+        {
+          "rect": {
+            "x": 388.5,
+            "y": 1447.765625,
+            "width": 332.5,
+            "height": 229.6875,
+            "right": 721,
+            "bottom": 1677.453125
+          },
+          "padding": "24px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "rect": {
+            "x": 32,
+            "y": 1701.453125,
+            "width": 332.5,
+            "height": 229.6875,
+            "right": 364.5,
+            "bottom": 1931.140625
+          },
+          "padding": "24px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "rect": {
+            "x": 388.5,
+            "y": 1701.453125,
+            "width": 332.5,
+            "height": 229.6875,
+            "right": 721,
+            "bottom": 1931.140625
+          },
+          "padding": "24px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        }
+      ],
+      "containers": [
+        {
+          "x": 32,
+          "y": 0,
+          "width": 689,
+          "height": 84,
+          "right": 721,
+          "bottom": 84
+        },
+        {
+          "x": 32,
+          "y": 149,
+          "width": 689,
+          "height": 997.1875,
+          "right": 721,
+          "bottom": 1146.1875
+        },
+        {
+          "x": 32,
+          "y": 1282.1875,
+          "width": 689,
+          "height": 648.953125,
+          "right": 721,
+          "bottom": 1931.140625
+        },
+        {
+          "x": 32,
+          "y": 2028.140625,
+          "width": 689,
+          "height": 20.796875,
+          "right": 721,
+          "bottom": 2048.9375
+        }
+      ],
+      "visual": {
+        "x": 136.5,
+        "y": 562.578125,
+        "width": 480,
+        "height": 583.609375,
+        "right": 616.5,
+        "bottom": 1146.1875
+      },
+      "overflow": []
+    },
+    {
+      "width": 390,
+      "scrollWidth": 390,
+      "height": 844,
+      "bodyHeight": 2590,
+      "grid": "358px",
+      "gap": "16px",
+      "headers": [
+        {
+          "text": "Información que conecta.\nDecisiones que importan.",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 16,
+          "y": 206.578125,
+          "width": 358,
+          "height": 171.1875,
+          "right": 374,
+          "bottom": 377.765625
+        },
+        {
+          "text": "Una plataforma para colaborar",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 41,
+          "y": 762.75,
+          "width": 252,
+          "height": 56,
+          "right": 293,
+          "bottom": 818.75
+        },
+        {
+          "text": "Un espacio, diferentes formas de participar.",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 16,
+          "y": 1387.125,
+          "width": 358,
+          "height": 67.1875,
+          "right": 374,
+          "bottom": 1454.3125
+        },
+        {
+          "text": "Comité de Adopciones",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "x": 37,
+          "y": 1640.8125,
+          "width": 316,
+          "height": 25.1875,
+          "right": 353,
+          "bottom": 1666
+        },
+        {
+          "text": "Trabajo Social",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 37,
+          "y": 1878.5,
+          "width": 316,
+          "height": 25.1875,
+          "right": 353,
+          "bottom": 1903.6875
+        },
+        {
+          "text": "Psicología",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 37,
+          "y": 2090.6875,
+          "width": 316,
+          "height": 25.1875,
+          "right": 353,
+          "bottom": 2115.875
+        },
+        {
+          "text": "Familias",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 37,
+          "y": 2302.875,
+          "width": 316,
+          "height": 25.1875,
+          "right": 353,
+          "bottom": 2328.0625
+        }
+      ],
+      "cards": [
+        {
+          "rect": {
+            "x": 16,
+            "y": 1551.8125,
+            "width": 358,
+            "height": 221.6875,
+            "right": 374,
+            "bottom": 1773.5
+          },
+          "padding": "20px",
+          "color": "rgb(255, 255, 255)",
+          "descriptionColor": "rgb(240, 245, 255)",
+          "background": "rgb(18, 63, 107)"
+        },
+        {
+          "rect": {
+            "x": 16,
+            "y": 1789.5,
+            "width": 358,
+            "height": 196.1875,
+            "right": 374,
+            "bottom": 1985.6875
+          },
+          "padding": "20px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "rect": {
+            "x": 16,
+            "y": 2001.6875,
+            "width": 358,
+            "height": 196.1875,
+            "right": 374,
+            "bottom": 2197.875
+          },
+          "padding": "20px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "rect": {
+            "x": 16,
+            "y": 2213.875,
+            "width": 358,
+            "height": 221.6875,
+            "right": 374,
+            "bottom": 2435.5625
+          },
+          "padding": "20px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        }
+      ],
+      "containers": [
+        {
+          "x": 16,
+          "y": 0,
+          "width": 358,
+          "height": 126.390625,
+          "right": 374,
+          "bottom": 126.390625
+        },
+        {
+          "x": 16,
+          "y": 167.390625,
+          "width": 358,
+          "height": 1100.546875,
+          "right": 374,
+          "bottom": 1267.9375
+        },
+        {
+          "x": 16,
+          "y": 1355.9375,
+          "width": 358,
+          "height": 1079.625,
+          "right": 374,
+          "bottom": 2435.5625
+        },
+        {
+          "x": 16,
+          "y": 2508.5625,
+          "width": 358,
+          "height": 57.59375,
+          "right": 374,
+          "bottom": 2566.15625
+        }
+      ],
+      "visual": {
+        "x": 16,
+        "y": 737.75,
+        "width": 358,
+        "height": 530.1875,
+        "right": 374,
+        "bottom": 1267.9375
+      },
+      "overflow": []
+    },
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "height": 844,
+      "bodyHeight": 2675,
+      "grid": "288px",
+      "gap": "16px",
+      "headers": [
+        {
+          "text": "Información que conecta.\nDecisiones que importan.",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 16,
+          "y": 206.578125,
+          "width": 288,
+          "height": 161.25,
+          "right": 304,
+          "bottom": 367.828125
+        },
+        {
+          "text": "Una plataforma para colaborar",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 37,
+          "y": 777.609375,
+          "width": 200,
+          "height": 56,
+          "right": 237,
+          "bottom": 833.609375
+        },
+        {
+          "text": "Un espacio, diferentes formas de participar.",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 16,
+          "y": 1387.265625,
+          "width": 288,
+          "height": 100.78125,
+          "right": 304,
+          "bottom": 1488.046875
+        },
+        {
+          "text": "Comité de Adopciones",
+          "color": "rgb(255, 255, 255)",
+          "opacity": "1",
+          "x": 37,
+          "y": 1674.546875,
+          "width": 246,
+          "height": 25.1875,
+          "right": 283,
+          "bottom": 1699.734375
+        },
+        {
+          "text": "Trabajo Social",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 37,
+          "y": 1912.234375,
+          "width": 246,
+          "height": 25.1875,
+          "right": 283,
+          "bottom": 1937.421875
+        },
+        {
+          "text": "Psicología",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 37,
+          "y": 2149.921875,
+          "width": 246,
+          "height": 25.1875,
+          "right": 283,
+          "bottom": 2175.109375
+        },
+        {
+          "text": "Familias",
+          "color": "rgb(11, 53, 88)",
+          "opacity": "1",
+          "x": 37,
+          "y": 2362.109375,
+          "width": 246,
+          "height": 25.1875,
+          "right": 283,
+          "bottom": 2387.296875
+        }
+      ],
+      "cards": [
+        {
+          "rect": {
+            "x": 16,
+            "y": 1585.546875,
+            "width": 288,
+            "height": 221.6875,
+            "right": 304,
+            "bottom": 1807.234375
+          },
+          "padding": "20px",
+          "color": "rgb(255, 255, 255)",
+          "descriptionColor": "rgb(240, 245, 255)",
+          "background": "rgb(18, 63, 107)"
+        },
+        {
+          "rect": {
+            "x": 16,
+            "y": 1823.234375,
+            "width": 288,
+            "height": 221.6875,
+            "right": 304,
+            "bottom": 2044.921875
+          },
+          "padding": "20px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "rect": {
+            "x": 16,
+            "y": 2060.921875,
+            "width": 288,
+            "height": 196.1875,
+            "right": 304,
+            "bottom": 2257.109375
+          },
+          "padding": "20px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        },
+        {
+          "rect": {
+            "x": 16,
+            "y": 2273.109375,
+            "width": 288,
+            "height": 247.1875,
+            "right": 304,
+            "bottom": 2520.296875
+          },
+          "padding": "20px",
+          "color": "rgb(11, 53, 88)",
+          "descriptionColor": "rgb(71, 103, 136)",
+          "background": "rgb(255, 255, 255)"
+        }
+      ],
+      "containers": [
+        {
+          "x": 16,
+          "y": 0,
+          "width": 288,
+          "height": 126.390625,
+          "right": 304,
+          "bottom": 126.390625
+        },
+        {
+          "x": 16,
+          "y": 167.390625,
+          "width": 288,
+          "height": 1100.6875,
+          "right": 304,
+          "bottom": 1268.078125
+        },
+        {
+          "x": 16,
+          "y": 1356.078125,
+          "width": 288,
+          "height": 1164.21875,
+          "right": 304,
+          "bottom": 2520.296875
+        },
+        {
+          "x": 16,
+          "y": 2593.296875,
+          "width": 288,
+          "height": 57.59375,
+          "right": 304,
+          "bottom": 2650.890625
+        }
+      ],
+      "visual": {
+        "x": 16,
+        "y": 756.609375,
+        "width": 288,
+        "height": 511.46875,
+        "right": 304,
+        "bottom": 1268.078125
+      },
+      "overflow": []
+    }
+  ],
+  "teclado": [
+    {
+      "text": "Saltar al contenido",
+      "outline": "solid",
+      "width": "3px",
+      "focusVisible": true,
+      "height": 53.59375
+    },
+    {
+      "text": "SENNIAF Match · Inicio",
+      "outline": "solid",
+      "width": "3px",
+      "focusVisible": true,
+      "height": 78
+    },
+    {
+      "text": "Inicio",
+      "outline": "solid",
+      "width": "3px",
+      "focusVisible": true,
+      "height": 44.390625
+    },
+    {
+      "text": "Iniciar sesión",
+      "outline": "solid",
+      "width": "3px",
+      "focusVisible": true,
+      "height": 44.390625
+    },
+    {
+      "text": "Registrarse",
+      "outline": "solid",
+      "width": "3px",
+      "focusVisible": true,
+      "height": 44.390625
+    },
+    {
+      "text": "Conocer el sistema",
+      "outline": "solid",
+      "width": "3px",
+      "focusVisible": true,
+      "height": 56
+    },
+    {
+      "text": "Iniciar sesión",
+      "outline": "solid",
+      "width": "3px",
+      "focusVisible": true,
+      "height": 52
+    }
+  ],
+  "anclaReducida": {
+    "hash": "#conocer-sistema",
+    "top": 127.609375,
+    "scroll": 669
+  },
+  "temaOscuro": [
+    "rgb(255, 255, 255)",
+    "rgb(11, 53, 88)",
+    "rgb(11, 53, 88)",
+    "rgb(11, 53, 88)"
+  ],
+  "enlacesHover": [
+    {
+      "selector": ".inicio-nav a",
+      "hover": true,
+      "color": "rgb(0, 68, 159)",
+      "fondo": "rgb(234, 242, 255)"
+    },
+    {
+      "selector": ".inicio-registro",
+      "hover": true,
+      "color": "rgb(0, 68, 159)",
+      "fondo": "rgb(234, 242, 255)"
+    },
+    {
+      "selector": ".inicio-boton",
+      "hover": true,
+      "color": "rgb(255, 255, 255)",
+      "fondo": "rgb(0, 73, 184)"
+    }
+  ],
+  "estadosTitulos": "normal, hover, focus y focus-visible conservan los colores explícitos",
+  "acceso": "index.html conserva estilos calculados y formularios; enlace registro abre su vista con foco; validación vacía y alternancia funcionan; mostrar contraseña funciona",
+  "solicitudesPost": []
+}

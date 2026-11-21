@@ -1,0 +1,22 @@
+{
+  "rama": "mejora/sprint9",
+  "base": "07c7132a366198565e9bff345a74ad29d191b4a9",
+  "navegador": "Google Chrome for Testing 159.0.8154.6",
+  "origen": "HTTP local servido por Python; Chromium headless; sin conexión al backend ni a Azure",
+  "fuentes": {
+    "src/main/resources/static/inicio.html": "60f3b232f2bd74d9c25349509b7a32887e39594a5834ae5960b7264c51bc386a",
+    "src/main/resources/static/inicio.css": "01962d2d724469649b2c80a05452155e4da22c6f4013abac0aae0250e67c76fd",
+    "src/main/resources/static/senniaf.js": "791d1bd04827b34a5501a074aecd89913fc194d7084a82c78bbea8e634b76787"
+  },
+  "capturas": {
+    "inicio-1366.png": "5f1f54f7926e8636e9870b67c3223a880f6aa0d76b51985cd77d0f6445c7acfb",
+    "inicio-1920.png": "cc4eb380de927bd958b97a80b51e5bb1b49e106973af96d83546f1b65e3bafdf",
+    "inicio-320.png": "30ff873bac20eb5893ac035d9685d2d82466b09ac91aa11359cc75be17605fdd",
+    "inicio-390.png": "2cdcb47084b154bb67d89e2811423679532b37501a7eb04214c0b88b2f949806",
+    "inicio-768.png": "160fed7889dacfbeb55cafd6b318e7081ef26f9df41db8d483a4b0de711c661f",
+    "inicio-escritorio.png": "68ef1c0deb5560664f05c1366d2ec164c5ab2a56bc4413c946ddb251f85946b5",
+    "inicio-movil.png": "c4b8ab4fdca1ccb5032e82444525a4c189e5aab96a881454fd466282cf5ab616",
+    "roles-escritorio.png": "cddf0c8ae55f288889ffc8fe2b20d7e65265eeab57a5852b589d5d5a721c2799",
+    "roles-movil.png": "c429dbd890eada60d3a17953aa2cedfc0f707dde6ef7e666ee79a6f2b712cc8b"
+  }
+}

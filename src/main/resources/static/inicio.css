@@ -1,0 +1,123 @@
+html { scroll-behavior: smooth; scroll-padding-top: 104px; }
+body.inicio-publico {
+  --inicio-tinta: #0b3558;
+  --inicio-azul: #006bff;
+  --inicio-enlace: #0054cc;
+  --inicio-secundario: #476788;
+  color-scheme: light;
+  margin: 0;
+  color: var(--inicio-tinta);
+  background: #fff;
+  font-family: var(--fuente);
+  line-height: 1.6;
+}
+.inicio-publico *, .inicio-publico *::before, .inicio-publico *::after { box-sizing: border-box; }
+.inicio-publico .inicio-contenedor { width: min(1200px, calc(100% - 64px)); margin-inline: auto; }
+.inicio-publico a:focus-visible { outline: 3px solid #0054cc; outline-offset: 4px; }
+.inicio-publico .inicio-saltar {
+  position: fixed; z-index: 50; top: 12px; left: 16px; padding: 12px 18px;
+  background: #fff; color: #0b3558; border: 2px solid #0054cc; border-radius: 8px;
+  transform: translateY(-180%);
+}
+.inicio-publico .inicio-saltar:focus { transform: translateY(0); }
+.inicio-publico .inicio-simbolos { position: absolute; overflow: hidden; }
+.inicio-publico .inicio-icono { width: 26px; height: 26px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.inicio-publico .inicio-barra { background: #fff; border-bottom: 1px solid #dce7f4; }
+.inicio-publico .inicio-barra-interior { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 84px; }
+.inicio-publico .inicio-marca { display: inline-flex; align-items: center; border-radius: 8px; flex-shrink: 0; }
+.inicio-publico .inicio-marca img { display: block; width: 235px; height: 78px; object-fit: contain; }
+.inicio-publico .inicio-nav { display: flex; align-items: center; gap: 12px; }
+.inicio-publico .inicio-nav a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 12px; border: 1px solid transparent; border-radius: 10px; color: #0b3558; font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.inicio-publico .inicio-nav a[aria-current], .inicio-publico .inicio-nav .inicio-registro { color: #0054cc; }
+.inicio-publico .inicio-nav .inicio-registro { background: #f0f5ff; border-color: #ccddff; }
+.inicio-publico .inicio-nav a:hover { background: #eaf2ff; color: #00449f; }
+.inicio-publico main { width: 100%; margin: 0; }
+.inicio-publico .inicio-portada { padding-block: 64px; background: radial-gradient(ellipse at 95% 5%, #eaf2ff 0, transparent 58%), #f6f8fb; }
+.inicio-publico .inicio-columnas { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); align-items: center; gap: clamp(40px, 5vw, 80px); min-height: 500px; }
+.inicio-publico .inicio-presentacion { min-width: 0; }
+.inicio-publico .inicio-etiqueta { margin: 0 0 24px; color: #0054cc; font-size: 13px; font-weight: 800; letter-spacing: .18em; line-height: 1.6; }
+.inicio-publico h1 { margin: 0; color: #0b3558; font-size: clamp(40px, 4vw, 58px); font-weight: 800; line-height: 1.12; letter-spacing: -.045em; text-wrap: balance; overflow-wrap: normal; }
+.inicio-publico h1 span { color: #006bff; }
+.inicio-publico .inicio-descripcion { max-width: 49ch; margin: 28px 0 0; color: #476788; font-size: 16px; line-height: 1.8; }
+.inicio-publico .inicio-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; margin-top: 36px; }
+.inicio-publico .inicio-acciones a { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 52px; border-radius: 12px; font-size: 15px; font-weight: 700; text-decoration: none; }
+.inicio-publico .inicio-acciones .inicio-icono { width: 18px; height: 18px; }
+.inicio-publico .inicio-boton { padding: 16px 22px; color: #fff; background: #005ce6; box-shadow: 0 12px 28px #0054cc17; }
+.inicio-publico .inicio-boton:hover { color: #fff; background: #0049b8; }
+.inicio-publico .inicio-acceso { padding: 12px 0; color: #0b3558; }
+.inicio-publico .inicio-acceso:hover { color: #0054cc; text-decoration: underline; text-underline-offset: 4px; }
+.inicio-publico .inicio-visual {
+  width: 100%; max-width: 480px; justify-self: end; min-width: 0; padding: 32px;
+  border: 1px solid #ccddf6; border-radius: 28px;
+  background: radial-gradient(ellipse at 0 100%, #fae5ff 0, transparent 52%), radial-gradient(ellipse at 100% 100%, #cef0ff 0, transparent 56%), #fff;
+  box-shadow: 0 24px 52px #12395e14;
+}
+.inicio-publico .inicio-visual-cabecera { display: flex; align-items: flex-start; gap: 20px; }
+.inicio-publico .inicio-visual h2 { margin: 0; color: #0b3558; font-size: 22px; line-height: 1.4; font-weight: 750; }
+.inicio-publico .inicio-visual-cabecera p { margin: 8px 0 0; color: #476788; font-size: 14px; line-height: 1.6; }
+.inicio-publico .inicio-destello { display: grid; place-items: center; width: 44px; height: 50px; flex: 0 0 auto; border-radius: 15px; color: #006bff; background: #eaf2ff; }
+.inicio-publico .inicio-conexion { position: relative; width: 100%; max-width: 340px; aspect-ratio: 1.15; margin: 20px auto 12px; }
+.inicio-publico .inicio-orbita { position: absolute; top: 50%; left: 50%; border-radius: 50%; transform: translate(-50%, -50%); }
+.inicio-publico .inicio-orbita-exterior { width: 88%; aspect-ratio: 1; border: 1px dashed #9ac5ff; }
+.inicio-publico .inicio-orbita-interior { width: 68%; aspect-ratio: 1; border: 1px solid #dce9ff; }
+.inicio-publico .inicio-nucleo { position: absolute; top: 50%; left: 50%; display: grid; place-items: center; width: 43%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 28px; color: #fff; background: #006bff; box-shadow: 0 18px 30px #006bff33; }
+.inicio-publico .inicio-nucleo .inicio-icono { width: 48px; height: 48px; stroke-width: 1.4; }
+.inicio-publico .inicio-nodo { position: absolute; display: grid; place-items: center; width: 56px; aspect-ratio: 1; color: #006bff; background: #fff; border: 1px solid #d0e1ff; border-radius: 17px; box-shadow: 0 10px 24px #163f6812; }
+.inicio-publico .inicio-nodo-calendario { left: 7%; top: 2%; }
+.inicio-publico .inicio-nodo-persona { right: 3%; top: 16%; }
+.inicio-publico .inicio-nodo-ficha { left: 2%; bottom: 3%; }
+.inicio-publico .inicio-nodo-corazon { right: 7%; bottom: 1%; }
+.inicio-publico .inicio-criterio { display: flex; align-items: center; gap: 14px; margin: 0; padding: 16px; border: 1px solid #dce7ff; border-radius: 14px; color: #315c80; background: #ffffffde; font-size: 13px; line-height: 1.6; }
+.inicio-publico .inicio-criterio .inicio-icono { width: 22px; height: 22px; color: #005ce6; }
+.inicio-publico .inicio-sistema { padding-block: 72px; background: #fff; scroll-margin-top: 24px; }
+.inicio-publico .inicio-sistema-cabecera { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: end; margin-bottom: 32px; }
+.inicio-publico .inicio-sistema-cabecera .inicio-etiqueta { margin-bottom: 12px; }
+.inicio-publico .inicio-sistema h2 { max-width: 23ch; margin: 0; color: #0b3558; font-size: clamp(28px, 2.7vw, 36px); font-weight: 800; line-height: 1.2; letter-spacing: -.035em; }
+.inicio-publico .inicio-sistema-cabecera > p { max-width: 45ch; margin: 0; color: #476788; font-size: 15px; }
+.inicio-publico .inicio-roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.inicio-publico .inicio-rol { min-width: 0; padding: 24px; border: 1px solid #d5e2f4; border-radius: 20px; background: #fff; color: #0b3558; }
+.inicio-publico .inicio-rol-icono { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: 20px; border-radius: 13px; color: #006bff; background: #eaf2ff; }
+.inicio-publico .inicio-rol h3 { margin: 0 0 10px; color: #0b3558; font-size: 18px; font-weight: 750; line-height: 1.4; }
+.inicio-publico .inicio-rol p { max-width: 48ch; margin: 0; color: #476788; font-size: 15px; line-height: 1.7; }
+.inicio-publico .inicio-rol-comite { color: #fff; background: #123f6b; border-color: #123f6b; box-shadow: 0 12px 28px #0b35581a; }
+.inicio-publico .inicio-rol-comite h3 { color: #fff; }
+.inicio-publico .inicio-rol-comite p { color: #f0f5ff; }
+.inicio-publico .inicio-rol-comite .inicio-rol-icono { color: #fff; background: #315a80; }
+.inicio-publico .inicio-pie { padding-block: 24px; border-top: 1px solid #dce7f4; color: #476788; background: #f6f8fb; font-size: 13px; }
+.inicio-publico .inicio-pie .inicio-contenedor { display: flex; justify-content: space-between; gap: 16px 32px; flex-wrap: wrap; }
+@media (max-width: 900px) {
+  .inicio-publico .inicio-columnas { grid-template-columns: 1fr; gap: 44px; }
+  .inicio-publico .inicio-presentacion { max-width: 650px; }
+  .inicio-publico .inicio-visual { justify-self: center; max-width: 480px; }
+  .inicio-publico .inicio-sistema-cabecera { gap: 24px; }
+}
+@media (max-width: 640px) {
+  html { scroll-padding-top: 24px; }
+  .inicio-publico .inicio-contenedor { width: calc(100% - 32px); }
+  .inicio-publico .inicio-barra-interior { flex-direction: column; align-items: flex-start; gap: 0; padding-bottom: 12px; }
+  .inicio-publico .inicio-marca img { width: 210px; height: 70px; }
+  .inicio-publico .inicio-nav { width: 100%; justify-content: space-between; gap: 4px; }
+  .inicio-publico .inicio-nav a { padding-inline: 8px; }
+  .inicio-publico .inicio-portada { padding-block: 40px; }
+  .inicio-publico h1 { font-size: clamp(36px, 9.8vw, 44px); }
+  .inicio-publico .inicio-etiqueta { margin-bottom: 20px; font-size: 12px; }
+  .inicio-publico .inicio-descripcion { margin-top: 24px; }
+  .inicio-publico .inicio-acciones { margin-top: 28px; gap: 12px 20px; }
+  .inicio-publico .inicio-visual { padding: 24px; border-radius: 24px; }
+  .inicio-publico .inicio-visual h2 { font-size: 20px; }
+  .inicio-publico .inicio-visual-cabecera { gap: 12px; }
+  .inicio-publico .inicio-nodo { width: 50px; border-radius: 15px; }
+  .inicio-publico .inicio-criterio { padding: 14px; gap: 10px; }
+  .inicio-publico .inicio-sistema { padding-block: 48px; }
+  .inicio-publico .inicio-sistema-cabecera { grid-template-columns: 1fr; gap: 20px; margin-bottom: 28px; }
+  .inicio-publico .inicio-roles { grid-template-columns: 1fr; gap: 16px; }
+  .inicio-publico .inicio-rol { padding: 20px; }
+}
+@media (max-width: 360px) {
+  .inicio-publico .inicio-acciones { flex-direction: column; align-items: stretch; }
+  .inicio-publico .inicio-visual { padding: 20px; }
+  .inicio-publico .inicio-visual-cabecera { gap: 10px; }
+  .inicio-publico .inicio-destello { width: 36px; height: 44px; }
+  .inicio-publico .inicio-nucleo { border-radius: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

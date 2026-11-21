@@ -1,0 +1,42 @@
+[
+  {
+    "archivo": "src/main/resources/static/index.html",
+    "sinCambios": true,
+    "sha256": "e7533ad25b9979bd81039e3b151fa78d9fcac3d45cf07e7653e27301df8695b9"
+  },
+  {
+    "archivo": "src/main/resources/static/index.css",
+    "sinCambios": true,
+    "sha256": "75fca5c9adc14349935edb36d78cad788b8223b51a2d8b438641e3fcdf783e56"
+  },
+  {
+    "archivo": "src/main/resources/static/calendly-login.css",
+    "sinCambios": true,
+    "sha256": "7d801f68b9ef7e788168eedf348b629871cc727bf9c7521a5b5d859e6be88ae4"
+  },
+  {
+    "archivo": "src/main/resources/static/calendly-theme.css",
+    "sinCambios": true,
+    "sha256": "1811da7dac9559d040e9aae7ada5d158fb068820f400e12689428a5cc4dce567"
+  },
+  {
+    "archivo": "src/main/resources/static/img/logo.png",
+    "sinCambios": true,
+    "sha256": "24e0e5d853107eae388f9fca3b6d42750b3049e351521abfdc8c8fca67209e3d"
+  },
+  {
+    "archivo": "src/main/resources/static/vinculaciones.js",
+    "sinCambios": true,
+    "sha256": "888fe24d3aa1ae90e97d2315cd0ddf5e115852ab297c0e91e1b0f58b8f522130"
+  },
+  {
+    "archivo": "src/main/java/com/senniaf/match/service/ScoringService.java",
+    "sinCambios": true,
+    "sha256": "5223478d9f77faf13032f3150ea575e6f4817a73f626f54426961cdc4a134154"
+  },
+  {
+    "archivo": "src/main/java/com/senniaf/match/service/AnalizadorTextoCompatibilidad.java",
+    "sinCambios": true,
+    "sha256": "1f04521f4de2334d64c6065c77220e6f9215c9d2f394b845994657f8ea735855"
+  }
+]
