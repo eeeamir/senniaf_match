@@ -32,7 +32,7 @@ class ScoringReevaluacionServiceTest {
         when(ninos.bloquear("NINO-001")).thenReturn(Optional.of(nino));
         when(familias.bloquear("FAM-001")).thenReturn(Optional.of(familia));
 
-        ScoringService servicio = new ScoringService(ninos, familias, decisiones, pesos);
+        ScoringService servicio = spy(new ScoringService(ninos, familias, decisiones, pesos));
         Map<String, Object> resultado = servicio.decidir("NINO-001", "FAM-001", "REEVALUACION",
                 "Se necesita una entrevista familiar actualizada", "CM-001");
 
@@ -41,6 +41,17 @@ class ScoringReevaluacionServiceTest {
         assertEquals(0, resultado.get("numeroReevaluaciones"));
         assertEquals(false, resultado.get("alertaRevisionTecnica"));
         verify(familias).save(familia);
-        verify(decisiones).save(any());
+        verify(decisiones).save(argThat(d -> d.getContextoScoring().contains("sinCalculo")));
+        verify(servicio, never()).candidato(any(), any(), any());
+    }
+    @Test void solicitudSinCalculoNoReinterpretaPuntajesHistoricos() {
+        var decisiones=mock(DecisionComiteRepository.class);
+        var servicio=new ScoringService(mock(PerfilNinoRepository.class),mock(PerfilFamiliaRepository.class),decisiones,mock(PesosScoringRepository.class));
+        var antigua=new com.senniaf.match.model.DecisionComite();antigua.setDecision("REEVALUACION");antigua.setPuntaje(42);
+        var nueva=new com.senniaf.match.model.DecisionComite();nueva.setDecision("REEVALUACION");nueva.setPuntaje(0);nueva.setContextoScoring("{\"tipo\":\"SOLICITUD_REEVALUACION\",\"sinCalculo\":true}");
+        when(decisiones.findByCodigoNinoOrderByFechaAsc("N-1")).thenReturn(java.util.List.of(antigua,nueva));
+        var historial=servicio.historial("N-1");assertEquals(42,historial.get(0).get("puntaje"));
+        assertEquals(false,historial.get(0).get("sinCalculo"));assertNull(historial.get(1).get("puntaje"));
+        assertEquals(true,historial.get(1).get("sinCalculo"));assertNull(historial.get(1).get("contextoScoring"));
     }
 }

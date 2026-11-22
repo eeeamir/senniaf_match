@@ -1,0 +1,19 @@
+{
+  "servicio": "active",
+  "postgresql": "active",
+  "versionPostgreSQL": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+  "datosPostgreSQL": "/var/lib/postgresql/16/main",
+  "sha256": "d19726ebcb44b5895ab350b596fc53006bc05b4b3774a19c3382cf1154fba067",
+  "buildInfo": "build.artifact=senniaf-match\nbuild.branch=mejora/sprint9\nbuild.commit=8628cea8b6101345529422329f8f3746cb099439\nbuild.group=com.senniaf\nbuild.name=senniaf-match\nbuild.time=2026-11-21T19\\:17\\:38.861Z\nbuild.version=0.1.0\nbuild.worktree=modificado\\:docs/image.png-preexistente-excluido\n",
+  "esquema012a019": "t|t|t|t|t|t|t|t",
+  "esquema020": "t",
+  "permisoUpdateHistorialCitas": "f",
+  "permisoUpdateDecisiones": "f",
+  "permisoUpdateEvaluaciones": "f",
+  "jarAnteriorSHA256": "b9e4d1021ca70c2413352e444f4db34b64c86d68e4668936785a89bf21cdf562",
+  "erroresCriticosDesdeIntervencion": 0,
+  "credencialesYConfiguracionPreviaConservadas": true,
+  "horarioPrototipoConfigurado": true,
+  "migracion020Registro": "/var/backups/senniaf/operacion-sprint9-20261121-8628cea/migracion020.log",
+  "finalMigracion020": "COMMIT"
+}

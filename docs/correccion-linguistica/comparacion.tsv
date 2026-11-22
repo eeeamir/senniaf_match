@@ -1,0 +1,158 @@
+tipo	id	fuente	texto	esperado	antes	despues	clasificacionAntes	clasificacionDespues
+cobertura	C01	familia	Podemos acompañar asma	1.0	1.0	1.0	VP	VP
+cobertura	C02	familia	Podemos acompañar diabetes	1.0	1.0	1.0	VP	VP
+cobertura	C03	familia	Podemos acompañar epilepsia	1.0	1.0	1.0	VP	VP
+cobertura	C04	familia	Podemos acompañar TDAH	1.0	1.0	1.0	VP	VP
+cobertura	C05	familia	Podemos acompañar TEA	1.0	1.0	1.0	VP	VP
+cobertura	C06	familia	Podemos acompañar discapacidad física	1.0	1.0	1.0	VP	VP
+cobertura	C07	familia	Podemos acompañar discapacidad intelectual	1.0	1.0	1.0	VP	VP
+cobertura	C08	familia	Podemos acompañar discapacidad visual	1.0	1.0	1.0	VP	VP
+cobertura	C09	familia	Podemos acompañar discapacidad auditiva	1.0	1.0	1.0	VP	VP
+cobertura	C10	familia	Podemos acompañar intolerancia a la lactosa	1.0	1.0	1.0	VP	VP
+cobertura	C11	familia	Podemos acompañar alergia alimentaria	1.0	1.0	1.0	VP	VP
+cobertura	C12	familia	Podemos acompañar alergia a medicamentos	1.0	1.0	1.0	VP	VP
+cobertura	C13	familia	Podemos acompañar alergia al polen	1.0	1.0	1.0	VP	VP
+cobertura	C14	familia	Podemos acompañar alergia a picaduras de insectos	1.0	1.0	1.0	VP	VP
+cobertura	C15	familia	Podemos acompañar terapia del lenguaje	1.0	1.0	1.0	VP	VP
+cobertura	C16	familia	Podemos acompañar fisioterapia	1.0	1.0	1.0	VP	VP
+cobertura	C17	familia	Podemos acompañar terapia ocupacional	1.0	1.0	1.0	VP	VP
+cobertura	C18	familia	Podemos acompañar acompañamiento psicológico	1.0	1.0	1.0	VP	VP
+cobertura	C19	familia	Podemos acompañar rutinas estables	1.0	1.0	1.0	VP	VP
+cobertura	C20	familia	Podemos acompañar apoyo emocional	1.0	1.0	1.0	VP	VP
+cobertura	C21	familia	Podemos acompañar apoyo durante su adaptación	1.0	1.0	1.0	VP	VP
+cobertura	C22	familia	Podemos acompañar supervisión cotidiana	1.0	1.0	1.0	VP	VP
+cobertura	C23	familia	Podemos acompañar supervisión permanente	1.0	1.0	1.0	VP	VP
+cobertura	C24	familia	Podemos acompañar apoyo educativo individualizado	1.0	1.0	1.0	VP	VP
+cobertura	C25	familia	Podemos acompañar apoyo educativo especializado	1.0	1.0	1.0	VP	VP
+cobertura	C26	familia	Podemos acompañar ayuda con las tareas	1.0	1.0	1.0	VP	VP
+cobertura	C27	familia	Podemos acompañar seguimiento educativo	1.0	1.0	1.0	VP	VP
+cobertura	C28	familia	Podemos acompañar refuerzo escolar	1.0	1.0	1.0	VP	VP
+cobertura	C29	familia	Podemos acompañar hermanos	1.0	1.0	1.0	VP	VP
+cobertura	C30	familia	Contamos con una red de apoyo	1.0	1.0	1.0	VP	VP
+cobertura	C31	familia	Contamos con una persona de apoyo que puede acompañarlo en actividades cotidianas	1.0	1.0	1.0	VP	VP
+cobertura	C32	familia	Podemos viajar	1.0	1.0	1.0	VP	VP
+cobertura	C33	familia	Podemos recibir visitas	1.0	1.0	1.0	VP	VP
+cobertura	D01	familia	Estamos dispuestos a recibir a los hermanitos juntos	1.0	0.0	1.0	FN	VP
+cobertura	D02	familia	Tenemos personas que nos pueden ayudar en el día a día	1.0	0.0	1.0	FN	VP
+cobertura	D03	familia	Contamos con una persona que puede ayudar con los quehaceres diarios del niño	1.0	0.0	1.0	FN	VP
+cobertura	D04	familia	Tenemos disponibilidad para trasladarnos	1.0	1.0	1.0	VP	VP
+cobertura	D05	familia	Estamos disponibles para recibir las visitas	1.0	0.0	1.0	FN	VP
+cobertura	L01	familia	No podemos acompañar asma	0.0	0.0	0.0	VN	VN
+cobertura	L02	familia	No siempre podemos acompañar asma	0.0	1.0	0.0	FP	VN
+cobertura	L03	familia	Antes acompañamos a un niño con asma	0.0	1.0	0.0	FP	VN
+cobertura	L04	familia	No tenemos ningún impedimento para acompañar asma	1.0	0.0	1.0	FN	VP
+cobertura	L05	familia	Podemos acompañar asma si contamos con apoyo	0.5	0.5	0.5	VP	VP
+cobertura	L06	familia	Podemos acompañar asma si no contamos con apoyo	0.0	0.0	0.0	VN	VN
+cobertura	L07	familia	Tal vez podamos acompañar asma	0.0	0.0	0.0	VN	VN
+cobertura	L08	familia	Podemos acompañar asma sin apoyo adicional	1.0	1.0	1.0	VP	VP
+cobertura	L09	familia	Podemos acompañar asma si fuera posible	0.0	0.0	0.0	VN	VN
+cobertura	L10	familia	Mi hermana tiene asma	0.0	0.0	0.0	VN	VN
+cobertura	L11	familia	Mi hermana tiene asma, pero podemos acompañar a un niño con asma	1.0	1.0	1.0	VP	VP
+cobertura	L12	familia	Podemos acompañar asma. No podemos acompañar asma	0.0	0.0	0.0	VN	VN
+cobertura	L13	familia	No podemos acompañar asma. Podemos acompañar asma	0.0	0.0	0.0	VN	VN
+cobertura	L14	familia	En el pasado acompañamos terapias psicológicas	0.0	1.0	0.0	FP	VN
+cobertura	L15	familia	Podemos ofrecer apoyo emocional	0.0	0.0	0.0	VN	VN
+cobertura	L16	familia	Mi hermano es psicólogo	0.0	0.0	0.0	VN	VN
+cobertura	L17	familia	Podemos acompañar sesiones psicológicas con apoyo	0.5	0.5	0.5	VP	VP
+cobertura	L18	familia	No siempre podemos acompañar terapia psicológica	0.0	1.0	0.0	FP	VN
+cobertura	L19	familia	Podemos pagar un psicólogo	0.0	0.0	0.0	VN	VN
+cobertura	L20	familia	Podemos facilitar que continúe su atención psicológica si recibimos apoyo	0.5	0.0	0.5	FN	VP
+cobertura	L21	familia	Tenemos una familia responsable y cariñosa	0.0	0.0	0.0	VN	VN
+cobertura	L22	familia	Podemos mantener horarios constantes y no ofrecer apoyo emocional	1.0	1.0	1.0	VP	VP
+cobertura	L23	familia	Podemos acompañarlo a diario	0.0	0.0	0.0	VN	VN
+cobertura	L24	familia	Podemos ayudarlo con las tareas	0.0	0.0	0.0	VN	VN
+cobertura	L25	familia	Mi hijo hace sus tareas solo	0.0	0.0	0.0	VN	VN
+cobertura	L26	familia	Somos personas cariñosas	0.0	0.0	0.0	VN	VN
+cobertura	L27	familia	Quizás podríamos acompañarlo durante su adaptación	0.0	0.0	0.0	VN	VN
+cobertura	L28	familia	Podemos estar pendientes de él todos los días	0.0	0.0	0.0	VN	VN
+cobertura	V01	familia	Nos podemos hacer cargo de un niño con asma	1.0	0.0	1.0	FN	VP
+cobertura	V02	familia	Podemos atender el asma y seguir las indicaciones de su médico	1.0	1.0	1.0	VP	VP
+cobertura	V03	familia	Estamos en condiciones de cuidar a un niño con diabetes	1.0	0.0	1.0	FN	VP
+cobertura	V04	familia	Podemos ayudarlo a seguir su tratamiento para la diabetes	1.0	1.0	1.0	VP	VP
+cobertura	V05	familia	Tenemos disposición para atender a un niño con epilepsia	1.0	0.0	1.0	FN	VP
+cobertura	V06	familia	Podemos apoyar al niño con déficit de atención e hiperactividad	1.0	0.0	1.0	FN	VP
+cobertura	V07	familia	Podemos acompañar a un niño dentro del espectro autista	1.0	0.0	1.0	FN	VP
+cobertura	V08	familia	Nos sentimos capaces de cuidar a un niño con discapacidad física	1.0	0.0	1.0	FN	VP
+cobertura	V09	familia	Tenemos capacidad para cuidar de un niño con discapacidad intelectual	1.0	1.0	1.0	VP	VP
+cobertura	V10	familia	Podemos asistir a un niño con discapacidad visual en su día a día	1.0	1.0	1.0	VP	VP
+cobertura	V11	familia	Estamos disponibles para acompañar a un niño con discapacidad auditiva	1.0	0.0	1.0	FN	VP
+cobertura	V12	familia	Podemos atender a un niño intolerante a la lactosa	1.0	0.0	1.0	FN	VP
+cobertura	V13	familia	Podemos cuidar a un niño con alergias a los alimentos	1.0	0.0	1.0	FN	VP
+cobertura	V14	familia	Podemos acompañar al niño si tiene alergia a los medicamentos	1.0	0.0	1.0	FN	VP
+cobertura	V15	familia	Podemos atender a un niño alérgico al polen	1.0	0.0	1.0	FN	VP
+cobertura	V16	familia	Podemos cuidar a un niño alérgico a las picaduras de insectos	1.0	0.0	1.0	FN	VP
+cobertura	V17	familia	Tenemos disponibilidad para llevarlo a sus terapias del lenguaje	1.0	1.0	1.0	VP	VP
+cobertura	V18	familia	Podemos llevarlo donde el fisioterapeuta para sus sesiones de fisioterapia	1.0	1.0	1.0	VP	VP
+cobertura	V19	familia	Estamos disponibles para acompañarlo a terapia ocupacional	1.0	0.0	1.0	FN	VP
+cobertura	V20	familia	Podemos acompañarlo a terapia psicológica	1.0	1.0	1.0	VP	VP
+cobertura	V21	familia	Podemos llevarlo a sus citas con el psicólogo	1.0	0.0	1.0	FN	VP
+cobertura	V22	familia	Tenemos disponibilidad para asistir con él a sesiones de psicología	1.0	1.0	1.0	VP	VP
+cobertura	V23	familia	Podemos facilitar que continúe su atención psicológica	1.0	0.0	1.0	FN	VP
+cobertura	V24	familia	Podemos acompañarlo durante su tratamiento psicológico	1.0	0.0	1.0	FN	VP
+cobertura	V25	familia	Podemos ir con él al psicólogo	1.0	0.0	1.0	FN	VP
+cobertura	V26	familia	Estamos disponibles para acompañarlo a sesiones psicológicas	1.0	0.0	1.0	FN	VP
+cobertura	V27	familia	Podemos mantener una rutina fija todos los días	1.0	0.0	1.0	FN	VP
+cobertura	V28	familia	Podemos organizar horarios regulares para sus actividades	1.0	0.0	1.0	FN	VP
+cobertura	V29	familia	Mantenemos horarios constantes y podemos acompañarlo	1.0	1.0	1.0	VP	VP
+cobertura	V30	familia	Podemos darle apoyo emocional cuando lo necesite	1.0	0.0	1.0	FN	VP
+cobertura	V31	familia	Podemos apoyarlo emocionalmente durante su adaptación	1.0	0.0	1.0	FN	VP
+cobertura	V32	familia	Podemos apoyarlo para que se acostumbre al nuevo hogar	1.0	0.0	1.0	FN	VP
+cobertura	V33	familia	Podemos ayudarlo a adaptarse al hogar	1.0	0.0	1.0	FN	VP
+cobertura	V34	familia	Podemos acompañarlo en su proceso de adaptación	1.0	1.0	1.0	VP	VP
+cobertura	V35	familia	Podemos vigilarlo todos los días	1.0	0.0	1.0	FN	VP
+cobertura	V36	familia	Podemos supervisarlo diariamente	1.0	0.0	1.0	FN	VP
+cobertura	V37	familia	Podemos supervisarlo las veinticuatro horas	1.0	0.0	1.0	FN	VP
+cobertura	V38	familia	Podemos garantizar supervisión las 24 horas	1.0	0.0	1.0	FN	VP
+cobertura	V39	familia	Podemos brindarle apoyo educativo individualizado	1.0	0.0	1.0	FN	VP
+cobertura	V40	familia	Podemos ofrecer acompañamiento escolar individualizado	1.0	1.0	1.0	VP	VP
+cobertura	V41	familia	Tenemos disponibilidad para facilitar apoyo escolar especializado	1.0	1.0	1.0	VP	VP
+cobertura	V42	familia	Podemos echarle una mano con sus tareas escolares	1.0	0.0	1.0	FN	VP
+cobertura	V43	familia	Podemos ayudarlo a hacer las tareas de la escuela	1.0	0.0	1.0	FN	VP
+cobertura	V44	familia	Podemos ayudarlo con sus tareas	1.0	1.0	1.0	VP	VP
+cobertura	V45	familia	Podemos estar pendientes de sus actividades escolares	1.0	0.0	1.0	FN	VP
+cobertura	V46	familia	Podemos realizar seguimiento de sus actividades escolares	1.0	1.0	1.0	VP	VP
+cobertura	V47	familia	Podemos llevarlo a sus clases de refuerzo escolar	1.0	1.0	1.0	VP	VP
+cobertura	N01	perfil	Necesita acompañamiento psicológico	1.0	1.0	1.0	VP	VP
+cobertura	N02	perfil	Necesita que lo lleven a sus citas con el psicólogo	1.0	0.0	1.0	FN	VP
+cobertura	N03	perfil	Precisa que una persona lo vigile todos los días	1.0	0.0	1.0	FN	VP
+cobertura	N04	perfil	Necesita ayuda para hacer las tareas de la escuela	1.0	0.0	1.0	FN	VP
+cobertura	N05	perfil	Se ha descartado el asma	0.0	1.0	0.0	FP	VN
+cobertura	N06	perfil	No requiere terapia psicológica	0.0	0.0	0.0	VN	VN
+cobertura	N07	perfil	Su hermana requiere terapia psicológica	0.0	0.0	0.0	VN	VN
+cobertura	N08	perfil	¿Requiere terapia psicológica?	0.0	1.0	0.0	FP	VN
+cobertura	N09	perfil	Requiere apoyo emocional si llega a necesitarlo	0.0	1.0	0.0	FP	VN
+cobertura	N10	perfil	Necesita una rutina fija todos los días	1.0	0.0	1.0	FN	VP
+cobertura	N11	perfil	Le gusta mantener rutinas estables	0.0	0.0	0.0	VN	VN
+cobertura	N12	perfil	Antecedentes de terapia psicológica	0.0	0.0	0.0	VN	VN
+cobertura	N13	perfil	Actualmente no presenta asma	0.0	0.0	0.0	VN	VN
+cobertura	N14	perfil	Necesita seguimiento psicológico	1.0	1.0	1.0	VP	VP
+cobertura	N15	perfil	Requiere un apoyo uno a uno para aprender	1.0	0.0	1.0	FN	VP
+cobertura	N16	perfil	Requiere tratamiento especializado	1.0	1.0	1.0	VP	VP
+cobertura	N01	recomendacion	Necesita acompañamiento psicológico	1.0	1.0	1.0	VP	VP
+cobertura	N02	recomendacion	Necesita que lo lleven a sus citas con el psicólogo	1.0	0.0	1.0	FN	VP
+cobertura	N03	recomendacion	Precisa que una persona lo vigile todos los días	1.0	0.0	1.0	FN	VP
+cobertura	N04	recomendacion	Necesita ayuda para hacer las tareas de la escuela	1.0	0.0	1.0	FN	VP
+cobertura	N05	recomendacion	Se ha descartado el asma	0.0	0.0	0.0	VN	VN
+cobertura	N06	recomendacion	No requiere terapia psicológica	0.0	0.0	0.0	VN	VN
+cobertura	N07	recomendacion	Su hermana requiere terapia psicológica	0.0	0.0	0.0	VN	VN
+cobertura	N08	recomendacion	¿Requiere terapia psicológica?	0.0	0.0	0.0	VN	VN
+cobertura	N09	recomendacion	Requiere apoyo emocional si llega a necesitarlo	0.0	0.0	0.0	VN	VN
+cobertura	N10	recomendacion	Necesita una rutina fija todos los días	1.0	0.0	1.0	FN	VP
+cobertura	N11	recomendacion	Le gusta mantener rutinas estables	0.0	0.0	0.0	VN	VN
+cobertura	N12	recomendacion	Antecedentes de terapia psicológica	0.0	0.0	0.0	VN	VN
+cobertura	N13	recomendacion	Actualmente no presenta asma	0.0	0.0	0.0	VN	VN
+cobertura	N14	recomendacion	Necesita seguimiento psicológico	1.0	1.0	1.0	VP	VP
+cobertura	N15	recomendacion	Requiere un apoyo uno a uno para aprender	1.0	0.0	1.0	FN	VP
+cobertura	N16	recomendacion	Requiere tratamiento especializado	1.0	1.0	1.0	VP	VP
+puntosSalud	I01	calculo	Requiere acompañamiento psicológico / Podemos acompañarlo a terapia psicológica	35	35	35	CORRECTO	CORRECTO
+puntosSalud	I02	calculo	Requiere acompañamiento psicológico / Podemos llevarlo a sus citas con el psicólogo	35	0	35	FALLO	CORRECTO
+puntosSalud	I03	calculo	Requiere acompañamiento psicológico / Podemos facilitar que continúe su atención psicológica	35	0	35	FALLO	CORRECTO
+puntosSalud	I04	calculo	Necesita que lo lleven a sus citas con el psicólogo / sin capacidad adicional	18	35	18	FALLO	CORRECTO
+puntosSalud	I05	calculo	Requiere tratamiento especializado / sin capacidad adicional	18	18	18	CORRECTO	CORRECTO
+puntosSalud	I06	calculo	Requiere hemodiálisis / sin capacidad adicional	18	35	18	FALLO	CORRECTO
+puntosSalud	I07	calculo	¿Requiere terapia psicológica? / Podemos acompañar terapia psicológica	0	35	0	FALLO	CORRECTO
+puntosSalud	I08	calculo	Sin otra necesidad / No siempre podemos acompañar asma	0	35	0	FALLO	CORRECTO
+puntosSalud	I09	calculo	Sin otra necesidad / Antes acompañamos a un niño con asma	0	35	0	FALLO	CORRECTO
+puntosSalud	I10	calculo	Es introvertido / Podemos acompañar asma	35	35	35	CORRECTO	CORRECTO
+puntosSalud	I11	calculo	Requiere acompañamiento psicológico / No podemos acompañar terapia psicológica	0	0	0	CORRECTO	CORRECTO
+puntosSalud	I12	calculo	Requiere acompañamiento psicológico / Quizás podríamos acompañar terapia psicológica	0	0	0	CORRECTO	CORRECTO

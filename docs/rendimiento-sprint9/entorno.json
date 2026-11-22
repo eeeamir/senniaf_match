@@ -1,0 +1,28 @@
+{
+  "commits": {
+    "v6": "78a2ee0e5d8d03ae14726b7560c5c4e3b9e4dc12",
+    "v7": "07c7132a366198565e9bff345a74ad29d191b4a9"
+  },
+  "fecha": "2026-11-21",
+  "sistema": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "procesador": "Intel Core i5-13500HX; 20 CPU lógicas visibles en WSL2",
+  "ramWSLMiB": 7799,
+  "java": "17.0.21+9",
+  "opcionesJvm": [
+    "-Xms128m",
+    "-Xmx512m",
+    "-XX:+UseG1GC"
+  ],
+  "calentamientoPorFase": 12,
+  "repeticionesPorFork": 30,
+  "forks": 2,
+  "orden": "v6-v7 en fork 1; v7-v6 en fork 2; tamaños 10,50,100,500",
+  "concurrentes": 4,
+  "lotesConcurrentes": 12,
+  "lotesConcurrentesDescartados": 2,
+  "sql": "No hay conexión JDBC: repositorios sintéticos con contadores",
+  "endpoint": "MockMvc standalone: controlador real, despacho MVC y serialización; sin red, autenticación ni PostgreSQL",
+  "datos": "1 niño, 1 recomendación vigente, familias idénticas salvo código; véase MedirRanking.java",
+  "memoria": "RSS VmHWM por JVM al finalizar todas las fases; incluye arnés, heap, metaspace y fase concurrente; heap pico separado por fase",
+  "cpu": "getProcessCpuTime: incluye JIT y GC; no es uso de CPU de Azure"
+}

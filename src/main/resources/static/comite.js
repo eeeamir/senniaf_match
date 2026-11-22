@@ -16,12 +16,16 @@ const Comite = {
     }catch(e){this.contenido.innerHTML=Profesionales.encabezado('Panel del Comité','Consulta las propuestas y solicitudes.','personas')+`<p class="mensaje error" role="alert">${limpiarHtml(e.message)}</p>`;}
   },
   async api(ruta,opciones={}) {
-    const r=await fetch(ruta,{...opciones,headers:Sesion.encabezados({'Content-Type':'application/json'})});const datos=await r.json();
+    const r=await fetch(ruta,{...opciones,cache:'no-store',headers:Sesion.encabezados({'Content-Type':'application/json'})});const datos=await r.json();
     if(!r.ok){const error=new Error(datos.mensaje||'No se pudo cargar la información. Inténtalo de nuevo.');error.estado=r.status;throw error;}return datos;
   },
   icono(n){return Profesionales.icono(n);},
   vinculo(c,f){return `match.html?vista=compatibilidad&caso=${encodeURIComponent(c)}${f?'&familia='+encodeURIComponent(f):''}`;},
-  nivel(p){return p>=85?'alta':p>=70?'media':'baja';},
+  estadoInformacion(familia) {
+    const estados = Object.values(familia.estadosFactores || {});
+    if (!estados.length) return 'Desglose disponible';
+    return estados.includes('DESCONOCIDO') ? 'Información por aclarar' : 'Criterios evaluados';
+  },
   inicio(){
     this.contenido.innerHTML=Profesionales.encabezado('Panel del Comité','Revisa la compatibilidad y gestiona las solicitudes recibidas.','personas')+`
       <div class="pro-dashboard"><section class="tarjeta pro-modulo"><span class="pro-simbolo">${this.icono('salud')}</span><h2>Compatibilidad</h2><p>Consulta los expedientes y las familias propuestas.</p><a class="boton" href="match.html?vista=compatibilidad">Ver compatibilidad ${this.icono('flecha')}</a></section>
@@ -38,8 +42,8 @@ const Comite = {
       const busca=document.getElementById('buscarCompatibilidad').value.trim().toLocaleLowerCase('es');const orden=document.getElementById('ordenCompatibilidad').value==='mayor'?-1:1;
       const casos=seleccionado.filter(c=>c.codigo.toLocaleLowerCase('es').includes(busca));
       document.getElementById('propuestasComite').innerHTML=casos.length?casos.map(c=>`<section class="tarjeta pro-compatibilidad-caso"><div class="pro-reciente"><span class="pro-simbolo">${this.icono('carpeta')}</span><div><span class="pro-capsula">Expediente infantil</span><h2>${limpiarHtml(c.codigo)}</h2><p>Familias propuestas para análisis</p></div></div>
-        ${c.familias.length?[...c.familias].sort((a,b)=>orden*(a.puntaje-b.puntaje)).map(f=>`<article class="pro-compatibilidad-familia"><div class="pro-fila-titulo"><div><span class="pro-capsula">Familia propuesta</span><h3>${limpiarHtml(f.codigo)}</h3><span class="chip">Evidencia ${this.nivel(f.puntaje)}</span></div><div class="pro-puntaje">${f.puntaje}<small>/100</small><p class="ayuda">Puntos acreditados</p></div></div>${Profesionales.avisoInterrupcion(f.antecedenteInterrupcion)}<div class="pro-medidor"><span style="width:${Math.max(0,Math.min(100,f.puntaje))}%"></span></div><div class="pro-propuesta-pie"><p>${Object.entries(f.f).slice(0,2).map(([k,v])=>limpiarHtml(FACTORES[k]?.n||k)+': '+v[0]+' puntos').join(' · ')}</p><a class="boton" href="${this.vinculo(c.codigo,f.codigo)}">Ver análisis completo ${this.icono('flecha')}</a></div></article>`).join(''):`<p>${c.propuestaAceptada?'Este expediente ya tiene una propuesta aceptada. Consulta su historial.':'No hay familias disponibles para este expediente.'}</p><a href="perfiles.html?caso=${encodeURIComponent(c.codigo)}#panelAuditoria">Consultar historial</a>`}
-        <p class="ayuda">La escala conserva los mismos pesos sobre 100. Los factores no aplicables o desconocidos no suman puntos; revisa el desglose antes de comparar. Una puntuación baja también puede reflejar falta de información.</p></section>`).join(''):'<div class="tarjeta"><p>No hay expedientes disponibles con ese código.</p></div>';
+        ${c.familias.length?[...c.familias].sort((a,b)=>orden*(a.puntaje-b.puntaje)).map(f=>`<article class="pro-compatibilidad-familia"><div class="pro-fila-titulo"><div><span class="pro-capsula">Familia propuesta</span><h3>${limpiarHtml(f.codigo)}</h3><span class="chip">${this.estadoInformacion(f)}</span></div><div class="pro-puntaje">${f.puntaje}<small>/100</small><p class="ayuda">Puntos acreditados</p></div></div>${Profesionales.avisoInterrupcion(f.antecedenteInterrupcion)}<div class="pro-medidor"><span style="width:${Math.max(0,Math.min(100,f.puntaje))}%"></span></div><div class="pro-propuesta-pie"><p>${Object.entries(f.f).slice(0,2).map(([k,v])=>limpiarHtml(FACTORES[k]?.n||k)+': '+v[0]+' puntos').join(' · ')}</p><a class="boton" href="${this.vinculo(c.codigo,f.codigo)}">Ver análisis completo ${this.icono('flecha')}</a></div></article>`).join(''):`<p>${c.propuestaAceptada?'Este expediente ya tiene una propuesta aceptada. Consulta su historial.':'No hay familias disponibles para este expediente.'}</p><a href="perfiles.html?caso=${encodeURIComponent(c.codigo)}#panelAuditoria">Consultar historial</a>`}
+        </section>`).join(''):'<div class="tarjeta"><p>No hay expedientes disponibles con ese código.</p></div>';
     };document.getElementById('buscarCompatibilidad').addEventListener('input',pintar);document.getElementById('ordenCompatibilidad').addEventListener('change',pintar);pintar();
   },
   async analisis(){
@@ -53,15 +57,36 @@ const Comite = {
     const gruposFamilia=[['informe','Información general','Datos registrados por la familia'],['hogar','Composición del hogar','Estructura y entorno familiar'],['solicitudes','Entrevista familiar','Respuestas y preferencias registradas'],['salud','Capacidad de acompañamiento','Cuidados y necesidades que puede atender'],['personas','Red de apoyo','Apoyos disponibles para la familia'],['heart-handshake','Apoyos culturales y comunitarios','Apoyos que la familia puede ofrecer para respetar la identidad y los vínculos del niño']];
     const tarjeta=(titulo,codigo,grupos,href,clase='')=>`<section class="tarjeta pro-expediente-tarjeta ${clase}"><header>${this.icono('personas')}<div><h2>${titulo}</h2><p>${limpiarHtml(codigo)}</p></div></header><ul>${grupos.map(([icono,t,d])=>`<li>${this.icono(icono)}<div><strong>${t}</strong><small>${d}</small></div></li>`).join('')}</ul><a class="boton secundario" href="${href}">Ver ${titulo.toLocaleLowerCase('es')} completo ${this.icono('flecha')}</a></section>`;
     this.contenido.innerHTML=`<p class="pro-breadcrumb"><a href="${this.vinculo(caso.codigo)}">← Volver a compatibilidad</a></p>`+Profesionales.encabezado(caso.codigo+' y '+familia.codigo,'Revisa los dos expedientes y los criterios utilizados para esta propuesta.','salud')+this.avisoProgramacion(this.programacion?.pendiente,'mini')+`
-      <section class="tarjeta pro-analisis-resumen"><div class="pro-circulo"><strong>${familia.puntaje}</strong><small>de 100</small></div><div><h3>Resultado de compatibilidad</h3><p>Se acreditan puntos solo con información evaluada. Máximo aplicable: ${familia.maximoAplicable??100}; peso evaluado: ${familia.pesoEvaluado??100}. Los factores no aplicables o desconocidos no suman ni redistribuyen puntos.</p></div><span class="chip">Evidencia ${this.nivel(familia.puntaje)}</span></section>
+      <section class="tarjeta pro-analisis-resumen"><div class="pro-circulo"><strong>${familia.puntaje}</strong><small>de 100</small></div><div><h3>Resultado de compatibilidad</h3><p>Se acreditan puntos solo con información evaluada. Máximo aplicable: ${familia.maximoAplicable??100}; peso evaluado: ${familia.pesoEvaluado??100}. Los factores no aplicables o desconocidos no suman ni redistribuyen puntos.</p></div><span class="chip">${this.estadoInformacion(familia)}</span></section>
       ${Profesionales.avisoInterrupcion(familia.antecedenteInterrupcion)}<div class="pro-dashboard">${tarjeta('Expediente infantil',caso.codigo,gruposNino,`perfiles.html?caso=${encodeURIComponent(caso.codigo)}&origen=match&familiaOrigen=${encodeURIComponent(familia.codigo)}`)}${tarjeta('Expediente familiar',familia.codigo,gruposFamilia,`perfiles.html?familia=${encodeURIComponent(familia.codigo)}&casoOrigen=${encodeURIComponent(caso.codigo)}&origen=match`,'verde')}</div>
-      <section class="tarjeta pro-seccion"><details><summary><strong>Cómo se calculó la compatibilidad</strong></summary><p>Revisa cada criterio del análisis.</p><div class="tabla"><table><thead><tr><th>Criterio</th><th>Puntos</th><th>Estado</th><th>Razón</th></tr></thead><tbody>${Object.entries(familia.f).map(([k,[p,nota]])=>`<tr><td>${limpiarHtml(FACTORES[k]?.n||k)}</td><td>${p} de ${pesos[k]}</td><td>${limpiarHtml(Profesionales.etiqueta(familia.estadosFactores?.[k]||'EVALUADO'))}</td><td>${limpiarHtml(nota)}</td></tr>`).join('')}</tbody></table></div></details></section>
+      <section class="tarjeta pro-seccion"><div class="pro-acciones"><button type="button" class="boton secundario" id="reevaluarCompatibilidad">${this.icono('refrescar')}Actualizar análisis</button></div><p id="estadoReevaluacion" role="status" aria-live="polite"></p><details><summary><strong>Cómo se calculó la compatibilidad</strong></summary><p>Revisa cada criterio del análisis.</p><div class="tabla"><table><thead><tr><th>Criterio</th><th>Puntos</th><th>Estado</th><th>Razón</th></tr></thead><tbody>${Object.entries(familia.f).map(([k,[p,nota]])=>`<tr><td>${limpiarHtml(FACTORES[k]?.n||k)}</td><td>${p} de ${pesos[k]}</td><td>${limpiarHtml(Profesionales.etiqueta(familia.estadosFactores?.[k]||'EVALUADO'))}</td><td>${limpiarHtml(nota)}</td></tr>`).join('')}</tbody></table></div></details></section>
 ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
       <section class="tarjeta pro-seccion"><h2>Decisión del Comité</h2><p>${bloqueado?'Este expediente ya tiene una propuesta aceptada.':'Selecciona la acción que corresponde a esta propuesta.'}</p>${bloqueado?'':`<div class="pro-acciones"><button class="boton" type="button" data-decision="ACEPTADA">${this.icono('comprobar')}Aceptar propuesta</button><button class="boton secundario" type="button" data-decision="DESCARTADA">Rechazar propuesta</button><button class="boton secundario" type="button" data-decision="REEVALUACION">Solicitar reevaluación</button></div>`}<p id="estadoDecision" role="status"></p></section>
 
       <a class="boton secundario" href="${this.vinculo(caso.codigo)}">← Volver a compatibilidad</a>`;
 
+    this.contenido.querySelector('#reevaluarCompatibilidad')?.addEventListener('click', () => this.reevaluar());
     this.contenido.querySelectorAll('[data-decision]').forEach(b=>b.addEventListener('click',()=>this.decidir(caso,familia,b.dataset.decision)));
+  },
+  async reevaluar() {
+    if (this.reevaluando) return;
+    this.reevaluando = true;
+    const aviso = document.getElementById('estadoReevaluacion');
+    aviso.textContent = 'Actualizando el análisis…';
+    this.contenido.querySelectorAll('#reevaluarCompatibilidad,[data-decision]').forEach(b => b.disabled = true);
+    try {
+      const actual = await this.api('/api/scoring/casos/' + encodeURIComponent(this.codigo));
+      this.casos = this.casos.map(c => c.codigo === actual.codigo ? actual : c);
+      await this.analisis();
+      const estado = document.getElementById('estadoReevaluacion');
+      if (estado) estado.textContent = 'Análisis actualizado con la información vigente.';
+      document.getElementById('reevaluarCompatibilidad')?.focus();
+    } catch (e) {
+      aviso.textContent = 'No se pudo actualizar el análisis. El resultado mostrado corresponde a la consulta anterior. ' + e.message;
+    } finally {
+      this.reevaluando = false;
+      this.contenido.querySelectorAll('#reevaluarCompatibilidad,[data-decision]').forEach(b => b.disabled = false);
+    }
   },
   decidir(caso,familia,tipo){
     const motivos={
@@ -78,7 +103,7 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
       alGuardar:async datos=>{
         if(tipo==='REEVALUACION'){
           this.codigo=null;this.familia=null;this.vista='compatibilidad';history.replaceState(null,'','match.html?vista=compatibilidad');
-          try{this.casos=await this.api('/api/scoring/casos');this.revisionesPendientes=await this.api('/api/scoring/reevaluaciones-pendientes');this.compatibilidad();}
+          try{this.casos=this.casos.map(c=>({...c,familias:c.familias.filter(f=>f.codigo!==familia.codigo)}));this.revisionesPendientes=await this.api('/api/scoring/reevaluaciones-pendientes');this.compatibilidad();}
           catch(error){this.contenido.innerHTML=Profesionales.encabezado('Análisis de compatibilidad','Consulta las propuestas disponibles.','salud');const pendiente=document.createElement('p');Profesionales.mensaje(pendiente,'La solicitud quedó guardada. No se pudo actualizar el listado: '+error.message,'aviso');this.contenido.append(pendiente);}
           const aviso=document.createElement('p');Profesionales.mensaje(aviso,'La solicitud de reevaluación se registró correctamente','exito');this.contenido.prepend(aviso);return;
         }
@@ -107,7 +132,7 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
     const pesos=await this.api('/api/scoring/pesos');const [historial,agenda]=await Promise.all([this.api('/api/scoring/pesos/historial'),this.api('/api/scoring/pesos/programacion')]);if(pesos.version!==agenda.versionVigente)return this.criterios();
     this.programacion=agenda;
     this.contenido.innerHTML=Profesionales.encabezado('Configuración de pesos','Consulta los criterios vigentes y programa los próximos cambios.','criterios')+this.avisoProgramacion(agenda.pendiente,'completo')+`
-      <section class="tarjeta"><h2>${this.icono('criterios')}Pesos actualmente vigentes</h2><p>Los cinco factores conservan una escala de 100 puntos. Los cambios se programan con al menos 24 horas de anticipación y se activan a las 7:00 a. m., hora de Panamá.</p>
+      <section class="tarjeta"><h2>${this.icono('criterios')}Pesos actualmente vigentes</h2><p>Los pesos indican la importancia de cada factor. Los cambios requieren al menos 24 horas de anticipación y se activan a las 7:00 a. m., hora de Panamá.</p>
       <div class="pro-pesos-vigentes">${Object.entries(FACTORES).map(([k,f])=>`<div><span class="peso-icono peso-${k}">${this.icono(({edad:'calendario',hermanos:'personas',salud:'salud',apoyo:'personas',logistica:'ubicacion'})[k])}</span><span>${limpiarHtml(f.n)}</span><strong>${pesos[k]} puntos</strong></div>`).join('')}</div>
       ${agenda.pendiente?'<p class="ayuda">Hay una actualización pendiente. Consulta sus valores y fecha antes de realizar otro cambio.</p>':`<details class="pro-seccion"><summary>${this.icono('calendario')}Programar nuevos pesos</summary><form id="formPesos">${Object.entries(FACTORES).map(([k,f])=>`<div class="pro-ajuste-fila"><span class="pro-simbolo">${this.icono(k==='edad'?'calendario':k==='salud'?'salud':k==='logistica'?'hogar':'personas')}</span><label for="peso-${k}">${limpiarHtml(f.n)}</label><input id="peso-${k}" type="number" name="${k}" value="${pesos[k]}" min="0" max="100" step="1" required></div>`).join('')}<div class="pro-ajuste-total"><span>Suma de los criterios</span><strong id="sumaPesos">100 / 100</strong></div><p class="ayuda">Introduce números enteros entre 0 y 100 que sumen exactamente 100.</p><label for="justificacionPesos">Justificación del cambio</label><textarea id="justificacionPesos" minlength="10" maxlength="300" required rows="4"></textarea><p class="ayuda">${this.icono('informacion')}La fecha se calcula en el servidor; la hora de activación siempre será las 7:00 a. m. de Panamá.</p><div class="pro-acciones"><button class="boton secundario" type="reset">Cancelar</button><button class="boton" type="submit">Revisar programación</button></div></form></details>`}
       <p id="pesoEstado" role="status"></p><div id="confirmacionProgramacion"></div></section>

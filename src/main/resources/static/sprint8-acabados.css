@@ -69,12 +69,6 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 .s8-acabado #seccionApoyosCulturales .apoyo-cultural-campo label{align-self:start;line-height:1.5;padding-top:8px}
 .s8-acabado #seccionApoyosCulturales .apoyo-cultural-campo textarea{width:100%;min-height:84px;height:96px;border:1px solid #d0ddec;border-radius:11px;background:#fff;resize:vertical;font-size:14px;line-height:1.55;padding:12px}
 .s8-acabado #seccionApoyosCulturales .apoyo-cultural-campo .ayuda{grid-column:2;line-height:1.5;font-size:12px;color:#56708d}
-.s8-acabado #seccionApoyosCulturales .cultura-antecedente{background:#edf4ff;border:1px solid #dce8f9;border-radius:13px;padding:16px;margin:0 24px 20px}
-.s8-acabado #seccionApoyosCulturales .cultura-antecedente h3{font-size:14px;margin:0 0 8px}
-.s8-acabado .familia-entrevista-seccion:nth-of-type(3n+1)>summary{background:#f4faf7}
-.s8-acabado .familia-entrevista-seccion:nth-of-type(3n+2)>summary{background:#f7f3fe}
-.s8-acabado .pro-expedientes-completos .detalle-grupo:nth-of-type(3n+1)>summary{background:#edf8f4}
-.s8-acabado .pro-expedientes-completos .detalle-grupo:nth-of-type(3n+2)>summary{background:#f6f2ff}
 .s8-acabado :is(.pro-acciones,.vinculacion-cabecera h2,.pro-fila-titulo h2){gap:10px}
 @media(max-width:700px){
  .s8-acabado .hero::before{width:100px;height:100px;right:-50px;top:-65px}
@@ -104,12 +98,8 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 /* Los apartados familiares comparten proporciones; el color identifica cada sección. */
 .s8-acabado .pro-expedientes-completos{gap:14px 16px;align-items:start}
 .s8-acabado .pro-expedientes-completos>.detalle-grupo{padding:0;margin:0!important;border-radius:16px;box-shadow:0 3px 12px #173b5c04}
-.s8-acabado .pro-expedientes-completos>.detalle-grupo>summary{min-height:76px;padding:16px 18px;gap:12px;font-size:15px;line-height:1.45;background:#e7f8f1}
-.s8-acabado .pro-expedientes-completos>.detalle-grupo:nth-of-type(2)>summary{background:#f0e9ff}
-.s8-acabado .pro-expedientes-completos>.detalle-grupo:nth-of-type(3)>summary{background:#eaf2ff}
-.s8-acabado .pro-expedientes-completos>#apoyosCulturales>summary{background:#fff0e5}
+.s8-acabado .pro-expedientes-completos>.detalle-grupo>summary{min-height:76px;padding:16px 18px;gap:12px;font-size:15px;line-height:1.45;background:#fff}
 .s8-acabado .pro-expedientes-completos>.detalle-grupo:last-of-type{grid-column:1/-1}
-.s8-acabado .pro-expedientes-completos>.detalle-grupo:last-of-type>summary{background:#edf0ff}
 .s8-acabado .pro-expedientes-completos>.detalle-grupo>summary>.pro-icono{width:22px;height:22px;padding:0;background:transparent;color:#17806d;border-radius:0}
 .s8-acabado .pro-expedientes-completos>.detalle-grupo:nth-of-type(2)>summary>.pro-icono{color:#7951ad}
 .s8-acabado .pro-expedientes-completos>.detalle-grupo:nth-of-type(3)>summary>.pro-icono{color:#2673c8}
@@ -172,7 +162,6 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
  .s8-acabado .pro-aviso-interrupcion{padding:12px;gap:8px}
  .s8-acabado .pro-expedientes-completos>.detalle-grupo>summary{padding:14px 16px;min-height:72px}
  .s8-acabado #seccionApoyosCulturales>p.ayuda{padding-inline:20px}
- .s8-acabado #seccionApoyosCulturales .cultura-antecedente{margin-inline:20px}
 }
 @media(min-width:761px) and (max-width:1100px){
  .s8-acabado main,.s8-acabado main.ancho{padding-inline:24px}
@@ -182,11 +171,6 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 }
 .s8-acabado .tabla{max-width:100%;overflow-x:auto}
 .s8-acabado :is(.tarjeta,.pro-dashboard>*,.vinculacion-accesos>*){min-width:0}
-.s8-acabado .familia-entrevista-seccion:nth-of-type(1)>summary{background:#e7f8f1}
-.s8-acabado .familia-entrevista-seccion:nth-of-type(2)>summary{background:#f0e9ff}
-.s8-acabado .familia-entrevista-seccion:nth-of-type(3)>summary{background:#eaf2ff}
-.s8-acabado .familia-entrevista-seccion:nth-of-type(4)>summary{background:#f5f8fc}
-.s8-acabado .familia-entrevista-seccion:nth-of-type(5)>summary{background:#fff0e5}
 .s8-acabado .hero::before{left:auto}
 .s8-acabado .pro-dialogo-reevaluacion textarea{font-weight:400!important}
 /* Cada icono conserva un acento intenso sobre un fondo de su misma familia cromática. */
@@ -199,7 +183,9 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 .s8-acabado .familia-interrupcion .vinculacion-emblema{width:36px;height:36px;background:#ddeBff;color:#2365aa;flex-shrink:0}
 .s8-acabado .familia-interrupcion h3{font-size:16px}
 .s8-acabado #contenido>.mensaje.exito{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border:1px solid #c4e5d0;border-radius:12px;background:#dff5e8;color:#22623d}
-.s8-acabado .familia-entrevista-seccion>summary{background:#fff!important}
+.s8-acabado .familia-entrevista-seccion > summary {
+  background: #fff;
+}
 .s8-acabado .familia-entrevista-seccion:nth-of-type(1) .pro-simbolo{background:#e7f8f1;color:#087a59}
 .s8-acabado .familia-entrevista-seccion:nth-of-type(2) .pro-simbolo{background:#f0e9ff;color:#7145ad}
 .s8-acabado .familia-entrevista-seccion:nth-of-type(3) .pro-simbolo{background:#ddeBff;color:#1763c2}
@@ -239,3 +225,101 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
   .pro-familias-reevaluacion,#propuestasComite>.pro-compatibilidad-caso { padding:18px; }
   .pro-reevaluacion-fila { padding:16px; gap:14px; }
 }
+
+/* Mantener las acciones de consulta y respuesta sobre la misma línea de base. */
+.familia-propuesta-acciones .familia-informacion-asignada {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.familia-propuesta-acciones .familia-informacion-asignada > .vinculacion-emblema {
+  align-self: start;
+}
+
+.familia-seguimiento .familia-etapas {
+  margin-block: 28px;
+}
+
+.familia-etapas li {
+  color: #476788;
+}
+
+.familia-etapas .interrumpido .familia-paso {
+  background: #fff0f0;
+  color: #a12232;
+  border-color: #a12232;
+}
+
+.familia-etapas .registrada .familia-paso {
+  background: #e7f8f1;
+  color: #087a59;
+}
+
+/* Una sola flecha por desplegable; se conserva el elemento summary nativo. */
+.profesional summary:has(> .pro-icono) {
+  list-style: none;
+}
+
+.profesional summary:has(> .pro-icono)::-webkit-details-marker {
+  display: none;
+}
+
+.profesional summary:has(.familia-desplegar)::after {
+  content: none;
+}
+
+.pro-aviso-reevaluaciones {
+  margin-block: 24px;
+}
+
+@media (max-width: 760px) {
+  .familia-propuesta-acciones .familia-informacion-asignada {
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .familia-propuesta-acciones .familia-informacion-asignada .boton {
+    grid-column: 2;
+    justify-self: start;
+    margin-left: 0;
+  }
+}
+
+.vinculaciones-lista .vinculacion-cabecera {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.vinculacion-estados {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.vinculacion-estados .vinculacion-antecedente {
+  font-size: 0.75rem;
+}
+
+.profesional #propuestasComite + .pro-familias-reevaluacion {
+  margin-top: 28px;
+}
+
+#formularioFamilia label[for="disponibilidadViaje"] {
+  display: block;
+}
+
+.etiqueta-obligatoria-final {
+  white-space: nowrap;
+}
+
+.s8-acabado .chip.vinculacion-negativa { background: #fff0f0; color: #a12232; }
+.s8-acabado .chip.vinculacion-positiva { background: #eaf6ee; color: #21633b; }
+.s8-acabado .vinculacion-etapas .interrumpido .vinculacion-hito { background: #fff0f0; border-color: #a12232; color: #a12232; }
+.s8-acabado .vinculacion-etapas .completado .vinculacion-hito { background: #21633b; border-color: #21633b; color: #fff; }
+.s8-acabado .familia-etapas .interrumpido .familia-paso { background: #fff0f0; color: #a12232; border-color: #a12232; }
+.s8-acabado .familia-etapas .interrumpido small { color: #a12232; }
+.s8-acabado .vinculacion-cierre p, .s8-acabado .vinculacion-linea p { color: #476788; }

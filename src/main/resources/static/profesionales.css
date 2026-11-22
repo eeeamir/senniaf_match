@@ -288,3 +288,40 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 }
 .familia-revision-pendiente{padding:16px 20px;border:1px solid #edcf91;border-radius:14px;background:#fff8e8;margin-bottom:20px}
 .familia-revision-pendiente h2{display:flex;align-items:center;gap:10px;font-size:18px;margin:0 0 10px}.familia-revision-pendiente p{line-height:1.6;margin:8px 0}.familia-revision-indicador{display:block;margin-top:5px;color:#946017;font-size:12px;font-weight:400}
+
+/* Historial: la primera fila alinea el punto con el título, incluso al envolver. */
+.vinculacion-linea { list-style: none; margin: 24px 0 0; padding: 0; }
+.vinculacion-linea > li { display: grid; grid-template-columns: 18px minmax(0,1fr); grid-template-rows: auto auto; column-gap: 16px; }
+.vinculacion-linea > li::before, .vinculacion-linea > li::after { content: none; }
+.vinculacion-linea h3 { grid-column: 2; grid-row: 1; align-self: center; margin: 0; line-height: 1.5; color: #0b3558; font-size: 16px; overflow-wrap: anywhere; }
+.vinculacion-punto { grid-column: 1; grid-row: 1; display: grid; place-items: center; position: relative; }
+.vinculacion-punto::before { content: ''; position: absolute; width: 2px; background: #b9cee8; inset-block: 0; left: 8px; }
+.vinculacion-punto i { display: block; z-index: 1; width: 12px; height: 12px; border-radius: 50%; background: #0054cc; }
+.vinculacion-linea > li:first-child .vinculacion-punto::before { top: 50%; }
+.vinculacion-linea > li:last-child .vinculacion-punto::before { bottom: 50%; }
+.vinculacion-conector { grid-column: 1; grid-row: 2; width: 2px; background: #b9cee8; justify-self: center; }
+.vinculacion-linea > li:last-child .vinculacion-conector { background: transparent; }
+.vinculacion-evento { grid-column: 2; grid-row: 2; min-width: 0; padding: 6px 0 24px; }
+.vinculacion-linea > li:last-child .vinculacion-evento { padding-bottom: 0; }
+.vinculacion-evento p { margin: 0 0 8px; color: #476788; overflow-wrap: anywhere; }
+.vinculacion-evento-meta { font-size: 14px; }
+.vinculacion-evento-meta .pro-icono { width: 16px; height: 16px; vertical-align: middle; }
+.vinculacion-informacion-dialogo > [data-cerrar] { margin-top: 24px; margin-bottom: 4px; }
+.vinculacion-cierre > :is(div,section,aside) { margin-top: 24px; }
+.vinculacion-cierre h3 { margin: 0 0 16px; }
+.vinculacion-expedientes { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; }
+.vinculacion-expedientes article { border: 1px solid #dce7f5; border-radius: 16px; padding: 20px; min-width: 0; }
+.vinculacion-expedientes h4 { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font-size: 17px; color: #0b3558; }
+.vinculacion-expedientes .pro-acciones { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.vinculacion-proximo { padding: 20px; border-radius: 16px; background: #eff5ff; }
+.vinculacion-cierre .ayuda { margin-top: 24px; }
+@media(max-width:700px) { .vinculacion-expedientes { grid-template-columns: 1fr; gap: 16px; } }
+.vinculacion-estados .chip.vinculacion-negativa { background: #fff0f0; color: #a12232; }
+.vinculacion-estados .chip.vinculacion-positiva { background: #eaf6ee; color: #21633b; }
+.familia-etapas .interrumpido .familia-paso { background: #fff0f0; color: #a12232; border-color: #a12232; }
+.familia-etapas .interrumpido small { color: #a12232; }
+.familia-etapas small.familia-etapa-detalle { background: transparent; color: #476788; padding: 0; border-radius: 0; }
+.familia-etapas li small, .familia-seguimiento .familia-siguiente { color: #476788; }
+.familia-etapas .interrumpido small { color: #a12232; }
+.pro-dialogo.vinculacion-informacion-dialogo .ayuda, .pro-dialogo.vinculacion-informacion-dialogo .detalle-datos dt { color: #476788; }
+.pro-dialogo.vinculacion-informacion-dialogo :focus-visible { outline: 3px solid #0054cc; outline-offset: 3px; }

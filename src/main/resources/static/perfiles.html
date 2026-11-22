@@ -94,7 +94,12 @@
 <script src="ejemplos-demo.js"></script>
 <script>
 const sesion = Sesion.requerir(['TRABAJADOR_SOCIAL', 'PSICOLOGO', 'COMITE']);
-const codigoEvaluacion = new URLSearchParams(location.search).get('caso');
+const parametrosExpediente = new URLSearchParams(location.search);
+const desdeVinculacion = parametrosExpediente.get('origen') === 'vinculacion';
+const vinculacionOrigen = parametrosExpediente.get('vinculacionOrigen') || '';
+const vinculacionOrigenValida = /^[1-9]\d{0,18}$/.test(vinculacionOrigen)
+  && BigInt(vinculacionOrigen) <= 9223372036854775807n;
+const codigoEvaluacion = parametrosExpediente.get('caso');
 const codigoFamilia = new URLSearchParams(location.search).get('familia');
 if(codigoFamilia)document.body.classList.add('s8-acabado');
 const vistaSolicitudes = sesion?.rol === 'TRABAJADOR_SOCIAL' && new URLSearchParams(location.search).get('vista') === 'solicitudes';
@@ -106,7 +111,13 @@ let corrigiendoInforme = null;
 if (sesion) {
   ContextoPsicologico.iniciar();
   Sesion.pintarCabecera(sesion);
-  Profesionales.iniciar(sesion, sesion.rol==='COMITE'?(new URLSearchParams(location.search).get('origen')==='solicitudes'?'solicitudes':'compatibilidad'):'expedientes');
+  let seccionNavegacion = 'expedientes';
+  if (sesion.rol === 'COMITE') {
+    seccionNavegacion = parametrosExpediente.get('origen') === 'solicitudes'
+      ? 'solicitudes' : 'compatibilidad';
+  }
+  if (desdeVinculacion) seccionNavegacion = 'vinculaciones';
+  Profesionales.iniciar(sesion, seccionNavegacion);
   document.getElementById('iconoBuscar').innerHTML=Profesionales.icono('buscar');
   document.querySelectorAll('[data-icono]').forEach(el=>el.innerHTML=Profesionales.icono(el.dataset.icono));
   document.querySelector('.volver').textContent='← Volver al inicio';
@@ -130,7 +141,14 @@ if (sesion) {
     document.querySelector('.hero p').textContent = codigoFamilia?'Consulta la entrevista y las condiciones registradas por la familia.':sesion.rol==='PSICOLOGO'?'Consulta la información social y registra tu evaluación psicológica.':'Consulta la información de este expediente y las acciones realizadas.';
     const origen = new URLSearchParams(location.search).get('casoOrigen') || codigoEvaluacion;
     document.querySelector('.volver').href = new URLSearchParams(location.search).get('origen') === 'match' ? 'match.html' + (origen ? '?caso=' + encodeURIComponent(origen) : '') : 'perfiles.html';
-    if(sesion.rol==='COMITE'){
+    if (desdeVinculacion) {
+      const volver = document.querySelector('.volver');
+      volver.href = vinculacionOrigenValida
+        ? 'vinculaciones.html?id=' + encodeURIComponent(vinculacionOrigen)
+        : 'vinculaciones.html';
+      volver.textContent = vinculacionOrigenValida
+        ? '← Volver a VIN-' + vinculacionOrigen : '← Volver a Vinculaciones';
+    } else if(sesion.rol==='COMITE'){
       const parametros=new URLSearchParams(location.search),familiaOrigen=parametros.get('familiaOrigen')||codigoFamilia;
       document.querySelector('.volver').href=parametros.get('origen')==='solicitudes'?'match.html?vista=solicitudes':'match.html?vista=compatibilidad'+(origen?'&caso='+encodeURIComponent(origen):'')+(familiaOrigen?'&familia='+encodeURIComponent(familiaOrigen):'');
       document.querySelector('.volver').textContent=parametros.get('origen')==='solicitudes'?'← Volver a solicitudes':'← Volver al análisis completo';
@@ -277,6 +295,18 @@ async function leerApi(ruta, opciones = {}) {
   if (!r.ok) throw new Error(datos.mensaje || 'No se pudo completar la operación.');
   return datos;
 }
+function mostrarErrorExpediente(contenedor) {
+  const regreso = document.querySelector('.volver');
+  contenedor.replaceChildren();
+  const mensaje = document.createElement('p');
+  mensaje.setAttribute('role', 'alert');
+  mensaje.textContent = 'No se pudo consultar este expediente. Puede que ya no esté disponible o que no tengas acceso.';
+  const enlace = document.createElement('a');
+  enlace.className = 'boton secundario';
+  enlace.href = regreso.href;
+  enlace.textContent = regreso.textContent;
+  contenedor.append(mensaje, enlace);
+}
 async function cargarCaso() {
   document.getElementById('panelEvaluaciones').hidden = false;
   document.getElementById('formEvaluacion').hidden = true;
@@ -293,7 +323,9 @@ async function cargarCaso() {
     await Promise.all([cargarEvaluaciones(), cargarSolicitudes()]);
     await cargarHistoria();
     configurarPestanas();
-  } catch (e) { Profesionales.mensaje(document.getElementById('estadoEvaluaciones'),e.message,'error'); }
+  } catch (e) {
+    mostrarErrorExpediente(document.getElementById('estadoEvaluaciones'));
+  }
 }
 async function cargarHistoria(){
  const eventos=await leerApi(`/api/ninos/${encodeURIComponent(codigoEvaluacion)}/auditoria`);
@@ -323,7 +355,9 @@ async function cargarFamilia() {
     document.getElementById('datosDetalle').innerHTML = (datos.reevaluacionPendiente?`<aside class="pro-aviso-reevaluaciones" role="status"><h3>${Profesionales.icono('reloj')}Revisión de entrevista pendiente</h3><p>La familia no recibe nuevas recomendaciones hasta completar su actualización.</p>${datos.apartadosReevaluacion?.length?`<p><strong>Apartados solicitados:</strong> ${datos.apartadosReevaluacion.map(limpiarHtml).join(', ')}.</p>`:''}${datos.observacionReevaluacion?`<p><strong>Justificación del Comité</strong></p><p class="pro-texto-registrado">${limpiarHtml(datos.observacionReevaluacion)}</p>`:''}</aside>`:'')+detalleSecciones(datos,CAMPOS_FAMILIA,GRUPOS_FAMILIA);
     if(location.hash==='#apoyosCulturales'){const a=document.getElementById('apoyosCulturales');if(a){a.open=true;a.scrollIntoView({block:'start'});}}
     document.getElementById('datosDetalle').classList.add('pro-expedientes-completos');
-  } catch(e) { document.getElementById('datosDetalle').textContent = e.message; }
+  } catch (e) {
+    mostrarErrorExpediente(document.getElementById('datosDetalle'));
+  }
 }
 async function cargarSolicitudes() {
   const datos = await leerApi(`/api/ninos/${encodeURIComponent(codigoEvaluacion)}/solicitudes-estado`);
@@ -466,16 +500,54 @@ const CAMPOS_CULTURA=[
  ['opinionCultural','Preferencias y opinión del niño','Registra las preferencias expresadas por el niño sobre las costumbres y vínculos que desea mantener, según su edad y madurez'],
  ['recomendacionesCulturales','Recomendaciones de continuidad cultural','Describe cómo una futura familia podría acompañar y respetar los aspectos culturales importantes para el niño']
 ];
-function culturaDetalle(datos){
- return `<details id="identidadCultural" class="detalle-grupo pro-detalle-amplio"><summary>${Profesionales.icono('personas')}Identidad y continuidad cultural</summary><div class="cultura-contenido">
- ${datos.contextoCultural?`<aside class="cultura-antecedente"><h3>Información cultural registrada anteriormente</h3><p class="pro-texto-registrado">${limpiarHtml(datos.contextoCultural)}</p><p class="ayuda">Este antecedente se conserva sin reinterpretarlo ni repartirlo entre los nuevos campos.</p></aside>`:''}
- <dl class="detalle-datos cultura-campos">${CAMPOS_CULTURA.map(([k,t,a])=>`<div><dt>${t}</dt><dd>${limpiarHtml(datos[k]||'Sin información registrada')}</dd><p class="ayuda">${a}.</p></div>`).join('')}</dl>
- <p data-cultura-estado role="status"></p></div></details>`;
+function culturaDetalle(datos) {
+  const mostrarAnterior = Profesionales.mostrarAntecedenteCultural(
+    datos.contextoCultural, datos, CAMPOS_CULTURA.map(([campo]) => campo)
+  );
+  return `
+    <details id="identidadCultural" class="detalle-grupo pro-detalle-amplio">
+      <summary>${Profesionales.icono('personas')}Identidad y continuidad cultural</summary>
+      <div class="cultura-contenido">
+        ${mostrarAnterior ? `
+          <aside class="cultura-antecedente">
+            <h3>Información cultural registrada anteriormente</h3>
+            <p class="pro-texto-registrado">${limpiarHtml(datos.contextoCultural)}</p>
+            <p class="ayuda">Este antecedente se conserva sin reinterpretarlo
+              ni repartirlo entre los nuevos campos.</p>
+          </aside>` : ''}
+        <dl class="detalle-datos cultura-campos">
+          ${CAMPOS_CULTURA.map(([campo, titulo, ayuda]) => `
+            <div>
+              <dt>${titulo}</dt><dd>${limpiarHtml(datos[campo] || 'Sin información registrada')}</dd>
+              <p class="ayuda">${ayuda}.</p>
+            </div>`).join('')}
+        </dl>
+        <p data-cultura-estado role="status"></p>
+      </div>
+    </details>`;
 }
-function detalleSecciones(datos,campos,grupos) {
- const aviso=grupos===GRUPOS_FAMILIA&&sesion.rol==='COMITE'?Profesionales.avisoInterrupcion(datos.antecedenteInterrupcion)+Profesionales.avisoReevaluaciones(datos.numeroReevaluaciones):'';
- return aviso+Object.entries(grupos).map(([titulo,keys],i)=>titulo==='Identidad y continuidad cultural'?culturaDetalle(datos):`<details id="${titulo==='Identidad y continuidad cultural'?'identidadCultural':titulo==='Apoyos culturales y comunitarios'?'apoyosCulturales':'grupo-'+i}" class="detalle-grupo ${keys.length===1?'pro-detalle-amplio':''}"><summary>${Profesionales.icono(titulo==='Apoyos culturales y comunitarios'?'personas':i===0?'escuela':i===1?'estrella':i===2?'personas':'informe')}${limpiarHtml(titulo)}</summary>`+
- detalleCampos(datos,Object.fromEntries(keys.map(k=>[k,campos[k]])))+'</details>').join('');
+function detalleSecciones(datos, campos, grupos) {
+  let aviso = '';
+  if (grupos === GRUPOS_FAMILIA && sesion.rol === 'COMITE') {
+    aviso = Profesionales.avisoInterrupcion(datos.antecedenteInterrupcion)
+      + Profesionales.avisoReevaluaciones(datos.numeroReevaluaciones);
+  }
+  const secciones = Object.entries(grupos).map(([titulo, claves], indice) => {
+    if (titulo === 'Identidad y continuidad cultural') return culturaDetalle(datos);
+    const esCultura = titulo === 'Apoyos culturales y comunitarios';
+    const identificador = esCultura ? 'apoyosCulturales' : 'grupo-' + indice;
+    const icono = esCultura ? 'personas' : ['escuela', 'estrella', 'personas'][indice] || 'informe';
+    const visibles = claves.filter(campo => campo !== 'continuidadCultural'
+      || Profesionales.mostrarAntecedenteCultural(
+        datos.continuidadCultural, datos, Profesionales.culturaFamilia.map(([clave]) => clave)
+      ));
+    return `
+      <details id="${identificador}" class="detalle-grupo ${claves.length === 1 ? 'pro-detalle-amplio' : ''}">
+        <summary>${Profesionales.icono(icono)}${limpiarHtml(titulo)}</summary>
+        ${detalleCampos(datos, Object.fromEntries(visibles.map(campo => [campo, campos[campo]])))}
+      </details>`;
+  });
+  return aviso + secciones.join('');
 }
 function pintarResumen(p){
  const r=document.getElementById('resumenExpediente');r.hidden=false;r.innerHTML=`<div>Expediente<strong>${limpiarHtml(p.codigoCaso)}</strong></div><div>Edad<strong>${limpiarHtml(Profesionales.edad(p))}</strong></div><div>Escolaridad<strong>${limpiarHtml(Profesionales.etiqueta(p.nivelEscolar))}</strong></div><div>Estado<strong><span class="chip">${Profesionales.estado(p)}</span></strong></div>`;

@@ -1,0 +1,17 @@
+{
+  "perfilesFamilia": {
+    "planificacionMs": 0.281,
+    "ejecucionMs": 0.026,
+    "filas": 3
+  },
+  "perfilesNino": {
+    "planificacionMs": 0.275,
+    "ejecucionMs": 0.038,
+    "filas": 6
+  },
+  "agendaConfirmada": {
+    "planificacionMs": 0.473,
+    "ejecucionMs": 0.032,
+    "filas": 0
+  }
+}

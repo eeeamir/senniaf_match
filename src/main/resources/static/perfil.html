@@ -34,7 +34,7 @@
        PANTALLA 0: SELECCIÓN DE ROL
        ================================================= -->
 
-  <div class="pantalla-selector" id="pantallaSelector">
+  <div class="pantalla-selector" id="pantallaSelector" hidden>
 
     <h1>¿Con qué rol vas a ingresar?</h1>
 
@@ -429,10 +429,10 @@
         </div>
 
 
-        <div class="campo ancho">
+        <div class="campo ancho" id="campoContextoCultural" hidden>
 
           <label for="contextoCultural">
-            Continuidad cultural o comunitaria
+            Información cultural registrada anteriormente
           </label>
 
           <textarea
@@ -837,8 +837,7 @@
 
             <label for="disponibilidadViaje">
               ¿Qué tan seguido podrías viajar o recibir visitas si
-              el niño o niña está en otra región?
-              <span class="req">*</span>
+              el niño o niña está en otra <span class="etiqueta-obligatoria-final">región? <span class="req">*</span></span>
             </label>
 
             <select id="disponibilidadViaje" name="disponibilidadViaje" required>
@@ -1062,7 +1061,6 @@
       <section class="grupo" id="seccionApoyosCulturales">
         <h2>Apoyos culturales y comunitarios</h2>
         <p class="ayuda">Cada niño o niña tiene una historia, costumbres y vínculos importantes. Comparte cómo tu familia podría acompañar y respetar esos aspectos durante su desarrollo.</p>
-        <aside id="antecedenteCulturalFamilia" class="cultura-antecedente" hidden><h3>Información cultural registrada anteriormente</h3><p class="pro-texto-registrado" data-texto-anterior></p></aside>
         <div class="campo ancho apoyo-cultural-campo"><label for="apoyoIdiomas">Apoyo con idiomas y comunicación</label><textarea id="apoyoIdiomas" name="apoyoIdiomas" rows="4" aria-describedby="ayuda-apoyoIdiomas"></textarea><p class="ayuda" id="ayuda-apoyoIdiomas">¿Qué idiomas habla tu familia y cómo acompañaría a un niño que utiliza otro idioma?</p></div>
         <div class="campo ancho apoyo-cultural-campo"><label for="respetoTradiciones">Respeto por costumbres y tradiciones</label><textarea id="respetoTradiciones" name="respetoTradiciones" rows="4" aria-describedby="ayuda-respetoTradiciones"></textarea><p class="ayuda" id="ayuda-respetoTradiciones">¿Cómo respetaría las costumbres, celebraciones y tradiciones importantes para el niño?</p></div>
         <div class="campo ancho apoyo-cultural-campo"><label for="recursosComunitarios">Recursos y apoyos comunitarios</label><textarea id="recursosComunitarios" name="recursosComunitarios" rows="4" aria-describedby="ayuda-recursosComunitarios"></textarea><p class="ayuda" id="ayuda-recursosComunitarios">¿Con qué actividades, personas de apoyo o recursos comunitarios cuenta para acompañarlo?</p></div>
@@ -1601,7 +1599,6 @@ if (sesion) {
             const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
           });
           ['redApoyo','condicionesPuedeAcompanarHoy','condicionesConApoyo'].forEach(k => marcarValores(k, p[k] || []));
-          const antecedente=document.getElementById('antecedenteCulturalFamilia');antecedente.hidden=!p.continuidadCultural;antecedente.querySelector('[data-texto-anterior]').textContent=p.continuidadCultural||'';
           ReglasPerfil.refrescarFamilia();
           Profesionales.marcarGuardado(formularioFamilia);
           btnRegistrarFamilia.disabled = false;
@@ -1628,6 +1625,10 @@ if (sesion) {
           'idiomaComunicacion','costumbresTradiciones','vinculosCulturales','opinionCultural','recomendacionesCulturales','contextoCultural','alergiasDetalle','intoleranciaLactosa','condicionesSaludDetalle','necesidadesApoyo'].forEach(k => {
             const campo = document.getElementById(k); if (campo && p[k] != null) campo.value = p[k];
           });
+        document.getElementById('campoContextoCultural').hidden = !Profesionales.mostrarAntecedenteCultural(
+          p.contextoCultural, p,
+          ['idiomaComunicacion', 'costumbresTradiciones', 'vinculosCulturales', 'opinionCultural', 'recomendacionesCulturales']
+        );
         ['habilidades','gustos','personalidad','alergias','condicionesSalud'].forEach(k => marcarValores(k, p[k] || []));
         document.getElementById('unidadEdad').value=p.unidadEdad||'ANIOS';
         document.getElementById('edad').dataset.historicaSinMeses=String(p.edad===0&&p.unidadEdad!=='MESES');

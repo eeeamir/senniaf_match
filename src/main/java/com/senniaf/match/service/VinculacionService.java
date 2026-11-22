@@ -110,6 +110,8 @@ public class VinculacionService {
             var a=new LinkedHashMap<String,Object>();a.put("fechaEmision",v.getFechaEmisionAutorizacion());a.put("fechaInicioConvivencia",v.getFechaInicioConvivencia());a.put("registradaEl",fecha(v.getFechaRegistroAutorizacion()));a.put("inicioRegistradoEl",fecha(v.getFechaRegistroInicio()));
             if(!familiar){a.put("referencia",v.getReferenciaAutorizacion());a.put("responsable",v.getAutorizacionRegistradaPor());a.put("rol",v.getAutorizacionRol());a.put("inicioResponsable",v.getInicioRegistradoPor());a.put("inicioRol",v.getInicioRol());}r.put("autorizacionPreadoptiva",a);
         }
+        if(v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA)r.put("respuestaFamiliar","ACEPTADA");
+        if(Set.of(Vinculacion.Estado.RECHAZADA_POR_FAMILIA,Vinculacion.Estado.RESPUESTA_RECHAZADA_PENDIENTE_CIERRE).contains(v.getEstado()))r.put("respuestaFamiliar","RECHAZADA");
         r.put("fechaRespuesta",fecha(v.getFechaRespuesta()));r.put("disponibilidad",!v.isReservaVigente()?"Pendiente de confirmar elegibilidad para Match":v.getEstado()==Vinculacion.Estado.RESPUESTA_RECHAZADA_PENDIENTE_CIERRE?"Reservado; pendiente de confirmación institucional":"Reservado por asignación vigente");
         r.put("siguientePaso",switch(v.getEstado()){
             case RECHAZADA_POR_FAMILIA -> "Tu respuesta quedó registrada. Gracias por revisar la propuesta. El equipo correspondiente podrá continuar con el seguimiento de tu expediente.";
@@ -133,6 +135,32 @@ public class VinculacionService {
         if(rechazoPortal(v)){
             r.put("siguientePaso",familiar?"Tu respuesta quedó registrada. Gracias por revisar la propuesta. El equipo correspondiente podrá continuar con el seguimiento de tu expediente.":"La propuesta del portal fue rechazada. Esta combinación queda fuera de las recomendaciones automáticas, sin cambiar la idoneidad de los expedientes.");
             r.put("disponibilidad","Sin reserva por esta propuesta; se mantienen los requisitos vigentes de cada expediente.");
+        }
+        {
+            // Solo fechas y respuesta del caso propio; no se exponen informes ni justificaciones internas.
+            Map<String, Object> seguimientoFamiliar = new LinkedHashMap<>();
+            if (seguimiento != null) {
+                seguimientoFamiliar.put("interrupcionRegistradaEl", fecha(seguimiento.getFechaRegistro()));
+                seguimientoFamiliar.put("revisionRegistradaEl", fecha(seguimiento.getFechaRevision()));
+                seguimientoFamiliar.put("interrupcionRol", seguimiento.getRolProfesional());
+                seguimientoFamiliar.put("fechaInterrupcion", seguimiento.getFechaInterrupcion());
+            }
+            seguimientoFamiliar.put("cierreRegistradoEl", fecha(v.getFechaRegistroCierre()));
+            r.put("seguimientoFamiliar", seguimientoFamiliar);
+            if (v.getEstado() == Vinculacion.Estado.CERRADA && v.getFechaRespuesta() != null) {
+                auditoria.findByCodigoCasoOrderByFechaAsc(v.getNino().getCodigoCaso()).stream()
+                    .filter(e -> "RESPUESTA_FAMILIAR".equals(e.getAccion()))
+                    .filter(e -> detalleEvento(e).path("vinculacionId").asLong(-1) == v.getId())
+                    .map(e -> detalleEvento(e).path("estado").asText(""))
+                    .forEach(estadoRespuesta -> {
+                        if ("RESPUESTA_ACEPTADA".equals(estadoRespuesta)) {
+                            r.put("respuestaFamiliar", "ACEPTADA");
+                        } else if (Set.of("RECHAZADA_POR_FAMILIA", "RESPUESTA_RECHAZADA_PENDIENTE_CIERRE")
+                                .contains(estadoRespuesta)) {
+                            r.put("respuestaFamiliar", "RECHAZADA");
+                        }
+                    });
+            }
         }
         if(!familiar){r.put("decisionComite",Map.of("decision",v.getDecision().getDecision(),"responsable",v.getDecision().getFuncionario(),"fecha",fecha(v.getDecision().getFecha()),"motivo",v.getDecision().getMotivo()));r.put("respondidoPor",v.getRespondidoPor());}
         return r;
@@ -225,7 +253,9 @@ public class VinculacionService {
     }
     private void exigirComite(String rol){if(!"COMITE".equals(rol))throw new RolNoAutorizadoException("Solo el Comité puede registrar esta actuación institucional");}
     private Map<String,Object> datosCierre(Vinculacion v){
-        var r=new LinkedHashMap<String,Object>();r.put("fecha",v.getFechaCierre());r.put("referencia",v.getReferenciaCierre());r.put("autoridad",v.getAutoridadCierre());r.put("motivo",v.getMotivoCierre());r.put("registradoPor",v.getCerradoPor());r.put("registradoEl",fecha(v.getFechaRegistroCierre()));r.put("ninoLiberado",v.isNinoLiberado());r.put("familiaLiberada",v.isFamiliaLiberada());return r;
+        var r=new LinkedHashMap<String,Object>();r.put("fecha",v.getFechaCierre());r.put("referencia",v.getReferenciaCierre());r.put("autoridad",v.getAutoridadCierre());r.put("motivo",v.getMotivoCierre());r.put("registradoPor",v.getCerradoPor());r.put("registradoEl",fecha(v.getFechaRegistroCierre()));r.put("ninoLiberado",v.isNinoLiberado());r.put("familiaLiberada",v.isFamiliaLiberada());
+        r.put("estadoInfantil",!v.isNinoLiberado()?"PENDIENTE_REVISION":!v.getNino().isPerfilCompleto() || v.getNino().isBajaLogica() || v.getNino().isCierrePorAdopcion()?"NO_ELEGIBLE":repo.existsByNinoCodigoCasoAndReservaVigenteTrue(v.getNino().getCodigoCaso())?"ASIGNADO":"DISPONIBLE");
+        r.put("estadoFamiliar",!v.isFamiliaLiberada()?"PENDIENTE_REVISION":!v.getFamilia().isPerfilCompleto() || v.getFamilia().isReevaluacionPendiente()?"NO_ELEGIBLE":repo.existsByFamiliaCodigoCasoAndReservaVigenteTrue(v.getFamilia().getCodigoCaso())?"ASIGNADO":"DISPONIBLE");return r;
     }
     /** Solo lee el fundamento guardado; nunca invoca el cálculo actual. */
     private Map<String,Object> compatibilidadOriginal(DecisionComite d){

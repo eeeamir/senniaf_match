@@ -1,0 +1,13 @@
+id	asmaEstructurada	necesidad	capacidad	pesoSalud	esperado	actual	totalReal	estado	razon
+I01	False	Requiere acompañamiento psicológico	Podemos acompañarlo a terapia psicológica	35	35	35	75	EVALUADO	Acompañamiento psicológico: correspondencia actual
+I02	False	Requiere acompañamiento psicológico	Podemos llevarlo a sus citas con el psicólogo	35	35	0	40	DESCONOCIDO	Acompañamiento psicológico: sin capacidad correspondiente registrada
+I03	False	Requiere acompañamiento psicológico	Podemos facilitar que continúe su atención psicológica	35	35	0	40	DESCONOCIDO	Acompañamiento psicológico: sin capacidad correspondiente registrada
+I04	True	Necesita que lo lleven a sus citas con el psicólogo	sin capacidad adicional	35	18	35	75	EVALUADO	Asma: correspondencia actual
+I05	True	Requiere tratamiento especializado	sin capacidad adicional	35	18	18	58	DESCONOCIDO	Asma: correspondencia actual. Necesidad sin equivalencia definida: necesidad por aclarar; sin puntos
+I06	True	Requiere hemodiálisis	sin capacidad adicional	35	18	35	75	EVALUADO	Asma: correspondencia actual
+I07	False	¿Requiere terapia psicológica?	Podemos acompañar terapia psicológica	35	0	35	75	EVALUADO	Acompañamiento psicológico: correspondencia actual
+I08	True	Sin otra necesidad	No siempre podemos acompañar asma	35	0	35	75	EVALUADO	Asma: correspondencia actual
+I09	True	Sin otra necesidad	Antes acompañamos a un niño con asma	35	0	35	75	EVALUADO	Asma: correspondencia actual
+I10	True	Es introvertido	Podemos acompañar asma	35	35	35	75	EVALUADO	Asma: correspondencia actual
+I11	False	Requiere acompañamiento psicológico	No podemos acompañar terapia psicológica	35	0	0	40	EVALUADO	Acompañamiento psicológico: incapacidad expresamente declarada
+I12	False	Requiere acompañamiento psicológico	Quizás podríamos acompañar terapia psicológica	35	0	0	40	DESCONOCIDO	Acompañamiento psicológico: declaraciones contradictorias o ambiguas; sin puntos

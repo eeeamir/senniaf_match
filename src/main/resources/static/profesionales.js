@@ -67,10 +67,10 @@ const Profesionales = {
     if(!['TRABAJADOR_SOCIAL','PSICOLOGO','COMITE','FAMILIA'].includes(s?.rol)||document.getElementById('navegacionProfesional'))return;
     document.body.classList.add('profesional');
     const opciones=s.rol==='FAMILIA'
-      ? [['inicio','match.html','inicio','Inicio'],['entrevista','match.html?vista=entrevista','informe','Mi entrevista'],['propuesta','match.html?vista=propuesta','vinculacion','Mi vinculación'],['historial','match.html?vista=historial','reloj','Historial']]
+      ? [['inicio','match.html','inicio','Inicio'],['entrevista','match.html?vista=entrevista','informe','Mi entrevista'],['propuesta','match.html?vista=propuesta','vinculacion','Mi vinculación'],['citas','citas.html','calendario','Mis citas'],['historial','match.html?vista=historial','reloj','Historial']]
       : s.rol==='COMITE'
       ? [['inicio','match.html','inicio','Inicio'],['compatibilidad','match.html?vista=compatibilidad','salud','Compatibilidad'],['solicitudes','match.html?vista=solicitudes','solicitudes','Solicitudes'],['criterios','match.html?vista=criterios','criterios','Criterios']]
-      : [['inicio','funcionario.html','inicio','Inicio'],['expedientes','perfiles.html','carpeta','Mis expedientes'],...(s.rol==='TRABAJADOR_SOCIAL'?[['registro','perfil.html','nuevo','Registrar perfil']]:[])];
+      : [['inicio','funcionario.html','inicio','Inicio'],['expedientes','perfiles.html','carpeta','Mis expedientes'],...(s.rol==='TRABAJADOR_SOCIAL'?[['registro','perfil.html','nuevo','Registrar perfil'],['citas','citas.html','calendario','Gestión de citas']]:[])];
     if(s.rol!=='FAMILIA')opciones.push(['vinculaciones','vinculaciones.html','vinculacion','Vinculaciones']);
     const nav=document.createElement('aside');nav.className='pro-sidebar';nav.id='navegacionProfesional';
     nav.innerHTML=`<nav aria-label="Navegación principal">${opciones.map(([clave,href,icono,texto])=>`<a href="${href}" ${seleccionado===clave?'aria-current="page"':''}>${this.icono(icono)}<span>${texto}</span></a>`).join('')}</nav><div class="pro-sidebar-pie"><button type="button" id="proSalir">${this.icono('salir')}Cerrar sesión</button></div>`;
@@ -118,10 +118,22 @@ const Profesionales = {
     const bloque=document.createElement('div');bloque.className='pro-sugerencias';bloque.setAttribute('aria-label','Sugerencias para redactar');
     opciones.forEach(([titulo,texto])=>{const b=document.createElement('button');b.type='button';b.className='pro-sugerencia';b.textContent=titulo;b.onclick=()=>{campo.value=texto;campo.dispatchEvent(new Event('input',{bubbles:true}));campo.focus();};bloque.append(b);});campo.insertAdjacentElement('afterend',bloque);
   },
-  avisoReevaluaciones(numero){
-    const n=Number.isInteger(Number(numero))&&Number(numero)>=0?Number(numero):0;
-    if(n<3)return '';
-    return `<aside class="pro-aviso-reevaluaciones ${n>=3?'destacado':''}"><h3>${this.icono('informacion')}Historial de reevaluaciones</h3><p>Esta familia registra <strong>${n} reevaluaciones completadas</strong>. ${n>=3?'Revisa sus antecedentes antes de continuar. Aviso para revisión humana, sin sanción automática.':'Las solicitudes pendientes no se incluyen en esta cantidad.'}</p></aside>`;
+  mostrarAntecedenteCultural(valor, datos, campos) {
+    const normalizar = (texto) =>
+      String(texto || '')
+        .trim()
+        .replace(/\s+/g, ' ');
+    const anterior = normalizar(valor);
+    return Boolean(anterior) && !campos.some((campo) => normalizar(datos[campo]) === anterior);
+  },
+  avisoReevaluaciones(numero) {
+    const cantidad = Number(numero);
+    if (!Number.isInteger(cantidad) || cantidad <= 0) return '';
+    return `
+      <aside class="pro-aviso-reevaluaciones">
+        <h3>${this.icono('informacion')}Historial de reevaluaciones</h3>
+        <p>Reevaluaciones completadas: <strong>${cantidad}</strong></p>
+      </aside>`;
   },
   avisoInterrupcion(antecedente){
     if(!antecedente?.revisada)return '';

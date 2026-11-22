@@ -4,11 +4,13 @@ import sys
 import zipfile
 
 
-def compatible(archivo, esquema_vinculaciones, esquema_interrupciones="f", esquema_cierre="f", esquema_refuerzos="f", esquema_cierre_servidor="f", esquema_cultura="f", esquema_apoyos="f", esquema_autorizacion="f"):
-    if esquema_autorizacion not in {"t", "f"} or esquema_apoyos not in {"t", "f"} or esquema_cultura not in {"t", "f"} or esquema_vinculaciones not in {"t", "f"} or esquema_interrupciones not in {"t", "f"} or esquema_cierre not in {"t", "f"} or esquema_refuerzos not in {"t", "f"} or esquema_cierre_servidor not in {"t", "f"}:
+def compatible(archivo, esquema_vinculaciones, esquema_interrupciones="f", esquema_cierre="f", esquema_refuerzos="f", esquema_cierre_servidor="f", esquema_cultura="f", esquema_apoyos="f", esquema_autorizacion="f", esquema_citas="f", esquema_reingreso="f"):
+    if esquema_reingreso not in {"t", "f"} or esquema_citas not in {"t", "f"} or esquema_autorizacion not in {"t", "f"} or esquema_apoyos not in {"t", "f"} or esquema_cultura not in {"t", "f"} or esquema_vinculaciones not in {"t", "f"} or esquema_interrupciones not in {"t", "f"} or esquema_cierre not in {"t", "f"} or esquema_refuerzos not in {"t", "f"} or esquema_cierre_servidor not in {"t", "f"}:
         return False, "No se pudo confirmar el esquema. Se conserva el servicio sin sustituir el JAR."
     try:
         with zipfile.ZipFile(archivo) as jar:
+            tiene_reingreso = any(n.endswith("META-INF/senniaf-reingreso-revisado.properties") for n in jar.namelist())
+            tiene_citas = "BOOT-INF/classes/com/senniaf/match/model/CitaVinculacion.class" in jar.namelist()
             tiene_autorizacion = "BOOT-INF/classes/com/senniaf/match/dto/AutorizacionPreadoptivaRequest.class" in jar.namelist()
             tiene_apoyos = "BOOT-INF/classes/com/senniaf/match/model/enums/MotivoInterrupcion.class" in jar.namelist()
             tiene_cultura = "BOOT-INF/classes/com/senniaf/match/dto/ContinuidadCulturalRequest.class" in jar.namelist()
@@ -39,12 +41,16 @@ def compatible(archivo, esquema_vinculaciones, esquema_interrupciones="f", esque
         return False, "El JAR requiere apoyos familiares y registro de interrupción compatibles (018)."
     if tiene_autorizacion and esquema_autorizacion != "t":
         return False, "El JAR requiere autorización, inicio efectivo y apartados estructurados completos (019)."
+    if tiene_citas and esquema_citas != "t":
+        return False, "El módulo de citas requiere la migración aditiva 020 completa. No se sustituirá el servicio."
+    if tiene_reingreso != (esquema_reingreso == "t"):
+        return False, "El reingreso revisado necesita código y esquema compatibles con 021. No se sustituirá ni recuperará este JAR."
     return True, "El JAR corresponde a la etapa actual del esquema de vinculaciones."
 
 
 if __name__ == "__main__":
-    if len(sys.argv) not in {3,4,5,6,7,8,9,10}:
-        sys.exit("Uso: verificar-compatibilidad.py archivo.jar vinculaciones:t|f [interrupciones:t|f] [cierres:t|f] [refuerzos:t|f] [cierre-servidor:t|f] [cultura:t|f] [apoyos:t|f] [autorizacion:t|f]")
-    valido, mensaje = compatible(sys.argv[1], sys.argv[2],sys.argv[3] if len(sys.argv)>=4 else "f",sys.argv[4] if len(sys.argv)>=5 else "f",sys.argv[5] if len(sys.argv)>=6 else "f",sys.argv[6] if len(sys.argv)>=7 else "f",sys.argv[7] if len(sys.argv)>=8 else "f",sys.argv[8] if len(sys.argv)>=9 else "f",sys.argv[9] if len(sys.argv)==10 else "f")
+    if len(sys.argv) not in {3,4,5,6,7,8,9,10,11,12}:
+        sys.exit("Uso: verificar-compatibilidad.py archivo.jar vinculaciones:t|f [interrupciones:t|f] [cierres:t|f] [refuerzos:t|f] [cierre-servidor:t|f] [cultura:t|f] [apoyos:t|f] [autorizacion:t|f] [citas:t|f] [reingreso:t|f]")
+    valido, mensaje = compatible(sys.argv[1], sys.argv[2],sys.argv[3] if len(sys.argv)>=4 else "f",sys.argv[4] if len(sys.argv)>=5 else "f",sys.argv[5] if len(sys.argv)>=6 else "f",sys.argv[6] if len(sys.argv)>=7 else "f",sys.argv[7] if len(sys.argv)>=8 else "f",sys.argv[8] if len(sys.argv)>=9 else "f",sys.argv[9] if len(sys.argv)>=10 else "f",sys.argv[10] if len(sys.argv)>=11 else "f",sys.argv[11] if len(sys.argv)==12 else "f")
     print(mensaje)
     sys.exit(0 if valido else 1)
