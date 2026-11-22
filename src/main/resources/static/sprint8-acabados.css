@@ -1,0 +1,325 @@
+/* Alcance explícito: Inicio e información social/psicológica infantil no reciben esta clase. */
+body.s8-acabado{background:#f4f7fc;color:#173b5c}
+.s8-acabado :is(.tarjeta,.grupo,.pro-dialogo){border-color:#d9e4f1;box-shadow:0 5px 20px #173b5c06}
+.s8-acabado :is(h1,h2,h3){color:#0b3558}
+.s8-acabado .boton:not(.secundario){background:#1265f2;border-color:#1265f2;color:#fff}
+.s8-acabado .boton.secundario{background:#fff;border-color:#c4d6eb;color:#174b7d}
+.s8-acabado .boton:hover{filter:brightness(.97)}
+.s8-acabado .hero{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(110deg,#fff 10%,#edf3ff 65%,#f0e9ff);border:1px solid #dce5f1}
+.s8-acabado .hero::before{content:'';position:absolute;pointer-events:none;z-index:-1;width:160px;height:160px;border-radius:50%;right:-55px;top:-85px;background:#c9eee4;opacity:.6}
+.s8-acabado .hero::after{pointer-events:none}
+.s8-acabado .pro-simbolo{background:#ddeBff;color:#1265f2;flex-shrink:0}
+.s8-acabado .pro-expediente-tarjeta>header{background:#edf4ff;border-radius:12px;padding:16px}
+.s8-acabado .pro-expediente-tarjeta.verde>header{background:#e7f8f1}
+.s8-acabado .pro-expediente-tarjeta.verde>header>.pro-icono{color:#00846c}
+.s8-acabado .pro-compatibilidad-familia{background:linear-gradient(135deg,#fff 80%,#f3f9f7);border-radius:16px}
+.s8-acabado .pro-analisis-resumen{background:linear-gradient(115deg,#fff,#edf4ff)}
+.s8-acabado :is(.pro-aviso-programacion,.pro-aviso-reevaluaciones){background:#fff8e6;border-color:#ead3a0}
+.s8-acabado .pro-aviso-interrupcion{display:flex;align-items:flex-start;gap:14px;grid-column:1/-1;width:100%;padding:18px 20px;margin:0 0 20px;background:#fff9ee;border:1px solid #efd39f;border-radius:16px;box-sizing:border-box}
+.s8-acabado .pro-aviso-interrupcion .pro-simbolo{width:40px;height:40px;background:#fff0d1;color:#a36a11}
+.s8-acabado .pro-aviso-interrupcion h3{font-size:16px;margin:0 0 8px;font-weight:650}
+.s8-acabado .pro-aviso-interrupcion p{margin:0 0 6px;line-height:1.6;color:#526c89}
+.s8-acabado .pro-aviso-interrupcion small{color:#92601e;line-height:1.5}
+.s8-acabado #datosDetalle>:is(.pro-aviso-reevaluaciones,.pro-aviso-interrupcion){grid-column:1/-1;margin:0 0 20px}
+.s8-acabado .pro-dialogo{border-radius:22px;padding:28px;color:#173b5c}
+.s8-acabado .pro-modal-cabecera{gap:14px;align-items:center}
+.s8-acabado .pro-dialogo :is(input:not([type=checkbox]):not([type=radio]),textarea,select){border:1px solid #cfdded;border-radius:11px;background:#fbfdff}
+.s8-acabado .pro-dialogo textarea{resize:vertical;min-height:100px}
+.s8-acabado .pro-dialogo .pro-acciones{gap:10px;margin-top:16px}
+.s8-acabado .pro-dialogo-reevaluacion{width:min(880px,calc(100vw - 32px))}
+.s8-acabado .pro-dialogo-reevaluacion form{display:grid;gap:16px}
+.s8-acabado .pro-dialogo-reevaluacion :is(fieldset,label,p){margin-top:0;margin-bottom:0}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion{padding:0;border:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.s8-acabado .pro-instruccion-apartados{grid-column:1/-1;line-height:1.5;margin:4px 0 6px!important}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion legend{font-weight:650;margin-bottom:6px}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label{display:flex;align-items:center;gap:10px;min-height:76px;padding:12px;background:#f5f8fd;border:1px solid #d9e4f1;border-radius:13px;font-size:13px;line-height:1.45;cursor:pointer}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label:has(:checked){background:#edf4ff;border-color:#1265f2;box-shadow:inset 0 0 0 1px #1265f2}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion .pro-icono{width:32px;height:32px;box-sizing:content-box;padding:7px;border-radius:10px;background:#e7f8f1;color:#008268;flex-shrink:0}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label:nth-of-type(2n) .pro-icono{background:#f0e9ff;color:#7145ad}
+.s8-acabado .pro-dialogo-reevaluacion .pro-motivos{gap:8px;padding:0;border:0}
+.s8-acabado .pro-dialogo-reevaluacion .pro-motivo{padding:9px 12px;background:#fbfcff;border:1px solid #dfe6f1;border-radius:10px}
+.s8-acabado .pro-dialogo-reevaluacion form>label{display:grid;gap:8px}
+.s8-acabado .pro-dialogo-reevaluacion .pro-motivo:has(:checked){background:#edf4ff;border-color:#a6c6ff}
+.s8-acabado .pro-dialogo-decision .pro-modal-cabecera>.pro-simbolo{background:#f0e9ff;color:#7145ad}
+.s8-acabado .pro-circulo{background:#e7f8f1;border-color:#c1e6d5;color:#125b4f}
+.s8-acabado .chip{border-color:transparent}
+.s8-acabado .chip.vinculacion-pendiente{background:#ddeBff;color:#185195}
+.s8-acabado .familia-confirmacion .menta{background:#dff5e8;color:#087044}
+.s8-acabado .familia-seguimiento>header>.vinculacion-emblema{background:#f0e9ff;color:#7145ad}
+.s8-acabado .familia-siguiente{background:#edf4ff}
+.s8-acabado .vinculacion-general{background:linear-gradient(115deg,#fff 65%,#f1f7ff)}
+.s8-acabado .vinculacion-acceso.menta{background:linear-gradient(120deg,#fff,#e7f8f1)}
+.s8-acabado .vinculacion-reporte.menta>summary{background:#fff}
+.s8-acabado .vinculacion-reporte.lavanda>summary{background:#fff}
+.s8-acabado .vinculacion-autorizacion{position:relative;isolation:isolate;overflow:hidden}
+.s8-acabado .vinculacion-autorizacion::after{content:'';position:absolute;z-index:-1;pointer-events:none;width:110px;height:110px;border-radius:50%;right:-35px;top:-55px;background:#f0e9ff}
+.s8-acabado #seguimiento-incidencias .tarjeta{border-color:#eddbcc}
+.s8-acabado #seguimiento-incidencias .vinculacion-emblema{background:#ffe8db;color:#9c4e23}
+.s8-acabado :is(.aviso-legal-familia,.s8-aviso-icono){display:flex!important;align-items:flex-start;gap:10px;line-height:1.65}
+.s8-acabado :is(.aviso-legal-familia,.s8-aviso-icono)>.pro-icono{display:block;align-self:flex-start;flex:0 0 20px;width:20px;height:1.65em;margin:0!important;vertical-align:initial;transform:none}
+.s8-acabado :is(.aviso-legal-familia,.s8-aviso-icono)>span{margin:0;min-width:0}
+.s8-acabado .pro-dialogo :is(.ayuda,.mensaje)> .pro-icono{margin-right:10px;vertical-align:middle}
+.s8-acabado .s8-autorizacion-dialogo form{display:grid;gap:16px}
+.s8-acabado .s8-autorizacion-dialogo form>label:not(.pro-confirmacion-check){display:grid;gap:8px}
+.s8-acabado .s8-autorizacion-dialogo .pro-confirmacion-check{display:flex;align-items:flex-start;gap:10px}
+.s8-acabado #seccionApoyosCulturales{padding:0 0 22px;background:linear-gradient(135deg,#fff 85%,#f3fbf8);border-radius:18px}
+.s8-acabado #seccionApoyosCulturales>h2{margin:0 0 18px;padding:18px 24px;background:#edf8f4}
+.s8-acabado #seccionApoyosCulturales>p.ayuda{padding:0 24px;margin:0 0 20px;line-height:1.6}
+.s8-acabado #seccionApoyosCulturales .apoyo-cultural-campo{display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,2fr);gap:8px 22px;margin:20px 24px;padding:0}
+.s8-acabado #seccionApoyosCulturales .apoyo-cultural-campo label{align-self:start;line-height:1.5;padding-top:8px}
+.s8-acabado #seccionApoyosCulturales .apoyo-cultural-campo textarea{width:100%;min-height:84px;height:96px;border:1px solid #d0ddec;border-radius:11px;background:#fff;resize:vertical;font-size:14px;line-height:1.55;padding:12px}
+.s8-acabado #seccionApoyosCulturales .apoyo-cultural-campo .ayuda{grid-column:2;line-height:1.5;font-size:12px;color:#56708d}
+.s8-acabado :is(.pro-acciones,.vinculacion-cabecera h2,.pro-fila-titulo h2){gap:10px}
+@media(max-width:700px){
+ .s8-acabado .hero::before{width:100px;height:100px;right:-50px;top:-65px}
+ .s8-acabado .pro-dialogo{padding:20px}
+ .s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label{padding:10px;gap:8px;flex-wrap:wrap}
+ .s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label span{flex:1 0 90px}
+ .s8-acabado #seccionApoyosCulturales{padding:0 0 20px}
+ .s8-acabado #seccionApoyosCulturales>h2{margin:0 0 18px;padding:18px 20px}
+ .s8-acabado #seccionApoyosCulturales .apoyo-cultural-campo{grid-template-columns:1fr;gap:8px;margin:20px}
+ .s8-acabado #seccionApoyosCulturales .apoyo-cultural-campo .ayuda{grid-column:1}
+ .s8-acabado .pro-aviso-interrupcion{padding:16px;gap:10px}
+ .s8-acabado .vinculacion-autorizacion::after{display:none}
+}
+
+.s8-acabado :is(h2,h3):has(>.pro-icono){display:flex;align-items:center;gap:10px}.s8-acabado :is(h2,h3,.chip)>.pro-icono{flex-shrink:0;margin:0}
+.s8-acabado .pro-pesos-vigentes>div{background:#edf4ff;border:1px solid #d7e5f5;border-radius:13px;padding:16px}
+.s8-acabado .pro-pesos-vigentes>div:nth-child(2n){background:#e7f8f1;border-color:#d1eade}
+.s8-acabado .pro-pesos-vigentes>div:nth-child(3){background:#f0e9ff;border-color:#e1d7f6}
+.s8-acabado .pro-ajuste-fila:nth-child(2n)>.pro-simbolo{background:#e7f8f1;color:#087d65}
+.s8-acabado .pro-ajuste-fila:nth-child(3)>.pro-simbolo{background:#f0e9ff;color:#7145ad}
+.s8-acabado .pro-ajuste-total{background:#edf8f4;border-radius:12px;padding:14px 18px}
+.s8-acabado .familia-actividad>li h3 .chip{background:#e7f8f1;color:#166747}
+
+.s8-acabado .pro-dialogo [data-error]:empty{display:none}.s8-acabado .s8-autorizacion-dialogo form>p{margin:0}.s8-acabado .vinculacion-etapas [data-autorizacion]{margin-top:12px}.s8-acabado .vinculacion-estado-hero .chip.retirado{background:#ffe8ed;color:#864050}
+
+/* Los apartados familiares comparten proporciones; el color identifica cada sección. */
+.s8-acabado .pro-expedientes-completos{gap:14px 16px;align-items:start}
+.s8-acabado .pro-expedientes-completos>.detalle-grupo{padding:0;margin:0!important;border-radius:16px;box-shadow:0 3px 12px #173b5c04}
+.s8-acabado .pro-expedientes-completos>.detalle-grupo>summary{min-height:76px;padding:16px 18px;gap:12px;font-size:15px;line-height:1.45;background:#fff}
+.s8-acabado .pro-expedientes-completos>.detalle-grupo:last-of-type{grid-column:1/-1}
+.s8-acabado .pro-expedientes-completos>.detalle-grupo>summary>.pro-icono{width:22px;height:22px;padding:0;background:transparent;color:#17806d;border-radius:0}
+.s8-acabado .pro-expedientes-completos>.detalle-grupo:nth-of-type(2)>summary>.pro-icono{color:#7951ad}
+.s8-acabado .pro-expedientes-completos>.detalle-grupo:nth-of-type(3)>summary>.pro-icono{color:#2673c8}
+.s8-acabado .pro-expedientes-completos>#apoyosCulturales>summary>.pro-icono{color:#ac631f}
+.s8-acabado .pro-expedientes-completos>.detalle-grupo:last-of-type>summary>.pro-icono{color:#5267b1}
+.s8-acabado .pro-expedientes-completos>.detalle-grupo>summary::after{align-self:center;line-height:1;font-size:18px;color:#56708d}
+.s8-acabado .pro-expedientes-completos>.detalle-grupo[open]>summary{border-bottom:1px solid #e0e8f0}
+.s8-acabado .pro-expedientes-completos>.detalle-grupo .detalle-datos{padding-top:4px}
+.s8-acabado .pro-aviso-interrupcion{gap:10px;padding:12px 16px;margin:0;border-radius:14px;background:#fff9ee}
+.s8-acabado .pro-aviso-interrupcion .pro-simbolo{width:24px;height:24px;background:transparent;border-radius:0}
+.s8-acabado .pro-aviso-interrupcion .pro-simbolo>.pro-icono{width:20px;height:20px}
+.s8-acabado .pro-aviso-interrupcion h3{margin:0 0 6px;font-size:15px;line-height:24px}
+.s8-acabado .pro-aviso-interrupcion p{font-size:14px;line-height:1.55;margin-bottom:4px}
+.s8-acabado .pro-aviso-interrupcion small{font-size:12px}
+.s8-acabado #datosDetalle>:is(.pro-aviso-interrupcion,.pro-aviso-reevaluaciones){margin:0;grid-column:1/-1}
+/* Los encabezados y acciones mantienen la misma separación sin mover el contenido de lectura. */
+.s8-acabado .pro-fila-titulo{gap:16px;align-items:center}
+.s8-acabado .vinculacion-general>h2,.s8-acabado .vinculacion-panel>.tarjeta>h2{margin-top:0}
+.s8-acabado .vinculacion-etapas>li{gap:16px;padding-block:16px}
+.s8-acabado .vinculacion-etapas h3{margin:0 0 6px;line-height:1.4}
+.s8-acabado .vinculacion-etapas p{margin:0;line-height:1.6}
+.s8-acabado .familia-entrevista-seccion{border-radius:16px;margin-bottom:16px}
+.s8-acabado .familia-entrevista-seccion>summary{padding:16px 20px;min-height:76px;gap:12px}
+.s8-acabado .familia-entrevista-seccion .pro-simbolo{width:38px;height:38px;border-radius:12px}
+.s8-acabado .familia-seguimiento>header{gap:12px;align-items:center}
+.s8-acabado .familia-seguimiento>header h3{margin-bottom:6px}
+.s8-acabado .pro-expediente-tarjeta>header{gap:12px;align-items:center}
+.s8-acabado .pro-expediente-tarjeta>header h2{margin:0 0 6px}
+.s8-acabado .pro-expediente-tarjeta>header p{margin:0}
+.s8-acabado .pro-expediente-tarjeta li{gap:12px;padding-block:12px}
+.s8-acabado .pro-dialogo-decision[open]{display:grid;grid-template-columns:48px minmax(0,1fr);column-gap:12px;row-gap:12px}
+.s8-acabado .pro-dialogo-decision>.pro-modal-cabecera{grid-column:1/-1;display:grid;grid-template-columns:48px minmax(0,1fr);gap:12px;margin:0;align-items:center}
+.s8-acabado .pro-dialogo-decision>.pro-modal-cabecera h2{margin:0;line-height:1.3}
+.s8-acabado .pro-dialogo-decision>.pro-modal-contexto{grid-column:2;margin:0 0 4px;padding:0;background:transparent;line-height:1.5}
+.s8-acabado .pro-dialogo-decision>form{grid-column:1/-1;min-width:0}
+.s8-acabado .pro-dialogo-reevaluacion{width:920px;max-width:calc(100vw - 32px)}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label{position:relative;display:grid;grid-template-columns:1fr auto;gap:8px;padding:12px;align-content:start;min-height:120px;background:#f2f7ff}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label:nth-of-type(2){background:#fff6eb}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label:nth-of-type(3){background:#f5f0ff}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label:nth-of-type(4){background:#edf7fc}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label:nth-of-type(5){background:#eef9f3}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion input{grid-column:2;grid-row:1;margin:0;align-self:center}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion .pro-icono{grid-column:1;grid-row:1;width:26px;height:26px;padding:6px}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion span{grid-column:1/-1;line-height:1.4}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label:has(:checked){background:#e8f2ff;border-color:#1265f2}
+.s8-acabado .pro-dialogo-reevaluacion textarea{min-height:110px;font-weight:400;line-height:1.6}
+.s8-acabado .pro-dialogo .pro-acciones{justify-content:flex-end;align-items:center;gap:10px;margin-top:16px}
+.s8-acabado #seccionApoyosCulturales>p.ayuda:last-child{margin-bottom:0}
+.s8-acabado .hero::before{display:block;right:0;top:0;transform:translate(35%,-55%);background:#d0eee4;opacity:.45}
+@media(max-width:1000px){.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){
+ .s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label{min-height:116px}
+ .s8-acabado .pro-dialogo .pro-acciones{flex-direction:row;flex-wrap:wrap}
+ .s8-acabado .pro-dialogo .pro-acciones>.boton{flex:1 1 120px;min-width:0}
+ .s8-acabado .pro-dialogo-decision[open],.s8-acabado .pro-dialogo-decision>.pro-modal-cabecera{grid-template-columns:38px minmax(0,1fr)}
+ .s8-acabado .pro-dialogo-decision>.pro-modal-cabecera .pro-simbolo{width:38px;height:38px}
+ .s8-acabado .pro-dialogo-decision>.pro-modal-cabecera h2{font-size:21px}
+ .s8-acabado .pro-aviso-interrupcion{padding:12px;gap:8px}
+ .s8-acabado .pro-expedientes-completos>.detalle-grupo>summary{padding:14px 16px;min-height:72px}
+ .s8-acabado #seccionApoyosCulturales>p.ayuda{padding-inline:20px}
+}
+@media(min-width:761px) and (max-width:1100px){
+ .s8-acabado main,.s8-acabado main.ancho{padding-inline:24px}
+ .s8-acabado :is(.pro-dashboard,.vinculacion-accesos,.pro-expedientes-completos){grid-template-columns:1fr}
+ .s8-acabado .pro-expediente-tarjeta{min-width:0}
+ .s8-acabado .pro-analisis-resumen{flex-wrap:wrap}
+}
+.s8-acabado .tabla{max-width:100%;overflow-x:auto}
+.s8-acabado :is(.tarjeta,.pro-dashboard>*,.vinculacion-accesos>*){min-width:0}
+.s8-acabado .hero::before{left:auto}
+.s8-acabado .pro-dialogo-reevaluacion textarea{font-weight:400!important}
+/* Cada icono conserva un acento intenso sobre un fondo de su misma familia cromática. */
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label:nth-of-type(1) .pro-icono{color:#1763c2;background:#ddeBff}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label:nth-of-type(2) .pro-icono{color:#a75a12;background:#ffead5}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label:nth-of-type(3) .pro-icono{color:#7145ad;background:#ece2ff}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label:nth-of-type(4) .pro-icono{color:#176ba4;background:#dceffa}
+.s8-acabado .pro-dialogo-reevaluacion .pro-apartados-reevaluacion label:nth-of-type(5) .pro-icono{color:#087a59;background:#dff5e8}
+.s8-acabado .familia-interrupcion{padding:14px 16px;border:1px solid #d8e4f1;border-radius:14px;background:#f4f7fc;gap:12px}
+.s8-acabado .familia-interrupcion .vinculacion-emblema{width:36px;height:36px;background:#ddeBff;color:#2365aa;flex-shrink:0}
+.s8-acabado .familia-interrupcion h3{font-size:16px}
+.s8-acabado #contenido>.mensaje.exito{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border:1px solid #c4e5d0;border-radius:12px;background:#dff5e8;color:#22623d}
+.s8-acabado .familia-entrevista-seccion > summary {
+  background: #fff;
+}
+.s8-acabado .familia-entrevista-seccion:nth-of-type(1) .pro-simbolo{background:#e7f8f1;color:#087a59}
+.s8-acabado .familia-entrevista-seccion:nth-of-type(2) .pro-simbolo{background:#f0e9ff;color:#7145ad}
+.s8-acabado .familia-entrevista-seccion:nth-of-type(3) .pro-simbolo{background:#ddeBff;color:#1763c2}
+.s8-acabado .familia-entrevista-seccion:nth-of-type(4) .pro-simbolo{background:#e7f8f1;color:#087a59}
+.s8-acabado .familia-entrevista-seccion:nth-of-type(5) .pro-simbolo{background:#ffe8db;color:#a75a12}
+.s8-acabado .pro-pesos-vigentes>div{background:#fff!important;display:grid;gap:8px;align-content:start}
+.peso-icono{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#ddeBff;color:#1763c2}
+.peso-hermanos,.peso-apoyo{background:#e7f8f1;color:#087a59}.peso-salud{background:#f0e9ff;color:#7145ad}.peso-logistica{background:#ffe8db;color:#a75a12}
+.s8-acabado #seccionApoyosCulturales>h2{background:#fff}
+.s8-acabado:has(#buscarCompatibilidad) .hero::before{display:none}
+.s8-acabado #compatibilidadRegistrada{padding-block:18px}
+.s8-acabado #compatibilidadRegistrada p{margin-block:8px}
+.s8-acabado #compatibilidadRegistrada .detalle-datos>div{padding-block:10px}
+
+/* Cierre visual: consultas y seguimiento sobre los mismos registros. */
+.s8-acabado .vinculacion-reporte { background:#fff; border:1px solid #dce7f5; }
+.s8-acabado .vinculacion-reporte>summary { display:flex; align-items:center; gap:12px; }
+.s8-acabado .vinculacion-reporte>summary .vinculacion-emblema { color:#0064ff; background:#edf4ff; }
+.pro-familias-reevaluacion { margin-top:28px; padding:24px; }
+.pro-familias-reevaluacion>h2 { display:flex; align-items:center; gap:12px; margin:0 0 20px; }
+.pro-reevaluacion-fila { display:flex; align-items:center; gap:20px; flex-wrap:wrap; padding:20px; border:1px solid #dce7f5; border-radius:14px; margin-top:14px; }
+.pro-reevaluacion-fila h3,.pro-reevaluacion-fila p { margin:0; }
+.pro-reevaluacion-fila p { flex:1 1 220px; }
+.pro-reevaluacion-fila .chip { display:inline-flex; align-items:center; gap:8px; background:#fff4d6; color:#805600; }
+#propuestasComite>.pro-compatibilidad-caso { margin-top:24px; padding:24px; }
+.pro-cambio { background:#fff; border:1px solid #e1eaf5; border-radius:14px; padding:18px; margin-top:18px; }
+.pro-cambio h4 { margin:0 0 14px; color:#0b3558; }
+.pro-cambio .pro-cambio-valores { grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr); gap:16px; padding:0; background:#fff; margin:0; align-items:stretch; }
+.pro-cambio-valores>span { padding:14px; border-radius:10px; background:#f5f7fa; line-height:1.6; }
+.pro-cambio-valores>span:last-child { background:#f0f6ff; border:1px solid #e4edfa; }
+.pro-cambio-valores strong { display:inline-block; color:#455d79; margin-bottom:8px; }
+.pro-cambio-valores>span:last-child strong { color:#0064d9; }
+.pro-cambio-valores>.pro-cambio-flecha { display:flex; align-items:center; justify-content:center; padding:0; background:transparent; color:#567495; font-size:22px; }
+@media(max-width:760px){
+  .pro-cambio .pro-cambio-valores { grid-template-columns:minmax(0,1fr); gap:10px; }
+  .pro-cambio-valores>.pro-cambio-flecha { transform:rotate(90deg); }
+  .pro-familias-reevaluacion,#propuestasComite>.pro-compatibilidad-caso { padding:18px; }
+  .pro-reevaluacion-fila { padding:16px; gap:14px; }
+}
+
+/* Mantener las acciones de consulta y respuesta sobre la misma línea de base. */
+.familia-propuesta-acciones .familia-informacion-asignada {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.familia-propuesta-acciones .familia-informacion-asignada > .vinculacion-emblema {
+  align-self: start;
+}
+
+.familia-seguimiento .familia-etapas {
+  margin-block: 28px;
+}
+
+.familia-etapas li {
+  color: #476788;
+}
+
+.familia-etapas .interrumpido .familia-paso {
+  background: #fff0f0;
+  color: #a12232;
+  border-color: #a12232;
+}
+
+.familia-etapas .registrada .familia-paso {
+  background: #e7f8f1;
+  color: #087a59;
+}
+
+/* Una sola flecha por desplegable; se conserva el elemento summary nativo. */
+.profesional summary:has(> .pro-icono) {
+  list-style: none;
+}
+
+.profesional summary:has(> .pro-icono)::-webkit-details-marker {
+  display: none;
+}
+
+.profesional summary:has(.familia-desplegar)::after {
+  content: none;
+}
+
+.pro-aviso-reevaluaciones {
+  margin-block: 24px;
+}
+
+@media (max-width: 760px) {
+  .familia-propuesta-acciones .familia-informacion-asignada {
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .familia-propuesta-acciones .familia-informacion-asignada .boton {
+    grid-column: 2;
+    justify-self: start;
+    margin-left: 0;
+  }
+}
+
+.vinculaciones-lista .vinculacion-cabecera {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.vinculacion-estados {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.vinculacion-estados .vinculacion-antecedente {
+  font-size: 0.75rem;
+}
+
+.profesional #propuestasComite + .pro-familias-reevaluacion {
+  margin-top: 28px;
+}
+
+#formularioFamilia label[for="disponibilidadViaje"] {
+  display: block;
+}
+
+.etiqueta-obligatoria-final {
+  white-space: nowrap;
+}
+
+.s8-acabado .chip.vinculacion-negativa { background: #fff0f0; color: #a12232; }
+.s8-acabado .chip.vinculacion-positiva { background: #eaf6ee; color: #21633b; }
+.s8-acabado .vinculacion-etapas .interrumpido .vinculacion-hito { background: #fff0f0; border-color: #a12232; color: #a12232; }
+.s8-acabado .vinculacion-etapas .completado .vinculacion-hito { background: #21633b; border-color: #21633b; color: #fff; }
+.s8-acabado .familia-etapas .interrumpido .familia-paso { background: #fff0f0; color: #a12232; border-color: #a12232; }
+.s8-acabado .familia-etapas .interrumpido small { color: #a12232; }
+.s8-acabado .vinculacion-cierre p, .s8-acabado .vinculacion-linea p { color: #476788; }

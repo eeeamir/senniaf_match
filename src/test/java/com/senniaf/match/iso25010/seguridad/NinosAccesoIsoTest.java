@@ -1,6 +1,8 @@
 package com.senniaf.match.iso25010.seguridad;
 
 import com.senniaf.match.controller.PerfilNinoController;
+import com.senniaf.match.model.PerfilNino;
+import com.senniaf.match.repository.*;
 import com.senniaf.match.security.RolNoAutorizadoException;
 import com.senniaf.match.service.HistorialCasoService;
 import com.senniaf.match.service.PerfilNinoService;
@@ -32,7 +34,28 @@ class NinosAccesoIsoTest {
         when(service.numeroSolicitudesPendientes(any())).thenReturn(0L);
         PerfilNinoController controller=new PerfilNinoController(service,mock(HistorialCasoService.class));
         boolean permitido=permitido(endpoint,rol);
-        if(permitido) assertDoesNotThrow(()->invocar(controller,endpoint,rol));
+        // Algunos permisos pertenecen al servicio. Un mock permisivo no los verifica.
+        if(Set.of("GET_EVALUACIONES","POST_EVALUACION","PUT_EVALUACION","GET_PENDIENTES","GET_SOLICITUDES","POST_SOLICITUD","POST_RESOLUCION").contains(endpoint)) {
+            if(!permitido) {
+                PerfilNinoRepository repo=mock(PerfilNinoRepository.class);
+                PerfilNino nino=new PerfilNino();nino.setCodigoCaso("SINT-NINO");
+                nino.setTrabajadorSocialAsignado("SINT-USER");nino.setPsicologoAsignado("SINT-USER");
+                when(repo.findByCodigoCaso("SINT-NINO")).thenReturn(Optional.of(nino));
+                var real=new PerfilNinoService(repo,mock(EventoCasoRepository.class),mock(EvaluacionPsicologicaRepository.class),mock(SolicitudEstadoCasoRepository.class));
+                var conPermisos=new PerfilNinoController(real,mock(HistorialCasoService.class));
+                assertThrows(RolNoAutorizadoException.class,()->invocar(conPermisos,endpoint,rol));
+            }
+            assertDoesNotThrow(()->invocar(controller,endpoint,rol));
+            switch(endpoint) {
+                case "GET_EVALUACIONES" -> verify(service).consultarEvaluaciones("SINT-NINO","SINT-USER",rol);
+                case "POST_EVALUACION" -> verify(service).registrarEvaluacion("SINT-NINO","SINT-USER",rol,null);
+                case "PUT_EVALUACION" -> verify(service).corregirEvaluacion("SINT-NINO",1L,"SINT-USER",rol,null);
+                case "GET_PENDIENTES" -> verify(service).solicitudesPendientes(rol);
+                case "GET_SOLICITUDES" -> verify(service).consultarSolicitudes("SINT-NINO","SINT-USER",rol);
+                case "POST_SOLICITUD" -> verify(service).solicitarCambioEstado("SINT-NINO","SINT-USER",rol,null);
+                case "POST_RESOLUCION" -> verify(service).resolverSolicitud(1L,"SINT-USER",rol,null);
+            }
+        } else if(permitido) assertDoesNotThrow(()->invocar(controller,endpoint,rol));
         else assertThrows(RolNoAutorizadoException.class,()->invocar(controller,endpoint,rol));
     }
 

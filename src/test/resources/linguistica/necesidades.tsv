@@ -1,0 +1,17 @@
+id	concepto	texto	esperado
+N01	ACOMPANAMIENTO_PSICOLOGICO	Necesita acompañamiento psicológico	1
+N02	ACOMPANAMIENTO_PSICOLOGICO	Necesita que lo lleven a sus citas con el psicólogo	1
+N03	SUPERVISION_COTIDIANA	Precisa que una persona lo vigile todos los días	1
+N04	AYUDA_TAREAS	Necesita ayuda para hacer las tareas de la escuela	1
+N05	ASMA	Se ha descartado el asma	0
+N06	ACOMPANAMIENTO_PSICOLOGICO	No requiere terapia psicológica	0
+N07	ACOMPANAMIENTO_PSICOLOGICO	Su hermana requiere terapia psicológica	0
+N08	ACOMPANAMIENTO_PSICOLOGICO	¿Requiere terapia psicológica?	0
+N09	ACOMPANAMIENTO_EMOCIONAL	Requiere apoyo emocional si llega a necesitarlo	0
+N10	RUTINA_ESTABLE	Necesita una rutina fija todos los días	1
+N11	RUTINA_ESTABLE	Le gusta mantener rutinas estables	0
+N12	ACOMPANAMIENTO_PSICOLOGICO	Antecedentes de terapia psicológica	0
+N13	ASMA	Actualmente no presenta asma	0
+N14	ACOMPANAMIENTO_PSICOLOGICO	Necesita seguimiento psicológico	1
+N15	APOYO_EDUCATIVO_INDIVIDUALIZADO	Requiere un apoyo uno a uno para aprender	1
+N16	NECESIDAD_SIN_PRECISAR	Requiere tratamiento especializado	1

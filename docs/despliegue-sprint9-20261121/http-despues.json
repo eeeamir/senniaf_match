@@ -1,0 +1,36 @@
+{
+  "TS": {
+    "login": 200,
+    "ms": 539.35
+  },
+  "PS": {
+    "login": 200,
+    "ms": 545.89
+  },
+  "CM": {
+    "login": 200,
+    "ms": 537.88
+  },
+  "FAMILIA": {
+    "login": 200,
+    "ms": 552.99
+  },
+  "casos": {
+    "status": 200,
+    "ms": 926.84,
+    "cantidad": 3
+  },
+  "ranking": {
+    "status": 200,
+    "muestrasMs": [
+      504.91,
+      521.08,
+      499.69
+    ],
+    "medianaMs": 504.91,
+    "familias": 1,
+    "reglas": [
+      "EVIDENCIA_TEXTO_7"
+    ]
+  }
+}

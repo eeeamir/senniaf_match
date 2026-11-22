@@ -14,5 +14,7 @@ public enum RasgoPersonalidad {
     SENSIBLE,
     INDEPENDIENTE,
     CARINOSO,
-    OTRO
+    OTRO,
+    AUN_NO_EVALUADO,
+    INFORMACION_INSUFICIENTE
 }

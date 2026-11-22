@@ -12,6 +12,11 @@ import java.time.LocalDateTime;
 public class Usuario {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
     @Column(nullable=false, length=40) private String identificador;
+    @Enumerated(EnumType.STRING) @Column(length=30) private com.senniaf.match.model.enums.TipoDocumento tipoDocumento;
+    @Column(length=30) private String numeroDocumento;
+    public com.senniaf.match.model.enums.TipoDocumento getTipoDocumento(){return tipoDocumento;}
+    public void setTipoDocumento(com.senniaf.match.model.enums.TipoDocumento v){tipoDocumento=v;}
+    public String getNumeroDocumento(){return numeroDocumento;} public void setNumeroDocumento(String v){numeroDocumento=v;}
     private String nombre;
     private String apellido;
     @Column(length=30) private String cedula;

@@ -1,0 +1,114 @@
+id	concepto	dominio	necesidad	texto	esperado	grupo
+C01	ASMA	SALUD	Requiere acompañamiento para asma	Podemos acompañar asma	1	control
+C02	DIABETES	SALUD	Requiere acompañamiento para diabetes	Podemos acompañar diabetes	1	control
+C03	EPILEPSIA	SALUD	Requiere acompañamiento para epilepsia	Podemos acompañar epilepsia	1	control
+C04	TDAH	SALUD	Requiere acompañamiento para TDAH	Podemos acompañar TDAH	1	control
+C05	TEA	SALUD	Requiere acompañamiento para TEA	Podemos acompañar TEA	1	control
+C06	DISCAPACIDAD_FISICA	SALUD	Requiere acompañamiento para discapacidad física	Podemos acompañar discapacidad física	1	control
+C07	DISCAPACIDAD_INTELECTUAL	SALUD	Requiere acompañamiento para discapacidad intelectual	Podemos acompañar discapacidad intelectual	1	control
+C08	DISCAPACIDAD_VISUAL	SALUD	Requiere acompañamiento para discapacidad visual	Podemos acompañar discapacidad visual	1	control
+C09	DISCAPACIDAD_AUDITIVA	SALUD	Requiere acompañamiento para discapacidad auditiva	Podemos acompañar discapacidad auditiva	1	control
+C10	INTOLERANCIA_LACTOSA	SALUD	Requiere acompañamiento para intolerancia a la lactosa	Podemos acompañar intolerancia a la lactosa	1	control
+C11	ALERGIA_ALIMENTARIA	SALUD	Requiere acompañamiento para alergia alimentaria	Podemos acompañar alergia alimentaria	1	control
+C12	ALERGIA_MEDICAMENTOS	SALUD	Requiere acompañamiento para alergia a medicamentos	Podemos acompañar alergia a medicamentos	1	control
+C13	ALERGIA_AMBIENTAL_POLEN	SALUD	Requiere acompañamiento para alergia al polen	Podemos acompañar alergia al polen	1	control
+C14	ALERGIA_PICADURA_INSECTOS	SALUD	Requiere acompañamiento para alergia a picaduras de insectos	Podemos acompañar alergia a picaduras de insectos	1	control
+C15	TERAPIA_LENGUAJE	SALUD	Requiere acompañamiento para terapia del lenguaje	Podemos acompañar terapia del lenguaje	1	control
+C16	FISIOTERAPIA	SALUD	Requiere acompañamiento para fisioterapia	Podemos acompañar fisioterapia	1	control
+C17	TERAPIA_OCUPACIONAL	SALUD	Requiere acompañamiento para terapia ocupacional	Podemos acompañar terapia ocupacional	1	control
+C18	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Podemos acompañar acompañamiento psicológico	1	control
+C19	RUTINA_ESTABLE	SALUD	Requiere acompañamiento para rutinas estables	Podemos acompañar rutinas estables	1	control
+C20	ACOMPANAMIENTO_EMOCIONAL	SALUD	Requiere acompañamiento para apoyo emocional	Podemos acompañar apoyo emocional	1	control
+C21	APOYO_ADAPTACION	SALUD	Requiere acompañamiento para apoyo durante su adaptación	Podemos acompañar apoyo durante su adaptación	1	control
+C22	SUPERVISION_COTIDIANA	SALUD	Requiere acompañamiento para supervisión cotidiana	Podemos acompañar supervisión cotidiana	1	control
+C23	SUPERVISION_PERMANENTE	SALUD	Requiere acompañamiento para supervisión permanente	Podemos acompañar supervisión permanente	1	control
+C24	APOYO_EDUCATIVO_INDIVIDUALIZADO	SALUD	Requiere acompañamiento para apoyo educativo individualizado	Podemos acompañar apoyo educativo individualizado	1	control
+C25	APOYO_EDUCATIVO_ESPECIALIZADO	SALUD	Requiere acompañamiento para apoyo educativo especializado	Podemos acompañar apoyo educativo especializado	1	control
+C26	AYUDA_TAREAS	SALUD	Requiere acompañamiento para ayuda con las tareas	Podemos acompañar ayuda con las tareas	1	control
+C27	SEGUIMIENTO_ESCOLAR	SALUD	Requiere acompañamiento para seguimiento educativo	Podemos acompañar seguimiento educativo	1	control
+C28	REFUERZO_ESCOLAR	SALUD	Requiere acompañamiento para refuerzo escolar	Podemos acompañar refuerzo escolar	1	control
+C29	HERMANOS	HERMANOS	Requiere acompañamiento de hermanos	Podemos acompañar hermanos	1	control
+C30	RED_APOYO	RED	Requiere una red de apoyo	Contamos con una red de apoyo	1	control
+C31	CUIDADOS_DIARIOS	RED	Requiere cuidados diarios	Contamos con una persona de apoyo que puede acompañarlo en actividades cotidianas	1	control
+C32	VIAJE	LOGISTICA		Podemos viajar	1	control
+C33	VISITAS	LOGISTICA		Podemos recibir visitas	1	control
+V01	ASMA	SALUD	Requiere acompañamiento para asma	Nos podemos hacer cargo de un niño con asma	1	independiente
+V02	ASMA	SALUD	Requiere acompañamiento para asma	Podemos atender el asma y seguir las indicaciones de su médico	1	independiente
+V03	DIABETES	SALUD	Requiere acompañamiento para diabetes	Estamos en condiciones de cuidar a un niño con diabetes	1	independiente
+V04	DIABETES	SALUD	Requiere acompañamiento para diabetes	Podemos ayudarlo a seguir su tratamiento para la diabetes	1	independiente
+V05	EPILEPSIA	SALUD	Requiere acompañamiento para epilepsia	Tenemos disposición para atender a un niño con epilepsia	1	independiente
+V06	TDAH	SALUD	Requiere acompañamiento para TDAH	Podemos apoyar al niño con déficit de atención e hiperactividad	1	independiente
+V07	TEA	SALUD	Requiere acompañamiento para TEA	Podemos acompañar a un niño dentro del espectro autista	1	independiente
+V08	DISCAPACIDAD_FISICA	SALUD	Requiere acompañamiento para discapacidad física	Nos sentimos capaces de cuidar a un niño con discapacidad física	1	independiente
+V09	DISCAPACIDAD_INTELECTUAL	SALUD	Requiere acompañamiento para discapacidad intelectual	Tenemos capacidad para cuidar de un niño con discapacidad intelectual	1	independiente
+V10	DISCAPACIDAD_VISUAL	SALUD	Requiere acompañamiento para discapacidad visual	Podemos asistir a un niño con discapacidad visual en su día a día	1	independiente
+V11	DISCAPACIDAD_AUDITIVA	SALUD	Requiere acompañamiento para discapacidad auditiva	Estamos disponibles para acompañar a un niño con discapacidad auditiva	1	independiente
+V12	INTOLERANCIA_LACTOSA	SALUD	Requiere acompañamiento para intolerancia a la lactosa	Podemos atender a un niño intolerante a la lactosa	1	independiente
+V13	ALERGIA_ALIMENTARIA	SALUD	Requiere acompañamiento para alergia alimentaria	Podemos cuidar a un niño con alergias a los alimentos	1	independiente
+V14	ALERGIA_MEDICAMENTOS	SALUD	Requiere acompañamiento para alergia a medicamentos	Podemos acompañar al niño si tiene alergia a los medicamentos	1	independiente
+V15	ALERGIA_AMBIENTAL_POLEN	SALUD	Requiere acompañamiento para alergia al polen	Podemos atender a un niño alérgico al polen	1	independiente
+V16	ALERGIA_PICADURA_INSECTOS	SALUD	Requiere acompañamiento para alergia a picaduras de insectos	Podemos cuidar a un niño alérgico a las picaduras de insectos	1	independiente
+V17	TERAPIA_LENGUAJE	SALUD	Requiere acompañamiento para terapia del lenguaje	Tenemos disponibilidad para llevarlo a sus terapias del lenguaje	1	independiente
+V18	FISIOTERAPIA	SALUD	Requiere acompañamiento para fisioterapia	Podemos llevarlo donde el fisioterapeuta para sus sesiones de fisioterapia	1	independiente
+V19	TERAPIA_OCUPACIONAL	SALUD	Requiere acompañamiento para terapia ocupacional	Estamos disponibles para acompañarlo a terapia ocupacional	1	independiente
+V20	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Podemos acompañarlo a terapia psicológica	1	ejemplo_usuario
+V21	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Podemos llevarlo a sus citas con el psicólogo	1	ejemplo_usuario
+V22	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Tenemos disponibilidad para asistir con él a sesiones de psicología	1	ejemplo_usuario
+V23	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Podemos facilitar que continúe su atención psicológica	1	ejemplo_usuario
+V24	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Podemos acompañarlo durante su tratamiento psicológico	1	ejemplo_usuario
+V25	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Podemos ir con él al psicólogo	1	independiente
+V26	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Estamos disponibles para acompañarlo a sesiones psicológicas	1	independiente
+V27	RUTINA_ESTABLE	SALUD	Requiere acompañamiento para rutinas estables	Podemos mantener una rutina fija todos los días	1	independiente
+V28	RUTINA_ESTABLE	SALUD	Requiere acompañamiento para rutinas estables	Podemos organizar horarios regulares para sus actividades	1	independiente
+V29	RUTINA_ESTABLE	SALUD	Requiere acompañamiento para rutinas estables	Mantenemos horarios constantes y podemos acompañarlo	1	independiente
+V30	ACOMPANAMIENTO_EMOCIONAL	SALUD	Requiere acompañamiento para apoyo emocional	Podemos darle apoyo emocional cuando lo necesite	1	independiente
+V31	ACOMPANAMIENTO_EMOCIONAL	SALUD	Requiere acompañamiento para apoyo emocional	Podemos apoyarlo emocionalmente durante su adaptación	1	independiente
+V32	APOYO_ADAPTACION	SALUD	Requiere acompañamiento para apoyo durante su adaptación	Podemos apoyarlo para que se acostumbre al nuevo hogar	1	independiente
+V33	APOYO_ADAPTACION	SALUD	Requiere acompañamiento para apoyo durante su adaptación	Podemos ayudarlo a adaptarse al hogar	1	independiente
+V34	APOYO_ADAPTACION	SALUD	Requiere acompañamiento para apoyo durante su adaptación	Podemos acompañarlo en su proceso de adaptación	1	independiente
+V35	SUPERVISION_COTIDIANA	SALUD	Requiere acompañamiento para supervisión cotidiana	Podemos vigilarlo todos los días	1	independiente
+V36	SUPERVISION_COTIDIANA	SALUD	Requiere acompañamiento para supervisión cotidiana	Podemos supervisarlo diariamente	1	independiente
+V37	SUPERVISION_PERMANENTE	SALUD	Requiere acompañamiento para supervisión permanente	Podemos supervisarlo las veinticuatro horas	1	independiente
+V38	SUPERVISION_PERMANENTE	SALUD	Requiere acompañamiento para supervisión permanente	Podemos garantizar supervisión las 24 horas	1	independiente
+V39	APOYO_EDUCATIVO_INDIVIDUALIZADO	SALUD	Requiere acompañamiento para apoyo educativo individualizado	Podemos brindarle apoyo educativo individualizado	1	independiente
+V40	APOYO_EDUCATIVO_INDIVIDUALIZADO	SALUD	Requiere acompañamiento para apoyo educativo individualizado	Podemos ofrecer acompañamiento escolar individualizado	1	independiente
+V41	APOYO_EDUCATIVO_ESPECIALIZADO	SALUD	Requiere acompañamiento para apoyo educativo especializado	Tenemos disponibilidad para facilitar apoyo escolar especializado	1	independiente
+V42	AYUDA_TAREAS	SALUD	Requiere acompañamiento para ayuda con las tareas	Podemos echarle una mano con sus tareas escolares	1	independiente
+V43	AYUDA_TAREAS	SALUD	Requiere acompañamiento para ayuda con las tareas	Podemos ayudarlo a hacer las tareas de la escuela	1	independiente
+V44	AYUDA_TAREAS	SALUD	Requiere acompañamiento para ayuda con las tareas	Podemos ayudarlo con sus tareas	1	independiente
+V45	SEGUIMIENTO_ESCOLAR	SALUD	Requiere acompañamiento para seguimiento educativo	Podemos estar pendientes de sus actividades escolares	1	independiente
+V46	SEGUIMIENTO_ESCOLAR	SALUD	Requiere acompañamiento para seguimiento educativo	Podemos realizar seguimiento de sus actividades escolares	1	independiente
+V47	REFUERZO_ESCOLAR	SALUD	Requiere acompañamiento para refuerzo escolar	Podemos llevarlo a sus clases de refuerzo escolar	1	independiente
+D01	HERMANOS	HERMANOS	Requiere hermanos	Estamos dispuestos a recibir a los hermanitos juntos	1	independiente
+D02	RED_APOYO	RED		Tenemos personas que nos pueden ayudar en el día a día	1	independiente
+D03	CUIDADOS_DIARIOS	RED	Requiere cuidados diarios	Contamos con una persona que puede ayudar con los quehaceres diarios del niño	1	independiente
+D04	VIAJE	LOGISTICA		Tenemos disponibilidad para trasladarnos	1	independiente
+D05	VISITAS	LOGISTICA		Estamos disponibles para recibir las visitas	1	independiente
+L01	ASMA	SALUD	Requiere acompañamiento para asma	No podemos acompañar asma	0	contexto
+L02	ASMA	SALUD	Requiere acompañamiento para asma	No siempre podemos acompañar asma	0	contexto
+L03	ASMA	SALUD	Requiere acompañamiento para asma	Antes acompañamos a un niño con asma	0	contexto
+L04	ASMA	SALUD	Requiere acompañamiento para asma	No tenemos ningún impedimento para acompañar asma	1	contexto
+L05	ASMA	SALUD	Requiere acompañamiento para asma	Podemos acompañar asma si contamos con apoyo	0.5	contexto
+L06	ASMA	SALUD	Requiere acompañamiento para asma	Podemos acompañar asma si no contamos con apoyo	0	contexto
+L07	ASMA	SALUD	Requiere acompañamiento para asma	Tal vez podamos acompañar asma	0	contexto
+L08	ASMA	SALUD	Requiere acompañamiento para asma	Podemos acompañar asma sin apoyo adicional	1	contexto
+L09	ASMA	SALUD	Requiere acompañamiento para asma	Podemos acompañar asma si fuera posible	0	contexto
+L10	ASMA	SALUD	Requiere acompañamiento para asma	Mi hermana tiene asma	0	contexto
+L11	ASMA	SALUD	Requiere acompañamiento para asma	Mi hermana tiene asma, pero podemos acompañar a un niño con asma	1	contexto
+L12	ASMA	SALUD	Requiere acompañamiento para asma	Podemos acompañar asma. No podemos acompañar asma	0	contexto
+L13	ASMA	SALUD	Requiere acompañamiento para asma	No podemos acompañar asma. Podemos acompañar asma	0	contexto
+L14	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	En el pasado acompañamos terapias psicológicas	0	contexto
+L15	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Podemos ofrecer apoyo emocional	0	contexto
+L16	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Mi hermano es psicólogo	0	contexto
+L17	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Podemos acompañar sesiones psicológicas con apoyo	0.5	contexto
+L18	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	No siempre podemos acompañar terapia psicológica	0	contexto
+L19	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Podemos pagar un psicólogo	0	contexto
+L20	ACOMPANAMIENTO_PSICOLOGICO	SALUD	Requiere acompañamiento para acompañamiento psicológico	Podemos facilitar que continúe su atención psicológica si recibimos apoyo	0.5	contexto
+L21	RUTINA_ESTABLE	SALUD	Requiere acompañamiento para rutinas estables	Tenemos una familia responsable y cariñosa	0	contexto
+L22	RUTINA_ESTABLE	SALUD	Requiere acompañamiento para rutinas estables	Podemos mantener horarios constantes y no ofrecer apoyo emocional	1	contexto
+L23	SUPERVISION_PERMANENTE	SALUD	Requiere acompañamiento para supervisión permanente	Podemos acompañarlo a diario	0	contexto
+L24	APOYO_EDUCATIVO_ESPECIALIZADO	SALUD	Requiere acompañamiento para apoyo educativo especializado	Podemos ayudarlo con las tareas	0	contexto
+L25	AYUDA_TAREAS	SALUD	Requiere acompañamiento para ayuda con las tareas	Mi hijo hace sus tareas solo	0	contexto
+L26	ACOMPANAMIENTO_EMOCIONAL	SALUD	Requiere acompañamiento para apoyo emocional	Somos personas cariñosas	0	contexto
+L27	APOYO_ADAPTACION	SALUD	Requiere acompañamiento para apoyo durante su adaptación	Quizás podríamos acompañarlo durante su adaptación	0	contexto
+L28	SUPERVISION_COTIDIANA	SALUD	Requiere supervisión cotidiana	Podemos estar pendientes de él todos los días	0	ambiguo

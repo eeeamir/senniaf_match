@@ -32,3 +32,41 @@ target/
 # Cargas privadas: no forman parte del esquema ni del procedimiento de actualización.
 deploy/azure/sql/003-cuentas-ficticias.sql.example
 deploy/azure/sql/004-expediente-ficticio.sql
+
+# Cachés de las herramientas Python de despliegue y pruebas.
+__pycache__/
+
+# Salidas locales regenerables; no ocultar fuentes ni migraciones.
+*.jfr
+*.hprof
+*.pyc
+.pytest_cache/
+coverage/
+playwright-report/
+test-results/
+/tmp/
+/temp/
+/backups/
+*.sql.gz
+*.dump.sha256
+
+# Configuración personal del IDE y archivos del sistema.
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Referencia personal: conservar localmente, sin publicar.
+/docs/image.png
+
+# Evidencias desechables del cierre de Sprint 9.
+/docs/citas-sprint9/
+/docs/inicio-publico/
+/docs/correcciones-postdespliegue-sprint9/
+/docs/rendimiento-sprint9/muestras.jsonl.gz
+/docs/rendimiento-sprint9/interfaz.json
+/docs/rendimiento-sprint9/SHA256SUMS

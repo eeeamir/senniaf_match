@@ -1,7 +1,14 @@
 /* Componentes compartidos por las interfaces institucionales. Los permisos se verifican en el servidor. */
 const Profesionales = {
+  culturaFamilia: [["apoyoIdiomas", "Apoyo con idiomas y comunicación", "¿Qué idiomas habla tu familia y cómo acompañaría a un niño que utiliza otro idioma?"], ["respetoTradiciones", "Respeto por costumbres y tradiciones", "¿Cómo respetaría las costumbres, celebraciones y tradiciones importantes para el niño?"], ["recursosComunitarios", "Recursos y apoyos comunitarios", "¿Con qué actividades, personas de apoyo o recursos comunitarios cuenta para acompañarlo?"], ["respetoPreferencias", "Respeto por las preferencias del niño", "¿Cómo escucharía y tendría en cuenta sus preferencias culturales y sus vínculos importantes?"], ["compromisoCultural", "Compromiso de acompañamiento cultural", "¿Qué acciones concretas realizaría para preservar su identidad y facilitar su adaptación?"]],
   icono(nombre) {
     const trazos = {
+      ubicacion:'M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0 M15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+      'heart-handshake':'M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8 M12 5.7 8.5 9.2a1.8 1.8 0 0 0 2.5 2.5l1.5-1.5 5 5 M7 14l4 4 M10 12l5 5',
+      refrescar:'M20 8a8 8 0 0 0-14-3L3 8 M3 3v5h5 M4 16a8 8 0 0 0 14 3l3-3 M21 21v-5h-5',
+      vinculacion:'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2',
+      consulta:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12 M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+      advertencia:'m12 3 10 18H2z M12 9v5 M12 17h.01',
       carpeta:'M3 7h6l2 2h10v11H3z M3 7V4h6l2 3', nuevo:'M12 5v14M5 12h14',
       inicio:'m3 11 9-8 9 8 M5 10v11h5v-7h4v7h5V10',
       solicitudes:'M5 4h14v17H5z M9 2h6v4H9z M8 11h8M8 15h6',
@@ -16,10 +23,12 @@ const Profesionales = {
       psicologia:'M12 3v18 M12 5C7-1 3 5 5 8c-5 1-4 7 0 8-1 5 5 7 7 3 M12 5c5-6 9 0 7 3 5 1 4 7 0 8 1 5-5 7-7 3',
       escuela:'m2 9 10-5 10 5-10 5z M6 12v5c4 3 8 3 12 0v-5 M22 9v7',
       calendario:'M5 5h14v16H5z M8 2v6M16 2v6M5 10h14', flecha:'M4 12h16M15 7l5 5-5 5',
-      comprobar:'m5 12 4 4L19 6', cerrar:'m6 6 12 12M6 18 12-12', criterios:'M4 6h16v15H4z M9 6V3h6v3',
+      comprobar:'m5 12 4 4L19 6', cerrar:'M6 6l12 12M6 18l12-12', criterios:'M4 6h16v15H4z M9 6V3h6v3',
+      informacion:'M12 11v6 M12 7h.01 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',
+      credencial:'M4 5h16v16H4z M9 5V2h6v3 M10 11a2 2 0 1 0-4 0 2 2 0 0 0 4 0 M5 17c0-4 6-4 6 0 M14 10h3M14 14h3',
       persona:'M5 21v-3a7 7 0 0 1 14 0v3 M16 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0'
     };
-    return `<svg class="pro-icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${trazos[nombre] || trazos.informe}"/></svg>`;
+    return `<svg class="pro-icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${trazos[nombre==='vinculacion'?'heart-handshake':nombre] || trazos.informe}"/></svg>`;
   },
   fecha(valor) {
     if (!valor) return 'Fecha no registrada';
@@ -33,13 +42,19 @@ const Profesionales = {
   },
   informe(e,mostrarMetadatos=true) {
     const m=this.momento(e.fecha),s=Sesion.leer();
-    const seccion=(icono,titulo,valor)=>`<div class="pro-informe-bloque"><h4>${this.icono(icono)}${titulo}</h4><p>${limpiarHtml(valor||'Sin información registrada')}</p></div>`;
-    return `<article class="pro-informe"><div class="pro-informe-cabecera"><h3>${this.icono('psicologia')} ${e.vigente?'Evaluación actual':'Evaluación anterior'}</h3><small>Versión ${e.version}</small><span class="chip ${e.vigente?'':'retirado'}">${e.vigente?'Vigente':'Versión anterior'}</span></div>${mostrarMetadatos?`<div class="pro-informe-meta"><span>${this.icono('persona')}${limpiarHtml(e.profesional)}</span><span>${this.icono('calendario')}${limpiarHtml(m.fecha)}</span><span>${this.icono('reloj')}${limpiarHtml(m.hora)}</span></div>`:''}<div class="pro-informe-bloques">${seccion('psicologia','Evaluación',e.evaluacion)}${seccion('informe','Observaciones',e.observaciones)}${seccion('salud','Recomendaciones profesionales',e.recomendaciones)}${e.areasObservadas?.length?seccion('comprobar','Áreas evaluadas',e.areasObservadas.map(a=>this.etiqueta(a)).join(', ')):''}${e.sinDiagnostico===true?seccion('informe','Diagnóstico','No se establece diagnóstico'):''}${e.hallazgosProfesionales?seccion('informe','Valoración profesional',e.hallazgosProfesionales):''}${e.diagnosticoProfesional?seccion('informe','Diagnóstico profesional',e.diagnosticoProfesional):''}${e.contextoEvaluacion&&typeof ContextoPsicologico!=='undefined'?ContextoPsicologico.informe(e.contextoEvaluacion):''}</div>${s?.rol==='PSICOLOGO'&&s.id===e.profesional&&e.vigente?`<div class="pro-acciones"><button class="boton secundario chico" type="button" data-corregir="${e.id}">Editar evaluación</button></div>`:''}</article>`;
+    const seccion=(icono,titulo,valor)=>`<details class="detalle-grupo pro-informe-bloque"><summary>${this.icono(icono)}${titulo}</summary><div class="pro-informe-contenido"><p>${limpiarHtml(valor||'Sin información registrada')}</p></div></details>`;
+    return `<article class="pro-informe"><div class="pro-informe-registro"><div class="pro-informe-cabecera"><h3>${this.icono('psicologia')} ${e.vigente?'Evaluación actual':'Evaluación anterior'}</h3>${mostrarMetadatos?'':`<small>Versión ${e.version}</small>`}<span class="chip ${e.vigente?'':'retirado'}">${e.vigente?'Vigente':'Versión anterior'}</span></div>${mostrarMetadatos?`<div class="pro-informe-meta"><span>${this.icono('persona')}${limpiarHtml(e.profesional)}</span><span>${this.icono('calendario')}${limpiarHtml(m.fecha)}</span><span>${this.icono('reloj')}${limpiarHtml(m.hora)}</span></div>`:''}</div><div class="pro-informe-bloques">${seccion('psicologia','Evaluación',e.evaluacion)}${seccion('informe','Observaciones',e.observaciones)}${seccion('salud','Recomendaciones profesionales',e.recomendaciones)}${e.areasObservadas?.length?seccion('comprobar','Áreas evaluadas',e.areasObservadas.map(a=>this.etiqueta(a)).join(', ')):''}${e.sinDiagnostico===true?seccion('informe','Diagnóstico','No se establece diagnóstico'):''}${e.hallazgosProfesionales?seccion('informe','Valoración profesional',e.hallazgosProfesionales):''}${e.diagnosticoProfesional?seccion('informe','Diagnóstico profesional',e.diagnosticoProfesional):''}${e.contextoEvaluacion&&typeof ContextoPsicologico!=='undefined'?ContextoPsicologico.informe(e.contextoEvaluacion):''}</div></article>`;
   },
   etiqueta(valor) {
     if (valor == null || valor === '') return 'Sin información';
-    const etiquetas={SI:'Sí',NO:'No',NO_SABE:'No se sabe',NINGUNA_CONOCIDA:'Ninguna conocida',NINGUNA_IDENTIFICADA:'Ninguna identificada',NINGUNO_IDENTIFICADO:'Ninguno identificado',TEA:'TEA (autismo)',TDAH:'TDAH',DESACTIVACION:'Desactivación',REACTIVACION:'Reactivación',PENDIENTE:'Pendiente',APROBADA:'Aprobada',RECHAZADA:'Rechazada',ACEPTADA:'Propuesta aceptada',DESCARTADA:'Propuesta descartada',REEVALUACION:'Reevaluación solicitada'};
+    const etiquetas={NO_APLICA:'No aplica',NO_EVALUADO:'No evaluado',AUN_NO_EVALUADO:'Aún no evaluado',INFORMACION_INSUFICIENTE:'Información insuficiente',INFORMACION_NO_DISPONIBLE:'Información no disponible',NINGUNA_DE_LAS_ANTERIORES:'Ninguna de las anteriores',SI:'Sí',NO:'No',NO_SABE:'No se sabe',NINGUNA_CONOCIDA:'Ninguna conocida',NINGUNA_IDENTIFICADA:'Ninguna identificada',NINGUNO_IDENTIFICADO:'Ninguno identificado',TEA:'TEA (autismo)',TDAH:'TDAH',DESACTIVACION:'Desactivación',REACTIVACION:'Reactivación',PENDIENTE:'Pendiente',APROBADA:'Aprobada',RECHAZADA:'Rechazada',ACEPTADA:'Propuesta aceptada',DESCARTADA:'Propuesta descartada',REEVALUACION:'Reevaluación solicitada'};
     return etiquetas[valor] || String(valor).toLocaleLowerCase('es').replaceAll('_',' ').replace(/^./,c=>c.toLocaleUpperCase('es'));
+  },
+  edad(p) {
+    if(p.edad==null)return 'Sin información';
+    if(p.unidadEdad!=='MESES'&&Number(p.edad)===0)return 'Menor de un año (meses no registrados)';
+    const unidad=p.unidadEdad==='MESES'?(Number(p.edad)===1?'mes':'meses'):(Number(p.edad)===1?'año':'años');
+    return `${p.edad} ${unidad}`;
   },
   estado(p) { return p.cierrePorAdopcion?'Cierre por adopción':p.bajaLogica?'Fuera del Match':p.perfilCompleto?'Disponible para análisis':'Pendiente de información'; },
   encabezado(titulo,texto,icono='carpeta') {
@@ -52,16 +67,17 @@ const Profesionales = {
     if(!['TRABAJADOR_SOCIAL','PSICOLOGO','COMITE','FAMILIA'].includes(s?.rol)||document.getElementById('navegacionProfesional'))return;
     document.body.classList.add('profesional');
     const opciones=s.rol==='FAMILIA'
-      ? [['inicio','match.html','inicio','Inicio'],['entrevista','match.html?vista=entrevista','informe','Mi entrevista'],['propuesta','match.html?vista=propuesta','personas','Propuesta de vinculación'],['historial','match.html?vista=historial','reloj','Historial']]
+      ? [['inicio','match.html','inicio','Inicio'],['entrevista','match.html?vista=entrevista','informe','Mi entrevista'],['propuesta','match.html?vista=propuesta','vinculacion','Mi vinculación'],['citas','citas.html','calendario','Mis citas'],['historial','match.html?vista=historial','reloj','Historial']]
       : s.rol==='COMITE'
       ? [['inicio','match.html','inicio','Inicio'],['compatibilidad','match.html?vista=compatibilidad','salud','Compatibilidad'],['solicitudes','match.html?vista=solicitudes','solicitudes','Solicitudes'],['criterios','match.html?vista=criterios','criterios','Criterios']]
-      : [['inicio','funcionario.html','inicio','Inicio'],['expedientes','perfiles.html','carpeta','Mis expedientes'],...(s.rol==='TRABAJADOR_SOCIAL'?[['registro','perfil.html','nuevo','Registrar perfil']]:[])];
+      : [['inicio','funcionario.html','inicio','Inicio'],['expedientes','perfiles.html','carpeta','Mis expedientes'],...(s.rol==='TRABAJADOR_SOCIAL'?[['registro','perfil.html','nuevo','Registrar perfil'],['citas','citas.html','calendario','Gestión de citas']]:[])];
+    if(s.rol!=='FAMILIA')opciones.push(['vinculaciones','vinculaciones.html','vinculacion','Vinculaciones']);
     const nav=document.createElement('aside');nav.className='pro-sidebar';nav.id='navegacionProfesional';
     nav.innerHTML=`<nav aria-label="Navegación principal">${opciones.map(([clave,href,icono,texto])=>`<a href="${href}" ${seleccionado===clave?'aria-current="page"':''}>${this.icono(icono)}<span>${texto}</span></a>`).join('')}</nav><div class="pro-sidebar-pie"><button type="button" id="proSalir">${this.icono('salir')}Cerrar sesión</button></div>`;
     document.body.prepend(nav);
     const marca=document.querySelector('.topbar-marca');marca.href=['COMITE','FAMILIA'].includes(s.rol)?'match.html':'funcionario.html';marca.querySelector('img').alt='SENNIAF Match';
     const rol=s.rol==='FAMILIA'?'Familia adoptante':s.rol==='COMITE'?'Comité de asignación familiar':ROLES[s.rol];
-    document.getElementById('usuario').innerHTML=`<span class="chip">${this.icono('persona')}${limpiarHtml(rol)}</span>`;
+    document.getElementById('usuario').innerHTML=`<span class="chip">${this.icono('persona')}<span class="pro-rol-texto">${limpiarHtml(rol)}<small class="pro-id-sesion">ID: ${limpiarHtml(s.id)}</small></span></span>`;
     const abrir=document.createElement('button');abrir.type='button';abrir.className='pro-menu';abrir.setAttribute('aria-label','Abrir navegación');abrir.setAttribute('aria-controls',nav.id);abrir.setAttribute('aria-expanded','false');abrir.innerHTML=this.icono('menu');
     document.querySelector('.topbar-in').prepend(abrir);
     abrir.addEventListener('click',()=>{const activo=document.body.classList.toggle('pro-nav-abierta');abrir.setAttribute('aria-expanded',String(activo));});
@@ -70,6 +86,7 @@ const Profesionales = {
     dialogo.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('salir')}</span><h2 id="tituloSalir">Cerrar sesión</h2></div><p>¿Estás seguro de que deseas cerrar sesión?</p><p class="ayuda">Podrás volver a ingresar cuando lo necesites.</p><p id="avisoSalidaSinGuardar" class="pro-aviso-sin-guardar" hidden></p><div class="pro-acciones"><button type="button" class="boton secundario" id="proCancelarSalida">Cancelar</button><button type="button" class="boton" id="proConfirmarSalida">${this.icono('salir')}Cerrar sesión</button></div>`;
     document.body.append(dialogo);
     this.prepararProteccionFormularios();
+    document.querySelectorAll('form').forEach(form=>CamposFormulario.iniciar(form));
     document.getElementById('proSalir').addEventListener('click',()=>{
       const aviso=dialogo.querySelector('#avisoSalidaSinGuardar'),pendientes=this.formulariosPendientes();
       aviso.hidden=!pendientes.length;
@@ -79,8 +96,6 @@ const Profesionales = {
     document.getElementById('proCancelarSalida').addEventListener('click',()=>dialogo.close());
     document.getElementById('proConfirmarSalida').addEventListener('click',async()=>{const boton=document.getElementById('proConfirmarSalida');boton.disabled=true;await Sesion.salir();});
     this.decorarHero(s.rol==='PSICOLOGO'?'psicologia':'carpeta');
-    document.querySelector('.pie-pagina')?.remove();
-    const aviso=document.createElement('span');aviso.className='pro-demostracion';aviso.textContent='Datos de demostración';document.getElementById('usuario').prepend(aviso);
   },
   mensaje(elemento,texto,tipo='aviso'){
     elemento.className='mensaje '+tipo;elemento.setAttribute('role',tipo==='error'?'alert':'status');
@@ -99,13 +114,86 @@ const Profesionales = {
     d.innerHTML=`<h2 id="tituloConfirmacion">${limpiarHtml(titulo)}</h2><p>${limpiarHtml(texto)}</p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="button" class="boton" data-confirmar>Continuar</button></div>`;
     document.body.append(d);d.addEventListener('close',()=>d.remove(),{once:true});d.querySelector('[data-cancelar]').addEventListener('click',()=>d.close());d.querySelector('[data-confirmar]').addEventListener('click',()=>{d.close();accion();});d.showModal();
   },
-  errorCampo(campo,mensaje) {
-    const grupo=campo.closest('.campo')||campo.parentElement;let aviso=grupo.querySelector('.pro-error-campo');
-    if(!aviso){aviso=document.createElement('span');aviso.className='pro-error-campo';aviso.id='error-'+(campo.id||campo.closest('[data-grupo]')?.dataset.grupo||campo.name);aviso.setAttribute('role','alert');grupo.append(aviso);}
-    aviso.textContent=mensaje||'';campo.setAttribute('aria-invalid',String(Boolean(mensaje)));campo.setAttribute('aria-describedby',aviso.id);
-    if(mensaje)campo.closest('details')?.setAttribute('open','');
+  sugerencias(campo,opciones){
+    const bloque=document.createElement('div');bloque.className='pro-sugerencias';bloque.setAttribute('aria-label','Sugerencias para redactar');
+    opciones.forEach(([titulo,texto])=>{const b=document.createElement('button');b.type='button';b.className='pro-sugerencia';b.textContent=titulo;b.onclick=()=>{campo.value=texto;campo.dispatchEvent(new Event('input',{bubbles:true}));campo.focus();};bloque.append(b);});campo.insertAdjacentElement('afterend',bloque);
   },
-  erroresServidor(errores) {const campos={habilidadesCoherentes:'habilidadesDetalle',gustosCoherentes:'gustosDetalle',personalidadCoherente:'personalidadDetalle',alergiasCoherentes:'alergiasDetalle',condicionesSaludCoherentes:'condicionesSaludDetalle',hermanosCoherentes:'cantidadHermanos'};Object.entries(errores||{}).forEach(([id,mensaje])=>{const c=document.getElementById(campos[id]||id);if(c)this.errorCampo(c,mensaje);});},
+  mostrarAntecedenteCultural(valor, datos, campos) {
+    const normalizar = (texto) =>
+      String(texto || '')
+        .trim()
+        .replace(/\s+/g, ' ');
+    const anterior = normalizar(valor);
+    return Boolean(anterior) && !campos.some((campo) => normalizar(datos[campo]) === anterior);
+  },
+  avisoReevaluaciones(numero) {
+    const cantidad = Number(numero);
+    if (!Number.isInteger(cantidad) || cantidad <= 0) return '';
+    return `
+      <aside class="pro-aviso-reevaluaciones">
+        <h3>${this.icono('informacion')}Historial de reevaluaciones</h3>
+        <p>Reevaluaciones completadas: <strong>${cantidad}</strong></p>
+      </aside>`;
+  },
+  avisoInterrupcion(antecedente){
+    if(!antecedente?.revisada)return '';
+    return `<aside class="pro-aviso-interrupcion" role="note"><span class="pro-simbolo">${this.icono('informacion')}</span><div><h3>Antecedente de vinculación interrumpida</h3><p>${antecedente.cierrePendiente?'Esta familia registra una interrupción de convivencia revisada por el Comité. El cierre institucional aún está pendiente. Consulta los antecedentes antes de continuar.':'Esta familia registra una interrupción anterior revisada por el Comité. Consulta los antecedentes antes de considerar una nueva propuesta.'}</p><small>Aviso informativo. No modifica automáticamente su idoneidad ni su puntuación.</small></div></aside>`;
+  },
+  fechaCivil(valor){return valor?new Intl.DateTimeFormat('es-PA',{dateStyle:'medium',timeZone:'UTC'}).format(new Date(valor+'T12:00:00Z')):'Fecha no registrada';},
+  justificar({titulo,contexto,opciones,confirmacion,alConfirmar,alGuardar,alError=null,maximo=1850,instruccion='Selecciona un motivo',textoRevisar='Revisar y confirmar',tituloConfirmacion='Confirmar acción',textoConfirmar='Confirmar',ayuda='Puedes editar completamente la justificación. Para «Otro», escribe tu propia explicación.'}) {
+    const d=document.createElement('dialog');d.className='pro-dialogo pro-dialogo-decision'+(titulo==='Solicitar reevaluación'?' pro-dialogo-reevaluacion':'');d.setAttribute('aria-label',titulo);
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('solicitudes')}</span><h2>${limpiarHtml(titulo)}</h2></div><p class="pro-modal-contexto">${limpiarHtml(contexto)}</p><form><fieldset class="pro-motivos"><legend>${limpiarHtml(instruccion)}</legend>${opciones.map(([valor,nombre])=>`<label class="pro-motivo"><input type="radio" name="motivoDecision" value="${limpiarHtml(valor)}" required><span>${limpiarHtml(nombre)}</span></label>`).join('')}</fieldset><label>Justificación<textarea name="justificacion" required minlength="10" maxlength="${maximo}" rows="5" placeholder="Selecciona un motivo para ver la sugerencia editable."></textarea></label><p class="ayuda">${limpiarHtml(ayuda)}</p><p data-error role="alert"></p><div class="pro-acciones"><button class="boton secundario" type="button" data-cancelar>Cancelar</button><button class="boton" type="submit">${limpiarHtml(textoRevisar)}</button></div></form>`;
+    document.body.append(d);
+    if(titulo==='Solicitar reevaluación')d.querySelector('form').insertAdjacentHTML('afterbegin',`<fieldset class="pro-apartados-reevaluacion"><legend>Apartados de la entrevista familiar</legend><p class="ayuda pro-instruccion-apartados">Selecciona uno o más apartados de la entrevista que consideres necesario revisar o actualizar.</p>${['Hogar y red de apoyo','Preferencias familiares','Salud y acompañamiento','Disponibilidad y entorno','Apoyos culturales y comunitarios'].map((t,i)=>`<label><input type="checkbox" name="apartadoFamiliar" value="${t}">${this.icono(['personas','estrella','salud','hogar','personas'][i])}<span>${t}</span></label>`).join('')}</fieldset>`);
+    const form=d.querySelector('form'),texto=d.querySelector('textarea'),boton=d.querySelector('[type=submit]');
+    CamposFormulario.iniciar(form);
+    if(titulo==='Solicitar reevaluación'){
+      texto.placeholder='Explica qué información debe corregirse, aclararse o completarse y por qué.';
+      const limpiar=document.createElement('button');limpiar.type='reset';limpiar.className='boton secundario';limpiar.textContent='Limpiar';form.querySelector('.pro-acciones').prepend(limpiar);
+    }
+    let guardando=false;
+    d.querySelector('[data-cancelar]').addEventListener('click',()=>d.close());
+    d.addEventListener('cancel',e=>{if(guardando)e.preventDefault();});
+    d.addEventListener('close',()=>d.remove(),{once:true});
+    let motivoAnterior='',ultimaSugerencia='';
+    const aplicarMotivo=valor=>{motivoAnterior=valor;ultimaSugerencia=opciones.find(o=>o[0]===valor)?.[2]||'';texto.value=ultimaSugerencia;texto.setCustomValidity('');CamposFormulario.error(texto,'');texto.dispatchEvent(new Event('input',{bubbles:true}));};
+    form.addEventListener('reset',()=>{motivoAnterior='';ultimaSugerencia='';});
+    form.addEventListener('change',e=>{if(e.target.name!=='motivoDecision')return;const nuevo=e.target.value;
+      if(texto.value.trim() && texto.value!==ultimaSugerencia){
+        [...form.querySelectorAll('[name=motivoDecision]')].forEach(c=>c.checked=c.value===motivoAnterior);
+        this.confirmar('¿Actualizar la sugerencia?','La nueva sugerencia reemplazará la justificación que editaste. Cancela para conservarla.',()=>{form.querySelector(`[name=motivoDecision][value="${nuevo}"]`).checked=true;aplicarMotivo(nuevo);});
+      }else aplicarMotivo(nuevo);
+    });
+    texto.addEventListener('input',()=>texto.setCustomValidity(''));
+    form.addEventListener('submit',e=>{
+      e.preventDefault();if(guardando)return;
+      texto.setCustomValidity(texto.value.trim().length<10?'Escribe una justificación de al menos 10 caracteres.':'');
+      if(titulo==='Solicitar reevaluación'&&!form.querySelector('[name=apartadoFamiliar]:checked')){d.querySelector('[data-error]').textContent='Selecciona al menos un apartado de la entrevista familiar.';return;}
+      if(!form.reportValidity())return;
+      const motivo=opciones.find(o=>o[0]===form.elements.motivoDecision.value);
+      const apartados=[...form.querySelectorAll('[name=apartadoFamiliar]:checked')].map(c=>c.value);
+      const justificacion=titulo==='Solicitar reevaluación'?texto.value.trim():`${motivo[1].replace(/\.$/,'')}: ${texto.value.trim()}`;
+      const confirmar=document.createElement('dialog');confirmar.className='pro-dialogo';confirmar.setAttribute('aria-label',tituloConfirmacion);
+      confirmar.innerHTML=`<h2>${limpiarHtml(tituloConfirmacion)}</h2><p>${limpiarHtml(confirmacion)}</p><div class="pro-acciones"><button class="boton secundario" type="button" data-volver>Volver</button><button class="boton" type="button" data-confirmar>${limpiarHtml(textoConfirmar)}</button></div>`;
+      if(titulo==='Solicitar reevaluación')confirmar.querySelector('h2').insertAdjacentHTML('afterend',`<p>Revisar: ${apartados.map(limpiarHtml).join(', ')}.</p><p class="pro-texto-registrado">${limpiarHtml(justificacion)}</p>`);
+      document.body.append(confirmar);boton.disabled=true;
+      confirmar.addEventListener('close',()=>{confirmar.remove();if(!guardando)boton.disabled=false;},{once:true});
+      confirmar.querySelector('[data-volver]').onclick=()=>confirmar.close();
+      confirmar.querySelector('[data-confirmar]').onclick=async()=>{
+        guardando=true;confirmar.close();boton.disabled=true;d.querySelector('[data-cancelar]').disabled=true;
+        let resultado;
+        try{resultado=await alConfirmar(justificacion,{apartados,categoria:motivo[0]});}
+        catch(error){if(alError?.(error)){d.close();return;}d.querySelector('[data-error]').textContent=error.message;return;}
+        finally{guardando=false;boton.disabled=false;d.querySelector('[data-cancelar]').disabled=false;}
+        d.close();if(alGuardar)await alGuardar(resultado);
+      };
+      confirmar.showModal();
+    });
+    d.showModal();
+  },
+  errorCampo(campo,mensaje) { CamposFormulario.error(campo,mensaje); },
+  validarFormulario(form) { return CamposFormulario.revisar(form); },
+  erroresServidor(errores) {const campos={edadCoherente:'edad',habilidadesCoherentes:'habilidadesDetalle',gustosCoherentes:'gustosDetalle',personalidadCoherente:'personalidadDetalle',alergiasCoherentes:'alergiasDetalle',condicionesSaludCoherentes:'condicionesSaludDetalle',hermanosCoherentes:'cantidadHermanos',escolaridadCoherente:'rendimientoAcademico',hogarCoherente:'especificacionHogar',redApoyoCoherente:'notaRedApoyo',rangoEdadCoherente:'edadMaximaAceptada',disposicionHermanosCoherente:'notaHermanos',capacidadesCoherentes:'notaCondicionesSalud'};Object.entries(errores||{}).forEach(([id,mensaje])=>{const c=document.getElementById(campos[id]||id);if(c)this.errorCampo(c,mensaje);});},
   organizarFormulario() {
     const form=document.getElementById('formulario');if(!form)return;
     const iconos=['persona','escuela','estrella','personas','salud'];
@@ -118,21 +206,6 @@ const Profesionales = {
     });
     form.addEventListener('invalid',e=>this.errorCampo(e.target,e.target.validationMessage),true);
     form.addEventListener('input',e=>{if(e.target.matches('input,textarea,select'))this.errorCampo(e.target,'');});
-    ['habilidades','gustos','personalidad','alergias','condicionesSalud'].forEach(nombre=>{
-      const grupo=form.querySelector(`[data-grupo="${nombre}"]`),detalle=document.getElementById(nombre+'Detalle');
-      const actualizar=()=>{
-        const marcados=[...grupo.querySelectorAll('input:checked')];
-        const neutro=marcados.some(c=>['NINGUNA_CONOCIDA','NINGUNA_IDENTIFICADA','NINGUNO_IDENTIFICADO'].includes(c.value));
-        grupo.querySelector('input').setCustomValidity(!marcados.length?'Selecciona al menos una opción.':neutro&&marcados.length>1?'Selecciona una opción coherente con la información registrada.':'');
-        detalle.required=marcados.some(c=>['OTRO','OTRA'].includes(c.value)||(nombre==='alergias'&&c.value==='ALIMENTARIA'));
-      };grupo.addEventListener('change',actualizar);form.addEventListener('submit',actualizar,true);actualizar();
-    });
-    ['gradoEscolar','habilidadesDetalle','gustosDetalle','personalidadDetalle','alergiasDetalle','condicionesSaludDetalle','hermanosDetalle'].forEach(id=>document.getElementById(id).maxLength=255);
-    ['necesidadesApoyo','contextoCultural'].forEach(id=>document.getElementById(id).maxLength=2000);
-    document.getElementById('edad').step='1';document.getElementById('cantidadHermanos').step='1';
-    const hermanos=document.getElementById('tieneHermanos'),cantidad=document.getElementById('cantidadHermanos');
-    const revisar=()=>{cantidad.required=hermanos.value==='SI';cantidad.min=hermanos.value==='SI'?'1':'0';cantidad.setCustomValidity(hermanos.value==='NO'&&Number(cantidad.value)>0?'Revisa la cantidad: indicaste que no tiene hermanos.':'');};
-    hermanos.addEventListener('change',revisar);cantidad.addEventListener('input',revisar);form.addEventListener('submit',revisar,true);
     document.querySelector('#pantallaNino h1').textContent=new URLSearchParams(location.search).has('editar')?'Actualizar perfil infantil':'Registrar perfil infantil';
     document.querySelector('#pantallaNino .hero p').textContent='Completa la información del niño, niña o adolescente.';
     document.querySelector('#pantallaNino .volver').textContent='← Volver al inicio';document.querySelector('#pantallaNino .volver').href='funcionario.html';

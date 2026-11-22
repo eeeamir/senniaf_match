@@ -85,14 +85,12 @@ class PerfilFamiliaServiceTest {
     }
 
     @Test
-    void marcaComoIncompletoUnPerfilConRangoDeEdadInconsistente() {
+    void rechazaUnPerfilConRangoDeEdadInconsistente() {
         PerfilFamiliaRequest request = perfilCompleto();
         request.setEdadMinimaAceptada(10);
         request.setEdadMaximaAceptada(5);
 
-        PerfilFamiliaResponse response = service.registrarPerfil(request, "familia-1");
-
-        assertFalse(response.isPerfilCompleto());
+        assertThrows(IllegalArgumentException.class, () -> service.registrarPerfil(request, "familia-1"));
     }
 
     @Test
@@ -112,7 +110,7 @@ class PerfilFamiliaServiceTest {
         PerfilFamilia perfil = new PerfilFamilia();
         perfil.setCodigoCaso("FAM-001");
         perfil.setReevaluacionPendiente(true);
-        when(repo.findByRegistradoPor("8-123-456")).thenReturn(Optional.of(perfil));
+        when(repo.bloquearPorRegistradoPor("8-123-456")).thenReturn(Optional.of(perfil));
         when(repo.save(any(PerfilFamilia.class))).thenAnswer(i -> i.getArgument(0));
         PerfilFamiliaService servicio = new PerfilFamiliaService(repo, mock(DecisionComiteRepository.class));
 
@@ -136,17 +134,17 @@ class PerfilFamiliaServiceTest {
         PerfilFamilia perfil = new PerfilFamilia();
         perfil.setCodigoCaso("FAM-002");
         perfil.setReevaluacionPendiente(true);
-        when(repo.findByRegistradoPor("8-456-789")).thenReturn(Optional.of(perfil));
+        when(repo.bloquearPorRegistradoPor("8-456-789")).thenReturn(Optional.of(perfil));
         PerfilFamiliaService servicio = new PerfilFamiliaService(repo, mock(DecisionComiteRepository.class));
 
         PerfilFamiliaRequest incompleta = perfilCompleto();
         incompleta.setEdadMinimaAceptada(12);
         incompleta.setEdadMaximaAceptada(7);
 
-        PerfilFamiliaResponse respuesta = servicio.actualizarPropio(incompleta, "8-456-789");
-        assertEquals(0, respuesta.getNumeroReevaluaciones());
-        assertTrue(respuesta.isReevaluacionPendiente());
-        assertFalse(respuesta.isPerfilCompleto());
+        assertThrows(IllegalArgumentException.class, () -> servicio.actualizarPropio(incompleta, "8-456-789"));
+        assertEquals(0, perfil.getNumeroReevaluaciones());
+        assertTrue(perfil.isReevaluacionPendiente());
+        verify(repo, never()).save(any());
     }
 
     @Test
@@ -169,6 +167,31 @@ class PerfilFamiliaServiceTest {
         assertTrue(servicio.consultarPorCedula("8-111-111").orElseThrow().isVinculacionAceptada());
         assertFalse(servicio.consultarPorCedula("8-222-222").orElseThrow().isVinculacionAceptada());
         verify(decisiones).existsByCodigoFamiliaAndDecision("FAM-002", "ACEPTADA");
+    }
+
+    @Test
+    void conservaAntecedenteYAuditaCadaApoyoCulturalSinCambiarReevaluaciones() throws Exception {
+        var repo=mock(PerfilFamiliaRepository.class);
+        var auditoria=mock(com.senniaf.match.repository.EventoCasoRepository.class);
+        var captor=org.mockito.ArgumentCaptor.forClass(PerfilFamilia.class);
+        when(repo.save(captor.capture())).thenAnswer(i->i.getArgument(0));
+        var servicio=new PerfilFamiliaService(repo,mock(DecisionComiteRepository.class),auditoria);
+        var inicial=perfilCompleto();servicio.registrarPerfil(inicial,"familia-cultural");
+        var perfil=captor.getValue();perfil.setId(1L);
+        when(repo.bloquearPorRegistradoPor("familia-cultural")).thenReturn(Optional.of(perfil));
+        var cambios=perfilCompleto();cambios.setContinuidadCultural("No debe sustituir el texto anterior");
+        cambios.setApoyoIdiomas("Idioma familiar "+"á".repeat(3000));cambios.setRespetoTradiciones("Respeto por las celebraciones");
+        cambios.setRecursosComunitarios("Actividades comunitarias");cambios.setRespetoPreferencias("Escuchar las preferencias expresadas");cambios.setCompromisoCultural("Acompañamiento acordado con el equipo");
+        servicio.actualizarPropio(cambios,"familia-cultural");
+        assertEquals(inicial.getContinuidadCultural(),perfil.getContinuidadCultural());
+        assertEquals(cambios.getApoyoIdiomas(),perfil.getApoyoIdiomas());
+        var evento=org.mockito.ArgumentCaptor.forClass(com.senniaf.match.model.EventoCaso.class);verify(auditoria).save(evento.capture());
+        var diff=new com.fasterxml.jackson.databind.ObjectMapper().readTree(evento.getValue().getDescripcion()).path("cambios");
+        assertEquals(5,diff.size());assertFalse(diff.has("continuidadCultural"));
+        for(String k:List.of("apoyoIdiomas","respetoTradiciones","recursosComunitarios","respetoPreferencias","compromisoCultural"))assertTrue(diff.has(k));
+        assertEquals(0,perfil.getNumeroReevaluaciones());assertTrue(perfil.isPerfilCompleto());
+        cambios.setApoyoIdiomas("");servicio.actualizarPropio(cambios,"familia-cultural");assertEquals("",perfil.getApoyoIdiomas());
+        assertEquals(inicial.getContinuidadCultural(),perfil.getContinuidadCultural());
     }
 
     private PerfilFamiliaRequest perfilCompleto() {

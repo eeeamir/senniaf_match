@@ -1,0 +1,30 @@
+{
+  "jarSHA256": "b9e4d1021ca70c2413352e444f4db34b64c86d68e4668936785a89bf21cdf562",
+  "buildInfo": "build.artifact=senniaf-match\nbuild.branch=mejora/sprint9\nbuild.commit=78a2ee0e5d8d03ae14726b7560c5c4e3b9e4dc12\nbuild.group=com.senniaf\nbuild.name=senniaf-match\nbuild.time=2026-11-21T06\\:52\\:33.032Z\nbuild.version=0.1.0\nbuild.worktree=limpio\n",
+  "esquema012a019": "t|t|t|t|t|t|t|t",
+  "esquema020": "f",
+  "registroMigraciones": "",
+  "tablas": [
+    "auditoria_casos",
+    "combinaciones_excluidas",
+    "decisiones_comite",
+    "evaluaciones_psicologicas",
+    "familia_red_apoyo",
+    "familia_salud_apoyo",
+    "familia_salud_hoy",
+    "interrupciones_convivencia",
+    "nino_alergias",
+    "nino_condiciones_salud",
+    "nino_gustos",
+    "nino_habilidades",
+    "nino_personalidad",
+    "perfiles_familia",
+    "perfiles_nino",
+    "pesos_scoring",
+    "programaciones_pesos",
+    "sesiones_acceso",
+    "solicitudes_estado_caso",
+    "usuarios",
+    "vinculaciones"
+  ]
+}

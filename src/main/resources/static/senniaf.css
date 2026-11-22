@@ -276,3 +276,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 .estado-resumen { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
 .evaluacion .acciones-perfil { margin-top:16px; }
 @media(max-width:650px) { .detalle-datos { grid-template-columns:1fr; gap:4px; } .detalle-datos dd { margin-bottom:12px; } .avisos-globales { margin:12px; } }
+
+.campo-error { display: block; margin-top: 5px; color: var(--error,#b82e40); font-size: 12px; line-height: 1.5; }
+.campo-error[hidden] { display: none; }

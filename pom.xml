@@ -20,6 +20,9 @@
 
     <properties>
         <java.version>17</java.version>
+        <senniaf.commit>sin-publicar</senniaf.commit>
+        <senniaf.branch>sin-indicar</senniaf.branch>
+        <senniaf.worktree>no-verificado</senniaf.worktree>
         <senniaf.artifact-name>${project.artifactId}-${project.version}</senniaf.artifact-name>
         <!-- PBI27: parches de seguridad dentro de las mismas líneas compatibles. -->
         <tomcat.version>10.1.61</tomcat.version>
@@ -69,6 +72,14 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions><execution>
+                    <goals><goal>build-info</goal></goals>
+                    <configuration><additionalProperties>
+                        <commit>${senniaf.commit}</commit>
+                        <branch>${senniaf.branch}</branch>
+                        <worktree>${senniaf.worktree}</worktree>
+                    </additionalProperties></configuration>
+                </execution></executions>
             </plugin>
         </plugins>
     </build>

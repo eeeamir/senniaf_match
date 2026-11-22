@@ -82,4 +82,112 @@ No se programaron apagados, suspensión o eliminación. Mantener el límite de g
 
 ## Esquema y datos
 
-Los scripts 001, 002 y 005–008 conservan el esquema y permisos técnicos. Los cambios 006–008 están en la carpeta histórica `sql/propuestas/`, aunque ya fueron autorizados y aplicados en esta VM. Ninguno se ejecuta desde `actualizar.sh`. Los scripts privados de carga 003/004 no se publican ni son necesarios para actualizar el servicio existente. No se incluyen registros o respaldos en Git.
+Los scripts 001, 002 y 005–010 conservan el esquema y permisos técnicos. Los cambios 006–008 están en la carpeta histórica `sql/propuestas/`, aunque ya fueron autorizados y aplicados en esta VM. Ninguno se ejecuta desde `actualizar.sh`. Los scripts privados de carga 003/004 no se publican ni son necesarios para actualizar el servicio existente. No se incluyen registros o respaldos en Git.
+
+## Publicación de ajustes finales del 10 de noviembre de 2026
+
+La VM utiliza `senniaf-match-ajustes-finales-20261110-e1af49e.jar`, correspondiente al [commit de implementación `e1af49e`](https://github.com/eeeamir/senniaf_match/commit/e1af49eadc9fbf7eb5b727cb21880690a803237a), con SHA-256 `16eb51cb070c0dc42c3377a0adfde7473378639c9ab492a9ea63e6202c9b6932`. Se publicó con `actualizar.sh`; `/srv/senniaf/current.jar` apunta a `/srv/senniaf/releases/16eb51cb070c0dc42c3377a0adfde7473378639c9ab492a9ea63e6202c9b6932.jar`. La versión anterior `senniaf-match-revision-demo-20261110.jar`, SHA-256 `7d0a92f56402c7dbc7482897ac4914f19cbdf23f587476693cdce413aae9517a`, permanece intacta en el directorio de versiones.
+
+Las migraciones `009-formularios-coherentes.sql` y `010-documentos-identidad.sql` están aplicadas en `senniaf_demo`. La 010 añade dos columnas opcionales y un índice único para nuevos documentos; todas las cuentas anteriores conservan ambos campos nuevos en NULL. No convierte documentos ni modifica identificadores, credenciales o relaciones. La 009 conserva su ampliación de formularios y restricciones para nuevas escrituras.
+
+Antes de la 010 se generó `/var/backups/senniaf/20261111T031732Z.rY1Ae4.dump`, SHA-256 `e29274e3df0ed30b6befd57dc3235daceadb460f86fd1e82baa49bfa9b5e4be1`. El actualizador generó `/var/backups/senniaf/20261111T032040Z.yLF7KE.dump`, SHA-256 `7ea9e69f93892e491d92a38068892f0b622802eeb236a181500529c2517df973`, antes de sustituir el JAR. Las fechas de los nombres son UTC. Ambas copias privadas se leyeron completas con `pg_restore --file=/dev/null` y se verificó el SHA-256 de su descarga desde Blob, sin restaurar sobre ninguna base. Se conservaron los respaldos anteriores.
+
+La aplicación sigue usando PostgreSQL local y la misma base. Los datos residen en `/var/lib/postgresql/16/main`, sobre el disco administrado persistente Standard SSD LRS de la VM; no se cambió de base ni se reinició PostgreSQL. La lectura de integridad anterior y posterior conserva conteos y SHA-256 de las 16 tablas de datos durables (excluye `sesiones_acceso`), descontando únicamente las dos columnas nuevas: 11 cuentas, 6 expedientes infantiles, 3 entrevistas familiares, 7 evaluaciones psicológicas, 19 entradas de auditoría y una solicitud pendiente. No se crearon cuentas ni registros de demostración durante esta publicación.
+
+En esta demostración se habilitó expresamente `SENNIAF_DEMO_ASIGNACION_AUTOMATICA=true`, conservando una copia privada de la configuración anterior. Solo afecta a nuevas altas y distribuye psicología según la carga de casos; no reasigna expedientes anteriores ni representa una política institucional. No se cambiaron credenciales ni opciones de seguridad. Las credenciales de cuentas de demostración permanecen fuera del repositorio.
+
+## Revisión integral de HU19 — 13 de noviembre de 2026
+
+La inspección administrativa de solo lectura confirmó PostgreSQL **16.15**, Java **17.0.21**, base persistente `senniaf_demo` y datos en `/var/lib/postgresql/16/main`, sobre el disco de la VM. La migración 011 está representada por la columna `unidad_edad`; **012 todavía no está aplicada**. El JAR activo no contiene HU19 y `/vinculaciones.html` devuelve 404. El SHA-256 del JAR en ejecución es `7a06feedf3165f746d69cb12afec861d3b0c2ebecd4dd4b83c6728d58c35e033`. No contiene metadatos de commit: cuatro recursos web coinciden exactamente con `67db4fa`, pero esa coincidencia no certifica todo el binario.
+
+No existe una rama que despliegue automáticamente: el workflow remoto actual solo prueba cambios de `main`; Azure recibe un JAR mediante el procedimiento manual anterior. La ampliación local del mismo workflow valida también `sprint7-desarrollo`, prepara un esquema aislado con PostgreSQL 16 y ejecuta las suites unitarias y HTTP. Hasta publicarla, no está activa en GitHub. No añadir datos de pruebas a la base persistente para activar HU19.
+
+Antes de desplegar HU19, preparar una intervención autorizada:
+
+1. Publicar y revisar el commit de la rama de trabajo. Empaquetar con Java 17, conservar el SHA-256 y comprobar los metadatos. En una copia sin cambios pendientes:
+
+   ```bash
+   mvn -B package -DskipTests \
+     -Dsenniaf.artifact-name=senniaf-match-release-AAAAMMDD \
+     -Dsenniaf.commit="$(git rev-parse HEAD)" \
+     -Dsenniaf.branch="$(git branch --show-current)" \
+     -Dsenniaf.worktree=limpio
+   ```
+
+   Marcar `limpio` solo después de comprobar `git status`, incluidos archivos nuevos. Las pruebas deben haber pasado antes. `META-INF/build-info.properties` registra commit, rama y condición del árbol; el artefacto con cambios locales debe marcarse `modificado`, nunca atribuirse a un commit limpio.
+2. Actualizar expresamente **el actualizador existente y su nuevo auxiliar** `verificar-compatibilidad.py` en `/usr/local/lib/senniaf/`, con revisión del operador. No se han copiado ni instalado en Azure durante esta auditoría. El auxiliar usa solo Python estándar, ya disponible. Sin él, el actualizador nuevo cancela antes de tocar el servicio.
+3. Generar un respaldo nuevo mediante el procedimiento existente, comprobar SHA y lectura completa, y acordar la recuperación. La lectura correcta de un respaldo anterior no garantiza que incluya escrituras posteriores. No restaurar sobre la base activa automáticamente.
+4. Detener el backend anterior durante la conversión: no permitir nuevas decisiones del Comité entre migración y activación del JAR. Revisar conflictos de aceptaciones y ejecutar manualmente 012 con `ON_ERROR_STOP=1`, `base_autorizada` y `confirmacion=CREAR_VINCULACIONES_SIN_BORRAR`, usando el propietario del esquema. Conservar sus permisos a `senniaf_app`; no cambiar credenciales. No ejecutar el esquema 001 sobre esta base.
+5. Usar el mismo `actualizar.sh` con el JAR y SHA revisados. El nuevo precontrol rechaza HU19 sin su tabla y rechaza un JAR anterior si la tabla ya existe. No migra el esquema por su cuenta.
+6. Si falla el arranque, solo recuperar automáticamente un JAR compatible con vinculaciones. Si el anterior es legado, **el servicio queda detenido**, preservando la base para intervención del operador. Aunque 012 sea aditiva, el JAR legado podría aceptar propuestas sin crear vinculaciones: no es una recuperación funcional segura. La comprobación cubre esta incompatibilidad de HU19; las futuras migraciones deben revisar también sus requisitos de recuperación.
+7. Verificar HTTPS, acceso autenticado de los cuatro roles, respuestas familiares, alcance profesional, auditoría y persistencia. Contrastar la huella remota con el artefacto aprobado y leer sus metadatos de compilación sin imprimir el entorno privado.
+
+Ninguno de estos pasos operativos se ha aplicado durante la revisión. La inspección de la VM se realizó mediante Run Command de Azure porque SSH agotaba el tiempo de conexión; no se abrió SSH a Internet ni se cambiaron reglas de red.
+
+
+## Sprint 8 integrado — preparación local, sin publicación
+
+La implementación posterior validó HU19, HU11, HU12, HU14 y HU13 en orden, con commits locales separados. La petición vigente permitió continuar el desarrollo local sin esperar a Azure. Esto sustituye el bloqueo para desarrollar HU11 indicado en la auditoría histórica; no autoriza cambios en el servidor. La consulta pública final sigue mostrando raíz 200 y `/vinculaciones.html` 404. No se ejecutaron migraciones, reinicios ni despliegues remotos.
+
+La entrega funcional probada corresponde al commit **9d6b06d** de `sprint7-desarrollo`, con 273 pruebas Java y ocho del actualizador aprobadas. Artefacto local `target/senniaf-match-sprint8-validacion-9d6b06d.jar`, SHA-256 **bd9fe9382da347a9b5bb0efa44aa489f14808f9ba37e0b931d685391c8690cec**. Sus metadatos registran commit, rama y árbol limpio. Los cambios posteriores de cierre son documentación; cualquier cambio de código requiere una nueva validación y artefacto identificado. Ver [resultados](../../docs/SPRINT8_RESULTADOS.md) y [matriz](../../docs/SPRINT8_MATRIZ_ACEPTACION.md).
+
+Para una intervención futura autorizada, ampliar el procedimiento anterior:
+
+1. Revisar/publicar los commits y confirmar la versión exacta del JAR y su SHA. Contrastar Java 17, PostgreSQL 16 y el esquema real antes de actuar. El artefacto contiene HU11 y requiere 012 **y 013**; el control local `python3 deploy/azure/verificar-compatibilidad.py archivo.jar t t` comprueba esa etapa, pero no sustituye la validación del esquema.
+2. Instalar conjuntamente las versiones revisadas de `actualizar.sh` y `verificar-compatibilidad.py`; el auxiliar debe incluir el control de interrupciones. El script consulta ambas tablas y comprueba también la compatibilidad del candidato de recuperación. No aplicar únicamente una de las dos piezas.
+3. Generar y verificar un respaldo nuevo de la base persistente con el procedimiento existente, conservando copia privada externa, SHA y lectura completa. Conservar el JAR anterior sin alterarlo. Acordar una recuperación compatible antes de convertir el esquema.
+4. Detener el backend anterior para impedir decisiones durante la conversión. Aplicar manualmente 012 con `base_autorizada` y `confirmacion=CREAR_VINCULACIONES_SIN_BORRAR`; analizar cualquier conflicto sin borrar antecedentes. Después aplicar `013-interrupciones-convivencia.sql` con `base_autorizada` y `confirmacion=AGREGAR_INTERRUPCIONES_SIN_BORRAR`, usando `ON_ERROR_STOP=1` y el propietario del esquema. Conservar las credenciales y permisos de `senniaf_app`. Nunca ejecutar 001 ni restaurar una base de desarrollo sobre el destino persistente.
+5. Publicar el JAR revisado mediante el actualizador existente, sin carga de datos sintéticos. Si no hay un JAR de recuperación compatible con las dos migraciones, conservar el servicio detenido para intervención del operador ante un fallo. No volver a un JAR de HU19 que oculte interrupciones, ni al legado que omite vinculaciones. Las tablas aditivas no se borran automáticamente para forzar una recuperación.
+6. Verificar HTTPS, los cuatro roles, asignación profesional, privacidad familiar, historial, respuestas, revisión de interrupciones, apoyos culturales, alertas y pesos/versiones. Confirmar persistencia y huellas/conteos de los datos que deban conservarse. Verificar la huella del JAR activo y sus metadatos, sin imprimir secretos.
+
+Ninguno de estos pasos ha sido ejecutado en Azure. El ensayo de arranque y persistencia del JAR se limita al entorno local sintético.
+
+
+## Publicación del Sprint 8 — 14 de noviembre de 2026
+
+El procedimiento autorizado aplicó 012/013/014 sobre `senniaf_demo` con respaldo reciente verificado y backend detenido; luego el actualizador existente publicó el JAR CI del commit `4d19bc2`. La ruta Vinculaciones ya responde 200 y se comprobaron autenticación, consultas y permisos de cuatro roles. Las tablas históricas conservan conteos y huellas. El cierre institucional y la revisión separada de disponibilidad requieren 014; el auxiliar actualizado impide recuperar un JAR que omita esas columnas.
+
+El informe vigente, respaldos, pipelines, commit/SHA y límites de comprobación están en [SPRINT8_INTEGRACION_DESPLIEGUE.md](../../docs/SPRINT8_INTEGRACION_DESPLIEGUE.md). Las secciones anteriores se conservan como antecedentes de las versiones previas.
+
+
+## Refuerzos posteriores: 015 pendiente de publicación
+
+La programación a las 07:00 de Panamá y la exclusión de pares rechazados requieren la migración 015 y el actualizador/auxiliar revisados conjuntamente. El auxiliar comprueba cuatro etapas: vinculaciones, interrupciones, cierre y refuerzos (`t t t t`). No recuperar un JAR anterior tras aplicar 015: ignoraría tanto las programaciones como las exclusiones. Esta ampliación está validada localmente; no se desplegó ni se migró Azure durante su desarrollo. Ver [informe técnico y pruebas](../../docs/HU13_PROGRAMACION_Y_RECHAZOS.md).
+
+### Cierre simplificado (016; pendiente de despliegue)
+
+`sql/016-cierre-simplificado.sql` permite registrar cierres nuevos sin referencia ni autoridad manual y conserva los valores históricos. Requiere 014 y 015. Para una futura publicación: verificar el respaldo con el procedimiento anterior, detener el servicio, ejecutar el SQL con `base_autorizada` y `confirmacion=SIMPLIFICAR_CIERRE_SIN_BORRAR`, y sustituir el JAR mediante el actualizador y verificador incluidos en esta versión. No permitir escrituras del código anterior durante la transición. La comprobación exige la marca `senniaf-cierre-servidor.properties` y la nueva restricción; impide recuperar un JAR anterior sobre 016. Si la actualización falla, conservar el servicio detenido hasta disponer de código compatible; no restaurar datos automáticamente.
+
+### Campos culturales infantiles (017; preparación local)
+
+017 agrega cinco columnas `text` opcionales, sin modificar `contexto_cultural` ni rellenar datos. La auditoría debe estar en `text`. El JAR nuevo exige las cinco columnas; el actualizador no migra automáticamente. Aplicar con respaldo verificado, `base_autorizada` y `confirmacion=AGREGAR_CULTURA_SIN_REINTERPRETAR` antes de activar el JAR compatible. El JAR anterior puede recuperarse sobre 017: ignora estas columnas y no las sobrescribe; conserva su auditoría, aunque no permite editar los cinco campos. No borrar columnas para recuperar código. Cada valor nuevo admite hasta 10.000 caracteres; un exceso se rechaza, nunca se recorta. El antecedente cultural permanece separado y no se distribuye automáticamente.
+
+### Apoyos familiares e interrupción simplificada (018)
+
+018 agrega cinco columnas `text` opcionales a `perfiles_familia` y `motivo` a `interrupciones_convivencia`. Permite NULL en las fechas del hecho y referencias anteriores; conserva íntegramente sus valores históricos y `continuidad_cultural`. No rellena campos ni altera puntuaciones. Aplicar explícitamente con respaldo verificado, servicio detenido, `base_autorizada` y `confirmacion=AMPLIAR_APOYOS_SIMPLIFICAR_INTERRUPCION`; activar después el JAR compatible mediante el actualizador existente. Instalar juntos el actualizador y su auxiliar: ambos comprueban 018 además de 012–017. El JAR anterior de 017 puede recuperarse: ignora las columnas nuevas, conserva sus valores y admite la lectura de fechas/referencias nulas sin alterar los informes. La recuperación de código no elimina columnas ni restaura la base.
+
+### Autorización preadoptiva y apartados de reevaluación (019)
+
+019 agrega datos opcionales de la autorización institucional, su responsable/rol/instante y el inicio efectivo a `vinculaciones`; agrega apartados JSONB y categoría a `decisiones_comite`. No interpreta ni modifica registros históricos. Requiere 018 completa y aplicación explícita con respaldo verificado, servicio detenido, `base_autorizada` y `confirmacion=REGISTRAR_AUTORIZACION_Y_APARTADOS_SIN_BORRAR`. Actualizar juntos `actualizar.sh` y `verificar-compatibilidad.py`: el candidato exige columnas, restricciones y disparadores completos, además de 012–018.
+
+Las salvaguardas de inserción impiden interrupciones sin autorización e inicio efectivo y nuevas decisiones sobre el mismo par anteriormente interrumpido, incluso con el JAR previo de 018. Este JAR puede recuperarse temporalmente: conserva los campos nuevos sin sobrescribirlos y lee los informes antiguos; no permite registrar autorizaciones ni presenta los nuevos apartados. Su interfaz puede ofrecer acciones que las salvaguardas rechazarán. La recuperación nunca elimina columnas ni restaura datos. Aplicar y publicar una sola versión integrada; la aceptación familiar no se transforma en autorización. La fecha de emisión identifica el acto existente; el inicio efectivo se completa en el mismo formulario solo cuando haya ocurrido. Los reportes detallados e incidencias avanzadas permanecen fuera del alcance del Sprint 8.
+
+## Publicación consolidada del Sprint 9 — 21 de noviembre de 2026
+
+Versión activa comprobada: commit `8628cea8b6101345529422329f8f3746cb099439`, SHA-256 `d19726ebcb44b5895ab350b596fc53006bc05b4b3774a19c3382cf1154fba067`. Publicada mediante el actualizador existente, incluyendo `EVIDENCIA_TEXTO_7`, Inicio y Citas. Las migraciones 012–020 están completas; la 020 se aplicó manualmente una sola vez con respaldo verificado y conserva todas las tablas y filas anteriores. El proyecto no utiliza una tabla automática de migraciones: la evidencia está en el log privado de intervención y las comprobaciones de catálogo.
+
+El horario provisional del prototipo se configura mediante `SENNIAF_CITAS_FRANJAS` y `SENNIAF_CITAS_INTERVALO_MINUTOS`: lunes–viernes 08:00–16:00, pasos de 30 minutos, zona America/Panama. No es un horario oficial de SENNIAF. Sin configuración válida no se deben confirmar citas. El actualizador y auxiliar incluyen ahora la comprobación de 020; deben conservarse juntos. El JAR anterior `b9e4d1021ca70c2413352e444f4db34b64c86d68e4668936785a89bf21cdf562` permanece intacto y se verificó compatible para recuperación de código, sin borrar las tablas nuevas ni restaurar la base.
+
+[Informe vigente, respaldos, 1141 pruebas, integridad, verificaciones y límites](../../docs/DESPLIEGUE_CONSOLIDADO_SPRINT9.md). Las notas anteriores con migraciones pendientes se conservan como antecedentes históricos.
+
+## Correcciones posteriores al despliegue — 021 pendiente, solo local
+
+La corrección del reingreso revisado requiere `021-reingreso-revisado.sql`: mantiene los antecedentes y permite reevaluar el par interrumpido únicamente después de su cierre y de la revisión independiente de ambos expedientes. Las exclusiones expresas y las condiciones de elegibilidad siguen vigentes. No se ejecutó en Azure durante esta tarea. Ver [impacto previo](../../docs/REVISION_REINGRESO_SPRINT9.md) e [informe de correcciones](../../docs/CORRECCIONES_POSTDESPLIEGUE_SPRINT9.md).
+
+Una futura publicación autorizada debe aplicar 021 explícitamente con respaldo verificado, `ON_ERROR_STOP=1`, base autorizada y `confirmacion=PERMITIR_REINGRESO_REVISADO_SIN_BORRAR`, y usar juntos el actualizador/auxiliar revisados. Se exige la marca `senniaf-reingreso-revisado.properties`; el JAR anterior aplica una regla funcional diferente y el auxiliar no lo admite automáticamente sobre 021. No borrar antecedentes, revertir datos ni restaurar la base para recuperar código.
+
+## Publicación de las diez correcciones — 021 aplicada, 21 de noviembre de 2026
+
+Publicado mediante `actualizar.sh`: commit `0c88ad72d5d45ac890d85f553df1b61ca7214f6d`, SHA-256 `7cdbda6ca0206e65dfe5f12f79e52b101ab743aa5e4faab71d3e49aab59d9163`. La 020 permanece completa y la 021 se aplicó una sola vez, con COMMIT, marca y cuerpo de función verificados. Servicio y PostgreSQL activos; HTTPS, cuatro vistas públicas, paneles de los cuatro roles, Citas, `EVIDENCIA_TEXTO_7` y botón Reevaluar comprobados sin modificar expedientes. Se reutilizaron las 1159 pruebas verificables; no se repitió la suite ni se hicieron pruebas de rendimiento o capturas nuevas.
+
+Respaldo premigración `/var/backups/senniaf/20261121T222951Z.nA1smf.dump`, SHA-256 `f19567ff6a0e80809adff1dcdb09849730737fa4245d683038c000c3bb956848`: lectura completa local y de su descarga desde Blob verificadas. El actualizador creó además `/var/backups/senniaf/20261121T222952Z.ttAVTS.dump`. Las 22 tablas de datos conservan sus conteos y huellas (se excluye únicamente `sesiones_acceso`); configuración y JAR anterior intactos. Sin errores críticos detectados. Evidencia privada de intervención: `/var/backups/senniaf/operacion-correcciones-sprint9-20261121-0c88ad7`. Las notas anteriores de 021 pendiente quedan como antecedentes. La recuperación de código sigue exigiendo compatibilidad con 021; no se restaura automáticamente la base.

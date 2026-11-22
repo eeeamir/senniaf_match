@@ -80,7 +80,7 @@ class PerfilNinoControllerTest {
 
         mockMvc.perform(post("/api/ninos")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-User-Role", "PSICOLOGO")
+                        .header("X-User-Role", "TRABAJADOR_SOCIAL")
                         .header("X-User-Id", "test-001")
                         .content(cuerpo))
                 .andExpect(status().isCreated())

@@ -13,6 +13,7 @@ import java.util.List;
 @Service
 public class PerfilFamiliaService {
 
+    @org.springframework.beans.factory.annotation.Autowired private com.senniaf.match.repository.VinculacionRepository vinculaciones;
     private final PerfilFamiliaRepository repositorio;
     private final com.senniaf.match.repository.EventoCasoRepository auditoria;
     private final com.senniaf.match.repository.DecisionComiteRepository decisiones;
@@ -26,16 +27,19 @@ public class PerfilFamiliaService {
         this.repositorio=repositorio;this.decisiones=decisiones;this.auditoria=auditoria;
     }
 
+    @Transactional
     public synchronized PerfilFamiliaResponse registrarPerfil(PerfilFamiliaRequest request, String registradoPor) {
+        request.validarCoherencia();
+        repositorio.bloquearAltas();
         String cedula = registradoPor == null ? "" : registradoPor.trim();
 
         if (cedula.isBlank()) {
-            throw new IllegalArgumentException("La cédula del responsable es obligatoria");
+            throw new IllegalArgumentException("El identificador de la persona responsable es obligatorio");
         }
 
         if (repositorio.existsByRegistradoPor(cedula)) {
             throw new IllegalStateException(
-                    "Ya existe un caso de familia registrado con la cédula " + cedula);
+                    "Ya existe un caso de familia registrado con el identificador " + cedula);
         }
 
         String codigoCaso = siguienteCodigoCaso();
@@ -61,7 +65,8 @@ public class PerfilFamiliaService {
     /** La familia actualiza su entrevista propia; una revisión solicitada se contabiliza al completarse. */
     @Transactional
     public PerfilFamiliaResponse actualizarPropio(PerfilFamiliaRequest request, String cedula) {
-        PerfilFamilia perfil = repositorio.findByRegistradoPor(cedula)
+        request.validarCoherencia();
+        PerfilFamilia perfil = repositorio.bloquearPorRegistradoPor(cedula)
                 .orElseThrow(() -> new IllegalArgumentException("Todavía no existe una entrevista para modificar"));
         var antes=datosAuditoria(perfil);
         copiarDatos(perfil, request);
@@ -85,12 +90,20 @@ public class PerfilFamiliaService {
 
     private PerfilFamiliaResponse respuesta(PerfilFamilia p, String mensaje) {
         var respuesta=new PerfilFamiliaResponse(mensaje, p.getCodigoCaso(), p.isPerfilCompleto(),
-                p.isReevaluacionPendiente(), p.getNumeroReevaluaciones(), decisiones!=null && decisiones.existsByCodigoFamiliaAndDecision(p.getCodigoCaso(),"ACEPTADA"));
+                p.isReevaluacionPendiente(), p.getNumeroReevaluaciones(), vinculaciones!=null?vinculaciones.findByFamiliaRegistradoPorOrderByIdDesc(p.getRegistradoPor()).stream().anyMatch(v->v.isReservaVigente() && (v.getEstado()==com.senniaf.match.model.Vinculacion.Estado.PENDIENTE_RESPUESTA || v.getEstado()==com.senniaf.match.model.Vinculacion.Estado.RESPUESTA_ACEPTADA)):decisiones!=null && decisiones.existsByCodigoFamiliaAndDecision(p.getCodigoCaso(),"ACEPTADA"));
         var actividad=new java.util.ArrayList<java.util.Map<String,Object>>();
         if(p.getFechaRegistro()!=null)actividad.add(actividad("Entrevista registrada","Se recibió la información de tu hogar.",p.getFechaRegistro()));
         if(decisiones!=null)for(var d:decisiones.findByCodigoFamiliaOrderByFechaAsc(p.getCodigoCaso())) {
             if(d.getFecha()==null)continue;
-            if("ACEPTADA".equals(d.getDecision()))actividad.add(actividad("Propuesta aceptada","El equipo SENNIAF te orientará sobre los siguientes pasos.",d.getFecha()));
+            if(p.isReevaluacionPendiente() && "REEVALUACION".equals(d.getDecision())){
+                var apartados=d.getApartadosReevaluacion();String observacion=d.getMotivo();
+                if(apartados==null && observacion!=null && observacion.startsWith("Apartados: ") && observacion.contains("\n\n")){
+                    var partes=observacion.split("\n\n",2);apartados=java.util.Arrays.asList(partes[0].substring(11).split(java.util.regex.Pattern.quote(" | ")));observacion=partes[1];
+                }
+                respuesta.setApartadosReevaluacion(apartados==null?List.of():apartados);
+                respuesta.setObservacionReevaluacion(observacion);
+            }
+            if("ACEPTADA".equals(d.getDecision()))actividad.add(actividad("Propuesta enviada por el Comité","Consulta Mi vinculación para conocer el estado y registrar tu respuesta.",d.getFecha()));
             else if("REEVALUACION".equals(d.getDecision()))actividad.add(actividad("Revisión de entrevista solicitada","Se solicitó ampliar la información de la entrevista.",d.getFecha()));
         }
         if(auditoria!=null)for(var e:auditoria.findByCodigoCasoOrderByFechaAsc(p.getCodigoCaso())) {
@@ -98,9 +111,49 @@ public class PerfilFamiliaService {
             if(e.getFecha()!=null && "CONTENIDO_ACADEMICO_ACTUALIZADO".equals(e.getAccion()))actividad.add(actividad("Información del hogar actualizada","Se completó la descripción del hogar conservando las respuestas de la entrevista.",e.getFecha()));
         }
         actividad.sort(java.util.Comparator.comparing(a->a.get("fecha").toString()));
-        respuesta.setActividad(actividad);return respuesta;
+        respuesta.setActividad(actividad);
+        if (!actividad.isEmpty()) respuesta.setFechaActualizacionComunicada((java.time.OffsetDateTime)actividad.get(actividad.size()-1).get("fecha"));
+        respuesta.setProximosPasos(respuesta.isVinculacionAceptada()
+                ? List.of("Espera el contacto del equipo responsable para recibir orientación sobre la vinculación.", "Acuerda visitas o encuentros únicamente cuando el equipo los autorice.", "Mantén actualizada la información de tu hogar y comunica cambios relevantes.")
+                : p.isReevaluacionPendiente() || !p.isPerfilCompleto()
+                ? List.of("Revisa y completa tu entrevista para que el equipo pueda continuar el análisis.")
+                : List.of("Espera la revisión del Comité. Las actualizaciones autorizadas se comunicarán en esta pantalla."));
+        return respuesta;
     }
 
+    /** Vista institucional derivada del contador existente y de sus actuaciones, sin crear avisos persistentes duplicados. */
+    @Transactional(readOnly=true)
+    public java.util.List<String> reevaluacionesPendientes(){return repositorio.findAll().stream().filter(PerfilFamilia::isReevaluacionPendiente).map(PerfilFamilia::getCodigoCaso).sorted().toList();}
+    @Transactional(readOnly=true)
+    public java.util.List<java.util.Map<String,Object>> alertasReevaluaciones(){
+        return repositorio.findAll().stream().filter(p->p.getNumeroReevaluaciones()>=3)
+                .sorted(java.util.Comparator.comparing(PerfilFamilia::getCodigoCaso)).map(p->{
+            var antecedentes=new java.util.ArrayList<java.util.Map<String,Object>>();
+            for(var d:decisiones.findByCodigoFamiliaOrderByFechaAsc(p.getCodigoCaso()))if("REEVALUACION".equals(d.getDecision())){
+                var e=new java.util.LinkedHashMap<String,Object>();e.put("titulo","Reevaluación solicitada");e.put("fecha",fechaEvento(d.getFecha()));e.put("responsable",d.getFuncionario());e.put("descripcion",d.getMotivo());e.put("completada",false);antecedentes.add(e);
+            }
+            int completadasDocumentadas=0;
+            for(var e:auditoria.findByCodigoCasoOrderByFechaAsc(p.getCodigoCaso())){
+                if(!"CORRECCION_ENTREVISTA".equals(e.getAccion()))continue;
+                var detalle=detalleCorreccion(e.getDescripcion());
+                if(!"REEVALUACION".equals(detalle.path("tipo").asText()))continue;
+                var contador=detalle.path("cambios").path("numeroReevaluaciones");
+                boolean completa=contador.path("anterior").isNumber() && contador.path("nuevo").asInt(-1)==contador.path("anterior").asInt()+1
+                        && detalle.path("cambios").path("reevaluacionPendiente").path("nuevo").isBoolean()
+                        && !detalle.path("cambios").path("reevaluacionPendiente").path("nuevo").asBoolean();
+                if(completa)completadasDocumentadas++;
+                var h=new java.util.LinkedHashMap<String,Object>();h.put("titulo",completa?"Reevaluación completada":"Corrección recibida; pendiente de completar");h.put("fecha",fechaEvento(e.getFecha()));h.put("responsable",e.getActor());h.put("descripcion",completa?"Se recibió una entrevista completa para la revisión solicitada.":"Esta actuación no acredita una reevaluación completada.");h.put("completada",completa);antecedentes.add(h);
+            }
+            antecedentes.sort(java.util.Comparator.comparing(h->h.get("fecha")==null?"":h.get("fecha").toString()));
+            var r=new java.util.LinkedHashMap<String,Object>();r.put("codigoFamilia",p.getCodigoCaso());r.put("completadas",p.getNumeroReevaluaciones());r.put("pendiente",p.isReevaluacionPendiente());r.put("umbral",3);r.put("antecedentes",antecedentes);
+            r.put("completadasSinFechaDetallada",Math.max(0,p.getNumeroReevaluaciones()-completadasDocumentadas));return (java.util.Map<String,Object>)r;
+        }).toList();
+    }
+    private Object fechaEvento(LocalDateTime fecha){return fecha==null?null:fecha.atZone(java.time.ZoneId.systemDefault()).toOffsetDateTime();}
+    private com.fasterxml.jackson.databind.JsonNode detalleCorreccion(String descripcion){
+        try{var n=descripcion==null?null:new com.fasterxml.jackson.databind.ObjectMapper().readTree(descripcion);return n==null?com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode():n;}
+        catch(com.fasterxml.jackson.core.JsonProcessingException error){return com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode();}
+    }
     private String tituloCorreccion(String descripcion) {
         try {
             var datos=new com.fasterxml.jackson.databind.ObjectMapper().readTree(descripcion);
@@ -128,6 +181,7 @@ public class PerfilFamiliaService {
 
     private void copiarDatos(PerfilFamilia perfil, PerfilFamiliaRequest request) {
         perfil.setTipoFamilia(request.getTipoFamilia());
+        perfil.setEspecificacionHogar(request.getTipoFamilia() == com.senniaf.match.model.enums.TipoFamilia.OTRA ? request.getEspecificacionHogar() : null);
         perfil.setNotaEstructuraHogar(request.getNotaEstructuraHogar());
         perfil.setRedApoyo(request.getRedApoyo());
         perfil.setNotaRedApoyo(request.getNotaRedApoyo());
@@ -142,7 +196,14 @@ public class PerfilFamiliaService {
         perfil.setCondicionesPuedeAcompanarHoy(request.getCondicionesPuedeAcompanarHoy());
         perfil.setCondicionesConApoyo(request.getCondicionesConApoyo());
         perfil.setNotaCondicionesSalud(request.getNotaCondicionesSalud());
-        perfil.setContinuidadCultural(request.getContinuidadCultural());
+        // El texto anterior se conserva íntegro; no se reparte ni se sustituye en actualizaciones.
+        if (perfil.getId()==null) perfil.setContinuidadCultural(request.getContinuidadCultural());
+        if(request.getApoyoIdiomas()!=null) perfil.setApoyoIdiomas(request.getApoyoIdiomas());
+        if(request.getRespetoTradiciones()!=null) perfil.setRespetoTradiciones(request.getRespetoTradiciones());
+        if(request.getRecursosComunitarios()!=null) perfil.setRecursosComunitarios(request.getRecursosComunitarios());
+        if(request.getRespetoPreferencias()!=null) perfil.setRespetoPreferencias(request.getRespetoPreferencias());
+        if(request.getCompromisoCultural()!=null) perfil.setCompromisoCultural(request.getCompromisoCultural());
+
     }
 
     /** Perfil que la familia ya registró con su cédula, si existe. */
@@ -152,7 +213,9 @@ public class PerfilFamiliaService {
     }
 
     private synchronized String siguienteCodigoCaso() {
-        return String.format("FAM-%03d", repositorio.count() + 1);
+        long numero = repositorio.count() + 1;
+        while (repositorio.existsByCodigoCaso(String.format("FAM-%03d", numero))) numero++;
+        return String.format("FAM-%03d", numero);
     }
 
     private boolean calcularSiEstaCompleto(PerfilFamiliaRequest r) {
@@ -165,7 +228,8 @@ public class PerfilFamiliaService {
                 && r.getProvincia() != null
                 && r.getDisponibilidadViaje() != null
                 && rangoEdadValido
-                && r.getDisposicionHermanos() != null;
+                && r.getDisposicionHermanos() != null
+                && r.isHogarCoherente() && r.isRedApoyoCoherente() && r.isDisposicionHermanosCoherente();
     }
 
     private boolean noVacia(List<?> lista) {

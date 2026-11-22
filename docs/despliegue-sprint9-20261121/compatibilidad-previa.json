@@ -1,0 +1,17 @@
+{
+  "huellasVerificadas": true,
+  "recuperacion": {
+    "previoCon020": {
+      "codigo": 0,
+      "mensaje": "El JAR corresponde a la etapa actual del esquema de vinculaciones."
+    },
+    "nuevoSin020": {
+      "codigo": 1,
+      "mensaje": "El módulo de citas requiere la migración aditiva 020 completa. No se sustituirá el servicio."
+    },
+    "nuevoCon020": {
+      "codigo": 0,
+      "mensaje": "El JAR corresponde a la etapa actual del esquema de vinculaciones."
+    }
+  }
+}

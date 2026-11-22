@@ -1,0 +1,116 @@
+{
+  "tablas": [
+    {
+      "md5": "47d033d87558a0130507d10f813e9751",
+      "filas": 40,
+      "tabla": "auditoria_casos"
+    },
+    {
+      "md5": "d41d8cd98f00b204e9800998ecf8427e",
+      "filas": 0,
+      "tabla": "citas_historial"
+    },
+    {
+      "md5": "d41d8cd98f00b204e9800998ecf8427e",
+      "filas": 0,
+      "tabla": "citas_vinculacion"
+    },
+    {
+      "md5": "19f65323e1005b3a1b0f453f64a7fb94",
+      "filas": 1,
+      "tabla": "combinaciones_excluidas"
+    },
+    {
+      "md5": "c997533523d970df8652e0d2fced40f9",
+      "filas": 6,
+      "tabla": "decisiones_comite"
+    },
+    {
+      "md5": "34e3a38d2164198872fe587901e0ba93",
+      "filas": 9,
+      "tabla": "evaluaciones_psicologicas"
+    },
+    {
+      "md5": "1de33274efece99e919c3b1656f03101",
+      "filas": 5,
+      "tabla": "familia_red_apoyo"
+    },
+    {
+      "md5": "6a8a94f4c360b8c4f002addc5fc6f645",
+      "filas": 2,
+      "tabla": "familia_salud_apoyo"
+    },
+    {
+      "md5": "9a20765828a3b0018d280c92e6cae770",
+      "filas": 3,
+      "tabla": "familia_salud_hoy"
+    },
+    {
+      "md5": "8da096006731980cfad1f18b190090fc",
+      "filas": 1,
+      "tabla": "interrupciones_convivencia"
+    },
+    {
+      "md5": "018df6994f888d04bc326a65612bf8b8",
+      "filas": 6,
+      "tabla": "nino_alergias"
+    },
+    {
+      "md5": "b6ed4c83ac49506cbd1db3265aa99bc9",
+      "filas": 6,
+      "tabla": "nino_condiciones_salud"
+    },
+    {
+      "md5": "91eed8e3186a231668f9341037c0ebee",
+      "filas": 10,
+      "tabla": "nino_gustos"
+    },
+    {
+      "md5": "df77c597e33f225abbb2e8a1ae91941d",
+      "filas": 10,
+      "tabla": "nino_habilidades"
+    },
+    {
+      "md5": "f725ad6a75adabe59aa3d61a8f9694a7",
+      "filas": 10,
+      "tabla": "nino_personalidad"
+    },
+    {
+      "md5": "0967acb17696389124709d7c9605c798",
+      "filas": 3,
+      "tabla": "perfiles_familia"
+    },
+    {
+      "md5": "3f4ec0de0a33261da98746869e026c18",
+      "filas": 6,
+      "tabla": "perfiles_nino"
+    },
+    {
+      "md5": "84246166fc9c7586ec89f3c8d1028eaa",
+      "filas": 1,
+      "tabla": "pesos_scoring"
+    },
+    {
+      "md5": "d9a5f058cfae18bc78cdd735a643d0c4",
+      "filas": 1,
+      "tabla": "programaciones_pesos"
+    },
+    {
+      "md5": "41156caff7b33c96fed7beaf1d3eb13b",
+      "filas": 1,
+      "tabla": "solicitudes_estado_caso"
+    },
+    {
+      "md5": "e100fce7782faa4f65613a8f8b57376e",
+      "filas": 11,
+      "tabla": "usuarios"
+    },
+    {
+      "md5": "4bd4901b38d28c2c3c784e16b020cc2a",
+      "filas": 3,
+      "tabla": "vinculaciones"
+    }
+  ],
+  "consultaMs": 65.0,
+  "sesionesExcluidas": true
+}
