@@ -104,11 +104,3 @@ Los datos completos están en `target/sprint9/rendimiento.csv`.
 | Defectos y regresiones | CUMPLE | 14 de 14 aprobadas |
 
 **Veredicto global del sprint:** NO CUMPLE, porque la eficiencia de rendimiento no cumple su criterio.
-
-## 5. Correcciones aplicadas en los archivos de prueba
-
-1. **Horario de citas no configurado (77 fallos en la primera ejecución real):** la aplicación solo ofrece huecos cuando `senniaf.citas.franjas` tiene valor, y ese valor solo existe en el perfil `citas-demo`. `Sprint9Base` ahora define el mismo horario (lunes a viernes, 08:00–16:00, cada 30 minutos).
-2. **Cierre institucional previo (DE-01, DE-05):** la revisión de expedientes exige el cierre institucional. Los casos usan `vinculacionCerrada`, que ya incluye la interrupción previa.
-3. **Reevaluación tras aceptación (DE-07):** la aplicación rechaza con 409 una reevaluación cuando ya hay aceptación. La prueba espera un error de cliente y comprueba que no se crea una segunda aceptación.
-4. **Umbrales de eficiencia:** se añadieron límites p95 por grupo de endpoints (sección 3.1).
-
