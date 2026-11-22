@@ -83,12 +83,3 @@ Los resultados completos están en `target/sprint9/rendimiento.csv` (263 líneas
 | Disponibilidad pública (Azure) | CUMPLE | 4 de 4 aprobadas |
 
 La eficiencia no puede darse como cumplida sin umbrales de tiempo definidos y sin explicar el caso de EF-06.
-
-## 5. Pendientes
-
-1. Analizar EF-06 (`/api/scoring/casos`), con tiempos de cerca de 210 s.
-2. Confirmar que los 409 de EF-10 y EF-11 son el comportamiento esperado de concurrencia.
-3. Definir umbrales de tiempo para la prueba de eficiencia, si el brief los exige.
-4. Revisar el motivo de las pruebas FI-28 y FI-29 omitidas.
-5. Confirmar la asignación de características frente al brief original.
-6. Cambiar la contraseña de la base de datos de pruebas. Aparece en texto plano en los registros de ejecución.
