@@ -325,3 +325,19 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .familia-etapas .interrumpido small { color: #a12232; }
 .pro-dialogo.vinculacion-informacion-dialogo .ayuda, .pro-dialogo.vinculacion-informacion-dialogo .detalle-datos dt { color: #476788; }
 .pro-dialogo.vinculacion-informacion-dialogo :focus-visible { outline: 3px solid #0054cc; outline-offset: 3px; }
+
+.profesional .pro-analisis-criterios{padding:18px 20px}
+.pro-analisis-cabecera{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.pro-analisis-titulo{display:flex;align-items:center;gap:10px;min-width:0}
+.pro-analisis-titulo .pro-simbolo{width:40px;height:40px;border-radius:11px}
+.profesional .pro-analisis-titulo h2{font-size:18px;line-height:1.3;margin:0}
+.profesional .pro-analisis-titulo p{font-size:13px;line-height:1.5;margin:4px 0 0}
+.pro-analisis-cabecera>.boton{flex-shrink:0;margin:0}
+.pro-analisis-criterios>#estadoReevaluacion:empty{display:none}
+.pro-analisis-criterios>#estadoReevaluacion:not(:empty){margin:12px 0 0}
+.pro-analisis-criterios>details{border-top:1px solid #e0e8f0;margin-top:14px;padding-top:14px}
+.pro-analisis-criterios>details>summary{margin:0}
+@media(max-width:650px){
+ .pro-analisis-cabecera{flex-wrap:wrap;gap:12px}
+ .pro-analisis-cabecera>.boton{max-width:100%}
+}
