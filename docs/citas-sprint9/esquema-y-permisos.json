@@ -1,9 +1,0 @@
-{
-  "PostgreSQL" : "16.4",
-  "esquema020" : "t",
-  "updateHistorialCitas" : false,
-  "updateDecisiones" : false,
-  "updateEvaluaciones" : false,
-  "rol" : "senniaf_app",
-  "updateCitas" : true
-}

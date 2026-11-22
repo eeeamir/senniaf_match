@@ -1,5 +1,7 @@
 # Correcciones posteriores al despliegue — Sprint 9
 
+> Limpieza de cierre: las capturas y salidas temporales citadas se retiraron del árbol de trabajo; se conservan en el historial del commit `298c292`. Este documento conserva las decisiones y los resultados de aquella verificación.
+
 Trabajo exclusivamente local sobre `mejora/sprint9`, desde `789da77` (aplicación publicada previamente: `8628cea`). **Sin acceso a Azure, cambios de producción, push, merge ni despliegue durante esta tarea.** Se conserva `docs/image.png` sin modificar ni incorporar.
 
 **Corregido** identifica un defecto resuelto; **Verificado**, una función existente comprobada sin reescribirla; **Pendiente**, una intervención adicional necesaria. Las capturas son del navegador Chromium real conectado a Spring Boot y PostgreSQL locales; no son imágenes generadas ni capturas de producción.
@@ -14,8 +16,6 @@ Trabajo exclusivamente local sobre `mejora/sprint9`, desde `789da77` (aplicació
 
 **Pruebas y resultado:** navegación entre cuatro vistas y regreso a Inicio en 1440×1000, 1280×800, 768×1024, 390×844 y 320×844; alternancia interna y mediante encabezado; login desde formulario real; registro completo cubierto por Sprint6 E2E aislado. Sin duplicar formularios ni errores JavaScript observados. Comparación de código confirma portada, cuatro tarjetas, formularios e instrucciones originales de autenticación conservados.
 
-**Evidencia:** [Inicio](correcciones-postdespliegue-sprint9/inicio-escritorio.png), [Conocer el sistema](correcciones-postdespliegue-sprint9/conocer-escritorio.png), [login móvil](correcciones-postdespliegue-sprint9/login-movil.png), [registro móvil](correcciones-postdespliegue-sprint9/registro-movil.png).
-
 ## 2. VIN-1: interrupción de convivencia preadoptiva — Corregido
 
 **Problema y causa:** la quinta etapa dependía de que existiera una nueva columna de inicio de convivencia; una interrupción histórica sin esas columnas acababa mostrando «Información histórica no disponible». El resultado de la respuesta familiar cerrada se recuperaba de auditoría solo para la familia, no para el Comité. Una interrupción pendiente podía prevalecer sobre el título de cierre.
@@ -25,8 +25,6 @@ Trabajo exclusivamente local sobre `mejora/sprint9`, desde `789da77` (aplicació
 **Archivos:** `VinculacionService.java`, `vinculaciones.js`, `profesionales.css`, `sprint8-acabados.css`.
 
 **Pruebas y resultado:** escenarios sintéticos cerrados con interrupción, sin autorización antigua, aceptados, rechazados y con respuesta desconocida; pruebas de proyección HTTP y nueve pruebas JavaScript de estados históricos. Escritorio, portátil, tableta y móvil. La regla no contiene condiciones por ID o por VIN-1.
-
-**Evidencia:** [Familia](correcciones-postdespliegue-sprint9/familia-cerrada-movil.png), [Comité](correcciones-postdespliegue-sprint9/detalle-cerrada-escritorio.png). Se reprodujo localmente el escenario descrito; no se consultó ni modificó el VIN-1 real de producción.
 
 **Autoría verificada:** se muestra el rol que consta en el registro. Si consta FAMILIA, se atribuye a la familia; si consta Trabajo Social/Psicología, se atribuye a ese profesional. El flujo actual de registro de interrupciones está autorizado a profesionales asignados; no se inventó una autoría familiar ni se ampliaron permisos para adaptar el relato. Una prueba específica cubre la presentación de autoría familiar cuando ese dato exista en un antecedente.
 
@@ -40,8 +38,6 @@ Trabajo exclusivamente local sobre `mejora/sprint9`, desde `789da77` (aplicació
 
 **Pruebas y resultado:** integración distingue propuesta pendiente, vinculación elegible y cerrada; comprobación real de botón deshabilitado y aviso en cuatro tamaños. La familia elegible solicitó y completó el recorrido de citas en la base aislada.
 
-**Evidencia:** [aviso móvil](correcciones-postdespliegue-sprint9/aviso-citas-movil.png), [solicitud habilitada](correcciones-postdespliegue-sprint9/citas/solicitud-escritorio.png).
-
 ## 4. Historial de vinculación: línea de tiempo — Corregido
 
 **Problema y causa:** varios renderizadores y pseudoelementos usaban el bloque completo del evento como referencia, con posiciones fijas y conectores inconsistentes.
@@ -51,8 +47,6 @@ Trabajo exclusivamente local sobre `mejora/sprint9`, desde `789da77` (aplicació
 **Archivos:** `vinculaciones.js`, `familia.js`, `profesionales.css`.
 
 **Pruebas y resultado:** medidas del DOM con uno, dos y cinco eventos, títulos cortos/largos y fechas distintas, en escritorio y móvil; además, historial real de las vinculaciones sintéticas. La diferencia vertical medida entre centro del título y punto es menor de 0,6 px; los puntos comparten eje horizontal. No se modificaron datos para corregir CSS.
-
-**Evidencia:** [historial móvil](correcciones-postdespliegue-sprint9/historial-movil.png), [historial familiar](correcciones-postdespliegue-sprint9/historial-familia-movil.png), [un evento](correcciones-postdespliegue-sprint9/linea-1-eventos.png), [geometría](correcciones-postdespliegue-sprint9/navegador-revision-final.json).
 
 ## 5. Modal de información del niño asignado — Corregido
 
@@ -64,8 +58,6 @@ Trabajo exclusivamente local sobre `mejora/sprint9`, desde `789da77` (aplicació
 
 **Pruebas y resultado:** modal real con datos estructurados sintéticos; separación medida de 24 px, apertura y cierre correctos en escritorio y móvil.
 
-**Evidencia:** [escritorio](correcciones-postdespliegue-sprint9/modal-nino-escritorio.png), [móvil](correcciones-postdespliegue-sprint9/modal-nino-movil.png), [cierre tras desplazamiento](correcciones-postdespliegue-sprint9/modal-nino-movil-cerrar.png), medidas en los JSON de navegador.
-
 ## 6. Comité: cierre institucional — Corregido
 
 **Problema y causa:** «Reserva conservada» describía el bloqueo técnico, sin explicar que faltaba revisar la disponibilidad. La información del cierre y de ambos expedientes compartía el mismo bloque.
@@ -75,8 +67,6 @@ Trabajo exclusivamente local sobre `mejora/sprint9`, desde `789da77` (aplicació
 **Archivos:** `VinculacionService.java` (proyección), `vinculaciones.js`, `profesionales.css`, `sprint8-acabados.css`.
 
 **Pruebas y resultado:** estados parciales y completos verificados en HTTP/PostgreSQL; paneles y enlaces en navegador, cuatro tamaños. Sin cambiar permisos ni el método que autoriza cada revisión.
-
-**Evidencia:** [detalle y cierre](correcciones-postdespliegue-sprint9/detalle-cerrada-escritorio.png), [móvil](correcciones-postdespliegue-sprint9/detalle-cerrada-movil.png).
 
 ## 7. Estados de vinculación: rechazo en rojo — Corregido
 
@@ -88,8 +78,6 @@ Trabajo exclusivamente local sobre `mejora/sprint9`, desde `789da77` (aplicació
 
 **Pruebas y resultado:** prueba con rechazo fechado, prueba de etapas posteriores no completadas y comprobación de color calculado en el DOM de Inicio y Mi vinculación. Sin cambiar la decisión registrada.
 
-**Evidencia:** [Mi vinculación](correcciones-postdespliegue-sprint9/familia-rechazada.png), [Inicio familiar](correcciones-postdespliegue-sprint9/inicio-familia-rechazada-movil.png).
-
 ## 8. Citas: jerarquía y experiencia de usuario — Corregido; reglas existentes verificadas
 
 **Problema y causa:** horario, mensajes y estados tenían una jerarquía parecida; el historial repetía siempre todo el contenido; Cancelar resultaba ambiguo.
@@ -100,8 +88,6 @@ Trabajo exclusivamente local sobre `mejora/sprint9`, desde `789da77` (aplicació
 
 **Pruebas y resultado:** recorrido completo en Chromium contra PostgreSQL como `senniaf_app`: solicitud, revisión de aceptación sin guardar, propuesta, contrapropuesta, aceptación de una hora, aceptación familiar de otra propuesta, rechazo y cancelación. Mensajes editables conservados, restablecimiento explícito, contenido HTML tratado como texto, historial de cuatro eventos y móvil de 390/320 px. Teclado, Escape, retorno de foco y botones alcanzables mediante desplazamiento interno. Las 18 pruebas PostgreSQL previas de citas y las unitarias de horario/servicio siguen pasando. Horario, duraciones, disponibilidad, permisos y transacciones no se modificaron.
 
-**Evidencia:** [tarjetas e historial](correcciones-postdespliegue-sprint9/citas/familia-confirmada-historial.png), [Trabajo Social](correcciones-postdespliegue-sprint9/citas/trabajo-social-escritorio.png), [proponer en móvil](correcciones-postdespliegue-sprint9/citas/proponer-movil.png), [recorrido](correcciones-postdespliegue-sprint9/citas/navegador.json).
-
 ## 9. Cierre institucional: revisión independiente y reingreso — Verificado; comunicación corregida
 
 **Inspección:** ya existen `nino_liberado`, `familia_liberada` y eventos de disponibilidad. Solo el Comité autoriza cada expediente tras un cierre; las condiciones de completitud, baja/adopción y reevaluación se comprueban por separado. Los repositorios de reservas ya consideran individualmente cada liberación, aunque el otro expediente siga retenido. No se reescribió este proceso.
@@ -111,8 +97,6 @@ Trabajo exclusivamente local sobre `mejora/sprint9`, desde `789da77` (aplicació
 **Archivos:** proyección de cierre en `VinculacionService.java`, presentación en `vinculaciones.js` y CSS compartido.
 
 **Pruebas y resultado:** suites de cierre/HU11 más nuevas pruebas HTTP: sin liberación automática; liberar uno no libera el otro; nueva reserva vuelve a bloquear; un expediente no elegible no se libera; solo Comité; auditorías y decisiones anteriores conservadas. Comprobación de estados posteriores en UI y del retorno al ranking.
-
-**Evidencia:** [detalle del cierre](correcciones-postdespliegue-sprint9/detalle-cerrada-escritorio.png), [pruebas por clase](correcciones-postdespliegue-sprint9/pruebas.json), [comprobación adicional](correcciones-postdespliegue-sprint9/accesibilidad.json).
 
 ## 10. Motor y botón Reevaluar — Corregido y verificado
 
@@ -129,8 +113,6 @@ Trabajo exclusivamente local sobre `mejora/sprint9`, desde `789da77` (aplicació
 **Pruebas y resultado:** seis pruebas nuevas PostgreSQL cubren ambas revisiones, impedimento con una pendiente, salvaguarda SQL, exclusión expresa vigente, conservación de decisiones y recálculo después de PUT familiar. En una prueba se modifica capacidad médica y el ranking aumenta usando datos nuevos; en navegador se modifica el rango de edad y el resultado disminuye tras pulsar Reevaluar. Ningún puntaje se modifica manualmente. Tres pruebas nuevas del auxiliar impiden publicar/recuperar JAR incompatible con 021.
 
 Se actualizaron explícitamente dos expectativas de HU11/cierre que codificaban la prohibición permanente ahora retirada por el requisito del usuario. Se conservó la comprobación SQL de bloqueo antes de las revisiones y las comprobaciones de reservas/privacidad; no se eliminaron pruebas para ocultar fallos. El nuevo caso añade la aceptación efectiva y la preservación del antecedente después de ambas revisiones.
-
-**Evidencia:** [antes de Reevaluar](correcciones-postdespliegue-sprint9/reevaluacion-antes.png), [después](correcciones-postdespliegue-sprint9/reevaluacion-despues.png), [registro de navegador](correcciones-postdespliegue-sprint9/navegador.json).
 
 **Límite institucional:** no existe un proceso definido para revocar exclusiones expresas del Comité o de la familia. No se inventó uno ni se levantaron automáticamente. La corrección elimina el bloqueo por mera historia interrumpida ya revisada; no revoca decisiones expresas todavía vigentes.
 
@@ -150,11 +132,9 @@ Java 17: `mvn -B verify -Pe2e`, con variables `HU19_TEST_DB_*` apuntando exclusi
 
 PostgreSQL 16.4 local: una base para la suite y otra pequeña para navegador. Para reproducir un antecedente anterior a 019 sin inventarle autorización se insertó una fixture sintética con excepción del disparador limitada a esa transacción local. La aplicación de navegador continuó usando el rol restringido `senniaf_app`; nunca se relajó un disparador en producción.
 
-Navegador real en cinco resoluciones, teclado y muestra de contraste computado. Se corrigieron tres textos secundarios con contraste inferior a 4,5:1. La muestra final revisa encabezado, estados, explicación familiar, cierre, aviso y tarjetas de citas; mínimos y colores constan en [accesibilidad](correcciones-postdespliegue-sprint9/accesibilidad.json). No constituye una certificación completa con lector de pantalla.
+Navegador real en cinco resoluciones, teclado y muestra de contraste computado. Se corrigieron tres textos secundarios con contraste inferior a 4,5:1. La muestra final revisa encabezado, estados, explicación familiar, cierre, aviso y tarjetas de citas; mínimos y colores constaban en la evidencia histórica de accesibilidad. No constituye una certificación completa con lector de pantalla.
 
-[Integridad de código](correcciones-postdespliegue-sprint9/integridad.json) confirma conservación byte a byte de fórmulas/explicaciones, analizador, pesos y programación, portada (excepto enlace), cuatro tarjetas y formularios/lógica de acceso. Las decisiones y eventos históricos de las pruebas se conservan y sus snapshots se verifican. **No se accedió ni escribió a producción en esta tarea.**
-
-Evidencia final: [recorrido visual](correcciones-postdespliegue-sprint9/navegador-revision-final.json), [conteos por clase](correcciones-postdespliegue-sprint9/pruebas.json) y `SHA256SUMS` del directorio de evidencias.
+La comprobación histórica de integridad confirmó conservación byte a byte de fórmulas/explicaciones, analizador, pesos y programación, portada (excepto enlace), cuatro tarjetas y formularios/lógica de acceso. Las decisiones y eventos históricos de las pruebas se conservan y sus snapshots se verifican. **No se accedió ni escribió a producción en esta tarea.**
 
 ## Archivos y commits
 

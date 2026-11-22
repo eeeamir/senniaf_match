@@ -1,5 +1,7 @@
 # Citas durante la vinculación — Sprint 9
 
+> Limpieza de cierre: las capturas y salidas temporales citadas se retiraron del árbol de trabajo; se conservan en el historial del commit `298c292`. Este documento conserva las decisiones y los resultados de aquella verificación.
+
 Implementación local en `mejora/sprint9`. Sin push, merge, despliegue ni acceso a Azure o PostgreSQL de producción.
 
 ## Funcionalidad
@@ -42,19 +44,9 @@ Rutas nuevas: `/citas.html` y `/api/citas` (listado, creación, opciones, dispon
 
 Se reutilizan tipografía, iconos, menú lateral, botones, tarjetas y estilos base existentes. Solo se añade una entrada en los menús de Familia y Trabajo Social. CSS específico del módulo, sin rediseñar otras pantallas. Estados con texto e iconografía, formularios etiquetados, foco visible, diálogo con Escape, restitución del foco y navegación Tab contenida.
 
-Capturas reales de Chromium conectado a Spring Boot y PostgreSQL, sin respuestas simuladas:
-
-| Vista | Evidencia |
-| --- | --- |
-| Familia, escritorio | [Panel](citas-sprint9/familia-escritorio.png), [solicitud](citas-sprint9/solicitud-escritorio.png) |
-| Trabajo Social, escritorio | [Panel](citas-sprint9/trabajo-social-escritorio.png) |
-| Respuestas del profesional | [Aceptar](citas-sprint9/aceptar-escritorio.png), [rechazar](citas-sprint9/rechazar-escritorio.png), [proponer](citas-sprint9/proponer-escritorio.png) |
-| Respuesta familiar e historial | [Propuesta recibida](citas-sprint9/familia-respuesta.png), [revisión](citas-sprint9/aceptar-propuesta-familia.png), [historial](citas-sprint9/familia-confirmada-historial.png) |
-| Móvil | [Familia](citas-sprint9/familia-movil.png), [formulario](citas-sprint9/solicitud-movil.png), [Trabajo Social](citas-sprint9/trabajo-social-movil.png), [propuesta](citas-sprint9/proponer-movil.png), [acciones con desplazamiento interno](citas-sprint9/proponer-movil-acciones.png), [320 px](citas-sprint9/familia-320.png) |
+Se comprobaron los flujos de solicitud, aceptación, rechazo, propuesta y respuesta familiar en Chromium conectado a Spring Boot y PostgreSQL, sin respuestas simuladas.
 
 Se verificaron escritorio, 390 px y 320 px: sin desbordamiento horizontal, campos alineados, botones accesibles y diálogo contenido en la ventana con desplazamiento interno. Se corrigieron el contraste de descripciones y resúmenes y la altura heredada de botones en diálogos móviles. La muestra de colores calculados contiene 48 textos/controles visibles: mínimos de contraste 5,04:1 en panel y solicitud y 5,43:1 en revisión de aceptación. No constituye una auditoría completa con lector de pantalla.
-
-Evidencia: [flujo y geometría](citas-sprint9/navegador.json), [colores computados](citas-sprint9/colores.json), [esquema y permisos reales](citas-sprint9/esquema-y-permisos.json).
 
 ## Pruebas
 
@@ -72,11 +64,11 @@ Comando Java: `mvn -q '-Dtest=*Test,CitasPostgresIT' test`, con `JAVA_HOME` de J
 
 Cobertura nueva: permisos entre familias y trabajadores distintos, cambios de asignación, ausencia de vinculación/configuración, fechas manipuladas, fines de semana, fechas pasadas, duración, límites de jornada, solapamientos, intervalos contiguos, solicitudes duplicadas, versiones obsoletas, tres escenarios de concurrencia, transiciones e historial protegido. El navegador comprobó además plantillas editables, prevención de sobrescritura, duración de una hora, contrapropuestas, aceptación por la familia, rechazo, cancelación, historial, teclado y contenido HTML mostrado como texto.
 
-[Conteos por clase](citas-sprint9/pruebas.json). Las comprobaciones de navegador se informan aparte y no inflan el total automatizado.
+Las comprobaciones de navegador se informan aparte y no inflan el total automatizado.
 
 ## Archivos e integridad
 
-Creados: `CitaVinculacion`, `CitaHistorial`; sus dos repositorios; `CitaService`, `HorarioCitas`, `CitaController`; `application-citas-demo.properties`; `citas.html`, `citas.css`, `citas.js`; migración 020; `CitaServiceTest`, `HorarioCitasTest`, `CitasPostgresIT`; este informe y evidencias en `docs/citas-sprint9/`.
+Creados: `CitaVinculacion`, `CitaHistorial`; sus dos repositorios; `CitaService`, `HorarioCitas`, `CitaController`; `application-citas-demo.properties`; `citas.html`, `citas.css`, `citas.js`; migración 020; `CitaServiceTest`, `HorarioCitasTest`, `CitasPostgresIT`; este informe y evidencias históricas (retiradas en la limpieza de cierre).
 
 Modificados: `profesionales.js` (dos entradas de menú), preparación PostgreSQL de CI (020), workflow Maven (validación sintáctica del nuevo JavaScript), verificador de compatibilidad y `actualizar.sh` (detección de 020), pruebas de compatibilidad de despliegue (tres casos nuevos). Los respaldos y la sustitución de JAR siguen el procedimiento existente.
 

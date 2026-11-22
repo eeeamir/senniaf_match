@@ -1,5 +1,7 @@
 # Validación puntual de rendimiento — Sprint 9
 
+> Limpieza de cierre: las capturas y salidas temporales citadas se retiraron del árbol de trabajo; se conservan en el historial del commit `298c292`. Este documento conserva las decisiones y los resultados de aquella verificación.
+
 Fecha: 2026-11-21. Rama `mejora/sprint9`. Versiones comparadas: `78a2ee0e5d8d03ae14726b7560c5c4e3b9e4dc12` y `07c7132a366198565e9bff345a74ad29d191b4a9`.
 
 **Resultado local del ranking, sin PostgreSQL:** 14–335 ms de mediana para 10–500 familias. El texto concentra el coste; el cálculo de puntuaciones es pequeño. **No es una medición integral de producción**: SQL, autenticación, HTTPS, red de Azure y carga simultánea real del servidor quedan sin comprobar. No se ha hecho ninguna optimización.
@@ -74,7 +76,7 @@ Dos JVM independientes por versión/tamaño; 12 calentamientos por fase y 30 rep
 
 PostgreSQL no está instalado localmente y Docker no tiene integración con esta distribución WSL. No se provisionó otra base ni se accedió a Azure. Los repositorios en memoria devuelven perfiles sintéticos e historiales vacíos, con pesos vigentes leídos mediante la alternativa `pesosRepo`; se excluye el servicio de programación de pesos real. Falta medir JDBC/ORM, historial grande, toda la configuración de Spring, seguridad, HTTPS/red y recorrido integrado navegador–servidor–PostgreSQL. No se extrapolan los contadores del arnés al total real de SQL.
 
-Fuentes verificables: [resumen.csv](rendimiento-sprint9/resumen.csv), [2560 muestras](rendimiento-sprint9/muestras.jsonl.gz), [320 cargas de interfaz](rendimiento-sprint9/interfaz.json), [contadores y perfil](rendimiento-sprint9/diagnostico.json), [JFR](rendimiento-sprint9/perfil-regex.jfr), [entorno](rendimiento-sprint9/entorno.json) y [SHA-256](rendimiento-sprint9/SHA256SUMS). El arnés manual está en `tools/rendimiento`; no se añade ninguna dependencia al producto ni suite JUnit.
+Fuentes conservadas: [resumen.csv](rendimiento-sprint9/resumen.csv), [contadores y diagnóstico](rendimiento-sprint9/diagnostico.json) y [entorno](rendimiento-sprint9/entorno.json). Las 2560 muestras, las 320 cargas de interfaz y el perfil JFR se retiraron en la limpieza; siguen disponibles en el historial `298c292`. El arnés manual reproducible permanece en `tools/rendimiento`; no añade dependencias al producto ni una suite JUnit.
 
 ```bash
 export JAVA_HOME=/home/anyel/.local/share/senniaf-tools/jdk-17.0.21+9
