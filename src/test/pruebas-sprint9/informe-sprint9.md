@@ -112,12 +112,3 @@ Los datos completos están en `target/sprint9/rendimiento.csv`.
 3. **Reevaluación tras aceptación (DE-07):** la aplicación rechaza con 409 una reevaluación cuando ya hay aceptación. La prueba espera un error de cliente y comprueba que no se crea una segunda aceptación.
 4. **Umbrales de eficiencia:** se añadieron límites p95 por grupo de endpoints (sección 3.1).
 
-## 6. Pendientes
-
-1. Analizar y corregir EF-06 (`/api/scoring/casos`), cuyo tiempo supera el umbral por mucho.
-2. Repetir EF-07 en una base limpia para confirmar si el fallo es estable.
-3. Confirmar con el equipo o con el brief los umbrales de la sección 3.1; son propuestas.
-4. Medir uso de recursos (CPU, memoria) si el brief lo exige.
-5. Revisar el motivo de las pruebas FI-28 y FI-29 omitidas. FI-28 necesita detener PostgreSQL y FI-29 necesita el correo habilitado; la suite no hace ninguna de las dos cosas.
-6. Confirmar la asignación de características frente al brief original.
-7. Cambiar la contraseña de la base de datos de pruebas. Aparece en texto plano en los registros de ejecución.
