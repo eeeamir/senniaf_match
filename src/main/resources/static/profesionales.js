@@ -114,27 +114,37 @@ const Profesionales = {
     d.innerHTML=`<h2 id="tituloConfirmacion">${limpiarHtml(titulo)}</h2><p>${limpiarHtml(texto)}</p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="button" class="boton" data-confirmar>Continuar</button></div>`;
     document.body.append(d);d.addEventListener('close',()=>d.remove(),{once:true});d.querySelector('[data-cancelar]').addEventListener('click',()=>d.close());d.querySelector('[data-confirmar]').addEventListener('click',()=>{d.close();accion();});d.showModal();
   },
-  sugerencias(campo, opciones, {anexar = false} = {}) {
+  sugerencias(campo, opciones, {seleccionUnica = false} = {}) {
     const bloque = document.createElement('div');
     bloque.className = 'pro-sugerencias';
     bloque.setAttribute('aria-label', 'Sugerencias para redactar');
+    let seleccion;
+    let plantilla;
     opciones.forEach(([titulo, texto]) => {
       const boton = document.createElement('button');
       boton.type = 'button';
       boton.className = 'pro-sugerencia';
       boton.textContent = titulo;
-      boton.onclick = () => {
-        if (anexar && campo.value.includes(texto)) { campo.focus(); return; }
-        const nuevo = anexar && campo.value.trim() ? campo.value + '\n' + texto : texto;
-        if (anexar && campo.maxLength >= 0 && nuevo.length > campo.maxLength) {
-          campo.setCustomValidity('La sugerencia no cabe en el espacio restante. Puedes acortar el texto o elegir otra.');
-          campo.reportValidity();
-          campo.setCustomValidity('');
-          return;
+      if (seleccionUnica) {
+        boton.setAttribute('aria-pressed', 'false');
+        boton.insertAdjacentHTML('afterbegin', this.icono('comprobar'));
+      }
+      const aplicar = () => {
+        if (seleccionUnica) {
+          seleccion?.setAttribute('aria-pressed', 'false');
+          seleccion = boton;
+          plantilla = texto;
+          boton.setAttribute('aria-pressed', 'true');
         }
-        campo.value = nuevo;
+        campo.value = texto;
         campo.dispatchEvent(new Event('input', {bubbles: true}));
         campo.focus();
+      };
+      boton.onclick = () => {
+        if (seleccionUnica && boton === seleccion) { campo.focus(); return; }
+        if (seleccionUnica && campo.value && campo.value !== plantilla) {
+          this.confirmar('¿Reemplazar el texto?', 'La nueva sugerencia sustituirá el contenido de este campo.', aplicar);
+        } else aplicar();
       };
       bloque.append(boton);
     });

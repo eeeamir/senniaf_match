@@ -49,12 +49,16 @@
         <label for="loginId">Documento de identidad o ID institucional</label>
         <input id="loginId" autocomplete="username" placeholder="Ej. 8-123-456 o TS-001" maxlength="160" required>
         <label for="loginPassword">Contraseña</label>
-        <input id="loginPassword" type="password" maxlength="72" autocomplete="current-password" placeholder="Tu contraseña" required aria-describedby="avisoCopiaPassword">
-        <button type="button" class="enlace" id="mostrarPassword" aria-pressed="false">Mostrar contraseña</button>
-        <p class="ayuda" id="avisoCopiaPassword" role="status" hidden></p>
-        
+        <div class="acceso-password">
+          <input id="loginPassword" type="password" maxlength="72" autocomplete="current-password" placeholder="Tu contraseña" required>
+          <button type="button" id="mostrarPassword" aria-label="Mostrar contraseña" aria-controls="loginPassword">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12 M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/><path class="acceso-ojo-tachado" d="m3 3 18 18"/></svg>
+          </button>
+        </div>
+        <div class="mensaje error acceso-error" id="msgLogin" role="alert">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m12 3 10 18H2z M12 9v5 M12 17h.01"/></svg><span id="textoErrorLogin"></span>
+        </div>
         <button class="boton bloque" type="submit">Iniciar sesión</button>
-        <div class="mensaje" id="msgLogin" role="alert"></div>
       </form>
       <p class="pie">¿Eres una familia y aún no tienes cuenta?
         <button class="enlace" type="button" data-ir="vistaRegistro">Regístrate</button></p>
@@ -136,18 +140,25 @@ document.querySelectorAll('[data-ir]').forEach(b=>b.addEventListener('click',()=
 let pendiente=null, temporizador=null;
 function mostrarCodigoDemo(codigo){ $('codigoDemo').textContent=codigo || 'Enviado por correo'; $('avisoDemo').hidden=!codigo; }
 function enfriarReenvio(){ let s=30,b=$('btnReenviar'); b.disabled=true; clearInterval(temporizador); temporizador=setInterval(()=>{b.textContent=s>0?`Reenviar código (${s--}s)`:'Reenviar código';if(s<0){b.disabled=false;clearInterval(temporizador);}},1000); }
-async function api(url,options){ const r=await fetch(url,options); let d={}; try{d=await r.json();}catch(_){ } if(!r.ok){const error=new Error(d.mensaje || 'No se pudo completar la operación.');error.errores=d.errores;throw error;} return d; }
+async function api(url,options){ const r=await fetch(url,options); let d={}; try{d=await r.json();}catch(_){ } if(!r.ok){const error=new Error(d.mensaje || 'No se pudo completar la operación.');error.errores=d.errores;error.estado=r.status;throw error;} return d; }
 
 $('formLogin').addEventListener('submit',async e=>{
  e.preventDefault(); const form=e.currentTarget; if(form.querySelector('[type=submit]').disabled)return; const id=normalizar($('loginId').value), password=$('loginPassword').value;
  if(!CamposFormulario.revisar(form))return;
  if(new TextEncoder().encode(password).length>72){CamposFormulario.error($('loginPassword'),'La contraseña admite hasta 72 bytes. Revisa el texto copiado.');return;}
- const boton=form.querySelector('[type=submit]');boton.disabled=true;
+ const boton=form.querySelector('[type=submit]');boton.disabled=true; $('textoErrorLogin').textContent='';
  try{
    const sesion=await api('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identificador:id,password})});
    sessionStorage.setItem('senniaf.sesion',JSON.stringify(sesion));
    const destino=sesion.tipo==='FAMILIA'?await Sesion.destinoFamilia(sesion):Sesion.inicio(sesion); location.href=destino;
- }catch(err){ CamposFormulario.servidor(form,err.errores,{identificador:'loginId',password:'loginPassword'});mensaje('msgLogin',err.message); }finally{boton.disabled=false;}
+ }catch(err){
+   const incorrectas=err.estado===401 || err.message==='Documento de identidad, ID institucional o contraseña incorrectos.';
+   $('textoErrorLogin').textContent=incorrectas ? 'Usuario o contraseña incorrectos.'
+     : err.estado===429 ? 'Demasiados intentos. Inténtalo más tarde.'
+     : err.message==='Debes verificar tu correo antes de iniciar sesión.' ? err.message
+     : err.estado ? 'El servicio no pudo iniciar la sesión. Inténtalo de nuevo.'
+     : 'No se pudo conectar con el sistema. Revisa tu conexión e inténtalo de nuevo.';
+ }finally{boton.disabled=false;}
 });
 
 $('formRegistro').addEventListener('submit',async e=>{
@@ -178,19 +189,13 @@ $('formCodigo').addEventListener('submit',async e=>{
  }catch(err){marcar($('codigo'),true);mensaje('msgCodigo',err.message);}finally{boton.disabled=false;}
 });
 $('btnReenviar').addEventListener('click',async()=>{if(!pendiente||$('btnReenviar').disabled)return;$('btnReenviar').disabled=true;try{const d=await api('/api/auth/reenviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cedula:pendiente.identificador})});mostrarCodigoDemo(d.codigoDemo);mensaje('msgCodigo',d.mensaje || 'Se envió un código nuevo.','exito');enfriarReenvio();}catch(err){$('btnReenviar').disabled=false;mensaje('msgCodigo',err.message);}});
-const passwordAcceso=$('loginPassword'),avisoCopia=$('avisoCopiaPassword');
-function advertirCopia(valor) {
- const extra=/\p{Cc}|\p{Cf}/u.test(valor)||/^\s|\s$/u.test(valor)||valor.normalize('NFKC')!==valor;
- avisoCopia.hidden=!extra;
- avisoCopia.textContent=extra?'Revisa si los espacios o caracteres especiales forman parte de tu contraseña. Usa «Mostrar contraseña» para comprobarla. El texto se conserva tal como lo ingresaste.':'';
-}
-passwordAcceso.addEventListener('input',()=>advertirCopia(passwordAcceso.value));
-passwordAcceso.addEventListener('paste',evento=>{
- // Inspección local: algunos navegadores eliminan los saltos antes del evento input.
- const texto=evento.clipboardData?.getData('text');
- if(texto!=null)setTimeout(()=>advertirCopia(texto),0);
+const passwordAcceso=$('loginPassword'), mostrarPassword=$('mostrarPassword');
+mostrarPassword.addEventListener('click',()=>{
+ const visible=passwordAcceso.type==='password';
+ passwordAcceso.type=visible?'text':'password';
+ mostrarPassword.classList.toggle('visible',visible);
+ mostrarPassword.setAttribute('aria-label',visible?'Ocultar contraseña':'Mostrar contraseña');
 });
-$('mostrarPassword').addEventListener('click',()=>{const visible=passwordAcceso.type==='password';passwordAcceso.type=visible?'text':'password';$('mostrarPassword').textContent=visible?'Ocultar contraseña':'Mostrar contraseña';$('mostrarPassword').setAttribute('aria-pressed',String(visible));});
 $('loginId').focus();
 </script>
 </body>

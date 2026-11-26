@@ -4,8 +4,9 @@ const SeguimientosVinculacion = {
       titulo: 'Seguimiento social', icono: 'informe', color: 'menta',
       descripcion: 'Adaptación familiar, condiciones de cuidado y necesidades de acompañamiento.',
       tipos: {
-        VISITA_DOMICILIARIA: 'Visita domiciliaria', ENTREVISTA_FAMILIAR: 'Entrevista familiar',
-        ENCUENTRO: 'Encuentro de seguimiento', TELEFONICO: 'Seguimiento telefónico', OTRO: 'Otro'
+        INTERRELACION: 'Encuentro de interrelación familiar', ENTREVISTA_FAMILIAR: 'Entrevista familiar',
+        ORIENTACION_FAMILIAR: 'Orientación familiar', VISITA_DOMICILIARIA: 'Visita domiciliaria',
+        TELEFONICO: 'Seguimiento telefónico', OTRO: 'Otro', ENCUENTRO: 'Encuentro de seguimiento'
       },
       campos: {
         adaptacion: ['Adaptación y dinámica familiar', [
@@ -37,7 +38,10 @@ const SeguimientosVinculacion = {
       descripcion: 'Adaptación emocional, evolución del vínculo afectivo y acompañamiento psicológico.',
       tipos: {
         SESION_INDIVIDUAL: 'Sesión individual', SESION_FAMILIAR: 'Sesión familiar',
-        OBSERVACION_VINCULO: 'Observación del vínculo', ENTREVISTA: 'Entrevista de seguimiento', OTRO: 'Otro'
+        INTERRELACION: 'Encuentro de interrelación familiar', ENTREVISTA_PSICOLOGICA: 'Entrevista psicológica',
+        OBSERVACION_VINCULO: 'Observación del vínculo afectivo', ORIENTACION_FAMILIAR: 'Orientación familiar',
+        VISITA_DOMICILIARIA: 'Visita domiciliaria', TELEFONICO: 'Seguimiento telefónico',
+        OTRO: 'Otro', ENTREVISTA: 'Entrevista de seguimiento'
       },
       campos: {
         adaptacion: ['Adaptación emocional', [
@@ -144,7 +148,7 @@ const SeguimientosVinculacion = {
     const dialogo = this.dialogo(this.especialidades[registro.rol].titulo, disparador);
     const campos = {fechaAtencion: registro.fechaAtencion, etapa: registro.etapa, ...registro.contenido};
     dialogo.insertAdjacentHTML('beforeend', this.contexto(vinculacion) + `
-      <p>${limpiarHtml(registro.profesional)} · Registrado el ${limpiarHtml(Profesionales.fecha(registro.registrado))}</p>
+      <p>${limpiarHtml(registro.profesional)} · Registrado el ${limpiarHtml(Vinculaciones.fechaHora(registro.registrado))}</p>
       <dl class="detalle-datos">${Object.entries(campos).map(([campo, valor]) => `
         <div><dt>${limpiarHtml(this.etiqueta(registro.rol, campo))}</dt>
         <dd class="pro-texto-registrado">${limpiarHtml(this.valor(registro.rol, campo, valor))}</dd></div>`).join('')}</dl>
@@ -157,18 +161,20 @@ const SeguimientosVinculacion = {
     const rol = registro?.rol || datos.rolRegistro;
     const especialidad = this.especialidades[rol];
     const dialogo = this.dialogo((registro ? 'Editar ' : 'Registrar ') + especialidad.titulo.toLowerCase(), disparador);
+    dialogo.classList.add('seguimiento-dialogo', especialidad.color);
     dialogo.insertAdjacentHTML('beforeend', this.contexto(vinculacion) + `
       <p>Etapa de la atención <strong data-etapa></strong></p>
       <form class="pro-interrupcion-form">
-        <label>Fecha de atención<input type="date" name="fechaAtencion" required min="${limpiarHtml(datos.primeraFecha)}" max="${limpiarHtml(datos.hoy)}"></label>
+        <label>Fecha de atención<input type="date" name="fechaAtencion" aria-describedby="fecha-atencion-legible" required min="${limpiarHtml(datos.primeraFecha)}" max="${limpiarHtml(datos.hoy)}"><small class="ayuda" id="fecha-atencion-legible"></small></label>
         <label>Tipo de seguimiento<select name="tipo" required><option value="">Selecciona un tipo</option>
-          ${Object.entries(especialidad.tipos).map(([valor, nombre]) => `<option value="${valor}">${nombre}</option>`).join('')}
+          ${Object.entries(especialidad.tipos).filter(([tipo]) => !['ENCUENTRO', 'ENTREVISTA'].includes(tipo) || tipo === registro?.contenido.tipo).map(([valor, nombre]) => `<option value="${valor}">${nombre}</option>`).join('')}
         </select></label>
         <label>Participantes<textarea name="participantes" rows="2" maxlength="500" required></textarea></label>
+        <p class="ayuda">Selecciona una sugerencia y adapta el texto según lo observado. Elegir otra reemplazará el contenido.</p>
         ${Object.entries(especialidad.campos).map(([campo, [etiqueta]]) => `
           <div><label for="seguimiento-${campo}">${etiqueta}</label>
           <textarea id="seguimiento-${campo}" name="${campo}" rows="3" maxlength="2000" required></textarea></div>`).join('')}
-        <label>Fecha prevista del próximo seguimiento (opcional)<input type="date" name="proximoSeguimiento"></label>
+        <label>Fecha prevista del próximo seguimiento (opcional)<input type="date" name="proximoSeguimiento" aria-describedby="fecha-proxima-legible"><small class="ayuda" id="fecha-proxima-legible"></small></label>
         ${registro ? '<label>Motivo de modificación (opcional)<textarea name="motivoModificacion" rows="2" maxlength="1000"></textarea></label>' : ''}
         <p class="mensaje error" role="alert" hidden></p>
         <div class="pro-acciones">
@@ -182,14 +188,17 @@ const SeguimientosVinculacion = {
     fecha.value = registro?.fechaAtencion || datos.hoy;
     Object.entries(registro?.contenido || {}).forEach(([campo, valor]) => { form.elements[campo].value = valor; });
     Object.entries(especialidad.campos).forEach(([campo, [, opciones]]) =>
-      Profesionales.sugerencias(form.elements[campo], opciones, {anexar: true}));
+      Profesionales.sugerencias(form.elements[campo], opciones, {seleccionUnica: true}));
     const actualizarEtapa = () => {
       proxima.min = fecha.value;
+      dialogo.querySelector('#fecha-atencion-legible').textContent = fecha.value ? Vinculaciones.fechaCivil(fecha.value) : '';
+      dialogo.querySelector('#fecha-proxima-legible').textContent = proxima.value ? Vinculaciones.fechaCivil(proxima.value) : '';
       const etapa = registro && fecha.value === registro.fechaAtencion ? registro.etapa
         : datos.inicioConvivencia && fecha.value >= datos.inicioConvivencia ? 'CONVIVENCIA_PREADOPTIVA' : 'ENCUENTROS_PREVIOS';
       dialogo.querySelector('[data-etapa]').textContent = fecha.value ? this.etapas[etapa] : 'Selecciona la fecha de atención';
     };
     fecha.addEventListener('input', actualizarEtapa);
+    proxima.addEventListener('input', actualizarEtapa);
     actualizarEtapa();
 
     // La clave pertenece a este envío y se conserva durante los reintentos del formulario.
@@ -256,13 +265,6 @@ const SeguimientosVinculacion = {
 
   evento(movimiento) {
     return {...movimiento, titulo: this.especialidades[movimiento.rol].titulo + ' ' + movimiento.accion.toLowerCase()};
-  },
-
-  fechaEvento(fecha) {
-    const opciones = {day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Panama'};
-    const partes = new Intl.DateTimeFormat('es-PA', opciones).formatToParts(new Date(fecha));
-    const valor = tipo => partes.find(parte => parte.type === tipo)?.value;
-    return `${valor('day')}/${valor('month')}/${valor('year')}`;
   },
 
   cambios(evento) {

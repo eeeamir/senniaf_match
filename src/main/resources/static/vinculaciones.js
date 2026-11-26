@@ -62,7 +62,7 @@ const Vinculaciones = {
                 <div>
                   <h2>${limpiarHtml(v.codigo)} · Mi vinculación</h2>
                   <p>Expediente familiar ${limpiarHtml(v.expedienteFamiliar)}</p>
-                  <p>Propuesta recibida: ${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</p>
+                  <p>Propuesta recibida: ${limpiarHtml(this.fechaHora(v.fechaCreacion))}</p>
                 </div>
               </div>
               ${this.estado(v, true)}
@@ -258,13 +258,13 @@ const Vinculaciones = {
         titulo: 'Autorización preadoptiva registrada',
         fecha: autorizacion?.registradaEl,
         detalle: autorizacion?.fechaEmision
-          ? 'Fecha de emisión: ' + Profesionales.fechaCivil(autorizacion.fechaEmision) : '',
+          ? 'Fecha de emisión: ' + this.fechaCivil(autorizacion.fechaEmision) : '',
       },
       {
         titulo: 'Inicio de convivencia registrado',
         fecha: autorizacion?.inicioRegistradoEl,
         detalle: autorizacion?.fechaInicioConvivencia
-          ? 'Inicio efectivo: ' + Profesionales.fechaCivil(autorizacion.fechaInicioConvivencia) : '',
+          ? 'Inicio efectivo: ' + this.fechaCivil(autorizacion.fechaInicioConvivencia) : '',
       },
       { titulo: 'Interrupción registrada', fecha: v.seguimientoFamiliar?.interrupcionRegistradaEl },
       {
@@ -279,6 +279,15 @@ const Vinculaciones = {
       .filter((e) => e.fecha)
       .map((e) => ({ ...e, descripcion: [v.codigo, e.detalle].filter(Boolean).join(' · ') }));
     return { estado, mensaje, accion, etapas, eventos };
+  },
+  fechaHora(valor) {
+    if (!valor) return 'Fecha no registrada';
+    const fecha = new Date(valor);
+    if (Number.isNaN(fecha.getTime())) return 'Fecha no disponible';
+    const partes = new Intl.DateTimeFormat('es-PA', {day: '2-digit', month: '2-digit', year: 'numeric',
+      timeZone: 'America/Panama'}).formatToParts(fecha);
+    const parte = tipo => partes.find(item => item.type === tipo)?.value;
+    return `${parte('day')}/${parte('month')}/${parte('year')} · ${Profesionales.momento(valor).hora}`;
   },
   fechaCivil(valor) {
     if (!valor) return 'Fecha no registrada';
@@ -297,9 +306,9 @@ const Vinculaciones = {
     if (!t) return '';
     const a = v.autorizacionPreadoptiva;
     const texto = [];
-    if (familiar && indice === 0 && v.fechaCreacion) texto.push(Profesionales.fecha(v.fechaCreacion));
+    if (familiar && indice === 0 && v.fechaCreacion) texto.push(this.fechaHora(v.fechaCreacion));
     if (indice === 1 && (v.fechaRespuesta || v.estado === 'PENDIENTE_RESPUESTA')) {
-      if (familiar && v.fechaRespuesta) texto.push(Profesionales.fecha(v.fechaRespuesta));
+      if (familiar && v.fechaRespuesta) texto.push(this.fechaHora(v.fechaRespuesta));
       texto.push(this.dias(t.respuesta) + (t.respuesta == null ? '' : ' desde la propuesta'));
     }
     if (indice === 3 && a?.fechaEmision) {
@@ -337,7 +346,7 @@ const Vinculaciones = {
               (etapa, indice) => `
             <li class="${etapa.clase}" ${etapa.clase === 'actual' ? 'aria-current="step"' : ''}>
               <span class="familia-paso">${etapa.clase === 'interrumpido' ? Profesionales.icono('advertencia') : etapa.clase === 'completado' ? Profesionales.icono('comprobar') : indice + 1}</span>
-              <strong>${etapa.titulo}</strong><small>${etapa.texto}</small>${etapa.detalle ? `<small class="familia-etapa-detalle">${limpiarHtml(etapa.detalle)}</small>` : ''}${etapa.fechaHecho ? `<small class="familia-etapa-detalle">Fecha de interrupción: ${limpiarHtml(Profesionales.fechaCivil(etapa.fechaHecho))}</small>` : ''}
+              <strong>${etapa.titulo}</strong><small>${etapa.texto}</small>${etapa.detalle ? `<small class="familia-etapa-detalle">${limpiarHtml(etapa.detalle)}</small>` : ''}${etapa.fechaHecho ? `<small class="familia-etapa-detalle">Fecha de interrupción: ${limpiarHtml(this.fechaCivil(etapa.fechaHecho))}</small>` : ''}
               ${this.tiemposEtapa(v, indice, true)}
             </li>
           `,
@@ -430,7 +439,7 @@ const Vinculaciones = {
           if (actual !== consulta) return;
           lista.innerHTML = datos.length ? datos.map(v => `<article class="tarjeta vinculacion-tarjeta">
             <header class="vinculacion-cabecera"><h2><span class="vinculacion-emblema">${Profesionales.icono('heart-handshake')}</span>${limpiarHtml(v.codigo)}</h2>${this.estado(v)}</header>
-            <dl class="vinculacion-resumen"><div><dt>${Profesionales.icono('carpeta')}Expediente infantil</dt><dd>${limpiarHtml(v.expedienteInfantil)}</dd></div><div><dt>${Profesionales.icono('personas')}Expediente familiar</dt><dd>${limpiarHtml(v.expedienteFamiliar)}</dd></div><div><dt>${Profesionales.icono('calendario')}Creación</dt><dd>${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</dd></div><div><dt>${Profesionales.icono('criterios')}Compatibilidad original</dt><dd><strong>${v.puntajeOriginal==null?'No disponible':Sesion.puntajeHistorico(v.puntajeOriginal,v.maximoAplicableOriginal)}</strong><small>Versión de criterios: ${limpiarHtml(String(v.versionOriginal??'no disponibles'))}</small></dd></div></dl>
+            <dl class="vinculacion-resumen"><div><dt>${Profesionales.icono('carpeta')}Expediente infantil</dt><dd>${limpiarHtml(v.expedienteInfantil)}</dd></div><div><dt>${Profesionales.icono('personas')}Expediente familiar</dt><dd>${limpiarHtml(v.expedienteFamiliar)}</dd></div><div><dt>${Profesionales.icono('calendario')}Creación</dt><dd>${limpiarHtml(this.fechaHora(v.fechaCreacion))}</dd></div><div><dt>${Profesionales.icono('criterios')}Compatibilidad original</dt><dd><strong>${v.puntajeOriginal==null?'No disponible':Sesion.puntajeHistorico(v.puntajeOriginal,v.maximoAplicableOriginal)}</strong><small>Versión de criterios: ${limpiarHtml(String(v.versionOriginal??'no disponibles'))}</small></dd></div></dl>
             <p class="vinculacion-siguiente">${limpiarHtml(this.descripcion(v))}</p>
             <footer class="vinculacion-acciones"><a class="boton secundario" href="vinculaciones.html?id=${v.id}">${Profesionales.icono('consulta')}Ver seguimiento</a></footer>
           </article>`).join('') : `<section class="tarjeta"><h2>${Profesionales.icono('informacion')}Sin vinculaciones</h2><p>No hay vinculaciones para esta consulta.</p></section>`;
@@ -460,7 +469,7 @@ const Vinculaciones = {
           <button class="boton secundario chico" type="button" data-actualizar-vinculacion>Actualizar</button></div>
         <p data-estado-actualizacion role="status" hidden></p>
         <dl class="detalle-datos vinculacion-tiempos">
-          <div><dt>Fecha de creación</dt><dd>${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</dd></div>
+          <div><dt>Fecha de creación</dt><dd>${limpiarHtml(this.fechaHora(v.fechaCreacion))}</dd></div>
           <div><dt>Tiempo transcurrido de vinculación</dt><dd class="vinculacion-tiempo-destacado">${this.dias(v.tiempos?.vinculacion)}</dd></div>
           <div><dt>Inicio efectivo de convivencia</dt><dd>${v.tiempos?.fechaInicio ? this.fechaCivil(v.tiempos.fechaInicio) : 'Sin inicio efectivo registrado'}</dd></div>
           <div><dt>Tiempo de convivencia</dt><dd class="vinculacion-tiempo-destacado convivencia">${this.tiempoConvivencia(v.tiempos)}</dd>
@@ -550,10 +559,10 @@ const Vinculaciones = {
               <span class="vinculacion-hito">
                 ${Profesionales.icono(etapa.clase === 'interrumpido' ? 'advertencia' : etapa.clase === 'completado' ? 'comprobar' : 'informacion')}
               </span>
-              <div><h3>${etapa.titulo}</h3>${etapa.detalle ? `<p>${limpiarHtml(etapa.detalle)}</p>` : ''}${etapa.fechaHecho ? `<p>Fecha de interrupción: ${limpiarHtml(Profesionales.fechaCivil(etapa.fechaHecho))}</p>` : ''}${this.tiemposEtapa(v, indice)}</div>
+              <div><h3>${etapa.titulo}</h3>${etapa.detalle ? `<p>${limpiarHtml(etapa.detalle)}</p>` : ''}${etapa.fechaHecho ? `<p>Fecha de interrupción: ${limpiarHtml(this.fechaCivil(etapa.fechaHecho))}</p>` : ''}${this.tiemposEtapa(v, indice)}</div>
               <div class="vinculacion-etapa-meta">
                 <span class="chip ${etapa.clase === 'interrumpido' ? 'vinculacion-negativa' : etapa.clase === 'completado' ? 'vinculacion-positiva' : 'retirado'}">${etapa.texto}</span>
-                ${fechas[indice] ? `<time>${indice === 3 || indice === 4 ? 'Registro · ' : ''}${limpiarHtml(Profesionales.fecha(fechas[indice]))}</time>` : ''}
+                ${fechas[indice] ? `<time>${indice === 3 || indice === 4 ? 'Registro · ' : ''}${limpiarHtml(this.fechaHora(fechas[indice]))}</time>` : ''}
               </div>
             </li>`).join('')}
         </ol>
@@ -623,7 +632,7 @@ const Vinculaciones = {
       if (boton.hasAttribute('data-reintentar-reportes')) { cargar(); return; }
       if (cargando) return;
       const visita = visitas?.registros.find(item => String(item.id) === boton.dataset.editarVisita);
-      if (visita?.puedeEditar || (visitas?.puedeRegistrar && boton.hasAttribute('data-registrar-visita'))) {
+      if (visitas?.trabajoSocial && (visita?.puedeEditar || (visitas.puedeRegistrar && boton.hasAttribute('data-registrar-visita')))) {
         VisitasDomiciliarias.formulario(vinculacion, visitas, visita, boton, mensaje => cargar(mensaje));
         return;
       }
@@ -652,9 +661,9 @@ const Vinculaciones = {
       <h3>${limpiarHtml(evento.titulo || Profesionales.etiqueta(evento.accion))}</h3>
       <span class="vinculacion-conector" aria-hidden="true"></span>
       <div class="vinculacion-evento">${evento.seguimientoId || evento.visitaId
-        ? `<p class="vinculacion-evento-meta"><span><time>${limpiarHtml(SeguimientosVinculacion.fechaEvento(evento.fecha))} · ${limpiarHtml(Profesionales.momento(evento.fecha).hora)}</time> · ${limpiarHtml(evento.responsable)}</span></p>
+        ? `<p class="vinculacion-evento-meta"><span><time>${limpiarHtml(this.fechaHora(evento.fecha))}</time> · ${limpiarHtml(evento.responsable)}</span></p>
           ${evento.visitaId ? VisitasDomiciliarias.cambios(evento) : SeguimientosVinculacion.cambios(evento)}`
-        : `<p class="vinculacion-evento-meta">${evento.responsable ? `${Profesionales.icono('persona')}${limpiarHtml(evento.responsable)} · ` : ''}<time>${limpiarHtml(Profesionales.fecha(evento.fecha))}${evento.zona ? ' · ' + limpiarHtml(evento.zona) : ''}</time></p>
+        : `<p class="vinculacion-evento-meta">${evento.responsable ? `${Profesionales.icono('persona')}${limpiarHtml(evento.responsable)} · ` : ''}<time>${limpiarHtml(this.fechaHora(evento.fecha))}${evento.zona ? ' · ' + limpiarHtml(evento.zona) : ''}</time></p>
           ${evento.resumen || evento.detalle ? `<p>${limpiarHtml(evento.resumen || evento.detalle)}</p>` : ''}`}</div>
     </li>`).join('')}</ol>`;
   },
@@ -665,7 +674,7 @@ const Vinculaciones = {
     if(!h)return '<section id="compatibilidadRegistrada" class="tarjeta"><h2>Compatibilidad original</h2><p>No hay análisis histórico disponible.</p></section>';
     const c=h.contexto||{},factores={edad:'Rango de edad',hermanos:'Vínculos entre hermanos',salud:'Salud y desarrollo',apoyo:'Red de apoyo',logistica:'Logística'},dato=v=>v==null?'No disponible':limpiarHtml(String(v));
     return `<section id="compatibilidadRegistrada" class="tarjeta vinculacion-historica"><div class="pro-fila-titulo"><div><h2>${Profesionales.icono('criterios')}Compatibilidad original</h2><p>Se conserva el análisis registrado al aceptar esta propuesta.</p><span class="chip">Versión de criterios: ${dato(h.version)}</span> <span class="chip retirado">Resultado histórico</span></div><div class="pro-puntaje">${Sesion.puntajeHistorico(h.puntaje,h.maximoAplicable ?? c.maximoAplicable)}</div></div>
-      ${fecha?`<p class="ayuda">${Profesionales.icono('calendario')}${limpiarHtml(Profesionales.fecha(fecha))}</p>`:''}<details class="pro-seccion"><summary>${Profesionales.icono('consulta')}Ver desglose de compatibilidad</summary><div class="tabla"><table><thead><tr><th>Factor</th><th>Peso original</th><th>Puntos</th><th>Fundamento registrado</th></tr></thead><tbody>${Object.entries(factores).map(([k,n])=>`<tr><td>${n}</td><td>${dato(c.pesos?.[k])}</td><td>${dato(c.factores?.[k]?.[0])}</td><td>${dato(c.factores?.[k]?.[1])}</td></tr>`).join('')}</tbody></table></div>${!h.contexto?'<p class="ayuda">Este antecedente no conserva el desglose. No se sustituye por un cálculo nuevo.</p>':''}<p class="ayuda">Máximo aplicable registrado: ${dato(c.maximoAplicable)} · Peso evaluado: ${dato(c.pesoEvaluado)}</p></details></section>`;
+      ${fecha?`<p class="ayuda">${Profesionales.icono('calendario')}${limpiarHtml(this.fechaHora(fecha))}</p>`:''}<details class="pro-seccion"><summary>${Profesionales.icono('consulta')}Ver desglose de compatibilidad</summary><div class="tabla"><table><thead><tr><th>Factor</th><th>Peso original</th><th>Puntos</th><th>Fundamento registrado</th></tr></thead><tbody>${Object.entries(factores).map(([k,n])=>`<tr><td>${n}</td><td>${dato(c.pesos?.[k])}</td><td>${dato(c.factores?.[k]?.[0])}</td><td>${dato(c.factores?.[k]?.[1])}</td></tr>`).join('')}</tbody></table></div>${!h.contexto?'<p class="ayuda">Este antecedente no conserva el desglose. No se sustituye por un cálculo nuevo.</p>':''}<p class="ayuda">Máximo aplicable registrado: ${dato(c.maximoAplicable)} · Peso evaluado: ${dato(c.pesoEvaluado)}</p></details></section>`;
   },
   panelCierre(v) {
     if (!v.cierre && !v.puedeCerrar) return '';
@@ -678,7 +687,7 @@ const Vinculaciones = {
     };
     return `<section class="tarjeta vinculacion-cierre"><h2>${Profesionales.icono('informe')}Cierre institucional</h2>
       <div class="vinculacion-cierre-resumen"><span class="chip retirado">${Profesionales.icono(x ? 'informacion' : 'reloj')}${x ? 'Cierre registrado' : 'Pendiente de cierre'}</span>
-      ${x ? `<dl class="detalle-datos"><div><dt>Fecha del cierre</dt><dd>${limpiarHtml(Profesionales.fechaCivil(x.fecha))}</dd></div><div><dt>Responsable del registro</dt><dd>${limpiarHtml(x.registradoPor)}</dd></div><div><dt>Registro</dt><dd>${limpiarHtml(Profesionales.fecha(x.registradoEl))}</dd></div>${x.referencia ? `<div><dt>Referencia institucional</dt><dd>${limpiarHtml(x.referencia)}</dd></div>` : ''}${x.autoridad ? `<div><dt>Autoridad registrada</dt><dd>${limpiarHtml(x.autoridad)}</dd></div>` : ''}</dl><p class="pro-texto-registrado">${limpiarHtml(x.motivo)}</p>` : '<p>El Comité registra un cierre respaldado por la actuación de la autoridad competente.</p>'}</div>
+      ${x ? `<dl class="detalle-datos"><div><dt>Fecha del cierre</dt><dd>${limpiarHtml(this.fechaCivil(x.fecha))}</dd></div><div><dt>Responsable del registro</dt><dd>${limpiarHtml(x.registradoPor)}</dd></div><div><dt>Registro</dt><dd>${limpiarHtml(this.fechaHora(x.registradoEl))}</dd></div>${x.referencia ? `<div><dt>Referencia institucional</dt><dd>${limpiarHtml(x.referencia)}</dd></div>` : ''}${x.autoridad ? `<div><dt>Autoridad registrada</dt><dd>${limpiarHtml(x.autoridad)}</dd></div>` : ''}</dl><p class="pro-texto-registrado">${limpiarHtml(x.motivo)}</p>` : '<p>El Comité registra un cierre respaldado por la actuación de la autoridad competente.</p>'}</div>
       ${x ? `<section class="vinculacion-disponibilidad"><h3>Estado de los expedientes</h3><div class="vinculacion-expedientes">${[['NINO','Expediente infantil',x.ninoLiberado,x.estadoInfantil,v.expedienteInfantil],['FAMILIA','Expediente familiar',x.familiaLiberada,x.estadoFamiliar,v.expedienteFamiliar]].map(([k,n,revisado,estado,codigo]) => {
         const info = estados[estado] || estados[revisado ? 'DISPONIBLE' : 'PENDIENTE_REVISION'];
         return `<article><h4>${Profesionales.icono(k === 'NINO' ? 'carpeta' : 'personas')}${n}</h4><strong>${info[0]}</strong><p>${info[1]}</p><div class="pro-acciones">${v.puedeRevisarDisponibilidad && !revisado ? `<button class="boton secundario" data-disponibilidad="${k}">${Profesionales.icono('consulta')}Revisar disponibilidad</button>` : ''}<a class="boton secundario" href="perfiles.html?${k === 'NINO' ? 'caso' : 'familia'}=${encodeURIComponent(codigo)}&origen=vinculacion&vinculacionOrigen=${Number(v.id)}">Consultar expediente</a></div></article>`;
@@ -734,15 +743,15 @@ const Vinculaciones = {
             <div><dt>Resolución o autorización institucional</dt>
               <dd>${limpiarHtml(autorizacion.referencia)}</dd></div>
             <div><dt>Fecha de emisión</dt>
-              <dd>${limpiarHtml(Profesionales.fechaCivil(autorizacion.fechaEmision))}</dd></div>
+              <dd>${limpiarHtml(this.fechaCivil(autorizacion.fechaEmision))}</dd></div>
             <div><dt>Inicio efectivo de la convivencia</dt>
               <dd>${autorizacion.fechaInicioConvivencia
-                ? limpiarHtml(Profesionales.fechaCivil(autorizacion.fechaInicioConvivencia))
+                ? limpiarHtml(this.fechaCivil(autorizacion.fechaInicioConvivencia))
                 : 'Sin constancia registrada'}</dd></div>
             <div><dt>Responsable del registro</dt>
               <dd>${limpiarHtml(autorizacion.responsable)}
                 · ${limpiarHtml(Profesionales.etiqueta(autorizacion.rol))}
-                · ${limpiarHtml(Profesionales.fecha(autorizacion.registradaEl))} · Panamá</dd></div>
+                · ${limpiarHtml(this.fechaHora(autorizacion.registradaEl))} · Panamá</dd></div>
           </dl>` : ''}
         ${v.puedeRegistrarAutorizacion ? `
           <button type="button" class="boton" data-autorizacion>
@@ -768,8 +777,8 @@ const Vinculaciones = {
     return `<section class="tarjeta"><h2>${Profesionales.icono('advertencia')}Interrupción de convivencia</h2>${i?`
       <p><strong>${i.fechaRevision?'Revisión registrada':'Pendiente de revisión del Comité'}</strong></p>
       <dl class="detalle-datos">${i.motivo?`<div><dt>Motivo de la interrupción</dt><dd>${limpiarHtml(this.motivosInterrupcion.find(([k])=>k===i.motivo)?.[1]||i.motivo)}</dd></div>`:''}${i.fechaInterrupcion?`<div><dt>Fecha de la interrupción registrada anteriormente</dt><dd>${limpiarHtml(i.fechaInterrupcion)}</dd></div>`:''}${i.referenciaActuacion?`<div><dt>Referencia institucional registrada anteriormente</dt><dd>${limpiarHtml(i.referenciaActuacion)}</dd></div>`:''}</dl>
-      <p class="pro-texto-registrado">${limpiarHtml(i.justificacion)}</p><p>${Profesionales.icono('persona')}${limpiarHtml(i.registradoPor)} · ${limpiarHtml(Profesionales.etiqueta(i.rolProfesional))} · ${limpiarHtml(Profesionales.fecha(i.fechaRegistro))} · Panamá</p>
-      ${i.fechaRevision?`<h3>Revisión del Comité</h3><p class="pro-texto-registrado">${limpiarHtml(i.revisionJustificacion)}</p><p>${limpiarHtml(i.revisadoPor)} · ${limpiarHtml(Profesionales.fecha(i.fechaRevision))}</p>`:''}
+      <p class="pro-texto-registrado">${limpiarHtml(i.justificacion)}</p><p>${Profesionales.icono('persona')}${limpiarHtml(i.registradoPor)} · ${limpiarHtml(Profesionales.etiqueta(i.rolProfesional))} · ${limpiarHtml(this.fechaHora(i.fechaRegistro))} · Panamá</p>
+      ${i.fechaRevision?`<h3>Revisión del Comité</h3><p class="pro-texto-registrado">${limpiarHtml(i.revisionJustificacion)}</p><p>${limpiarHtml(i.revisadoPor)} · ${limpiarHtml(this.fechaHora(i.fechaRevision))}</p>`:''}
       `:'<p>Deja constancia de una interrupción de convivencia respaldada por la actuación institucional correspondiente.</p>'}
       <p class="ayuda">${Profesionales.icono('informacion')}El registro conserva los antecedentes y la reserva de los expedientes. No cambia su idoneidad ni formaliza una adopción.</p>
       ${v.puedeReportarInterrupcion?`<button class="boton secundario" data-interrupcion>${Profesionales.icono('advertencia')}Registrar interrupción de convivencia</button>`:''}

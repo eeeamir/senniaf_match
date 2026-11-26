@@ -97,3 +97,20 @@ body.acceso-publico { display: block; padding: 0; }
   #conocer-sistema .conocer-rol { grid-row: auto; grid-template-rows: auto auto auto; }
   #conocer-sistema .conocer-mensaje { gap: 12px; }
 }
+
+.acceso-publico .acceso-password { position: relative; }
+.acceso-publico .acceso-password input { padding-inline-end: 3.25rem; }
+.acceso-publico #mostrarPassword {
+  position: absolute; top: 50%; right: .35rem; transform: translateY(-50%);
+  display: grid; place-items: center; width: 42px; height: 42px;
+  border: 0; border-radius: 8px; padding: 0; background: transparent; color: #1555a5; cursor: pointer;
+}
+.acceso-publico #mostrarPassword:focus-visible { outline: 2px solid #0054cc; outline-offset: -3px; }
+.acceso-publico #mostrarPassword:hover { background: #edf4ff; }
+.acceso-publico .acceso-password svg, .acceso-publico .acceso-error svg {
+  width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor;
+  stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+}
+.acceso-publico .acceso-ojo-tachado, .acceso-publico .acceso-error:has(span:empty) { display: none; }
+.acceso-publico #mostrarPassword.visible .acceso-ojo-tachado { display: inline; }
+.acceso-publico .acceso-error { display: flex; align-items: center; gap: .55rem; }

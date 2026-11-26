@@ -405,3 +405,16 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 }
 .s8-acabado #seguimiento-reportes .vinculacion-reporte.menta > summary .vinculacion-emblema { color: #087d68; background: #e5f4ef; }
 .s8-acabado #seguimiento-reportes .vinculacion-reporte.lavanda > summary .vinculacion-emblema { color: #694798; background: #f0eaf8; }
+
+.seguimiento-dialogo.menta { --sugerencia-tinta: #14664f; --sugerencia-fondo: #e4f4ed; }
+.seguimiento-dialogo.lavanda { --sugerencia-tinta: #654293; --sugerencia-fondo: #f0eaf9; }
+.seguimiento-dialogo .pro-sugerencia { display: inline-flex; align-items: center; gap: .35rem; }
+.seguimiento-dialogo .pro-sugerencia .pro-icono { display: none; width: 1em; height: 1em; }
+.seguimiento-dialogo .pro-sugerencia[aria-pressed=true] {
+  border-color: var(--sugerencia-tinta); color: var(--sugerencia-tinta); background: var(--sugerencia-fondo);
+}
+.seguimiento-dialogo .pro-sugerencia[aria-pressed=true] .pro-icono { display: inline-block; }
+.visita-previstas { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin: .25rem 0 .5rem; }
+.visita-estado { margin-bottom: .85rem; color: #476788; }
+.visita-estado p { margin: .25rem 0; }
+.visita-adicionales { margin: 1rem 0 0; font-size: 1rem; }

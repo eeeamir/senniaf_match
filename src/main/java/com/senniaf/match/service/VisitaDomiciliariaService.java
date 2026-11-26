@@ -39,18 +39,19 @@ public class VisitaDomiciliariaService {
     public record Movimiento(Long visitaId, String responsable, Instant fecha, Accion accion,
                              Map<String, Cambio> cambios, String motivo) {}
     public record Consulta(List<Registro> registros, List<Movimiento> historial, LocalDate fechaMinima,
-                           int referencia, boolean puedeRegistrar) {}
+                           int referencia, boolean puedeRegistrar, String estadoConvivencia, boolean trabajoSocial) {}
 
     public Consulta consultar(Long id, Usuario usuario) {
         Vinculacion v = seguimientos.autorizada(id, usuario, false);
-        boolean editable = profesional(usuario) && permiteCambios(v);
+        String estado = estadoConvivencia(v);
+        boolean editable = trabajoSocial(usuario) && "VIGENTE".equals(estado);
         return new Consulta(visitas.findByVinculacionIdOrderByFechaAscInicioAscIdAsc(id).stream()
                 .map(visita -> vista(visita, usuario, editable)).toList(),
                 historial.findByVisitaVinculacionIdOrderByFechaDescIdDesc(id).stream()
                 .map(evento -> new Movimiento(evento.getVisitaId(), evento.getNombreActor(), evento.getFecha(),
                         evento.getAccion(), seguimientos.leer(evento.getCambios(), new TypeReference<>() {}),
                         evento.getMotivo())).toList(),
-                v.getFechaInicioConvivencia(), TiemposVinculacion.VISITAS_REFERENCIA_ACOGIMIENTO, editable);
+                v.getFechaInicioConvivencia(), TiemposVinculacion.VISITAS_REFERENCIA_ACOGIMIENTO, editable, estado, trabajoSocial(usuario));
     }
 
     @Transactional
@@ -102,12 +103,12 @@ public class VisitaDomiciliariaService {
     }
 
     private Vinculacion bloquear(Long id, Usuario usuario) {
-        if (!profesional(usuario)) throw new RolNoAutorizadoException("Solo el equipo técnico asignado puede registrar o editar visitas");
+        if (!trabajoSocial(usuario)) throw new RolNoAutorizadoException("Solo el trabajador social asignado puede registrar o editar visitas");
         return seguimientos.autorizada(id, usuario, true);
     }
 
-    private boolean profesional(Usuario usuario) {
-        return usuario != null && ("TRABAJADOR_SOCIAL".equals(usuario.getRol()) || "PSICOLOGO".equals(usuario.getRol()));
+    private boolean trabajoSocial(Usuario usuario) {
+        return usuario != null && "TRABAJADOR_SOCIAL".equals(usuario.getRol());
     }
 
     private boolean autor(VisitaDomiciliaria visita, Usuario usuario) {
@@ -115,9 +116,16 @@ public class VisitaDomiciliariaService {
     }
 
     private boolean permiteCambios(Vinculacion v) {
-        return vinculaciones.reportable(v) && v.getFechaEmisionAutorizacion() != null
-                && v.getFechaRegistroInicio() != null && v.getFechaCierre() == null
-                && !interrupciones.existsByVinculacionId(v.getId());
+        return "VIGENTE".equals(estadoConvivencia(v));
+    }
+
+    private String estadoConvivencia(Vinculacion v) {
+        if (v.getEstado() == Vinculacion.Estado.CERRADA || v.getFechaCierre() != null) return "FINALIZADA";
+        if (interrupciones.existsByVinculacionId(v.getId())) return "INTERRUMPIDA";
+        if (v.getEstado() != Vinculacion.Estado.RESPUESTA_ACEPTADA) return "NO_DISPONIBLE";
+        if (v.getFechaInicioConvivencia() == null || v.getFechaRegistroInicio() == null
+                || v.getFechaInicioConvivencia().isAfter(LocalDate.now(PANAMA))) return "PENDIENTE";
+        return vinculaciones.reportable(v) && v.getFechaEmisionAutorizacion() != null ? "VIGENTE" : "NO_DISPONIBLE";
     }
 
     private void validar(Vinculacion v, Solicitud datos, Instant ahora, Long excluir) {

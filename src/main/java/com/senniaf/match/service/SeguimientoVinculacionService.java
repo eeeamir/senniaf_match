@@ -21,8 +21,9 @@ public class SeguimientoVinculacionService {
     private static final String COMITE = "COMITE";
     private static final ZoneId PANAMA = ZoneId.of("America/Panama");
     private static final Map<String, Set<String>> TIPOS = Map.of(
-            SOCIAL, Set.of("VISITA_DOMICILIARIA", "ENTREVISTA_FAMILIAR", "ENCUENTRO", "TELEFONICO", "OTRO"),
-            PSICOLOGIA, Set.of("SESION_INDIVIDUAL", "SESION_FAMILIAR", "OBSERVACION_VINCULO", "ENTREVISTA", "OTRO"));
+            SOCIAL, Set.of("VISITA_DOMICILIARIA", "ENTREVISTA_FAMILIAR", "ENCUENTRO", "INTERRELACION", "ORIENTACION_FAMILIAR", "TELEFONICO", "OTRO"),
+            PSICOLOGIA, Set.of("SESION_INDIVIDUAL", "SESION_FAMILIAR", "OBSERVACION_VINCULO", "ENTREVISTA",
+                    "ENTREVISTA_PSICOLOGICA", "INTERRELACION", "ORIENTACION_FAMILIAR", "VISITA_DOMICILIARIA", "TELEFONICO", "OTRO"));
 
     private final VinculacionRepository vinculaciones;
     private final VinculacionService accesoVinculacion;
