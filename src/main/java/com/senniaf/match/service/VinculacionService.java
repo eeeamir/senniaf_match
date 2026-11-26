@@ -51,7 +51,11 @@ public class VinculacionService {
         return repo.findAllByOrderByIdDesc().stream().filter(v->autorizado(v,rol,actor))
             .filter(v->estado==null || estado.isBlank() || estadoVisible(v).name().equals(estado))
             .filter(v->buscar==null || ("VIN-"+v.getId()+" "+v.getNino().getCodigoCaso()+" "+v.getFamilia().getCodigoCaso()).toLowerCase(Locale.ROOT).contains(buscar.toLowerCase(Locale.ROOT)))
-            .map(v->resumen(v)).toList();
+            .map(v -> {
+                var resumen = resumen(v);
+                resumen.put("maximoAplicableOriginal", compatibilidadOriginal(v.getDecision()).get("maximoAplicable"));
+                return resumen;
+            }).toList();
     }
     public Map<String,Object> detalle(Long id,String rol,String actor){
         institucional(rol);
@@ -65,7 +69,7 @@ public class VinculacionService {
         r.put("puedeCerrar","COMITE".equals(rol) && v.getEstado()!=Vinculacion.Estado.CERRADA && !rechazoPortal(v));
         r.put("puedeRevisarDisponibilidad","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.CERRADA);
         r.put("cierre",v.getFechaCierre()==null?null:datosCierre(v));
-        r.put("puedeReportarInterrupcion",!"COMITE".equals(rol) && interrupcion==null && reportable(v));
+        r.put("puedeReportarInterrupcion","TRABAJADOR_SOCIAL".equals(rol) && interrupcion==null && reportable(v));
         r.put("puedeRevisarInterrupcion","COMITE".equals(rol) && interrupcion!=null && interrupcion.getFechaRevision()==null);
         // La misma auditoría conserva el historial infantil y el detalle de la vinculación.
         r.put("historial",auditoria.findByCodigoCasoOrderByFechaAsc(v.getNino().getCodigoCaso()).stream()
@@ -98,7 +102,7 @@ public class VinculacionService {
         return vista(v,true);
     }
     private void institucional(String rol){if(!Set.of("COMITE","TRABAJADOR_SOCIAL","PSICOLOGO").contains(rol))throw new RolNoAutorizadoException("Solo el equipo institucional autorizado puede consultar vinculaciones");}
-    private boolean autorizado(Vinculacion v,String rol,String actor){return "COMITE".equals(rol) || "TRABAJADOR_SOCIAL".equals(rol)&&actor.equals(v.getNino().getTrabajadorSocialAsignado()) || "PSICOLOGO".equals(rol)&&actor.equals(v.getNino().getPsicologoAsignado());}
+    boolean autorizado(Vinculacion v,String rol,String actor){return "COMITE".equals(rol) || "TRABAJADOR_SOCIAL".equals(rol)&&actor.equals(v.getNino().getTrabajadorSocialAsignado()) || "PSICOLOGO".equals(rol)&&actor.equals(v.getNino().getPsicologoAsignado());}
     private Map<String,Object> resumen(Vinculacion v){
         Map<String,Object> r=new LinkedHashMap<>();r.put("id",v.getId());r.put("codigo","VIN-"+v.getId());r.put("expedienteInfantil",v.getNino().getCodigoCaso());r.put("expedienteFamiliar",v.getFamilia().getCodigoCaso());r.put("fechaCreacion",fecha(v.getDecision().getFecha()));r.put("estado",estadoVisible(v));r.put("puntajeOriginal",v.getDecision().getPuntaje());r.put("versionOriginal",v.getDecision().getVersionPesos());var i=interrupcion(v);r.put("interrupcionPendiente",i!=null && i.getFechaRevision()==null);r.put("interrupcionRegistrada",i!=null);return r;
     }
@@ -162,6 +166,9 @@ public class VinculacionService {
                     });
             }
         }
+        r.put("tiempos", TiemposVinculacion.calcular(v, (String) r.get("respuestaFamiliar"),
+                r.get("estado") == Vinculacion.Estado.RECHAZADA_POR_FAMILIA, seguimiento != null,
+                seguimiento == null ? null : seguimiento.getFechaInterrupcion()));
         if(!familiar){r.put("decisionComite",Map.of("decision",v.getDecision().getDecision(),"responsable",v.getDecision().getFuncionario(),"fecha",fecha(v.getDecision().getFecha()),"motivo",v.getDecision().getMotivo()));r.put("respondidoPor",v.getRespondidoPor());}
         return r;
     }
@@ -189,7 +196,7 @@ public class VinculacionService {
     }
     @Transactional
     public Map<String,Object> registrarInterrupcion(Long id,String rol,String actor,com.senniaf.match.dto.InterrupcionRequest solicitud){
-        if(!Set.of("TRABAJADOR_SOCIAL","PSICOLOGO").contains(rol))throw new RolNoAutorizadoException("Solo el profesional asignado puede registrar la interrupción");
+        if(!"TRABAJADOR_SOCIAL".equals(rol))throw new RolNoAutorizadoException("Solo el trabajador social asignado puede registrar la interrupción");
         Vinculacion v=repo.bloquear(id).orElseThrow(()->new IllegalArgumentException("La vinculación no está disponible"));
         if(!autorizado(v,rol,actor))throw new RolNoAutorizadoException("No tienes asignada esta vinculación");
         if(!reportable(v))throw new IllegalStateException("Esta vinculación no permite registrar una interrupción de convivencia");
@@ -260,13 +267,13 @@ public class VinculacionService {
     /** Solo lee el fundamento guardado; nunca invoca el cálculo actual. */
     private Map<String,Object> compatibilidadOriginal(DecisionComite d){
         var r=new LinkedHashMap<String,Object>();r.put("puntaje",d.getPuntaje());r.put("version",d.getVersionPesos());
-        try{var c=d.getContextoScoring()==null?null:json.readTree(d.getContextoScoring());r.put("contexto",c!=null&&c.isObject()?c:null);}catch(com.fasterxml.jackson.core.JsonProcessingException error){r.put("contexto",null);}return r;
+        try{var c=d.getContextoScoring()==null?null:json.readTree(d.getContextoScoring());r.put("contexto",c!=null&&c.isObject()?c:null);r.put("maximoAplicable",ScoringService.maximoHistorico(c));}catch(com.fasterxml.jackson.core.JsonProcessingException error){r.put("contexto",null);}return r;
     }
     private boolean rechazoPortal(Vinculacion v){
         return v.getEstado()==Vinculacion.Estado.RECHAZADA_POR_FAMILIA || v.getEstado()==Vinculacion.Estado.RESPUESTA_RECHAZADA_PENDIENTE_CIERRE && !v.isReservaVigente() && v.getFechaCierre()==null && interrupcion(v)==null;
     }
     private Vinculacion.Estado estadoVisible(Vinculacion v){return rechazoPortal(v)?Vinculacion.Estado.RECHAZADA_POR_FAMILIA:v.getEstado();}
-    private boolean reportable(Vinculacion v){return v.getFechaRegistroAutorizacion()!=null && v.getFechaInicioConvivencia()!=null && v.isReservaVigente() && v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA && v.getFechaRespuesta()!=null && !v.getNino().isCierrePorAdopcion();}
+    boolean reportable(Vinculacion v){return v.getFechaRegistroAutorizacion()!=null && v.getFechaInicioConvivencia()!=null && v.isReservaVigente() && v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA && v.getFechaRespuesta()!=null && !v.getNino().isCierrePorAdopcion();}
     private InterrupcionConvivencia interrupcion(Vinculacion v){return interrupciones==null?null:interrupciones.findByVinculacionId(v.getId()).orElse(null);}
     private Map<String,Object> detalleInterrupcion(InterrupcionConvivencia i){
         Map<String,Object> r=new LinkedHashMap<>();r.put("id",i.getId());r.put("fechaInterrupcion",i.getFechaInterrupcion());

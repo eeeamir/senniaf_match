@@ -1,6 +1,6 @@
 /* Presentación familiar: reutiliza la entrevista y expone únicamente actividad autorizada del caso propio. */
 const Familia = {
-  async mostrar(sesion) {
+  async mostrar(sesion, {actualizarSeguimiento = false} = {}) {
     if (this.cargando) return;
     this.cargando = true;
     const solicitada = new URLSearchParams(location.search).get('vista');
@@ -20,6 +20,7 @@ const Familia = {
       const sinEntrevista = r.status === 404;
       if (sinEntrevista && vista === 'entrevista') return location.replace('perfil.html');
       const vinculaciones = await Vinculaciones.api('/api/vinculaciones/propias');
+      if (actualizarSeguimiento && document.querySelector('dialog[open]')) return;
       document.querySelectorAll('[data-asignacion-info]').forEach((d) => {
         if (
           !vinculaciones.some(
@@ -154,12 +155,14 @@ const Familia = {
           ${Profesionales.icono('informacion')} Tienes una propuesta pendiente de respuesta.
           <a href="match.html?vista=propuesta">Consultar mi vinculación</a>
         </section>` : '';
+      if (actualizarSeguimiento && document.querySelector('dialog[open]')) return;
       document.getElementById('contenido').innerHTML =
         Profesionales.encabezado(titulo, descripcion, icono) + avisoPropuesta
         + (['inicio', 'entrevista'].includes(vista) ? this.avisoReevaluacion(p) : '')
         + contenidoVista;
       Vinculaciones.enlazarRespuestas(sesion);
     } catch (e) {
+      if (actualizarSeguimiento) throw e;
       this.version = null;
       document.getElementById('contenido').innerHTML =
         `<section class="tarjeta"><p role="alert">${limpiarHtml(e.message)}</p></section>`;

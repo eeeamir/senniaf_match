@@ -296,16 +296,11 @@ async function leerApi(ruta, opciones = {}) {
   return datos;
 }
 function mostrarErrorExpediente(contenedor) {
-  const regreso = document.querySelector('.volver');
   contenedor.replaceChildren();
   const mensaje = document.createElement('p');
   mensaje.setAttribute('role', 'alert');
   mensaje.textContent = 'No se pudo consultar este expediente. Puede que ya no esté disponible o que no tengas acceso.';
-  const enlace = document.createElement('a');
-  enlace.className = 'boton secundario';
-  enlace.href = regreso.href;
-  enlace.textContent = regreso.textContent;
-  contenedor.append(mensaje, enlace);
+  contenedor.append(mensaje);
 }
 async function cargarCaso() {
   document.getElementById('panelEvaluaciones').hidden = false;
@@ -340,7 +335,7 @@ async function cargarHistoria(){
      return Profesionales.edad({edad:v,unidadEdad:unidad});
    };
    const cambios=Object.entries(d.cambios||{}).map(([campo,v])=>`<article class="pro-cambio"><h4>${limpiarHtml(CAMPOS_NINO[campo]||({evaluacion:'Evaluación',observaciones:'Observaciones',recomendaciones:'Recomendaciones',hallazgosProfesionales:'Valoración profesional',diagnosticoProfesional:'Diagnóstico',areasObservadas:'Áreas evaluadas',sinDiagnostico:'Sin diagnóstico',contextoEvaluacion:'Contexto de la evaluación'})[campo]||'Dato del expediente')}</h4><div class="pro-cambio-valores"><span><strong>Antes</strong><br>${limpiarHtml(campo==='edad'?edadHistorica(v.anterior,true):valor(v.anterior))}</span><span class="pro-cambio-flecha" aria-hidden="true">→</span><span><strong>Después</strong><br>${limpiarHtml(campo==='edad'?edadHistorica(v.nuevo,false):valor(v.nuevo))}</span></div></article>`).join('');
-   const contextoDecision=d.familia?`<p><strong>Familia propuesta:</strong> ${limpiarHtml(d.familia)} · <strong>Resultado registrado:</strong> ${limpiarHtml(d.puntaje)} de 100 · <strong>Versión de criterios:</strong> ${limpiarHtml(d.versionPesos)}</p>`:'';
+   const contextoDecision=d.familia?`<p><strong>Familia propuesta:</strong> ${limpiarHtml(d.familia)} · <strong>Resultado registrado:</strong> ${d.sinCalculo?'Solicitud de reevaluación sin cálculo':Sesion.puntajeHistorico(d.puntaje,d.maximoAplicable)} · <strong>Versión de criterios:</strong> ${limpiarHtml(d.versionPesos)}</p>`:'';
    const asignacion=(d.trabajadorSocial?`<p><strong>Trabajo social asignado:</strong> ${limpiarHtml(d.trabajadorSocial)}</p>`:'')+(d.psicologo?`<p><strong>Psicología asignada:</strong> ${limpiarHtml(d.psicologo)}</p>`:'');
    const contenido=contextoDecision+asignacion+(d.justificacion?`<p>${limpiarHtml(d.justificacion)}</p>`:'')+(campos?`<p>Campos modificados: ${campos}.</p>`:'')+cambios+(d.detalleParcial?'<p>No se conservó el detalle ampliado de todos los campos; la información actual está disponible en el expediente.</p>':'');
    const responsable=e.rol==='SISTEMA'?'Sistema':e.actor||'Responsable no registrado';

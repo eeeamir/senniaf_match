@@ -28,3 +28,72 @@ body.acceso-publico { display: block; padding: 0; }
 .acceso-publico .marca { padding-top: 24px; }
 .publico-regreso .inicio-icono { width: 20px; height: 20px; }
 @media(max-width:640px) { .acceso-publico .marca { padding-top: 8px; } }
+
+.inicio-publico #conocer-sistema {
+  background: #f5f8fd;
+  padding-block: clamp(24px, 4vw, 52px) clamp(36px, 5vw, 64px);
+}
+#conocer-sistema .publico-regreso { margin-bottom: 16px; }
+#conocer-sistema .conocer-intro { margin-bottom: 36px; }
+#conocer-sistema .conocer-intro h1 { max-width: none; }
+#conocer-sistema .inicio-etiqueta { margin-bottom: 10px; }
+#conocer-sistema .conocer-perfiles-cabecera { margin-bottom: 22px; }
+#conocer-sistema .conocer-perfiles-cabecera h2 {
+  max-width: none;
+  font-size: clamp(22px, 2.3vw, 29px);
+}
+#conocer-sistema .conocer-perfiles-cabecera p,
+#conocer-sistema .conocer-mensaje p { margin: 8px 0 0; color: #47627e; }
+#conocer-sistema .conocer-rol {
+  --perfil-tinta: #1555a5;
+  --perfil-fondo: #eaf2ff;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  row-gap: 14px;
+}
+#conocer-sistema .conocer-rol-social { --perfil-tinta: #14664f; --perfil-fondo: #e4f4ed; }
+#conocer-sistema .conocer-rol-psicologia { --perfil-tinta: #654293; --perfil-fondo: #f0eaf9; }
+#conocer-sistema .conocer-rol-familias { --perfil-tinta: #8a471d; --perfil-fondo: #fff0e3; }
+#conocer-sistema .conocer-rol-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+#conocer-sistema .inicio-rol-icono { flex: none; margin-bottom: 0; }
+#conocer-sistema .conocer-rol .inicio-rol-icono { color: var(--perfil-tinta); background: var(--perfil-fondo); }
+#conocer-sistema .conocer-rol h3 { margin: 0; color: var(--perfil-tinta); font-size: clamp(17px, 1.8vw, 21px); }
+#conocer-sistema .conocer-rol p { max-width: 54ch; }
+#conocer-sistema .conocer-funciones {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 15px 0 0;
+  border-top: 1px solid #e0e8f4;
+  font-size: 15px;
+  line-height: 1.5;
+}
+#conocer-sistema .conocer-funciones li { display: flex; align-items: flex-start; gap: 10px; }
+#conocer-sistema .conocer-funciones .inicio-icono { width: 19px; height: 19px; margin-top: 2px; color: var(--perfil-tinta); }
+#conocer-sistema .conocer-mensaje {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 26px;
+  padding: clamp(16px, 2.5vw, 24px);
+  background: #eaf2ff;
+  border: 1px solid #d4e4fb;
+  border-radius: 20px;
+}
+#conocer-sistema .conocer-mensaje h2 { max-width: none; font-size: clamp(18px, 2vw, 22px); }
+#conocer-sistema .conocer-mensaje .inicio-rol-icono { color: #1555a5; background: #fff; }
+#conocer-sistema a:focus-visible { outline: 3px solid #0054cc; outline-offset: 3px; }
+@media (max-width: 680px) {
+  #conocer-sistema .conocer-intro { margin-bottom: 26px; }
+  #conocer-sistema .inicio-roles { grid-template-columns: minmax(0, 1fr); }
+  #conocer-sistema .conocer-rol { grid-row: auto; grid-template-rows: auto auto auto; }
+  #conocer-sistema .conocer-mensaje { gap: 12px; }
+}

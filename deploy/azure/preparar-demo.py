@@ -74,7 +74,7 @@ def cuenta(identificador, rol, hash_clave, solo_si_falta_rol=False):
     """
 
 
-def infantil(escenario, letra):
+def infantil(escenario, letra, *, evaluacion_personalizada=None):
     d = dict(escenario)
     # Compatibilidad con el JAR vigente: las categorías nuevas quedan descritas con OTRA/OTRO.
     # No se despliega código ni se introducen enums desconocidos para ese JAR.
@@ -99,6 +99,10 @@ def infantil(escenario, letra):
               'condicionesSaludDetalle': 'condiciones_salud_detalle', 'necesidadesApoyo': 'necesidades_apoyo',
               'tieneHermanos': 'tiene_hermanos', 'cantidadHermanos': 'cantidad_hermanos',
               'hermanosDetalle': 'hermanos_detalle', 'contextoCultural': 'contexto_cultural'}
+    if evaluacion_personalizada is not None:
+        campos.update({'unidadEdad': 'unidad_edad', 'idiomaComunicacion': 'idioma_comunicacion',
+                       'costumbresTradiciones': 'costumbres_tradiciones', 'vinculosCulturales': 'vinculos_culturales',
+                       'opinionCultural': 'opinion_cultural', 'recomendacionesCulturales': 'recomendaciones_culturales'})
     referencia = 'DEMO-FUNCIONAL-' + letra
     nombres = ','.join(campos.values())
     valores = ','.join(sql(d[k]) for k in campos)
@@ -114,6 +118,12 @@ def infantil(escenario, letra):
     evaluacion = f"Escenario simulado de {d['edad']} años. {etapa} {d['personalidadDetalle']}"
     observaciones = f"Información descriptiva del expediente: {d['habilidadesDetalle']} Intereses: {d['gustosDetalle']} {d['hermanosDetalle']}"
     valoracion = 'La valoración se limita al escenario académico y a los apoyos documentados. No se establece diagnóstico clínico.'
+    recomendaciones = d['necesidadesApoyo']
+    if evaluacion_personalizada is not None:
+        evaluacion = evaluacion_personalizada['evaluacion']
+        observaciones = evaluacion_personalizada['observaciones']
+        valoracion = evaluacion_personalizada['hallazgos']
+        recomendaciones = evaluacion_personalizada['recomendaciones']
     contexto = json.dumps(dict(formato=1, metodos=['REVISION_ANTECEDENTES'], apoyos=['EMOCIONAL', 'RUTINAS'],
                               detalleAcompanamiento=d['necesidadesApoyo']), ensure_ascii=False)
     return f"""DO $infantil$ DECLARE perfil bigint; ts text; ps text; codigo text;
@@ -132,7 +142,7 @@ def infantil(escenario, letra):
         {listas}
         INSERT INTO evaluaciones_psicologicas(perfil_id,profesional,fecha,numero_version,evaluacion,observaciones,recomendaciones,
           sin_diagnostico,areas_observadas,hallazgos_profesionales,contexto_evaluacion)
-        VALUES(perfil,ps,localtimestamp,1,{sql(evaluacion)},{sql(observaciones)},{sql(d['necesidadesApoyo'])},TRUE,
+        VALUES(perfil,ps,localtimestamp,1,{sql(evaluacion)},{sql(observaciones)},{sql(recomendaciones)},TRUE,
           '["ADAPTACION_EMOCIONAL","ACOMPANAMIENTO"]',{sql(valoracion)},{sql(contexto)});
         INSERT INTO auditoria_casos(codigo_caso,actor,accion,descripcion,fecha)
         VALUES(codigo,'CONFIGURACION_FICTICIA','VINCULACION_INSTITUCIONAL_FICTICIA',
@@ -141,13 +151,17 @@ def infantil(escenario, letra):
     END $infantil$;"""
 
 
-def familiar(escenario, usuario):
+def familiar(escenario, usuario, *, incluir_apoyos_culturales=False):
     campos = {'tipoFamilia': 'tipo_familia', 'notaEstructuraHogar': 'nota_estructura_hogar',
               'notaRedApoyo': 'nota_red_apoyo', 'provincia': 'provincia', 'disponibilidadViaje': 'disponibilidad_viaje',
               'notaDistancia': 'nota_distancia', 'edadMinimaAceptada': 'edad_minima_aceptada',
               'edadMaximaAceptada': 'edad_maxima_aceptada', 'notaRangoEdad': 'nota_rango_edad',
               'disposicionHermanos': 'disposicion_hermanos', 'notaHermanos': 'nota_hermanos',
               'notaCondicionesSalud': 'nota_condiciones_salud'}
+    if incluir_apoyos_culturales:
+        campos.update({'apoyoIdiomas': 'apoyo_idiomas', 'respetoTradiciones': 'respeto_tradiciones',
+                       'recursosComunitarios': 'recursos_comunitarios', 'respetoPreferencias': 'respeto_preferencias',
+                       'compromisoCultural': 'compromiso_cultural'})
     nombres = ','.join(campos.values())
     valores = ','.join(sql(escenario[k]) for k in campos)
     listas = '\n'.join(f'INSERT INTO {tabla}(perfil_id,{col}) VALUES (perfil,{sql(v)});'

@@ -77,7 +77,25 @@ public class HistorialCasoService {
         for(var d:decisiones.findByCodigoNinoOrderByFechaAsc(codigo)) {
             var v=evento("decision:"+d.getId(),"DECISION_"+d.getDecision(),d.getFuncionario(),"COMITE",d.getFecha());
             v.put("descripcion","Se registró una decisión sobre una propuesta de vinculación.");
-            v.put("detalles",Map.of("justificacion",d.getMotivo(),"familia",d.getCodigoFamilia(),"puntaje",d.getPuntaje(),"versionPesos",d.getVersionPesos()));lista.add(v);
+            var detalles = new LinkedHashMap<String, Object>();
+            detalles.put("justificacion", d.getMotivo());
+            detalles.put("familia", d.getCodigoFamilia());
+            detalles.put("versionPesos", d.getVersionPesos());
+            com.fasterxml.jackson.databind.JsonNode contexto = null;
+            try {
+                if (d.getContextoScoring() != null) contexto = json.readTree(d.getContextoScoring());
+            } catch (com.fasterxml.jackson.core.JsonProcessingException error) {
+                // Un fundamento histórico ilegible no impide consultar la actuación.
+            }
+            boolean sinCalculo = "REEVALUACION".equals(d.getDecision()) && contexto != null
+                    && contexto.path("sinCalculo").asBoolean(false);
+            detalles.put("sinCalculo", sinCalculo);
+            if (!sinCalculo) {
+                detalles.put("puntaje", d.getPuntaje());
+                detalles.put("maximoAplicable", ScoringService.maximoHistorico(contexto));
+            }
+            v.put("detalles", detalles);
+            lista.add(v);
         }
         for(var evento:lista){
             boolean psicologico=Set.of("EVALUACION_PSICOLOGICA","CORRECCION_PSICOLOGICA").contains(evento.get("accion"));

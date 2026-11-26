@@ -280,6 +280,44 @@ const Vinculaciones = {
       .map((e) => ({ ...e, descripcion: [v.codigo, e.detalle].filter(Boolean).join(' · ') }));
     return { estado, mensaje, accion, etapas, eventos };
   },
+  fechaCivil(valor) {
+    if (!valor) return 'Fecha no registrada';
+    const [anio, mes, dia] = valor.split('-');
+    return `${dia}/${mes}/${anio}`;
+  },
+  dias(cantidad) {
+    return cantidad == null ? 'Duración no disponible' : cantidad + (cantidad === 1 ? ' día' : ' días');
+  },
+  tiempoConvivencia(tiempos) {
+    if (!tiempos?.fechaInicio && !tiempos?.convivenciaInterrumpida) return 'Sin inicio efectivo registrado';
+    return this.dias(tiempos.convivencia);
+  },
+  tiemposEtapa(v, indice, familiar = false) {
+    const t = v.tiempos;
+    if (!t) return '';
+    const a = v.autorizacionPreadoptiva;
+    const texto = [];
+    if (familiar && indice === 0 && v.fechaCreacion) texto.push(Profesionales.fecha(v.fechaCreacion));
+    if (indice === 1 && (v.fechaRespuesta || v.estado === 'PENDIENTE_RESPUESTA')) {
+      if (familiar && v.fechaRespuesta) texto.push(Profesionales.fecha(v.fechaRespuesta));
+      texto.push(this.dias(t.respuesta) + (t.respuesta == null ? '' : ' desde la propuesta'));
+    }
+    if (indice === 3 && a?.fechaEmision) {
+      texto.push('Fecha de emisión · ' + this.fechaCivil(a.fechaEmision));
+      if (v.respuestaFamiliar === 'ACEPTADA') texto.push(this.dias(t.autorizacion) + (t.autorizacion == null ? '' : ' desde la aceptación familiar'));
+    }
+    if (indice === 4 && (t.fechaInicio || t.convivenciaInterrumpida)) {
+      if (t.fechaInicio) {
+        texto.push('Inicio efectivo · ' + this.fechaCivil(t.fechaInicio));
+        if (a?.fechaEmision) texto.push(this.dias(t.inicio) + (t.inicio == null ? '' : ' desde la emisión de la autorización'));
+      }
+      const fin = t.convivenciaInterrumpida ? ' hasta la interrupción' : t.convivenciaFinalizada ? ' hasta el cierre' : ' transcurridos';
+      const convivencia = t.convivencia == null ? 'Duración de convivencia no disponible' : this.dias(t.convivencia) + ' de convivencia' + fin;
+      texto.push(convivencia);
+    }
+    const etiqueta = familiar ? 'small' : 'p';
+    return texto.map(linea => `<${etiqueta} class="vinculacion-tiempo">${limpiarHtml(linea)}</${etiqueta}>`).join('');
+  },
   progresoFamiliar(v) {
     const progreso = this.obtenerProgreso(v);
     if (!progreso) return '';
@@ -289,6 +327,10 @@ const Vinculaciones = {
           <span class="vinculacion-emblema">${Profesionales.icono('solicitudes')}</span>
           <div><h3>${limpiarHtml(progreso.estado)}</h3><p>${limpiarHtml(progreso.mensaje)}</p></div>
         </header>
+        ${v.tiempos ? `<p class="vinculacion-tiempo">Tiempo de vinculación · ${this.dias(v.tiempos.vinculacion)}
+          ${v.tiempos.fechaInicio || v.tiempos.convivenciaInterrumpida ? ' · Convivencia · ' + this.tiempoConvivencia(v.tiempos) : ''}
+          ${v.tiempos.fechaInicio ? '<small>Referencia de convivencia · ' + v.tiempos.diasReferencia + ' días calendario</small>' : ''}
+        </p>` : ''}
         <ol class="familia-etapas">
           ${progreso.etapas
             .map(
@@ -296,11 +338,14 @@ const Vinculaciones = {
             <li class="${etapa.clase}" ${etapa.clase === 'actual' ? 'aria-current="step"' : ''}>
               <span class="familia-paso">${etapa.clase === 'interrumpido' ? Profesionales.icono('advertencia') : etapa.clase === 'completado' ? Profesionales.icono('comprobar') : indice + 1}</span>
               <strong>${etapa.titulo}</strong><small>${etapa.texto}</small>${etapa.detalle ? `<small class="familia-etapa-detalle">${limpiarHtml(etapa.detalle)}</small>` : ''}${etapa.fechaHecho ? `<small class="familia-etapa-detalle">Fecha de interrupción: ${limpiarHtml(Profesionales.fechaCivil(etapa.fechaHecho))}</small>` : ''}
+              ${this.tiemposEtapa(v, indice, true)}
             </li>
           `,
             )
             .join('')}
         </ol>
+        <button class="boton secundario chico" type="button" data-actualizar-familiar>Actualizar seguimiento</button>
+        <p data-estado-seguimiento-familiar role="status" hidden></p>
         <p class="familia-siguiente">${limpiarHtml(progreso.accion)}</p>
       </section>`;
   },
@@ -322,6 +367,19 @@ const Vinculaciones = {
     return ({PENDIENTE_RESPUESTA:'La propuesta fue enviada a la familia y estamos a la espera de su respuesta.',RESPUESTA_ACEPTADA:'La familia aceptó la propuesta. Consulta el estado y las actuaciones registradas.',RECHAZADA_POR_FAMILIA:'La familia rechazó la propuesta. Su respuesta quedó registrada.',RESPUESTA_RECHAZADA_PENDIENTE_CIERRE:'La respuesta negativa quedó registrada. El cierre institucional sigue pendiente.',CERRADA:'El cierre quedó registrado. La disponibilidad de cada expediente se revisa por separado.'})[v.estado]||'Consulta las actuaciones registradas en el detalle.';
   },
   enlazarRespuestas(sesion) {
+    document.querySelectorAll('[data-actualizar-familiar]').forEach(boton => boton.onclick = async () => {
+      if (document.querySelector('dialog[open]') || Profesionales.formulariosPendientes().length) return;
+      boton.disabled = true;
+      try { await Familia.mostrar(sesion, {actualizarSeguimiento: true}); }
+      catch (error) {
+        const estado = boton.parentElement.querySelector('[data-estado-seguimiento-familiar]');
+        estado.textContent = error.message;
+        estado.hidden = false;
+      } finally {
+        boton.disabled = false;
+        if (!document.querySelector('dialog[open]')) document.querySelector('[data-actualizar-familiar]')?.focus();
+      }
+    });
     document.querySelectorAll('[data-informacion-nino]').forEach(b=>b.onclick=()=>this.informacionFamiliar(b.dataset.informacionNino));
     document.querySelectorAll('[data-responder]').forEach(b => b.onclick = () => {
       if (document.querySelector('dialog[data-respuesta]')) return;
@@ -372,7 +430,7 @@ const Vinculaciones = {
           if (actual !== consulta) return;
           lista.innerHTML = datos.length ? datos.map(v => `<article class="tarjeta vinculacion-tarjeta">
             <header class="vinculacion-cabecera"><h2><span class="vinculacion-emblema">${Profesionales.icono('heart-handshake')}</span>${limpiarHtml(v.codigo)}</h2>${this.estado(v)}</header>
-            <dl class="vinculacion-resumen"><div><dt>${Profesionales.icono('carpeta')}Expediente infantil</dt><dd>${limpiarHtml(v.expedienteInfantil)}</dd></div><div><dt>${Profesionales.icono('personas')}Expediente familiar</dt><dd>${limpiarHtml(v.expedienteFamiliar)}</dd></div><div><dt>${Profesionales.icono('calendario')}Creación</dt><dd>${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</dd></div><div><dt>${Profesionales.icono('criterios')}Compatibilidad original</dt><dd><strong>${limpiarHtml(String(v.puntajeOriginal??'No disponible'))}${v.puntajeOriginal==null?'':' / 100'}</strong><small>Versión de criterios: ${limpiarHtml(String(v.versionOriginal??'no disponibles'))}</small></dd></div></dl>
+            <dl class="vinculacion-resumen"><div><dt>${Profesionales.icono('carpeta')}Expediente infantil</dt><dd>${limpiarHtml(v.expedienteInfantil)}</dd></div><div><dt>${Profesionales.icono('personas')}Expediente familiar</dt><dd>${limpiarHtml(v.expedienteFamiliar)}</dd></div><div><dt>${Profesionales.icono('calendario')}Creación</dt><dd>${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</dd></div><div><dt>${Profesionales.icono('criterios')}Compatibilidad original</dt><dd><strong>${v.puntajeOriginal==null?'No disponible':Sesion.puntajeHistorico(v.puntajeOriginal,v.maximoAplicableOriginal)}</strong><small>Versión de criterios: ${limpiarHtml(String(v.versionOriginal??'no disponibles'))}</small></dd></div></dl>
             <p class="vinculacion-siguiente">${limpiarHtml(this.descripcion(v))}</p>
             <footer class="vinculacion-acciones"><a class="boton secundario" href="vinculaciones.html?id=${v.id}">${Profesionales.icono('consulta')}Ver seguimiento</a></footer>
           </article>`).join('') : `<section class="tarjeta"><h2>${Profesionales.icono('informacion')}Sin vinculaciones</h2><p>No hay vinculaciones para esta consulta.</p></section>`;
@@ -391,28 +449,54 @@ const Vinculaciones = {
     const contexto = new URLSearchParams({origen: 'vinculacion', vinculacionOrigen: String(v.id)});
     const enlaceNino = `perfiles.html?caso=${encodeURIComponent(v.expedienteInfantil)}&${contexto}`;
     const enlaceFamilia = `perfiles.html?familia=${encodeURIComponent(v.expedienteFamiliar)}&${contexto}`;
+    const mostrarIncidencias = sesion.rol !== 'PSICOLOGO';
+    const pestañas = [['proceso','solicitudes','Proceso'], ['reportes','informe','Reportes profesionales'],
+      ...(mostrarIncidencias ? [['incidencias','advertencia','Incidencias']] : []), ['historial','reloj','Historial de cambios']];
     const panelActivo=c.querySelector('[data-seguimiento][aria-selected="true"]')?.dataset.seguimiento||'proceso';
     c.innerHTML = `<div class="vinculacion-detalle"><p class="pro-breadcrumb"><a href="vinculaciones.html">${Profesionales.icono('flecha')}Volver a Vinculaciones</a></p>`+
       Profesionales.encabezado(v.codigo+' · Detalle de vinculación','Seguimiento de la asignación familiar.','heart-handshake')+`
-      <section class="tarjeta vinculacion-general"><h2>${Profesionales.icono('carpeta')}Información general</h2><dl class="detalle-datos">
-        <div><dt>${Profesionales.icono('calendario')}Fecha de creación</dt><dd>${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</dd></div>
-      </dl></section>
+      <section class="tarjeta vinculacion-general">
+        <div class="pro-fila-titulo"><h2>${Profesionales.icono('carpeta')}Información general</h2>
+          <button class="boton secundario chico" type="button" data-actualizar-vinculacion>Actualizar</button></div>
+        <p data-estado-actualizacion role="status" hidden></p>
+        <dl class="detalle-datos vinculacion-tiempos">
+          <div><dt>Fecha de creación</dt><dd>${limpiarHtml(Profesionales.fecha(v.fechaCreacion))}</dd></div>
+          <div><dt>Tiempo transcurrido de vinculación</dt><dd class="vinculacion-tiempo-destacado">${this.dias(v.tiempos?.vinculacion)}</dd></div>
+          <div><dt>Inicio efectivo de convivencia</dt><dd>${v.tiempos?.fechaInicio ? this.fechaCivil(v.tiempos.fechaInicio) : 'Sin inicio efectivo registrado'}</dd></div>
+          <div><dt>Tiempo de convivencia</dt><dd class="vinculacion-tiempo-destacado convivencia">${this.tiempoConvivencia(v.tiempos)}</dd>
+          ${v.tiempos ? `<small>Periodo de referencia · ${v.tiempos.diasReferencia} días calendario</small>` : ''}</div>
+        </dl>
+      </section>
       <div class="vinculacion-accesos" aria-label="Accesos de la vinculación">
         ${this.acceso('carpeta','Expediente infantil',v.expedienteInfantil,enlaceNino,'Ver expediente','azul')}
         ${this.acceso('personas','Expediente familiar',v.expedienteFamiliar,sesion.rol==='COMITE'?enlaceFamilia:null,'Ver expediente','menta')}
       </div>
       ${this.compatibilidadOriginal(v.compatibilidadOriginal,d.fecha)}
-      <nav class="pro-pestanas vinculacion-pestanas" role="tablist" aria-label="Apartados de seguimiento">${[['proceso','solicitudes','Proceso'],['reportes','informe','Reportes profesionales'],['incidencias','advertencia','Incidencias'],['historial','reloj','Historial de cambios']].map(([k,i,n])=>`<button type="button" role="tab" id="tab-seguimiento-${k}" aria-controls="seguimiento-${k}" aria-selected="false" data-seguimiento="${k}">${Profesionales.icono(i)}${n}</button>`).join('')}</nav>
+      <nav class="pro-pestanas vinculacion-pestanas" role="tablist" aria-label="Apartados de seguimiento">${pestañas.map(([k,i,n])=>`<button type="button" role="tab" id="tab-seguimiento-${k}" aria-controls="seguimiento-${k}" aria-selected="false" data-seguimiento="${k}">${Profesionales.icono(i)}${n}</button>`).join('')}</nav>
       <div class="vinculacion-panel" role="tabpanel" id="seguimiento-proceso" aria-labelledby="tab-seguimiento-proceso" hidden>
         ${this.proceso(v)}${this.panelAutorizacion(v)}${this.panelCierre(v)}
       </div>
-      <div class="vinculacion-panel" role="tabpanel" id="seguimiento-reportes" aria-labelledby="tab-seguimiento-reportes" hidden>${this.reportes(enlaceNino)}</div>
-      <div class="vinculacion-panel" role="tabpanel" id="seguimiento-incidencias" aria-labelledby="tab-seguimiento-incidencias" hidden>
+      <div class="vinculacion-panel" role="tabpanel" id="seguimiento-reportes" aria-labelledby="tab-seguimiento-reportes" hidden><p role="status">Cargando seguimientos profesionales…</p></div>
+      ${mostrarIncidencias ? `<div class="vinculacion-panel" role="tabpanel" id="seguimiento-incidencias" aria-labelledby="tab-seguimiento-incidencias" hidden>
         ${this.panelInterrupcion(v)||`<section class="tarjeta vinculacion-vacio"><span class="vinculacion-emblema durazno">${Profesionales.icono('advertencia')}</span><h2>Sin incidencias registradas</h2><p>No hay una interrupción de convivencia registrada en esta vinculación.</p></section>`}
-      </div>
+      </div>` : ''}
       <div class="vinculacion-panel" role="tabpanel" id="seguimiento-historial" aria-labelledby="tab-seguimiento-historial" hidden>${this.historialConDecision(v)}</div></div>`;
     c.querySelector('.hero').insertAdjacentHTML('beforeend',`<div class="vinculacion-estado-hero">${this.estado(v)}</div>`);
-    this.enlazarPestanas(c,panelActivo);
+    this.enlazarPestanas(c, panelActivo, this.enlazarSeguimientos(c, v));
+    const actualizar = c.querySelector('[data-actualizar-vinculacion]');
+    actualizar.onclick = async () => {
+      if (document.querySelector('dialog[open]') || Profesionales.formulariosPendientes().length) return;
+      actualizar.disabled = true;
+      try {
+        const datos = await this.api(`/api/vinculaciones/${v.id}`);
+        if (!actualizar.isConnected || document.querySelector('dialog[open]') || Profesionales.formulariosPendientes().length) return;
+        await this.detalle(c, v.id, sesion, datos);
+        c.querySelector('[data-actualizar-vinculacion]')?.focus();
+      } catch (error) {
+        const estado = c.querySelector('[data-estado-actualizacion]');
+        if (estado) { estado.textContent = error.message; estado.hidden = false; }
+      } finally { actualizar.disabled = false; }
+    };
     c.querySelector('[data-autorizacion]')?.addEventListener('click',()=>this.registrarAutorizacion(c,v,sesion));
     c.querySelector('[data-cierre]')?.addEventListener('click',()=>this.registrarCierre(c,v,sesion));
     c.querySelectorAll('[data-disponibilidad]').forEach(b=>b.onclick=()=>Profesionales.justificar({
@@ -434,9 +518,17 @@ const Vinculaciones = {
   acceso(icono,titulo,valor,enlace,accion,color){
     return `<section class="tarjeta vinculacion-acceso ${color}"><span class="vinculacion-emblema">${Profesionales.icono(icono)}</span><div><h2>${titulo}</h2><p>${limpiarHtml(String(valor??'No disponible'))}</p>${enlace?`<a class="boton secundario chico" href="${enlace}">${accion}${Profesionales.icono('flecha')}</a>`:'<p class="ayuda">Consulta del expediente reservada al Comité.</p>'}</div></section>`;
   },
-  enlazarPestanas(c,activo){
+  enlazarPestanas(c,activo,alMostrar){
     const botones=[...c.querySelectorAll('[data-seguimiento]')];
-    const mostrar=k=>botones.forEach(b=>{const elegido=b.dataset.seguimiento===k;b.setAttribute('aria-selected',String(elegido));b.tabIndex=elegido?0:-1;c.querySelector('#seguimiento-'+b.dataset.seguimiento).hidden=!elegido;});
+    const mostrar = apartado => {
+      botones.forEach(boton => {
+        const activo = boton.dataset.seguimiento === apartado;
+        boton.setAttribute('aria-selected', String(activo));
+        boton.tabIndex = activo ? 0 : -1;
+        c.querySelector('#seguimiento-' + boton.dataset.seguimiento).hidden = !activo;
+      });
+      alMostrar(apartado);
+    };
     botones.forEach((b,i)=>{b.onclick=()=>mostrar(b.dataset.seguimiento);b.onkeydown=e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const j=e.key==='Home'?0:e.key==='End'?botones.length-1:(i+(e.key==='ArrowRight'?1:-1)+botones.length)%botones.length;botones[j].focus();mostrar(botones[j].dataset.seguimiento);};});
     mostrar(botones.some(b=>b.dataset.seguimiento===activo)?activo:'proceso');
   },
@@ -458,16 +550,16 @@ const Vinculaciones = {
               <span class="vinculacion-hito">
                 ${Profesionales.icono(etapa.clase === 'interrumpido' ? 'advertencia' : etapa.clase === 'completado' ? 'comprobar' : 'informacion')}
               </span>
-              <div><h3>${etapa.titulo}</h3>${etapa.detalle ? `<p>${limpiarHtml(etapa.detalle)}</p>` : ''}${etapa.fechaHecho ? `<p>Fecha de interrupción: ${limpiarHtml(Profesionales.fechaCivil(etapa.fechaHecho))}</p>` : ''}</div>
+              <div><h3>${etapa.titulo}</h3>${etapa.detalle ? `<p>${limpiarHtml(etapa.detalle)}</p>` : ''}${etapa.fechaHecho ? `<p>Fecha de interrupción: ${limpiarHtml(Profesionales.fechaCivil(etapa.fechaHecho))}</p>` : ''}${this.tiemposEtapa(v, indice)}</div>
               <div class="vinculacion-etapa-meta">
                 <span class="chip ${etapa.clase === 'interrumpido' ? 'vinculacion-negativa' : etapa.clase === 'completado' ? 'vinculacion-positiva' : 'retirado'}">${etapa.texto}</span>
-                ${fechas[indice] ? `<time>${limpiarHtml(Profesionales.fecha(fechas[indice]))}</time>` : ''}
+                ${fechas[indice] ? `<time>${indice === 3 || indice === 4 ? 'Registro · ' : ''}${limpiarHtml(Profesionales.fecha(fechas[indice]))}</time>` : ''}
               </div>
             </li>`).join('')}
         </ol>
       </section>`;
   },
-  historialConDecision(v) {
+  historialConDecision(v, seguimientos = [], visitas = []) {
     const decision = v.decisionComite;
     const eventos = [...(v.historial || [])];
     if (!eventos.some(evento => evento.accion === 'DECISION_' + decision.decision)) {
@@ -479,11 +571,79 @@ const Vinculaciones = {
         resumen: decision.motivo
       });
     }
-    eventos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+    if (seguimientos.length || visitas.length) {
+      eventos.push(...seguimientos.map(movimiento => SeguimientosVinculacion.evento(movimiento)),
+        ...visitas.map(movimiento => VisitasDomiciliarias.evento(movimiento)));
+      eventos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    } else eventos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
     return this.historial(eventos);
   },
-  reportes(enlaceNino){
-    return `<div class="vinculacion-reportes">${[['informe','Seguimiento social','Convivencia, adaptación familiar, condiciones de cuidado y necesidades de acompañamiento.','menta'],['psicologia','Seguimiento psicológico','Adaptación emocional, vínculo afectivo y acompañamiento psicológico.','lavanda']].map(([i,t,d,color])=>`<details class="detalle-grupo vinculacion-reporte ${color}"><summary><span class="vinculacion-emblema">${Profesionales.icono(i)}</span>${t}</summary><div class="vinculacion-reporte-contenido"><p>${d}</p><p>No hay informes periódicos de seguimiento registrados en este apartado.</p></div></details>`).join('')}</div>`;
+  enlazarSeguimientos(contenedor, vinculacion) {
+    const reportes = contenedor.querySelector('#seguimiento-reportes');
+    const historial = contenedor.querySelector('#seguimiento-historial');
+    let datos, visitas, cargando;
+    const cargar = (mensaje = '', rol, id) => {
+      if (cargando) return cargando;
+      const abiertos = new Set([...reportes.querySelectorAll('details[open][data-especialidad]')]
+        .map(detalle => detalle.dataset.especialidad));
+      if (rol) abiertos.add(rol);
+      const visitasAbiertas = reportes.querySelector('[data-panel-visitas]')?.open ?? true;
+      reportes.setAttribute('aria-busy', 'true');
+      historial.querySelector('[data-estado-reportes]')?.remove();
+      const ruta = `/api/vinculaciones/${vinculacion.id}`;
+      cargando = Promise.allSettled([this.api(ruta + '/seguimientos'), this.api(ruta + '/visitas-domiciliarias')])
+        .then(([resultado, resultadoVisitas]) => {
+          if (!reportes.isConnected) return;
+          datos = resultado.status === 'fulfilled' ? resultado.value : null;
+          visitas = resultadoVisitas.status === 'fulfilled' ? resultadoVisitas.value : null;
+          const errores = [resultado, resultadoVisitas].filter(item => item.status === 'rejected');
+          const aviso = errores.length ? `<div data-estado-reportes>
+            <p class="mensaje error" role="alert">No se pudo cargar toda la información profesional. ${limpiarHtml(errores[0].reason.message)}</p>
+            <button class="boton secundario chico" type="button" data-reintentar-reportes>Reintentar consulta</button></div>` : '';
+          reportes.innerHTML = (mensaje ? `<p class="mensaje exito" role="status">${limpiarHtml(mensaje)}</p>` : '')
+            + (visitas ? VisitasDomiciliarias.panel(visitas, visitasAbiertas) : '')
+            + (datos ? SeguimientosVinculacion.panel(datos, abiertos) : '') + aviso;
+          historial.innerHTML = aviso + this.historialConDecision(vinculacion, datos?.historial, visitas?.historial);
+          if (id && !reportes.hidden) reportes.querySelector(`[data-ver-seguimiento="${id}"]`)?.focus();
+          else if (mensaje && !reportes.hidden) reportes.querySelector('[data-panel-visitas] summary')?.focus();
+        }).catch(error => {
+          if (reportes.isConnected) {
+            reportes.innerHTML = `<p class="mensaje error" role="alert">${limpiarHtml(error.message)}</p>
+              <button class="boton secundario chico" type="button" data-reintentar-reportes>Reintentar consulta</button>`;
+          }
+        }).finally(() => {
+          reportes.removeAttribute('aria-busy');
+          cargando = null;
+        });
+      return cargando;
+    };
+    reportes.onclick = evento => {
+      const boton = evento.target.closest('button');
+      if (!boton) return;
+      if (boton.hasAttribute('data-reintentar-reportes')) { cargar(); return; }
+      if (cargando) return;
+      const visita = visitas?.registros.find(item => String(item.id) === boton.dataset.editarVisita);
+      if (visita?.puedeEditar || (visitas?.puedeRegistrar && boton.hasAttribute('data-registrar-visita'))) {
+        VisitasDomiciliarias.formulario(vinculacion, visitas, visita, boton, mensaje => cargar(mensaje));
+        return;
+      }
+      if (!datos) return;
+      const {verSeguimiento, editarSeguimiento} = boton.dataset;
+      const registro = datos.registros.find(item => String(item.id) === (verSeguimiento || editarSeguimiento));
+      if (verSeguimiento && registro) {
+        SeguimientosVinculacion.ver(vinculacion, registro, boton);
+      } else if ((editarSeguimiento && registro?.puedeEditar)
+          || (boton.hasAttribute('data-registrar-seguimiento') && datos.rolRegistro)) {
+        SeguimientosVinculacion.formulario(vinculacion, datos, registro, boton,
+          (rol, id, mensaje) => cargar(mensaje, rol, id));
+      }
+    };
+    historial.onclick = evento => {
+      if (evento.target.closest('[data-reintentar-reportes]')) cargar();
+    };
+    return apartado => {
+      if (!datos && !visitas && (apartado === 'reportes' || apartado === 'historial')) cargar();
+    };
   },
   lineaTiempo(eventos) {
     if (!eventos.length) return '<p>No hay movimientos adicionales registrados.</p>';
@@ -491,8 +651,11 @@ const Vinculaciones = {
       <span class="vinculacion-punto" aria-hidden="true"><i></i></span>
       <h3>${limpiarHtml(evento.titulo || Profesionales.etiqueta(evento.accion))}</h3>
       <span class="vinculacion-conector" aria-hidden="true"></span>
-      <div class="vinculacion-evento"><p class="vinculacion-evento-meta">${evento.responsable ? `${Profesionales.icono('persona')}${limpiarHtml(evento.responsable)} · ` : ''}<time>${limpiarHtml(Profesionales.fecha(evento.fecha))}${evento.zona ? ' · ' + limpiarHtml(evento.zona) : ''}</time></p>
-      ${evento.resumen || evento.detalle ? `<p>${limpiarHtml(evento.resumen || evento.detalle)}</p>` : ''}</div>
+      <div class="vinculacion-evento">${evento.seguimientoId || evento.visitaId
+        ? `<p class="vinculacion-evento-meta"><span><time>${limpiarHtml(SeguimientosVinculacion.fechaEvento(evento.fecha))} · ${limpiarHtml(Profesionales.momento(evento.fecha).hora)}</time> · ${limpiarHtml(evento.responsable)}</span></p>
+          ${evento.visitaId ? VisitasDomiciliarias.cambios(evento) : SeguimientosVinculacion.cambios(evento)}`
+        : `<p class="vinculacion-evento-meta">${evento.responsable ? `${Profesionales.icono('persona')}${limpiarHtml(evento.responsable)} · ` : ''}<time>${limpiarHtml(Profesionales.fecha(evento.fecha))}${evento.zona ? ' · ' + limpiarHtml(evento.zona) : ''}</time></p>
+          ${evento.resumen || evento.detalle ? `<p>${limpiarHtml(evento.resumen || evento.detalle)}</p>` : ''}`}</div>
     </li>`).join('')}</ol>`;
   },
   historial(eventos) {
@@ -501,7 +664,7 @@ const Vinculaciones = {
   compatibilidadOriginal(h,fecha){
     if(!h)return '<section id="compatibilidadRegistrada" class="tarjeta"><h2>Compatibilidad original</h2><p>No hay análisis histórico disponible.</p></section>';
     const c=h.contexto||{},factores={edad:'Rango de edad',hermanos:'Vínculos entre hermanos',salud:'Salud y desarrollo',apoyo:'Red de apoyo',logistica:'Logística'},dato=v=>v==null?'No disponible':limpiarHtml(String(v));
-    return `<section id="compatibilidadRegistrada" class="tarjeta vinculacion-historica"><div class="pro-fila-titulo"><div><h2>${Profesionales.icono('criterios')}Compatibilidad original</h2><p>Se conserva el análisis registrado al aceptar esta propuesta.</p><span class="chip">Versión de criterios: ${dato(h.version)}</span> <span class="chip retirado">Resultado histórico</span></div><div class="pro-puntaje">${dato(h.puntaje)}<small>/100</small></div></div>
+    return `<section id="compatibilidadRegistrada" class="tarjeta vinculacion-historica"><div class="pro-fila-titulo"><div><h2>${Profesionales.icono('criterios')}Compatibilidad original</h2><p>Se conserva el análisis registrado al aceptar esta propuesta.</p><span class="chip">Versión de criterios: ${dato(h.version)}</span> <span class="chip retirado">Resultado histórico</span></div><div class="pro-puntaje">${Sesion.puntajeHistorico(h.puntaje,h.maximoAplicable ?? c.maximoAplicable)}</div></div>
       ${fecha?`<p class="ayuda">${Profesionales.icono('calendario')}${limpiarHtml(Profesionales.fecha(fecha))}</p>`:''}<details class="pro-seccion"><summary>${Profesionales.icono('consulta')}Ver desglose de compatibilidad</summary><div class="tabla"><table><thead><tr><th>Factor</th><th>Peso original</th><th>Puntos</th><th>Fundamento registrado</th></tr></thead><tbody>${Object.entries(factores).map(([k,n])=>`<tr><td>${n}</td><td>${dato(c.pesos?.[k])}</td><td>${dato(c.factores?.[k]?.[0])}</td><td>${dato(c.factores?.[k]?.[1])}</td></tr>`).join('')}</tbody></table></div>${!h.contexto?'<p class="ayuda">Este antecedente no conserva el desglose. No se sustituye por un cálculo nuevo.</p>':''}<p class="ayuda">Máximo aplicable registrado: ${dato(c.maximoAplicable)} · Peso evaluado: ${dato(c.pesoEvaluado)}</p></details></section>`;
   },
   panelCierre(v) {

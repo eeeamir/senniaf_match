@@ -54,9 +54,10 @@ public class ScoringService {
                 .filter(this::familiaDisponible)
                 .sorted(Comparator.comparing(PerfilFamilia::getCodigoCaso)).toList();
         var capacidadesFamilias = analizarFamilias(disponibles);
+        Map<String, Map<String, Object>> antecedentes = new HashMap<>();
         return ninos.findAll().stream().filter(n -> n.isPerfilCompleto() && !n.isBajaLogica() && !n.isCierrePorAdopcion() && !ninoReservado(n.getCodigoCaso()))
                 .sorted(Comparator.comparing(PerfilNino::getCodigoCaso))
-                .map(n -> caso(n, disponibles, p, rechazadas, capacidadesFamilias)).toList();
+                .map(n -> caso(n, disponibles, p, rechazadas, capacidadesFamilias, false, antecedentes)).toList();
     }
 
     public Map<String, Object> caso(String codigo) {
@@ -74,18 +75,20 @@ public class ScoringService {
 
     private Map<String, Object> caso(PerfilNino n, List<PerfilFamilia> disponibles, PesosScoring p,
                                     Set<Par> rechazadas) {
-        return caso(n, disponibles, p, rechazadas, analizarFamilias(disponibles));
+        return caso(n, disponibles, p, rechazadas, analizarFamilias(disponibles),
+                ninoReservado(n.getCodigoCaso()), new HashMap<>());
     }
 
     private Map<String, Object> caso(PerfilNino n, List<PerfilFamilia> disponibles, PesosScoring p,
                                     Set<Par> rechazadas,
-                                    Map<PerfilFamilia, AnalizadorTextoCompatibilidad.Analisis> capacidadesFamilias) {
-        boolean aceptada = ninoReservado(n.getCodigoCaso());
+                                    Map<PerfilFamilia, AnalizadorTextoCompatibilidad.Analisis> capacidadesFamilias,
+                                    boolean aceptada, Map<String, Map<String, Object>> antecedentes) {
         var analisisNecesidades = analizarNecesidades(n);
         var candidatas = aceptada ? java.util.stream.Stream.<PerfilFamilia>empty() : disponibles.stream();
         List<Map<String, Object>> ranking = candidatas
                 .filter(f -> !rechazadas.contains(new Par(n.getCodigoCaso(), f.getCodigoCaso())))
-                .map(f -> candidato(n, f, p, analisisNecesidades, capacidadesFamilias.get(f)))
+                .map(f -> candidato(n, f, p, analisisNecesidades, capacidadesFamilias.get(f),
+                        antecedentes.computeIfAbsent(f.getCodigoCaso(), this::antecedenteInterrupcion)))
                 .sorted(Comparator.<Map<String, Object>>comparingInt(m -> (int) m.get("puntaje"))
                         .reversed().thenComparing(m -> (String) m.get("codigo"))).toList();
         Map<String, Object> result = new LinkedHashMap<>();
@@ -133,7 +136,7 @@ public class ScoringService {
      * Se informa el máximo aplicable para no confundir falta de evidencia con incompatibilidad.
      */
     public Map<String, Object> candidato(PerfilNino n, PerfilFamilia f, PesosScoring p) {
-        return candidato(n, f, p, analizarNecesidades(n), analizador.capacidades(f));
+        return candidato(n, f, p, analizarNecesidades(n), analizador.capacidades(f), antecedenteInterrupcion(f.getCodigoCaso()));
     }
 
     private AnalizadorTextoCompatibilidad.Analisis analizarNecesidades(PerfilNino n) {
@@ -144,7 +147,7 @@ public class ScoringService {
 
     private Map<String, Object> candidato(PerfilNino n, PerfilFamilia f, PesosScoring p,
                                          AnalizadorTextoCompatibilidad.Analisis necesidades,
-                                         AnalizadorTextoCompatibilidad.Analisis capacidades) {
+                                         AnalizadorTextoCompatibilidad.Analisis capacidades, Map<String, Object> antecedente) {
         Map<String, Object> factores = new LinkedHashMap<>();
         Map<String, String> estados = new LinkedHashMap<>();
         boolean edadConocida = n.getEdad() != null && f.getEdadMinimaAceptada() != null && f.getEdadMaximaAceptada() != null
@@ -154,15 +157,20 @@ public class ScoringService {
         int aniosCumplidos = n.getEdad() == null ? -1 : n.getUnidadEdad() == com.senniaf.match.model.enums.UnidadEdad.MESES ? 0 : n.getEdad();
         boolean edadDentro = edadConocida && aniosCumplidos >= f.getEdadMinimaAceptada() && aniosCumplidos <= f.getEdadMaximaAceptada();
         int edad = edadDentro ? p.getEdad() : 0;
+        String edadRegistrada = n.getEdad() == null ? "La edad infantil está sin registrar"
+                : "La edad registrada es de " + n.getEdad() + (n.getUnidadEdad() == UnidadEdad.MESES
+                        ? (n.getEdad() == 1 ? " mes" : " meses") : (n.getEdad() == 1 ? " año" : " años"));
+        String rango = f.getEdadMinimaAceptada() == null || f.getEdadMaximaAceptada() == null
+                ? "el rango familiar está incompleto" : "la familia declaró un rango de "
+                + f.getEdadMinimaAceptada() + " a " + f.getEdadMaximaAceptada() + " años cumplidos";
         factor(factores, estados, "edad", edad, edadConocida ? "EVALUADO" : "DESCONOCIDO",
-                !edadConocida ? "Información de edad o rango no disponible" : edadDentro ? "Edad dentro del rango declarado" : "Edad fuera del rango declarado");
+                edadRegistrada + " y " + rango + ". " + (!edadConocida ? "Se requiere confirmar los datos de edad o del rango."
+                        : edadDentro ? "La edad está dentro del rango y se acredita el peso del criterio."
+                        : "La edad está fuera del rango declarado y el criterio no acredita puntos."));
 
         EvaluacionCriterio evaluacionHermanos = evaluarHermanos(n, necesidades, capacidades, p.getHermanos());
-        boolean capacidadesConocidas = f.getCondicionesPuedeAcompanarHoy() != null
-                && f.getCondicionesConApoyo() != null;
-        EvaluacionCriterio evaluacionSalud = evaluarSalud(necesidades, capacidades,
-                capacidadesConocidas, p.getSalud());
-        EvaluacionCriterio evaluacionApoyo = evaluarApoyo(necesidades, capacidades, p.getApoyo());
+        EvaluacionCriterio evaluacionSalud = evaluarSalud(necesidades, capacidades, p.getSalud());
+        EvaluacionCriterio evaluacionApoyo = evaluarApoyo(f, necesidades, capacidades, p.getApoyo());
         EvaluacionCriterio evaluacionLogistica = evaluarLogistica(f, capacidades, p.getLogistica());
         registrarFactor(factores, estados, "hermanos", evaluacionHermanos);
         registrarFactor(factores, estados, "salud", evaluacionSalud);
@@ -174,17 +182,17 @@ public class ScoringService {
         int logistica = evaluacionLogistica.puntos();
 
         int total = edad + hermanos + salud + apoyo + logistica;
-        int noAplicables = valoresPesos(p).entrySet().stream().filter(e -> "NO_APLICA".equals(estados.get(e.getKey()))).mapToInt(Map.Entry::getValue).sum();
+        int maximoAplicable = valoresPesos(p).entrySet().stream().filter(e -> !"NO_APLICA".equals(estados.get(e.getKey()))).mapToInt(Map.Entry::getValue).sum();
         int pesoEvaluado = valoresPesos(p).entrySet().stream().filter(e -> "EVALUADO".equals(estados.get(e.getKey()))).mapToInt(Map.Entry::getValue).sum();
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("codigo", f.getCodigoCaso());
         result.put("provincia", f.getProvincia() == null ? "Sin indicar" : f.getProvincia().name());
         result.put("puntaje", total); result.put("f", factores); result.put("estadosFactores", estados);
-        result.put("maximoAplicable", 100 - noAplicables); result.put("pesoEvaluado", pesoEvaluado);
-        result.put("reglas", "EVIDENCIA_TEXTO_7");
+        result.put("maximoAplicable", maximoAplicable); result.put("pesoEvaluado", pesoEvaluado);
+        result.put("reglas", "EVIDENCIA_TEXTO_8");
         result.put("evidenciasCompatibilidad", Map.of("necesidades", necesidades, "capacidades", capacidades));
         result.put("reevaluaciones", f.getNumeroReevaluaciones());
-        result.put("antecedenteInterrupcion",antecedenteInterrupcion(f.getCodigoCaso()));
+        result.put("antecedenteInterrupcion", antecedente);
         result.put("alertaRevisionTecnica", f.getNumeroReevaluaciones() >= 3 || estados.containsValue("DESCONOCIDO"));
         return result;
     }
@@ -207,11 +215,11 @@ public class ScoringService {
 
     private EvaluacionCriterio evaluarSalud(AnalizadorTextoCompatibilidad.Analisis necesidades,
                                            AnalizadorTextoCompatibilidad.Analisis capacidades,
-                                           boolean capacidadesConocidas, int peso) {
+                                           int peso) {
         var pendientes = necesidades.necesidadesSalud();
         if (pendientes.isEmpty()) {
             return new EvaluacionCriterio(0, "NO_APLICA",
-                    "Sin necesidades específicas de salud o acompañamiento registradas; no aplica este criterio");
+                    "El expediente no registra necesidades específicas de salud o acompañamiento aplicables. Se excluye el peso de este criterio del máximo.");
         }
         double cubiertas = 0;
         boolean desconocido = false;
@@ -221,79 +229,107 @@ public class ScoringService {
             String cobertura;
             if (es(necesidad, AnalizadorTextoCompatibilidad.Declaracion.AMBIGUA)) {
                 desconocido = true;
-                cobertura = "necesidad por aclarar; sin puntos";
+                cobertura = "el expediente requiere aclarar esta necesidad antes de acreditar su cobertura";
             } else if (es(capacidad, AnalizadorTextoCompatibilidad.Declaracion.ACTUAL)) {
                 cubiertas += 1;
-                cobertura = "correspondencia actual";
+                cobertura = "la familia declaró disponibilidad actual para atender esta necesidad y se acredita su cobertura";
             } else if (es(capacidad, AnalizadorTextoCompatibilidad.Declaracion.CON_APOYO)) {
                 cubiertas += .5;
-                cobertura = "correspondencia con apoyo adicional";
+                cobertura = "la familia declaró disponibilidad con apoyo adicional y se acredita media cobertura";
             } else if (es(capacidad, AnalizadorTextoCompatibilidad.Declaracion.AMBIGUA)) {
                 desconocido = true;
-                cobertura = "declaraciones contradictorias o ambiguas; sin puntos";
+                cobertura = "la declaración familiar es ambigua o contradictoria y requiere aclaración";
             } else if (es(capacidad, AnalizadorTextoCompatibilidad.Declaracion.NEGATIVA)) {
-                cobertura = "incapacidad expresamente declarada";
+                cobertura = "la familia declaró que no puede atender esta necesidad y no se acredita su cobertura";
             } else {
-                cobertura = "sin capacidad correspondiente registrada";
-                if (!capacidadesConocidas || capacidad != null
-                        || capacidades.sinCorrespondencia().stream()
-                            .anyMatch(e -> e.campo().equals("notaCondicionesSalud"))) desconocido = true;
+                cobertura = "la familia no declaró disponibilidad específica; se requiere aclaración";
+                desconocido = true;
             }
-            razones.add(necesidad.nombre() + ": " + cobertura);
+            razones.add("Para " + necesidad.nombre().toLowerCase(Locale.ROOT) + ", " + cobertura);
         }
         int puntos = (int) Math.round(peso * cubiertas / pendientes.size());
         return new EvaluacionCriterio(puntos, desconocido ? "DESCONOCIDO" : "EVALUADO",
-                String.join(". ", razones));
+                String.join(". ", razones) + ". Se acreditan " + puntos + " de " + peso + " puntos.");
     }
 
     private EvaluacionCriterio evaluarHermanos(PerfilNino n,
                                                AnalizadorTextoCompatibilidad.Analisis necesidades,
                                                AnalizadorTextoCompatibilidad.Analisis capacidades,
                                                int peso) {
-        if (n.getTieneHermanos() == SiNo.NO
-                && (n.getCantidadHermanos() == null || n.getCantidadHermanos() == 0)) {
-            return new EvaluacionCriterio(0, "NO_APLICA", "Ausencia de hermanos confirmada; no aplica");
+        var presencia = necesidades.obtener("PRESENCIA_HERMANOS");
+        boolean ausenciaConfirmada = n.getTieneHermanos() == SiNo.NO
+                && (n.getCantidadHermanos() == null || n.getCantidadHermanos() == 0);
+        if (es(presencia, AnalizadorTextoCompatibilidad.Declaracion.AMBIGUA)
+                || ausenciaConfirmada && es(presencia, AnalizadorTextoCompatibilidad.Declaracion.NECESIDAD)
+                || n.getTieneHermanos() == SiNo.SI && es(presencia, AnalizadorTextoCompatibilidad.Declaracion.NEGATIVA)) {
+            return new EvaluacionCriterio(0, "DESCONOCIDO",
+                    "La ficha y el detalle requieren una aclaración sobre la presencia de hermanos. El peso se mantiene en el máximo.");
         }
-        if (n.getTieneHermanos() != SiNo.SI || n.getCantidadHermanos() == null
-                || n.getCantidadHermanos() <= 0) {
-            return new EvaluacionCriterio(0, "DESCONOCIDO", "Información de hermanos sin confirmar");
+        if (ausenciaConfirmada) {
+            return new EvaluacionCriterio(0, "NO_APLICA",
+                    "La ausencia de hermanos está confirmada. Se excluye el peso de este criterio del máximo.");
+        }
+        if (n.getTieneHermanos() != SiNo.SI || n.getCantidadHermanos() == null || n.getCantidadHermanos() <= 0) {
+            return new EvaluacionCriterio(0, "DESCONOCIDO", "Se requiere confirmar si el niño tiene hermanos y cuántos son.");
         }
         var disposicion = capacidades.obtener("HERMANOS");
         int puntos = 0;
         String estado = "EVALUADO";
-        String razon = "No se declara disposición para acompañar hermanos";
+        String razon;
         if (es(disposicion, AnalizadorTextoCompatibilidad.Declaracion.ACTUAL)) {
             puntos = peso;
-            razon = "Disposición declarada para acompañar hermanos";
+            razon = "La familia declaró disposición para recibir hermanos conjuntamente.";
         } else if (es(disposicion, AnalizadorTextoCompatibilidad.Declaracion.CON_APOYO)) {
             puntos = Math.round(peso * .5f);
-            razon = "Disposición con dudas o apoyo condicionado";
-        } else if (!es(disposicion, AnalizadorTextoCompatibilidad.Declaracion.NEGATIVA)) {
-            estado = "DESCONOCIDO";
-            razon = "Disposición ambigua o sin información suficiente; sin puntos";
-        }
-        var vinculo = necesidades.obtener("HERMANOS");
-        if (es(vinculo, AnalizadorTextoCompatibilidad.Declaracion.NEGATIVA)) {
-            razon += ". El detalle no solicita acompañamiento conjunto; se valora solo la disposición registrada";
+            razon = "La familia declaró dudas, condiciones o límites para recibir hermanos conjuntamente.";
+        } else if (es(disposicion, AnalizadorTextoCompatibilidad.Declaracion.NEGATIVA)) {
+            razon = "La familia declaró que prefiere recibir a un solo niño o que no puede recibir hermanos conjuntamente.";
         } else {
-            razon += ". No se presume que todos los hermanos estén incluidos en una ubicación conjunta";
+            estado = "DESCONOCIDO";
+            razon = "Se requiere aclarar la disposición familiar para recibir hermanos conjuntamente.";
         }
-        return new EvaluacionCriterio(puntos, estado, razon);
+        var contacto = capacidades.obtener("CONTACTO_HERMANOS");
+        if (es(contacto, AnalizadorTextoCompatibilidad.Declaracion.ACTUAL)) {
+            razon += " La familia también declaró disposición para mantener el contacto entre hermanos.";
+        } else if (es(contacto, AnalizadorTextoCompatibilidad.Declaracion.NEGATIVA)) {
+            razon += " La familia declaró una negativa respecto al contacto entre hermanos.";
+        } else if (contacto != null && !es(contacto, AnalizadorTextoCompatibilidad.Declaracion.INSUFICIENTE)) {
+            razon += " La disposición para mantener el contacto entre hermanos requiere aclaración.";
+        }
+        var conjunta = necesidades.obtener("ACOGIDA_CONJUNTA");
+        if (es(conjunta, AnalizadorTextoCompatibilidad.Declaracion.NECESIDAD)) {
+            razon += " El expediente menciona la acogida conjunta.";
+        }
+        return new EvaluacionCriterio(puntos, estado, "Hermanos registrados: " + n.getCantidadHermanos()
+                + ". " + razon + " Se acreditan " + puntos + " de " + peso + " puntos.");
     }
 
-    private EvaluacionCriterio evaluarApoyo(AnalizadorTextoCompatibilidad.Analisis necesidades,
+    private EvaluacionCriterio evaluarApoyo(PerfilFamilia familia, AnalizadorTextoCompatibilidad.Analisis necesidades,
                                             AnalizadorTextoCompatibilidad.Analisis capacidades, int peso) {
         var red = capacidades.obtener("RED_APOYO");
         if (red == null || es(red, AnalizadorTextoCompatibilidad.Declaracion.AMBIGUA)
                 || es(red, AnalizadorTextoCompatibilidad.Declaracion.INSUFICIENTE)) {
-            return new EvaluacionCriterio(0, "DESCONOCIDO", "Red de apoyo sin información suficiente o contradictoria");
+            return new EvaluacionCriterio(0, "DESCONOCIDO", "Se requiere aclarar con qué personas o recursos de apoyo cuenta la familia.");
         }
         if (es(red, AnalizadorTextoCompatibilidad.Declaracion.NEGATIVA)) {
-            return new EvaluacionCriterio(0, "EVALUADO", "No se declara una red de apoyo disponible");
+            return new EvaluacionCriterio(0, "EVALUADO", "La familia declaró que actualmente no cuenta con una red de apoyo. El criterio no acredita puntos.");
         }
-        String razon = "Fuentes de apoyo declaradas; no se suman puntos por cantidad de personas";
-        if (es(red, AnalizadorTextoCompatibilidad.Declaracion.CON_APOYO)) {
-            razon += ". El apoyo descrito está sujeto a una condición explícita";
+        String fuentes = familia.getRedApoyo() == null ? "" : familia.getRedApoyo().stream()
+                .filter(Objects::nonNull).map(fuente -> switch (fuente) {
+                    case PAREJA -> "pareja";
+                    case FAMILIA_EXTENDIDA -> "familia extendida";
+                    case AMISTADES_O_COMUNIDAD -> "amistades o comunidad";
+                    case NINGUNA_POR_AHORA -> "";
+                }).filter(fuente -> !fuente.isEmpty()).collect(java.util.stream.Collectors.joining(", "));
+        String razon = fuentes.isEmpty() ? "La familia describió una red de apoyo en la entrevista."
+                : "La familia declaró apoyo de " + fuentes + ".";
+        if (red.evidencias().stream().anyMatch(e -> AnalizadorTextoCompatibilidad.apoyoContinuo(e.original()))) {
+            razon += " La nota menciona apoyo habitual o permanente.";
+        }
+        if (red.evidencias().stream().anyMatch(e -> AnalizadorTextoCompatibilidad.disponibilidadLimitada(e.original()))) {
+            razon += " La nota describe apoyo ocasional o con restricciones de disponibilidad.";
+        } else if (es(red, AnalizadorTextoCompatibilidad.Declaracion.CON_APOYO)) {
+            razon += " El apoyo descrito está sujeto a una condición.";
         }
         var cuidado = necesidades.obtener("CUIDADOS_DIARIOS");
         if (es(cuidado, AnalizadorTextoCompatibilidad.Declaracion.NECESIDAD)) {
@@ -306,7 +342,8 @@ public class ScoringService {
                 razon += ". Cuidados diarios: sin apoyo específico equivalente; se conserva la valoración general de la red";
             }
         }
-        return new EvaluacionCriterio(peso, "EVALUADO", razon);
+        return new EvaluacionCriterio(peso, "EVALUADO", razon + " Se acreditan " + peso
+                + " puntos por la red general declarada.");
     }
 
     private EvaluacionCriterio evaluarLogistica(PerfilFamilia f,
@@ -317,27 +354,42 @@ public class ScoringService {
         if (f.getDisponibilidadViaje() == DisponibilidadViaje.MEDIA) puntos = Math.round(peso * .6f);
         if (f.getDisponibilidadViaje() == DisponibilidadViaje.BAJA) puntos = Math.round(peso * .3f);
         String estado = f.getDisponibilidadViaje() == null ? "DESCONOCIDO" : "EVALUADO";
-        String razon = "Disponibilidad declarada para traslados o recepción de visitas";
+        String razon = f.getDisponibilidadViaje() == null ? "Falta confirmar la categoría de disponibilidad familiar."
+                : "La familia registró disponibilidad " + f.getDisponibilidadViaje().name().toLowerCase(Locale.ROOT)
+                + " para traslados o recepción de visitas.";
         var viaje = capacidades.obtener("VIAJE");
         var visitas = capacidades.obtener("VISITAS");
         boolean noViaja = es(viaje, AnalizadorTextoCompatibilidad.Declaracion.NEGATIVA);
         boolean noRecibe = es(visitas, AnalizadorTextoCompatibilidad.Declaracion.NEGATIVA);
-        boolean viaja = es(viaje, AnalizadorTextoCompatibilidad.Declaracion.ACTUAL);
-        boolean recibe = es(visitas, AnalizadorTextoCompatibilidad.Declaracion.ACTUAL);
+        boolean viaja = es(viaje, AnalizadorTextoCompatibilidad.Declaracion.ACTUAL)
+                || es(viaje, AnalizadorTextoCompatibilidad.Declaracion.CON_APOYO);
+        boolean recibe = es(visitas, AnalizadorTextoCompatibilidad.Declaracion.ACTUAL)
+                || es(visitas, AnalizadorTextoCompatibilidad.Declaracion.CON_APOYO);
+        if (noViaja && noRecibe) {
+            return new EvaluacionCriterio(0, "EVALUADO",
+                    "La familia declaró que no puede trasladarse ni recibir visitas. El criterio no acredita puntos.");
+        }
         if (es(viaje, AnalizadorTextoCompatibilidad.Declaracion.AMBIGUA)
                 || es(visitas, AnalizadorTextoCompatibilidad.Declaracion.AMBIGUA)
                 || noViaja && !recibe || noRecibe && !viaja) {
             return new EvaluacionCriterio(0, "DESCONOCIDO",
                     "La nota restringe o contradice la disponibilidad declarada; sin puntos hasta aclararla");
         }
-        if (noViaja && recibe) razon = "Disponibilidad limitada a recibir visitas; no se presume capacidad de traslado";
-        if (noRecibe && viaja) razon = "Disponibilidad limitada a traslados; no se presume recepción de visitas";
+        if (noViaja && recibe) razon += " La nota restringe la disponibilidad a recibir visitas.";
+        if (noRecibe && viaja) razon += " La nota restringe la disponibilidad a los traslados.";
         if (es(viaje, AnalizadorTextoCompatibilidad.Declaracion.CON_APOYO)
                 || es(visitas, AnalizadorTextoCompatibilidad.Declaracion.CON_APOYO)) {
-            razon += ". Existe una condición explícita; se conserva la categoría de disponibilidad registrada";
+            razon += " La nota describe condiciones de horario, transporte o disponibilidad.";
         }
-        if (f.getDisponibilidadViaje() == null) razon = "Sin categoría de disponibilidad registrada; no se infiere una frecuencia del texto";
-        return new EvaluacionCriterio(puntos, estado, razon);
+        return new EvaluacionCriterio(puntos, estado, razon + (f.getDisponibilidadViaje() == null ? ""
+                : " La categoría registrada acredita " + puntos + " de " + peso + " puntos."));
+    }
+
+    static Integer maximoHistorico(com.fasterxml.jackson.databind.JsonNode contexto) {
+        if (contexto == null) return null;
+        var maximo = contexto.path("maximoAplicable");
+        if (maximo.isInt() && maximo.intValue() >= 0) return maximo.intValue();
+        return null;
     }
 
     public List<Map<String, Object>> historial(String codigo) {
@@ -351,6 +403,7 @@ public class ScoringService {
             r.put("sinCalculo", sinCalculo);
             r.put("puntaje", sinCalculo ? null : d.getPuntaje()); r.put("versionPesos", d.getVersionPesos());
             r.put("contextoScoring", sinCalculo ? null : contextoGuardado);
+            r.put("maximoAplicable", sinCalculo ? null : maximoHistorico(json.valueToTree(contextoGuardado)));
             return r;
         }).toList();
     }

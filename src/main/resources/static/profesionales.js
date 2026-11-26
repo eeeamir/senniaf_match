@@ -114,9 +114,31 @@ const Profesionales = {
     d.innerHTML=`<h2 id="tituloConfirmacion">${limpiarHtml(titulo)}</h2><p>${limpiarHtml(texto)}</p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="button" class="boton" data-confirmar>Continuar</button></div>`;
     document.body.append(d);d.addEventListener('close',()=>d.remove(),{once:true});d.querySelector('[data-cancelar]').addEventListener('click',()=>d.close());d.querySelector('[data-confirmar]').addEventListener('click',()=>{d.close();accion();});d.showModal();
   },
-  sugerencias(campo,opciones){
-    const bloque=document.createElement('div');bloque.className='pro-sugerencias';bloque.setAttribute('aria-label','Sugerencias para redactar');
-    opciones.forEach(([titulo,texto])=>{const b=document.createElement('button');b.type='button';b.className='pro-sugerencia';b.textContent=titulo;b.onclick=()=>{campo.value=texto;campo.dispatchEvent(new Event('input',{bubbles:true}));campo.focus();};bloque.append(b);});campo.insertAdjacentElement('afterend',bloque);
+  sugerencias(campo, opciones, {anexar = false} = {}) {
+    const bloque = document.createElement('div');
+    bloque.className = 'pro-sugerencias';
+    bloque.setAttribute('aria-label', 'Sugerencias para redactar');
+    opciones.forEach(([titulo, texto]) => {
+      const boton = document.createElement('button');
+      boton.type = 'button';
+      boton.className = 'pro-sugerencia';
+      boton.textContent = titulo;
+      boton.onclick = () => {
+        if (anexar && campo.value.includes(texto)) { campo.focus(); return; }
+        const nuevo = anexar && campo.value.trim() ? campo.value + '\n' + texto : texto;
+        if (anexar && campo.maxLength >= 0 && nuevo.length > campo.maxLength) {
+          campo.setCustomValidity('La sugerencia no cabe en el espacio restante. Puedes acortar el texto o elegir otra.');
+          campo.reportValidity();
+          campo.setCustomValidity('');
+          return;
+        }
+        campo.value = nuevo;
+        campo.dispatchEvent(new Event('input', {bubbles: true}));
+        campo.focus();
+      };
+      bloque.append(boton);
+    });
+    campo.insertAdjacentElement('afterend', bloque);
   },
   mostrarAntecedenteCultural(valor, datos, campos) {
     const normalizar = (texto) =>

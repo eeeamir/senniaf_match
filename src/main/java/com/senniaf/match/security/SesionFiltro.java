@@ -18,6 +18,7 @@ import java.util.Set;
 /** La identidad proviene de PostgreSQL, nunca de cabeceras declaradas por el cliente. */
 @Component
 public class SesionFiltro extends OncePerRequestFilter {
+    public static final String USUARIO_AUTENTICADO = "com.senniaf.match.security.SesionFiltro.usuario";
     private final SesionAccesoService sesiones;
     public SesionFiltro(SesionAccesoService sesiones) { this.sesiones = sesiones; }
 
@@ -60,6 +61,7 @@ public class SesionFiltro extends OncePerRequestFilter {
                 return Collections.enumeration(names);
             }
         };
+        segura.setAttribute(USUARIO_AUTENTICADO, usuario);
         chain.doFilter(segura, res);
     }
 }

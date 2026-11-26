@@ -6,6 +6,7 @@ import java.util.Optional;
 
 public interface InterrupcionConvivenciaRepository extends JpaRepository<InterrupcionConvivencia,Long> {
     Optional<InterrupcionConvivencia> findByVinculacionId(Long id);
+    boolean existsByVinculacionId(Long id);
     java.util.List<InterrupcionConvivencia> findByVinculacionFamiliaCodigoCasoAndFechaRevisionIsNotNull(String codigo);
     boolean existsByVinculacionNinoCodigoCasoAndVinculacionFamiliaCodigoCaso(String nino,String familia);
     @org.springframework.data.jpa.repository.Query("select count(i)>0 from InterrupcionConvivencia i where i.vinculacion.nino.codigoCaso=:nino and i.vinculacion.familia.codigoCaso=:familia and (i.vinculacion.estado<>'CERRADA' or i.vinculacion.ninoLiberado=false or i.vinculacion.familiaLiberada=false)")

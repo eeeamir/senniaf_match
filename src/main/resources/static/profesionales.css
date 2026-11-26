@@ -341,3 +341,67 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
  .pro-analisis-cabecera{flex-wrap:wrap;gap:12px}
  .pro-analisis-cabecera>.boton{max-width:100%}
 }
+
+.vinculacion-general .vinculacion-tiempos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.vinculacion-tiempo-destacado { color: #1761b6; font-size: 1.25rem; }
+.vinculacion-tiempo-destacado.convivencia { color: #087d68; }
+.vinculacion-tiempo { display: block; color: #1761b6; margin-top: .35rem; }
+.vinculacion-reporte .seguimiento-meta { display: block; font-weight: normal; color: #53677d; }
+.seguimiento-tiempo, .visita-horario { margin-inline-start: auto; text-align: end; }
+.menta .seguimiento-tiempo { color: #087d68; }
+.lavanda .seguimiento-tiempo { color: #7352a3; }
+.visitas-domiciliarias { margin-bottom: 1rem; }
+.visitas-domiciliarias progress { display: block; width: 100%; height: .45rem; accent-color: #1761b6; }
+.visitas-domiciliarias.completadas progress { accent-color: #087d68; }
+.visitas-lista { list-style: none; margin: 0 0 1rem; padding: 0; }
+.visitas-lista li { display: flex; justify-content: space-between; align-items: start; gap: 1rem; padding: .85rem 0; border-bottom: 1px solid #dfe7ef; }
+.visitas-lista p { margin: .35rem 0 0; }
+.visita-horario strong, .visita-duracion output { color: #1761b6; }
+.visita-horario button { display: block; margin-inline-start: auto; }
+.visita-dialogo { position: fixed; }
+.visita-dialogo h2 { padding-inline-end: 2rem; }
+.visita-dialogo [data-cerrar-visita] { position: absolute; inset-block-start: 1rem; inset-inline-end: 1rem; }
+.visita-horas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.visita-duracion { display: flex; align-items: center; gap: .5rem; margin: 0; padding: .8rem; border-radius: 8px; background: #ebf3fe; }
+.visita-duracion output { margin-inline-start: auto; font-weight: 600; }
+@media (max-width: 480px) {
+  .vinculacion-general .vinculacion-tiempos, .visita-horas { grid-template-columns: 1fr; }
+}
+
+.vinculacion-tiempos > div, .visita-horas > *, .vinculacion-reporte-contenido,
+.vinculacion-reporte > summary > span:not(.vinculacion-emblema), .vinculacion-evento { min-width: 0; }
+.vinculacion-general .vinculacion-tiempos { gap: .85rem 1.2rem; }
+.visitas-lista li > div:first-child { min-width: 0; }
+.visitas-lista :is(p, strong), .vinculacion-evento .pro-cambio-valores > span { overflow-wrap: anywhere; }
+.visita-horario { flex: 0 0 auto; }
+.visitas-domiciliarias .vinculacion-reporte-contenido > .pro-fila-titulo { flex-wrap: wrap; gap: .6rem 1rem; }
+.visitas-domiciliarias .vinculacion-reporte-contenido > .pro-fila-titulo p { margin: 0; }
+.visita-dialogo .pro-interrupcion-form { gap: 1rem; }
+.visita-dialogo .pro-interrupcion-form > p.ayuda { margin: 0; }
+.visita-campo { display: grid; align-content: start; gap: .35rem; }
+.visita-campo input { min-width: 0; }
+.visita-dialogo .visita-error-campo { color: #9c222c; }
+.visita-dialogo input[aria-invalid=true] { border-color: #b6303b; }
+.visita-dialogo :focus-visible, .vinculacion-reporte > summary:focus-visible { outline: 2px solid #1761b6; outline-offset: 3px; }
+@media (max-width: 600px) {
+  .vinculacion-reporte > summary { flex-wrap: wrap; }
+  .vinculacion-reporte .seguimiento-tiempo { margin-inline-start: 0; }
+  .visitas-domiciliarias .vinculacion-reporte-contenido > .pro-fila-titulo .boton { width: 100%; }
+}
+
+.s8-acabado #seguimiento-reportes > .visitas-domiciliarias { margin-block-end: 1rem; }
+.s8-acabado #seguimiento-reportes .vinculacion-reportes { grid-template-columns: minmax(0, 1fr); gap: .85rem; }
+.s8-acabado #seguimiento-reportes .visitas-domiciliarias > summary,
+.s8-acabado #seguimiento-reportes .vinculacion-reportes > details > summary { min-height: auto; }
+.s8-acabado .vinculacion-reporte .visita-horario, .s8-acabado .vinculacion-reporte .seguimiento-tiempo { white-space: nowrap; }
+.s8-acabado .vinculacion-reporte .visita-horario { color: #1761b6; }
+.s8-acabado .vinculacion-reporte.completadas > summary .visita-horario { color: #087d68; }
+.s8-acabado .visita-dialogo p.ayuda { color: #4b627c; }
+.s8-acabado .visita-dialogo h2 { gap: .55rem; }
+@media (max-width: 480px) {
+  .s8-acabado .visita-dialogo h2 { font-size: 1.35rem; }
+  .s8-acabado .visita-dialogo .pro-acciones { display: grid; grid-template-columns: 1fr; }
+  .s8-acabado .visita-dialogo .pro-acciones .boton { width: 100%; }
+}
+.s8-acabado #seguimiento-reportes .vinculacion-reporte.menta > summary .vinculacion-emblema { color: #087d68; background: #e5f4ef; }
+.s8-acabado #seguimiento-reportes .vinculacion-reporte.lavanda > summary .vinculacion-emblema { color: #694798; background: #f0eaf8; }

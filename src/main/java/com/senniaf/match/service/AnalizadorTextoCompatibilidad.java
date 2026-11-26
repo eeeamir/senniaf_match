@@ -32,11 +32,28 @@ public final class AnalizadorTextoCompatibilidad {
     }
 
     private record Concepto(String id, String nombre, Dominio dominio, Pattern expresion) {}
+    private static final Pattern MARCAS_DIACRITICAS = Pattern.compile("\\p{M}+");
+    private static final Pattern ESPACIOS = Pattern.compile("\\s+");
     private static final Map<String, Concepto> VOCABULARIO = vocabulario();
+    private static final Map<Dominio, List<Concepto>> CONCEPTOS_POR_DOMINIO = conceptosPorDominio();
     private static final Set<String> ACOMPANAMIENTO_COTIDIANO = Set.of("RUTINA_ESTABLE",
             "ACOMPANAMIENTO_EMOCIONAL", "APOYO_ADAPTACION", "SUPERVISION_COTIDIANA",
             "SUPERVISION_PERMANENTE", "APOYO_EDUCATIVO_INDIVIDUALIZADO", "APOYO_EDUCATIVO_ESPECIALIZADO",
             "AYUDA_TAREAS", "SEGUIMIENTO_ESCOLAR", "REFUERZO_ESCOLAR");
+    private static final Pattern PRESENCIA_HERMANOS = Pattern.compile(
+            "\\b(?:(no|nunca)\\s+)?(?:tiene|tienen|hay|cuenta con) (?:\\d+ |un |una |dos |tres |cuatro |varios |ningun |ninguna )?herman[oa](?:s)?\\b");
+    private static final Pattern LIMITACION_DISPONIBILIDAD = Pattern.compile(
+            "\\b(?:solo (?:los |por la |en |hasta |despues de |puedo |podemos |para )|entre semana|"
+                    + "fines de semana|dias laborables|los (?:lunes|martes|miercoles|jueves|viernes|sabados|domingos)|de vez en cuando|ocasionalmente|a veces|"
+                    + "sujeto a|dependiendo de|siempre que|a condicion de|solo cuando|a menos que|salvo que|excepto)\\b");
+    private static final Pattern EXCEPCION_CONCEPTO = Pattern.compile(
+            "\\b(?:excepto|salvo|menos)\\s+(?:(?:el|la|los|las)\\s+)?$");
+    private static final Pattern MODALIDAD_LOGISTICA = Pattern.compile(
+            "\\b(?:sin (?:carro|auto|vehiculo|transporte)|en (?:bus|autobus|transporte publico)|"
+                    + "despues de las|a partir de las|por la (?:manana|tarde|noche))\\b");
+    private static final Pattern APOYO_CONTINUO = Pattern.compile(
+            "\\b(?:todos los dias|a diario|de forma permanente|de manera permanente)\\b");
+
     private static final Pattern NECESIDAD_EXPLICITA = Pattern.compile(
             "\\b(?:necesita|requiere|precisa|necesidad de|continuar|se recomienda(?:n)?)\\b");
     private static final Pattern RECOMENDACION_HIPOTETICA = Pattern.compile(
@@ -53,8 +70,8 @@ public final class AnalizadorTextoCompatibilidad {
             "\\b(?:realizar|dar|ofrecer|brindar)\\s+(?:la |el )?(?:terapias? psicologicas?|"
                     + "(?:atencion|tratamiento) psicologic[oa])\\b");
     private static final String ACCION_INFINITIVA = "(?:acompanar|atender|cuidar|apoyar|asistir|llevar|"
-            + "seguir|administrar|ayudar|recibir|acoger|criar|viajar|trasladar|desplazar|facilitar|ofrecer|mantener|proporcionar|realizar|"
-            + "brindar|dar|organizar|vigilar|supervisar|garantizar|ir|hacer(?:me|nos|se)? cargo de|"
+            + "seguir|administrar|preparar|ayudar|recibir|acoger|criar|viajar|trasladar|desplazar|facilitar|ofrecer|mantener|proporcionar|realizar|"
+            + "brindar|dar|organizar|vigilar|supervisar|garantizar|ir|hacer(?:me|nos|se)? cargo de|hacer|adoptar|"
             + "estar pendientes de|echar(?:le)? una mano con)(?:l[oa]s?|les?|me|nos)?";
     private static final Pattern CLAUSULAS = Pattern.compile(
             "\\b(?:pero|sin embargo|aunque)\\b|(?:,|\\by\\b)\\s*(?=(?:(?:ahora|actualmente)\\s+)?(?:no\\s+)?"
@@ -120,6 +137,14 @@ public final class AnalizadorTextoCompatibilidad {
             "\\b(?:(no|nunca|jamas|tampoco)\\s+)?(puede|pueden|podria|podrian)\\s+"
                     + "(?:acompanar|ayudar|cuidar|atender)(?:l[oa]s?|nos)?\\b");
 
+    static boolean disponibilidadLimitada(String texto) {
+        return LIMITACION_DISPONIBILIDAD.matcher(normalizar(texto)).find();
+    }
+
+    static boolean apoyoContinuo(String texto) {
+        return APOYO_CONTINUO.matcher(normalizar(texto)).find();
+    }
+
     public Analisis necesidades(PerfilNino n) {
         return necesidades(n, List.of());
     }
@@ -144,6 +169,7 @@ public final class AnalizadorTextoCompatibilidad {
                 EnumSet.of(Dominio.SALUD, Dominio.RED), true);
         analizarCampo(datos, "hermanosDetalle", n.getHermanosDetalle(),
                 EnumSet.of(Dominio.HERMANOS), true);
+        analizarPresenciaHermanos(datos, n.getHermanosDetalle());
         analizarRecomendaciones(datos, evaluaciones);
         comprobarAusenciaDeclarada(datos, n.getCondicionesSalud(), CondicionSalud.NINGUNA_CONOCIDA,
                 "condicionesSalud", EnumSet.of(Dominio.SALUD), false);
@@ -156,6 +182,24 @@ public final class AnalizadorTextoCompatibilidad {
         completarOtra(datos, n.getCondicionesSalud(), "condicionesSaludDetalle", "NECESIDAD_SIN_PRECISAR", false);
         completarOtra(datos, n.getAlergias(), "alergiasDetalle", "NECESIDAD_SIN_PRECISAR", true);
         return datos.resultado();
+    }
+
+    private void analizarPresenciaHermanos(Acumulador datos, String detalle) {
+        if (detalle == null) return;
+        for (String frase : detalle.split("(?<=[.!?;\n])")) {
+            String texto = normalizar(frase);
+            if (TERCERO.matcher(texto).find() || necesidadNoConfirmada(frase, texto)) continue;
+            var presencia = PRESENCIA_HERMANOS.matcher(texto);
+            while (presencia.find()) {
+                String afirmacion = presencia.group();
+                boolean ausencia = presencia.group(1) != null || afirmacion.contains(" ningun")
+                        || afirmacion.contains(" 0 ");
+                Declaracion tipo = DUDA.matcher(texto).find() ? Declaracion.AMBIGUA
+                        : ausencia ? Declaracion.NEGATIVA : Declaracion.NECESIDAD;
+                datos.agregar(VOCABULARIO.get("PRESENCIA_HERMANOS"),
+                        new Evidencia("hermanosDetalle", frase.strip(), tipo, Origen.TEXTO));
+            }
+        }
     }
 
     private void analizarRecomendaciones(Acumulador datos, List<EvaluacionPsicologica> evaluaciones) {
@@ -306,12 +350,17 @@ public final class AnalizadorTextoCompatibilidad {
             List<Concepto> anteriores = List.of();
             boolean antecedentePropio = false;
             boolean condicionPrevia = oracion.stripLeading().matches("(?i)^si\\b.*");
-            boolean condicionIdentificada = CONDICION.matcher(normalizar(oracion)).find()
-                    && !CONDICION_NEGADA.matcher(normalizar(oracion)).find();
+            String oracionNormalizada = normalizar(oracion);
+            boolean condicionIdentificada = CONDICION.matcher(oracionNormalizada).find()
+                    && !CONDICION_NEGADA.matcher(oracionNormalizada).find();
             for (String fragmento : CLAUSULAS.split(normalizarSeparadores(oracion))) {
                 String texto = normalizar(fragmento);
                 if (texto.isBlank()) continue;
-                List<Concepto> conceptos = conceptosEn(texto, dominios);
+                List<Concepto> conceptos = conceptosNormalizados(texto, dominios);
+                if (conceptos.stream().anyMatch(c -> c.id().equals("CONTACTO_HERMANOS"))
+                        && !VOCABULARIO.get("ACOGIDA_CONJUNTA").expresion().matcher(texto).find()) {
+                    conceptos = conceptos.stream().filter(c -> !c.id().equals("HERMANOS")).toList();
+                }
                 if (conceptos.isEmpty() && antecedentesValidos(texto, anteriores, antecedentePropio)) {
                     conceptos = anteriores;
                 }
@@ -323,8 +372,12 @@ public final class AnalizadorTextoCompatibilidad {
                     }
                 }
                 for (Concepto concepto : conceptos) {
-                    Declaracion tipo = necesidad && necesidadNoConfirmada(fragmento, texto)
-                            ? Declaracion.INSUFICIENTE : interpretar(texto, concepto, necesidad, tercero);
+                    boolean datoClinicoPendiente = necesidad && !tercero
+                            && (campo.equals("condicionesSaludDetalle") || campo.equals("alergiasDetalle"))
+                            && DUDA.matcher(texto).find();
+                    Declaracion tipo = datoClinicoPendiente ? Declaracion.AMBIGUA
+                            : necesidad && necesidadNoConfirmada(fragmento, texto) ? Declaracion.INSUFICIENTE
+                            : interpretar(texto, concepto, necesidad, tercero);
                     if (!necesidad && tipo == Declaracion.ACTUAL && condicionPrevia) {
                         tipo = condicionIdentificada ? Declaracion.CON_APOYO : Declaracion.AMBIGUA;
                     }
@@ -364,12 +417,21 @@ public final class AnalizadorTextoCompatibilidad {
     }
 
     private Declaracion interpretar(String texto, Concepto concepto, boolean necesidad, boolean tercero) {
+        if (tercero && concepto.id().equals("CONTACTO_HERMANOS")) {
+            // El complemento «con sus hermanos» identifica el vínculo, no al agente.
+            tercero = TERCERO.matcher(concepto.expresion().matcher(texto).replaceAll(" ")).find();
+        }
         if (tercero && concepto.dominio() != Dominio.RED) return Declaracion.INSUFICIENTE;
         if (necesidad && NECESIDAD_DESCARTADA.matcher(texto).find()) return Declaracion.NEGATIVA;
-        if (DUDA.matcher(texto).find()) return Declaracion.AMBIGUA;
+        if (necesidad && DUDA.matcher(texto).find()) return Declaracion.AMBIGUA;
         var mencion = concepto.expresion().matcher(texto);
         int posicion = mencion.find() ? mencion.start() : texto.length();
         String anterior = texto.substring(0, posicion);
+        if (EXCEPCION_CONCEPTO.matcher(anterior).find()
+                && !anterior.matches(".*\\b(?:no|nunca|jamas)\\b.*")
+                && (necesidad || CAPACIDAD.matcher(anterior).find())) {
+            return Declaracion.NEGATIVA;
+        }
         if (necesidad) {
             if (tercero || texto.matches(".*\\b(?:le gusta|disfruta|prefiere|le gustaria|quisiera)\\b.*")) {
                 return Declaracion.INSUFICIENTE;
@@ -385,6 +447,7 @@ public final class AnalizadorTextoCompatibilidad {
         }
         var declaracionRed = RED_DECLARADA.matcher(texto);
         if (concepto.dominio() == Dominio.RED && declaracionRed.find()) {
+            if (DUDA.matcher(texto).find()) return Declaracion.AMBIGUA;
             if (NEGACION_RED.matcher(texto).find()) return Declaracion.NEGATIVA;
             if (concepto.id().equals("CUIDADOS_DIARIOS")) {
                 var capacidadRed = CAPACIDAD_CUIDADOS_RED.matcher(texto);
@@ -393,12 +456,13 @@ public final class AnalizadorTextoCompatibilidad {
                     if (capacidadRed.group(2).startsWith("podri")) return Declaracion.AMBIGUA;
                 }
             }
-            return interpretarCondicion(texto, declaracionRed.end());
+            if (esExperienciaPasada(texto, declaracionRed.end())) return Declaracion.INSUFICIENTE;
+            return interpretarCondicion(texto, declaracionRed.end(), concepto);
         }
         if (tercero) return Declaracion.INSUFICIENTE;
         if (NEGACION_DIRECTA.matcher(anterior).find()) return Declaracion.NEGATIVA;
         var acciones = CAPACIDAD.matcher(texto).results().toList();
-        if (acciones.isEmpty()) return Declaracion.INSUFICIENTE;
+        if (acciones.isEmpty()) return DUDA.matcher(texto).find() ? Declaracion.AMBIGUA : Declaracion.INSUFICIENTE;
         var accion = acciones.get(0);
         for (var candidata : acciones) {
             if (candidata.start() <= posicion) accion = candidata;
@@ -423,7 +487,11 @@ public final class AnalizadorTextoCompatibilidad {
         }
         if (negada) return Declaracion.NEGATIVA;
         String ambito = texto.substring(inicioAmbito, finAmbito);
-        if (limitada || DISPONIBILIDAD_LIMITADA.matcher(ambito).find()) return Declaracion.AMBIGUA;
+        if (DUDA.matcher(ambito).find()) return Declaracion.AMBIGUA;
+        if (limitada || DISPONIBILIDAD_LIMITADA.matcher(ambito).find()) {
+            return concepto.dominio() == Dominio.LOGISTICA || concepto.dominio() == Dominio.RED
+                    || concepto.dominio() == Dominio.HERMANOS ? Declaracion.CON_APOYO : Declaracion.AMBIGUA;
+        }
         if (esExperienciaPasada(ambito, finAccion - inicioAmbito)) return Declaracion.INSUFICIENTE;
         if (concepto.id().equals("ACOMPANAMIENTO_PSICOLOGICO")
                 && PRESTACION_PSICOLOGICA.matcher(ambito).find()) return Declaracion.INSUFICIENTE;
@@ -442,6 +510,12 @@ public final class AnalizadorTextoCompatibilidad {
     private Declaracion interpretarCondicion(String texto, int finAccion, Concepto concepto) {
         if (CONDICION_NEGADA.matcher(texto).find()) return Declaracion.AMBIGUA;
         if (CONDICION.matcher(texto).find()) return Declaracion.CON_APOYO;
+        if (concepto != null && concepto.dominio() == Dominio.LOGISTICA
+                && MODALIDAD_LOGISTICA.matcher(texto).find()) return Declaracion.CON_APOYO;
+        if (concepto != null && (concepto.dominio() == Dominio.LOGISTICA || concepto.dominio() == Dominio.RED
+                || concepto.dominio() == Dominio.HERMANOS) && LIMITACION_DISPONIBILIDAD.matcher(texto).find()) {
+            return Declaracion.CON_APOYO;
+        }
         String posterior = texto.substring(finAccion);
         if (concepto != null) {
             var caso = CONDICION_DEL_CASO.matcher(posterior);
@@ -483,21 +557,34 @@ public final class AnalizadorTextoCompatibilidad {
 
     public static String normalizar(String texto) {
         if (texto == null) return "";
-        return Normalizer.normalize(texto, Normalizer.Form.NFD).replaceAll("\\p{M}+", "")
-                .toLowerCase(Locale.ROOT).replaceAll("\\s+", " ").strip();
+        String sinMarcas = MARCAS_DIACRITICAS.matcher(Normalizer.normalize(texto, Normalizer.Form.NFD))
+                .replaceAll("");
+        return ESPACIOS.matcher(sinMarcas.toLowerCase(Locale.ROOT)).replaceAll(" ").strip();
     }
 
     private static List<Concepto> conceptosEn(String texto, Set<Dominio> dominios) {
-        String normalizado = normalizar(texto);
-        return VOCABULARIO.values().stream().filter(c -> dominios.contains(c.dominio()))
+        return conceptosNormalizados(normalizar(texto), dominios);
+    }
+
+    private static List<Concepto> conceptosNormalizados(String normalizado, Set<Dominio> dominios) {
+        return dominios.stream().flatMap(dominio -> CONCEPTOS_POR_DOMINIO.get(dominio).stream())
                 .filter(c -> c.expresion().matcher(normalizado).find()).toList();
+    }
+
+    private static Map<Dominio, List<Concepto>> conceptosPorDominio() {
+        Map<Dominio, List<Concepto>> porDominio = new EnumMap<>(Dominio.class);
+        for (Dominio dominio : Dominio.values()) {
+            porDominio.put(dominio, VOCABULARIO.values().stream()
+                    .filter(concepto -> concepto.dominio() == dominio).toList());
+        }
+        return Collections.unmodifiableMap(porDominio);
     }
 
     private static Map<String, Concepto> vocabulario() {
         Map<String, Concepto> conceptos = new LinkedHashMap<>();
-        definir(conceptos, "ASMA", "Asma", Dominio.SALUD, "asma");
+        definir(conceptos, "ASMA", "Asma", Dominio.SALUD, "asma bronquial|asma");
         definir(conceptos, "DIABETES", "Diabetes", Dominio.SALUD, "diabetes");
-        definir(conceptos, "EPILEPSIA", "Epilepsia", Dominio.SALUD, "epilepsia");
+        definir(conceptos, "EPILEPSIA", "Epilepsia", Dominio.SALUD, "epilepsia|epilepcia");
         definir(conceptos, "TDAH", "TDAH", Dominio.SALUD,
                 "tdah|(?:trastorno por )?deficit de atencion e hiperactividad");
         definir(conceptos, "TEA", "TEA", Dominio.SALUD, "tea|(?:trastorno del )?espectro autista");
@@ -508,7 +595,7 @@ public final class AnalizadorTextoCompatibilidad {
                     Dominio.SALUD, "discapacidad(?:es)? (?:" + normalizar(tipo) + "|" + plural + ")");
         }
         definir(conceptos, "INTOLERANCIA_LACTOSA", "Intolerancia a la lactosa", Dominio.SALUD,
-                "intolerancia (?:a la |a )?lactosa|intolerantes? a la lactosa");
+                "intolerancia (?:a la |a )?lactosa|intolerantes? a la lactosa|intolerancia (?:a la |a )lactoza|dietas? sin lactosa|comidas? sin lactosa");
         definir(conceptos, "ALERGIA_ALIMENTARIA", "Alergia alimentaria", Dominio.SALUD, "alergias? alimentarias?|alergias? (?:a los |a )alimentos");
         definir(conceptos, "ALERGIA_MEDICAMENTOS", "Alergia a medicamentos", Dominio.SALUD,
                 "alergias? (?:a los |a )medicamentos");
@@ -517,7 +604,7 @@ public final class AnalizadorTextoCompatibilidad {
         definir(conceptos, "ALERGIA_PICADURA_INSECTOS", "Alergia a picaduras de insectos", Dominio.SALUD,
                 "alergias? a (?:las )?picaduras? de insectos|alergic[oa]s? a (?:las )?picaduras? de insectos");
         definir(conceptos, "TERAPIA_LENGUAJE", "Terapia de lenguaje", Dominio.SALUD,
-                "terapias? (?:de|del) lenguaje");
+                "terapias? (?:de|del) lenguaje|terapias? del habla");
         definir(conceptos, "FISIOTERAPIA", "Fisioterapia", Dominio.SALUD, "fisioterapias?|terapias? fisicas?");
         definir(conceptos, "TERAPIA_OCUPACIONAL", "Terapia ocupacional", Dominio.SALUD,
                 "terapias? ocupacional(?:es)?");
@@ -528,7 +615,7 @@ public final class AnalizadorTextoCompatibilidad {
         definir(conceptos, "RUTINA_ESTABLE", "Rutinas estables", Dominio.SALUD,
                 "rutinas? (?:(?:diarias?|cotidianas?) )?(?:estables?|constantes?|consistentes?|fijas?)|horarios? (?:estables?|constantes?|consistentes?|regulares?)");
         definir(conceptos, "ACOMPANAMIENTO_EMOCIONAL", "Acompañamiento emocional", Dominio.SALUD,
-                "(?:acompanamiento|apoyo) emocional(?: especific[oa])?|apoyar(?:l[oa]s?)? emocionalmente");
+                "(?:acompanamiento|apoyo) emocional(?: especific[oa])?|apoyar(?:l[oa]s?)? emocionalmente|contencion emocional");
         definir(conceptos, "APOYO_ADAPTACION", "Apoyo durante la adaptación", Dominio.SALUD,
                 "proceso de adaptacion|(?:su|la) adaptacion|apoyo para adaptarse|adaptarse al hogar|se acostumbre al (?:nuevo )?hogar");
         definir(conceptos, "SUPERVISION_COTIDIANA", "Supervisión cotidiana", Dominio.SALUD,
@@ -537,7 +624,7 @@ public final class AnalizadorTextoCompatibilidad {
         definir(conceptos, "SUPERVISION_PERMANENTE", "Supervisión permanente", Dominio.SALUD,
                 "supervision (?:permanente|continua|las 24 horas|24 ?h|24/7)|supervisar(?:l[oa]s?)? (?:las )?(?:veinticuatro|24) horas");
         definir(conceptos, "APOYO_EDUCATIVO_INDIVIDUALIZADO", "Apoyo educativo individualizado", Dominio.SALUD,
-                "(?:apoyo|acompanamiento) (?:educativo|escolar) individualizado|apoyo uno a uno para aprender");
+                "(?:apoyo|acompanamiento) (?:educativo|escolar) individualizado|apoyo uno a uno para aprender|apoyo escolar uno a uno");
         definir(conceptos, "APOYO_EDUCATIVO_ESPECIALIZADO", "Apoyo educativo especializado", Dominio.SALUD,
                 "(?:apoyo|acompanamiento) (?:educativo|escolar) especializado");
         definir(conceptos, "AYUDA_TAREAS", "Ayuda con tareas", Dominio.SALUD,
@@ -548,14 +635,19 @@ public final class AnalizadorTextoCompatibilidad {
                 "seguimiento (?:educativo|escolar|de (?:sus |las )?actividades escolares)|seguir (?:sus |las )?actividades escolares|estar pendientes de (?:sus |las )?actividades escolares");
         definir(conceptos, "REFUERZO_ESCOLAR", "Refuerzo escolar", Dominio.SALUD, "refuerzo escolar");
         definir(conceptos, "HERMANOS", "Acompañamiento de hermanos", Dominio.HERMANOS,
-                "herman[oa]s?|hermanit[oa]s|grupo de hermanos|ubicacion conjunta|permanecer juntos");
+                "herman[oa]s?|hermanit[oa]s|grupo de hermanos|ubicacion conjunta|permanecer juntos|acogida conjunta");
+        definir(conceptos, "ACOGIDA_CONJUNTA", "Acogida conjunta", Dominio.HERMANOS,
+                "(?:acoger|recibir|adoptar|criar) (?:junt[oa]s? a |a )?(?:un grupo de |(?:dos|tres) )?herman[oa]s|ubicacion conjunta|acogida conjunta|permanecer juntos");
+        definir(conceptos, "CONTACTO_HERMANOS", "Contacto entre hermanos", Dominio.HERMANOS,
+                "(?:contacto|comunicacion|visitas|el vinculo) (?:con|entre) (?:(?:sus|los) )?herman[oa]s|ver a (?:sus|los) herman[oa]s");
+        definir(conceptos, "PRESENCIA_HERMANOS", "Presencia de hermanos", Dominio.HERMANOS, "(?!)");
         definir(conceptos, "RED_APOYO", "Red de apoyo", Dominio.RED,
-                "red de apoyo|persona de apoyo|apoyo familiar|ayuda familiar|familiares|mi hermana|mi madre|mi padre|personas? que nos pueden ayudar");
+                "red de apoyo|persona de apoyo|apoyo familiar|ayuda familiar|familiares|mi herman[oa]|mi madre|mi padre|mi tia|mi tio|mi abuel[oa]|mis (?:vecinos|amistades|amigos)|mi pareja|grupo comunitario|personas? que nos pueden ayudar");
         definir(conceptos, "CUIDADOS_DIARIOS", "Apoyo en cuidados diarios", Dominio.RED,
                 "cuidados? diarios?|cuidados? cotidianos?|actividades (?:cotidianas|diarias)|quehaceres (?:diarios|cotidianos)");
         definir(conceptos, "VIAJE", "Traslados", Dominio.LOGISTICA,
-                "viajar|viajes|trasladarme|trasladarnos|traslados|desplazarme|desplazarnos");
-        definir(conceptos, "VISITAS", "Recepción de visitas", Dominio.LOGISTICA, "visitas");
+                "viajar|viajes|trasladarme|trasladarnos|traslados|desplazarme|desplazarnos|hacer el viaje|hacer el traslado|ir en (?:bus|autobus|carro)|ir al (?:centro|lugar)");
+        definir(conceptos, "VISITAS", "Recepción de visitas", Dominio.LOGISTICA, "visitas|recibir(?:l[oa]s?)? en (?:casa|el hogar)");
         definir(conceptos, "NECESIDAD_SIN_PRECISAR", "Necesidad sin equivalencia definida",
                 Dominio.SALUD, "(?!)");
         return Collections.unmodifiableMap(conceptos);
@@ -589,7 +681,8 @@ public final class AnalizadorTextoCompatibilidad {
         void agregar(Concepto concepto, Evidencia evidencia) {
             List<Evidencia> fuentes = datos.computeIfAbsent(concepto, c -> new ArrayList<>());
             boolean repetida = fuentes.stream().anyMatch(e -> e.campo().equals(evidencia.campo())
-                    && e.declaracion() == evidencia.declaracion() && e.origen() == evidencia.origen());
+                    && e.declaracion() == evidencia.declaracion() && e.origen() == evidencia.origen()
+                    && e.original().equals(evidencia.original()));
             if (!repetida) fuentes.add(evidencia);
         }
 
