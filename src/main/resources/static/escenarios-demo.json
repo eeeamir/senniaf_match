@@ -1,6 +1,46 @@
 {
   "nino": [
     {
+      "unidadEdad": "MESES",
+      "edad": 6,
+      "nivelEscolar": "NO_ESCOLARIZADO",
+      "gradoEscolar": "No aplica",
+      "rendimientoAcademico": "NO_APLICA",
+      "habilidades": [
+        "MOVIMIENTO",
+        "COMUNICACION"
+      ],
+      "habilidadesDetalle": "Sigue objetos con la mirada y responde a voces conocidas con balbuceos.",
+      "gustos": [
+        "JUEGO_SENSORIAL",
+        "MUSICA"
+      ],
+      "gustosDetalle": "Prefiere sonajeros suaves y canciones sin acompañamiento fuerte.",
+      "personalidad": [
+        "AUN_NO_EVALUADO"
+      ],
+      "personalidadDetalle": "Orienta la mirada hacia su cuidadora y se calma al escuchar su voz.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "En los controles registrados no constan alergias conocidas.",
+      "intoleranciaLactosa": "NO_SABE",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "Los controles pediátricos registran desarrollo acorde con su edad y ninguna condición conocida.",
+      "necesidadesApoyo": "Mantener sus horarios de descanso, alimentación y controles pediátricos.",
+      "tieneHermanos": "NO",
+      "cantidadHermanos": 0,
+      "hermanosDetalle": "La revisión de antecedentes confirma que no tiene hermanos.",
+      "contextoCultural": "Las rutinas de cuidado se organizaron con aportes de su abuela, que participa en los intercambios con la cuidadora.",
+      "idiomaComunicacion": "En su entorno se habla español. Se comunica con miradas, gestos y sonidos.",
+      "costumbresTradiciones": "Reconoce la canción que su abuela suele cantarle antes de dormir.",
+      "vinculosCulturales": "La abuela participa en encuentros acompañados acordados por el equipo.",
+      "opinionCultural": "Aún no expresa preferencias verbalmente. Muestra atención al escuchar las voces habituales.",
+      "recomendacionesCulturales": "Conservar las canciones y los contactos acompañados que le resultan familiares."
+    },
+    {
       "unidadEdad": "ANIOS",
       "edad": 2,
       "nivelEscolar": "NO_ESCOLARIZADO",
@@ -8,38 +48,199 @@
       "rendimientoAcademico": "NO_APLICA",
       "habilidades": [
         "JUEGO",
-        "COMUNICACION",
-        "MOVIMIENTO"
+        "COMUNICACION"
       ],
-      "habilidadesDetalle": "Se comunica con gestos y palabras breves; explora objetos y participa en juegos de movimiento.",
+      "habilidadesDetalle": "Nombra objetos familiares y señala cuando necesita ayuda.",
       "gustos": [
         "JUEGO_SENSORIAL",
         "CUENTOS"
       ],
-      "gustosDetalle": "Disfruta bloques de colores, texturas y cuentos con imágenes.",
+      "gustosDetalle": "Elige bloques de colores y cuentos con imágenes.",
       "personalidad": [
         "AUN_NO_EVALUADO"
       ],
-      "personalidadDetalle": "Se registran respuestas al juego y a las figuras de cuidado; aún no se formula una descripción estable de personalidad.",
+      "personalidadDetalle": "Busca cercanía con su cuidadora antes de explorar un ambiente nuevo.",
       "alergias": [
         "NINGUNA_CONOCIDA"
       ],
-      "alergiasDetalle": "Sin alergias conocidas en los antecedentes simulados disponibles.",
+      "alergiasDetalle": "En los controles registrados no constan alergias conocidas.",
       "intoleranciaLactosa": "NO_SABE",
       "condicionesSalud": [
         "NINGUNA_CONOCIDA"
       ],
-      "condicionesSaludDetalle": "No se documentan condiciones específicas. Mantener controles de desarrollo.",
-      "necesidadesApoyo": "Rutinas previsibles, juego acompañado, comunicación cotidiana y controles pediátricos de desarrollo.",
+      "condicionesSaludDetalle": "Los controles de desarrollo no registran condiciones médicas específicas.",
+      "necesidadesApoyo": "Favorecer la comunicación con palabras sencillas y mantener una secuencia previsible para comer, jugar y descansar.",
       "tieneHermanos": "NO",
       "cantidadHermanos": 0,
-      "hermanosDetalle": "No se identifican hermanos en el expediente simulado.",
-      "contextoCultural": "",
-      "idiomaComunicacion": "Se comunica en español con palabras breves y gestos.",
-      "costumbresTradiciones": "Disfruta las celebraciones familiares y la música tradicional.",
-      "vinculosCulturales": "Participa en actividades educativas de su entorno.",
-      "opinionCultural": "No se ha podido obtener su opinión sobre estos aspectos.",
-      "recomendacionesCulturales": "Acompañar su comunicación con paciencia y mantener actividades familiares significativas."
+      "hermanosDetalle": "No tiene hermanos según la información familiar registrada.",
+      "contextoCultural": "En casa la lectura en voz alta forma parte de la rutina de la tarde.",
+      "idiomaComunicacion": "Comprende indicaciones breves en español y responde con gestos y palabras iniciales.",
+      "costumbresTradiciones": "Escoge el mismo cuento corto antes de la merienda.",
+      "vinculosCulturales": "Participa con su cuidadora en la hora del cuento de la biblioteca comunitaria.",
+      "opinionCultural": "Trae su cuento preferido cuando ve que preparan el espacio de lectura.",
+      "recomendacionesCulturales": "Conservar el momento de lectura y permitirle escoger el libro."
+    },
+    {
+      "unidadEdad": "ANIOS",
+      "edad": 5,
+      "nivelEscolar": "INICIAL",
+      "gradoEscolar": "Jardín",
+      "rendimientoAcademico": "BUENO",
+      "habilidades": [
+        "JUEGO",
+        "INTERACCION_SOCIAL"
+      ],
+      "habilidadesDetalle": "Organiza juegos de roles y comparte materiales con acompañamiento.",
+      "gustos": [
+        "JUEGO_SIMBOLICO",
+        "CUENTOS"
+      ],
+      "gustosDetalle": "Le gusta jugar a la tienda y representar personajes de cuentos.",
+      "personalidad": [
+        "CURIOSO",
+        "CARINOSO"
+      ],
+      "personalidadDetalle": "Hace preguntas al conocer personas nuevas y suele integrarse en grupos pequeños.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "En los controles registrados no constan alergias conocidas.",
+      "intoleranciaLactosa": "NO",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "Sin condiciones documentadas en los controles disponibles.",
+      "necesidadesApoyo": "Anticipar transiciones entre juego y actividades guiadas con instrucciones breves.",
+      "tieneHermanos": "NO",
+      "cantidadHermanos": 0,
+      "hermanosDetalle": "Se confirmó que no tiene hermanos.",
+      "contextoCultural": "La cuidadora comparte con el niño actividades recreativas del barrio, escogidas según sus intereses.",
+      "idiomaComunicacion": "Usa español en el hogar y en preescolar.",
+      "costumbresTradiciones": "Disfruta ayudar a escoger los cuentos que leen los domingos.",
+      "vinculosCulturales": "Participa con regularidad en juegos acompañados en el parque del barrio.",
+      "opinionCultural": "Quiere seguir participando en juegos al aire libre.",
+      "recomendacionesCulturales": "Buscar juntos espacios recreativos cercanos donde pueda jugar con pares."
+    },
+    {
+      "unidadEdad": "ANIOS",
+      "edad": 7,
+      "nivelEscolar": "PRIMARIA",
+      "gradoEscolar": "2do grado",
+      "rendimientoAcademico": "BUENO",
+      "habilidades": [
+        "MANUALIDADES",
+        "COMUNICACION"
+      ],
+      "habilidadesDetalle": "Arma figuras de papel y explica a sus compañeros cómo las hizo.",
+      "gustos": [
+        "NATURALEZA_ANIMALES",
+        "JUEGOS_DE_MESA"
+      ],
+      "gustosDetalle": "Dibuja animales que observa en el patio y elige juegos por turnos.",
+      "personalidad": [
+        "SOCIABLE"
+      ],
+      "personalidadDetalle": "Comparte materiales y solicita ayuda cuando una instrucción le resulta poco clara.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "En los controles registrados no constan alergias conocidas.",
+      "intoleranciaLactosa": "NO",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "Sin condiciones médicas conocidas.",
+      "necesidadesApoyo": "Confirmar que comprendió las instrucciones escolares y permitirle responder en el idioma que prefiera.",
+      "tieneHermanos": "NO",
+      "cantidadHermanos": 0,
+      "hermanosDetalle": "No tiene hermanos.",
+      "contextoCultural": "El niño aprendió expresiones en ngäbere al conversar con su abuela. Elige cuándo usarlas y pide ayuda para traducirlas cuando la necesita.",
+      "idiomaComunicacion": "Usa español en la escuela y español y ngäbere con su abuela.",
+      "costumbresTradiciones": "Conserva las historias que su abuela le cuenta al preparar la merienda.",
+      "vinculosCulturales": "Participa en juegos de mesa con compañeros del centro escolar.",
+      "opinionCultural": "Le gustaría que su abuela le siga contando sus historias.",
+      "recomendacionesCulturales": "Preservar el contacto con la abuela y ofrecer mediación lingüística si el niño la solicita."
+    },
+    {
+      "unidadEdad": "ANIOS",
+      "edad": 8,
+      "nivelEscolar": "PRIMARIA",
+      "gradoEscolar": "3er grado",
+      "rendimientoAcademico": "BUENO",
+      "habilidades": [
+        "ARTE",
+        "LECTURA_ESCRITURA"
+      ],
+      "habilidadesDetalle": "Ilustra escenas de relatos y lee textos breves con fluidez.",
+      "gustos": [
+        "ARTE_DIBUJO",
+        "LECTURA"
+      ],
+      "gustosDetalle": "Disfruta dibujar con su hermana y leerle en voz alta.",
+      "personalidad": [
+        "RESERVADO",
+        "CURIOSO"
+      ],
+      "personalidadDetalle": "Observa antes de integrarse a un grupo. Al ganar confianza, comparte sus dibujos y hace preguntas.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "En los controles registrados no constan alergias conocidas.",
+      "intoleranciaLactosa": "NO",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "Sin condiciones médicas registradas.",
+      "necesidadesApoyo": "Preparar los cambios de rutina y mantener encuentros acordados con su hermana.",
+      "tieneHermanos": "SI",
+      "cantidadHermanos": 1,
+      "hermanosDetalle": "Tiene una hermana mayor. Ambos disfrutan dibujar juntos y desean conservar el contacto.",
+      "contextoCultural": "El dulegaya forma parte de la comunicación con su hermana y otras personas cercanas. El niño lo asocia con las conversaciones y los cuentos que comparten.",
+      "idiomaComunicacion": "Usa español en la escuela y español y dulegaya con su hermana.",
+      "costumbresTradiciones": "Organiza con su hermana un cuaderno de dibujos e historias.",
+      "vinculosCulturales": "Conserva amistades en su salón y asiste a actividades de lectura.",
+      "opinionCultural": "Pidió seguir compartiendo dibujos y cuentos con su hermana.",
+      "recomendacionesCulturales": "Coordinar contactos con la hermana y respetar el idioma que ambos elijan."
+    },
+    {
+      "unidadEdad": "ANIOS",
+      "edad": 9,
+      "nivelEscolar": "PRIMARIA",
+      "gradoEscolar": "4to grado",
+      "rendimientoAcademico": "REGULAR",
+      "habilidades": [
+        "MATEMATICAS",
+        "DEPORTES"
+      ],
+      "habilidadesDetalle": "Resuelve problemas con material concreto y participa en juegos por equipos.",
+      "gustos": [
+        "DEPORTES",
+        "LECTURA"
+      ],
+      "gustosDetalle": "Le interesan el béisbol y los cómics bilingües.",
+      "personalidad": [
+        "SOCIABLE"
+      ],
+      "personalidadDetalle": "Pregunta por las reglas antes de incorporarse a juegos nuevos.",
+      "alergias": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "alergiasDetalle": "En los controles registrados no constan alergias conocidas.",
+      "intoleranciaLactosa": "NO",
+      "condicionesSalud": [
+        "ASMA"
+      ],
+      "condicionesSaludDetalle": "Asma documentada en los antecedentes clínicos. El equipo de salud mantiene el seguimiento y las indicaciones vigentes.",
+      "necesidadesApoyo": "Coordinar los controles de asma con salud y escuela. Acompañar la lectura comprensiva con textos de su interés.",
+      "tieneHermanos": "SI",
+      "cantidadHermanos": 1,
+      "hermanosDetalle": "Tiene un hermano menor. Comparten actividades recreativas cuando coinciden.",
+      "contextoCultural": "Aprendió inglés en conversaciones con un adulto cercano y lo usa para leer algunos cómics.",
+      "idiomaComunicacion": "Habla español habitualmente y alterna con inglés cuando conversa con personas conocidas.",
+      "costumbresTradiciones": "Tiene por costumbre elegir un cómic con su hermano los sábados.",
+      "vinculosCulturales": "Participa en actividades recreativas del centro escolar.",
+      "opinionCultural": "Quiere continuar jugando béisbol y leer en ambos idiomas.",
+      "recomendacionesCulturales": "Facilitar lecturas en los dos idiomas y coordinar actividades según las orientaciones registradas."
     },
     {
       "unidadEdad": "ANIOS",
@@ -49,561 +250,240 @@
       "rendimientoAcademico": "BUENO",
       "habilidades": [
         "ARTE",
-        "MATEMATICAS"
+        "LECTURA_ESCRITURA"
       ],
-      "habilidadesDetalle": "Resuelve problemas sencillos y disfruta representar ideas mediante dibujos.",
+      "habilidadesDetalle": "Ilustra mapas y explica con claridad lo que lee.",
       "gustos": [
-        "DEPORTES",
-        "ARTE_DIBUJO"
+        "LECTURA",
+        "ARTE_DIBUJO",
+        "JUEGOS_DE_MESA"
       ],
-      "gustosDetalle": "Fútbol recreativo y dibujo de animales.",
+      "gustosDetalle": "Elige cuentos de aventura, dibujo y juegos de mesa.",
       "personalidad": [
         "RESERVADO",
         "CURIOSO"
       ],
-      "personalidadDetalle": "Se integra gradualmente al grupo cuando conoce la rutina.",
+      "personalidadDetalle": "Participa más cuando conoce el propósito de la actividad y puede formular preguntas.",
       "alergias": [
         "NINGUNA_CONOCIDA"
       ],
-      "alergiasDetalle": "No se documentan alergias conocidas.",
+      "alergiasDetalle": "En los controles registrados no constan alergias conocidas.",
       "intoleranciaLactosa": "NO",
       "condicionesSalud": [
-        "ASMA"
+        "EPILEPSIA"
       ],
-      "condicionesSaludDetalle": "Asma documentada en el escenario; requiere controles y cumplimiento del plan médico existente.",
-      "necesidadesApoyo": "Seguimiento del asma según indicaciones médicas, coordinación escolar y espacios de expresión emocional.",
+      "condicionesSaludDetalle": "Epilepsia documentada en la valoración de neurología. Asiste a la escuela y cuenta con un plan individual de atención.",
+      "necesidadesApoyo": "Coordinar el plan de atención entre hogar, escuela y salud. Anticipar cambios y acordar cómo solicitar ayuda.",
       "tieneHermanos": "SI",
       "cantidadHermanos": 1,
-      "hermanosDetalle": "Mantiene contacto significativo con una hermana; revisar el vínculo con el equipo responsable.",
-      "contextoCultural": "",
-      "idiomaComunicacion": "Utiliza español en conversaciones cotidianas.",
-      "costumbresTradiciones": "Valora los relatos compartidos durante las reuniones familiares.",
-      "vinculosCulturales": "Mantiene interés por actividades artísticas comunitarias.",
-      "opinionCultural": "Expresa interés en mantener sus juegos y celebraciones habituales.",
-      "recomendacionesCulturales": "Conocer sus preferencias y preservar sus vínculos comunitarios con acompañamiento profesional."
+      "hermanosDetalle": "Mantiene contacto con una hermana mayor y desea continuar leyendo con ella.",
+      "contextoCultural": "La lectura compartida con su hermana es una actividad significativa en sus rutinas de cuidado.",
+      "idiomaComunicacion": "Se comunica en español y prefiere tener tiempo para explicar sus ideas.",
+      "costumbresTradiciones": "Intercambia cuentos de aventuras con su hermana.",
+      "vinculosCulturales": "Conserva amistades del salón y participa en actividades de lectura de la escuela.",
+      "opinionCultural": "Quiere mantener los encuentros de lectura con su hermana.",
+      "recomendacionesCulturales": "Acordar con ambos niños y el equipo cómo mantener la comunicación y los encuentros."
     },
     {
       "unidadEdad": "ANIOS",
-      "edad": 15,
-      "nivelEscolar": "MEDIA",
-      "gradoEscolar": "10mo grado",
-      "rendimientoAcademico": "NECESITA_APOYO",
-      "habilidades": [
-        "TECNOLOGIA",
-        "MUSICA"
-      ],
-      "habilidadesDetalle": "Interés en edición de audio y herramientas digitales.",
-      "gustos": [
-        "MUSICA",
-        "LECTURA"
-      ],
-      "gustosDetalle": "Música instrumental y relatos de ciencia ficción.",
-      "personalidad": [
-        "INDEPENDIENTE",
-        "SENSIBLE"
-      ],
-      "personalidadDetalle": "Valora participar en las decisiones cotidianas y contar con espacios de confianza.",
-      "alergias": [
-        "AMBIENTAL_POLEN"
-      ],
-      "alergiasDetalle": "Alergia ambiental registrada en los antecedentes simulados.",
-      "intoleranciaLactosa": "NO",
-      "condicionesSalud": [
-        "NINGUNA_CONOCIDA"
-      ],
-      "condicionesSaludDetalle": "No se documentan otras condiciones específicas.",
-      "necesidadesApoyo": "Tutoría en asignaturas pendientes, acompañamiento emocional, orientación vocacional y autonomía progresiva.",
-      "tieneHermanos": "NO",
-      "cantidadHermanos": 0,
-      "hermanosDetalle": "No se registran hermanos en el escenario.",
-      "contextoCultural": "",
-      "idiomaComunicacion": "Utiliza español y expresa interés por palabras de su comunidad.",
-      "costumbresTradiciones": "Le interesan las comidas y los juegos de las celebraciones comunitarias.",
-      "vinculosCulturales": "Disfruta los encuentros deportivos y recreativos de su comunidad.",
-      "opinionCultural": "Prefiere conservar sus actividades artísticas y recreativas.",
-      "recomendacionesCulturales": "Introducir las nuevas rutinas respetando sus tradiciones y su ritmo de adaptación."
-    },
-    {
-      "unidadEdad": "ANIOS",
-      "edad": 4,
-      "nivelEscolar": "INICIAL",
-      "gradoEscolar": "Prejardín",
-      "rendimientoAcademico": "NO_EVALUADO",
-      "habilidades": [
-        "JUEGO",
-        "INTERACCION_SOCIAL"
-      ],
-      "habilidadesDetalle": "Participa en juegos compartidos con apoyo del adulto.",
-      "gustos": [
-        "JUEGO_SIMBOLICO",
-        "CUENTOS"
-      ],
-      "gustosDetalle": "Juego de cocina y cuentos ilustrados.",
-      "personalidad": [
-        "CURIOSO",
-        "CARINOSO"
-      ],
-      "personalidadDetalle": "Observaciones iniciales durante actividades de juego, sujetas a seguimiento.",
-      "alergias": [
-        "ALIMENTARIA"
-      ],
-      "alergiasDetalle": "Alergia al huevo consignada en el escenario simulado; seguir las indicaciones médicas.",
-      "intoleranciaLactosa": "NO",
-      "condicionesSalud": [
-        "NINGUNA_CONOCIDA"
-      ],
-      "condicionesSaludDetalle": "No se documentan otras condiciones.",
-      "necesidadesApoyo": "Adaptación a la rutina de educación inicial y coordinación de cuidados por la alergia alimentaria.",
-      "tieneHermanos": "SI",
-      "cantidadHermanos": 2,
-      "hermanosDetalle": "Dos hermanos con quienes comparte actividades; el equipo revisará las necesidades del vínculo.",
-      "contextoCultural": "",
-      "idiomaComunicacion": "Se comunica en español con palabras breves y gestos.",
-      "costumbresTradiciones": "Disfruta las celebraciones familiares y la música tradicional.",
-      "vinculosCulturales": "Participa en actividades educativas de su entorno.",
-      "opinionCultural": "Desea continuar participando en actividades musicales.",
-      "recomendacionesCulturales": "Acompañar su comunicación con paciencia y mantener actividades familiares significativas."
-    },
-    {
-      "unidadEdad": "ANIOS",
-      "edad": 7,
+      "edad": 11,
       "nivelEscolar": "PRIMARIA",
-      "gradoEscolar": "2do grado",
-      "rendimientoAcademico": "REGULAR",
+      "gradoEscolar": "6to grado",
+      "rendimientoAcademico": "EXCELENTE",
       "habilidades": [
-        "MANUALIDADES",
-        "COMUNICACION"
+        "CIENCIAS",
+        "MANUALIDADES"
       ],
-      "habilidadesDetalle": "Organiza materiales y expresa preferencias en actividades breves.",
+      "habilidadesDetalle": "Construye modelos con materiales reciclados y explica sus observaciones.",
       "gustos": [
         "NATURALEZA_ANIMALES",
         "JUEGOS_DE_MESA"
       ],
-      "gustosDetalle": "Cuidado de plantas y juegos de turnos.",
+      "gustosDetalle": "Disfruta las caminatas acompañadas y los juegos de estrategia.",
       "personalidad": [
-        "SOCIABLE"
+        "CURIOSO",
+        "INDEPENDIENTE"
       ],
-      "personalidadDetalle": "Busca compartir juegos y necesita recordatorios para esperar turnos.",
+      "personalidadDetalle": "Colabora cuando conoce su función en el grupo y prefiere organizar primero sus materiales.",
+      "alergias": [
+        "PICADURA_INSECTOS"
+      ],
+      "alergiasDetalle": "Se registró alergia a picaduras de insectos. Las personas cuidadoras cuentan con las indicaciones del equipo de salud.",
+      "intoleranciaLactosa": "NO",
+      "condicionesSalud": [
+        "NINGUNA_CONOCIDA"
+      ],
+      "condicionesSaludDetalle": "No hay condiciones médicas conocidas.",
+      "necesidadesApoyo": "Ofrecer espacios para continuar sus proyectos escolares y contar con el plan de atención a su alergia registrada.",
+      "tieneHermanos": "NO",
+      "cantidadHermanos": 0,
+      "hermanosDetalle": "No tiene hermanos según la entrevista familiar.",
+      "contextoCultural": "Usa emberá en conversaciones con su abuelo. Le interesa conservar ese espacio de conversación y las actividades que comparten.",
+      "idiomaComunicacion": "Utiliza español en la escuela y emberá con su abuelo.",
+      "costumbresTradiciones": "Camina con su abuelo y anota qué plantas y animales observan.",
+      "vinculosCulturales": "Participa activamente en la feria científica escolar.",
+      "opinionCultural": "Expresó que quiere mantener el contacto con su abuelo y sus proyectos de ciencias.",
+      "recomendacionesCulturales": "Facilitar la comunicación en ambos idiomas y respetar los acuerdos de contacto."
+    },
+    {
+      "unidadEdad": "ANIOS",
+      "edad": 13,
+      "nivelEscolar": "PREMEDIA",
+      "gradoEscolar": "8vo grado",
+      "rendimientoAcademico": "BUENO",
+      "habilidades": [
+        "MUSICA",
+        "TECNOLOGIA"
+      ],
+      "habilidadesDetalle": "Graba sonidos y edita clips breves para proyectos escolares.",
+      "gustos": [
+        "MUSICA",
+        "LECTURA"
+      ],
+      "gustosDetalle": "Escucha música y lee crónicas sobre su comunidad.",
+      "personalidad": [
+        "SENSIBLE",
+        "INDEPENDIENTE"
+      ],
+      "personalidadDetalle": "Valora participar en acuerdos cotidianos y prefiere ensayar en privado antes de mostrar su trabajo.",
       "alergias": [
         "NINGUNA_CONOCIDA"
       ],
-      "alergiasDetalle": "",
+      "alergiasDetalle": "En los controles registrados no constan alergias conocidas.",
       "intoleranciaLactosa": "SI",
       "condicionesSalud": [
         "NINGUNA_CONOCIDA"
       ],
-      "condicionesSaludDetalle": "Sin otras condiciones conocidas en los antecedentes simulados.",
-      "necesidadesApoyo": "Lectura acompañada, rutinas de estudio breves y alimentación de acuerdo con la orientación médica sobre lactosa.",
-      "tieneHermanos": "NO_SABE",
-      "cantidadHermanos": null,
-      "hermanosDetalle": "Información familiar pendiente de completar; no equivale a ausencia de hermanos.",
-      "contextoCultural": "",
-      "idiomaComunicacion": "Utiliza español en conversaciones cotidianas.",
-      "costumbresTradiciones": "Valora los relatos compartidos durante las reuniones familiares.",
-      "vinculosCulturales": "Mantiene interés por actividades artísticas comunitarias.",
-      "opinionCultural": "Expresa interés en mantener sus juegos y celebraciones habituales.",
-      "recomendacionesCulturales": "Conocer sus preferencias y preservar sus vínculos comunitarios con acompañamiento profesional."
-    },
-    {
-      "unidadEdad": "ANIOS",
-      "edad": 12,
-      "nivelEscolar": "PREMEDIA",
-      "gradoEscolar": "7mo grado",
-      "rendimientoAcademico": "BUENO",
-      "habilidades": [
-        "CIENCIAS",
-        "DEPORTES"
-      ],
-      "habilidadesDetalle": "Participa en proyectos de ciencias y deportes de equipo.",
-      "gustos": [
-        "DEPORTES",
-        "NATURALEZA_ANIMALES"
-      ],
-      "gustosDetalle": "Caminatas y actividades al aire libre.",
-      "personalidad": [
-        "SOCIABLE",
-        "SENSIBLE"
-      ],
-      "personalidadDetalle": "Se expresa mejor cuando se anticipan las actividades.",
-      "alergias": [
-        "NINGUNA_CONOCIDA"
-      ],
-      "alergiasDetalle": "",
-      "intoleranciaLactosa": "NO",
-      "condicionesSalud": [
-        "DIABETES"
-      ],
-      "condicionesSaludDetalle": "Diabetes documentada para el ejercicio; requiere controles y acompañamiento del plan médico.",
-      "necesidadesApoyo": "Apoyo para cumplir el plan de diabetes indicado por profesionales y organizar la transición a premedia.",
+      "condicionesSaludDetalle": "Los antecedentes disponibles no registran condiciones médicas.",
+      "necesidadesApoyo": "Acordar horarios para proyectos escolares y respetar su participación en decisiones sobre cambios de rutina. La ficha de salud registra intolerancia a la lactosa.",
       "tieneHermanos": "SI",
-      "cantidadHermanos": 1,
-      "hermanosDetalle": "Conservar el contacto autorizado con su hermano.",
-      "contextoCultural": "",
-      "idiomaComunicacion": "Utiliza español y expresa interés por palabras de su comunidad.",
-      "costumbresTradiciones": "Le interesan las comidas y los juegos de las celebraciones comunitarias.",
-      "vinculosCulturales": "Disfruta los encuentros deportivos y recreativos de su comunidad.",
-      "opinionCultural": "Prefiere conservar sus actividades artísticas y recreativas.",
-      "recomendacionesCulturales": "Introducir las nuevas rutinas respetando sus tradiciones y su ritmo de adaptación."
+      "cantidadHermanos": 2,
+      "hermanosDetalle": "Tiene dos hermanos. Mantiene comunicación frecuente con el mayor y contacto acompañado con el menor.",
+      "contextoCultural": "Habla buglere con personas cercanas en encuentros familiares. Ha expresado que desea preservar este vínculo y decidir qué grabaciones comparte.",
+      "idiomaComunicacion": "Usa español en la escuela y español y buglere con su familia.",
+      "costumbresTradiciones": "Escucha historias narradas en casa y graba sonidos cuando cuenta con permiso.",
+      "vinculosCulturales": "Colabora en el grupo escolar que prepara las actividades del centro educativo.",
+      "opinionCultural": "Pidió conservar sus conversaciones en buglere y participar en los acuerdos sobre el uso de sus grabaciones.",
+      "recomendacionesCulturales": "Respetar su privacidad y coordinar con ella el contacto con sus familiares."
     },
     {
       "unidadEdad": "ANIOS",
       "edad": 16,
-      "nivelEscolar": "OTRO",
-      "gradoEscolar": "Programa flexible de formación técnica",
-      "rendimientoAcademico": "INFORMACION_NO_DISPONIBLE",
+      "nivelEscolar": "MEDIA",
+      "gradoEscolar": "11mo grado",
+      "rendimientoAcademico": "BUENO",
       "habilidades": [
         "TECNOLOGIA",
         "MANUALIDADES"
       ],
-      "habilidadesDetalle": "Interés en reparación de equipos y creación de objetos.",
+      "habilidadesDetalle": "Repara objetos sencillos y diseña modelos en una aplicación de dibujo.",
       "gustos": [
-        "VIDEOJUEGOS",
-        "MUSICA"
+        "MUSICA",
+        "LECTURA"
       ],
-      "gustosDetalle": "Diseño de juegos y creación musical.",
+      "gustosDetalle": "Disfruta novelas breves, música instrumental y proyectos de reparación.",
       "personalidad": [
         "RESERVADO",
         "INDEPENDIENTE"
       ],
-      "personalidadDetalle": "Prefiere conversaciones individuales y participar en la organización de su tiempo.",
+      "personalidadDetalle": "Prefiere conversaciones individuales. Expone sus metas cuando dispone de tiempo para preparar sus ideas.",
       "alergias": [
         "INFORMACION_NO_DISPONIBLE"
       ],
-      "alergiasDetalle": "Pendiente obtener antecedentes médicos.",
+      "alergiasDetalle": "La información de alergias está pendiente de confirmación.",
       "intoleranciaLactosa": "NO_SABE",
       "condicionesSalud": [
         "INFORMACION_NO_DISPONIBLE"
       ],
-      "condicionesSaludDetalle": "La información médica está pendiente; no se presume ausencia de condiciones.",
-      "necesidadesApoyo": "Actualizar antecedentes de salud, acompañar la formación técnica y construir un plan de autonomía con participación del adolescente.",
-      "tieneHermanos": "NO_SABE",
-      "cantidadHermanos": null,
-      "hermanosDetalle": "Pendiente verificar el contexto familiar.",
-      "contextoCultural": "",
-      "idiomaComunicacion": "Se comunica en español con palabras breves y gestos.",
-      "costumbresTradiciones": "Disfruta las celebraciones familiares y la música tradicional.",
-      "vinculosCulturales": "Participa en actividades educativas de su entorno.",
-      "opinionCultural": "Desea continuar participando en actividades musicales.",
-      "recomendacionesCulturales": "Acompañar su comunicación con paciencia y mantener actividades familiares significativas."
-    },
-    {
-      "unidadEdad": "ANIOS",
-      "edad": 1,
-      "nivelEscolar": "NO_ESCOLARIZADO",
-      "gradoEscolar": "No aplica",
-      "rendimientoAcademico": "NO_APLICA",
-      "habilidades": [
-        "EXPLORACION",
-        "MOVIMIENTO"
-      ],
-      "habilidadesDetalle": "Explora objetos seguros y ensaya desplazamientos con supervisión.",
-      "gustos": [
-        "JUEGO_SENSORIAL",
-        "MUSICA"
-      ],
-      "gustosDetalle": "Canciones suaves y materiales de distintas texturas.",
-      "personalidad": [
-        "INFORMACION_INSUFICIENTE"
-      ],
-      "personalidadDetalle": "No hay observaciones suficientes para describir rasgos estables.",
-      "alergias": [
-        "NINGUNA_CONOCIDA"
-      ],
-      "alergiasDetalle": "",
-      "intoleranciaLactosa": "NO_SABE",
-      "condicionesSalud": [
-        "NINGUNA_CONOCIDA"
-      ],
-      "condicionesSaludDetalle": "Controles preventivos de crecimiento y desarrollo.",
-      "necesidadesApoyo": "Cuidado sensible, supervisión del movimiento, descanso y juego de acuerdo con su etapa.",
+      "condicionesSaludDetalle": "La constancia de salud actual está pendiente de incorporarse.",
+      "necesidadesApoyo": "Acompañar su orientación vocacional y coordinar la actualización de antecedentes de salud con el equipo.",
       "tieneHermanos": "NO",
       "cantidadHermanos": 0,
-      "hermanosDetalle": "",
-      "contextoCultural": "",
-      "idiomaComunicacion": "Se comunica mediante gestos, sonidos y palabras iniciales; el entorno cuidador utiliza español.",
-      "costumbresTradiciones": "Valora los relatos compartidos durante las reuniones familiares.",
-      "vinculosCulturales": "Mantiene interés por actividades artísticas comunitarias.",
-      "opinionCultural": "No se ha podido obtener su opinión sobre estos aspectos.",
-      "recomendacionesCulturales": "Conocer sus preferencias y preservar sus vínculos comunitarios con acompañamiento profesional."
-    },
-    {
-      "unidadEdad": "MESES",
-      "edad": 0,
-      "nivelEscolar": "NO_ESCOLARIZADO",
-      "gradoEscolar": "No aplica",
-      "rendimientoAcademico": "NO_APLICA",
-      "habilidades": [
-        "AUN_NO_EVALUADO"
-      ],
-      "habilidadesDetalle": "Se requiere observar las respuestas y el desarrollo de acuerdo con su edad, sin anticipar habilidades.",
-      "gustos": [
-        "AUN_NO_EVALUADO"
-      ],
-      "gustosDetalle": "Los intereses aún no han sido evaluados.",
-      "personalidad": [
-        "AUN_NO_EVALUADO"
-      ],
-      "personalidadDetalle": "No se atribuyen rasgos estables de personalidad a esta edad.",
-      "alergias": [
-        "NINGUNA_CONOCIDA"
-      ],
-      "alergiasDetalle": "Sin alergias conocidas en los antecedentes simulados disponibles.",
-      "intoleranciaLactosa": "NO_SABE",
-      "condicionesSalud": [
-        "NINGUNA_CONOCIDA"
-      ],
-      "condicionesSaludDetalle": "No se documentan condiciones específicas. Mantener controles de desarrollo.",
-      "necesidadesApoyo": "Acompañamiento de las figuras de cuidado, alimentación y descanso adecuados a su etapa, y seguimiento pediátrico.",
-      "tieneHermanos": "NO_SABE",
-      "cantidadHermanos": null,
-      "hermanosDetalle": "Aún no se ha confirmado si tiene hermanos.",
-      "contextoCultural": "",
-      "idiomaComunicacion": "Se comunica mediante llanto, mirada, sonidos y movimientos. El entorno cuidador utiliza español.",
-      "costumbresTradiciones": "El entorno cuidador refiere canciones y rutinas de cuidado que conviene conocer y preservar cuando contribuyan a su bienestar.",
-      "vinculosCulturales": "Se recomienda valorar la continuidad de las figuras cuidadoras y de los entornos conocidos durante los cambios de cuidado.",
-      "opinionCultural": "Por su etapa de desarrollo no se ha podido obtener su opinión verbal. Se requiere observar sus señales de bienestar y malestar.",
-      "recomendacionesCulturales": "Mantener una comunicación sensible a sus señales, conservar rutinas de cuidado seguras y acompañar los cambios gradualmente con orientación profesional."
-    },
-    {
-      "unidadEdad": "MESES",
-      "edad": 6,
-      "nivelEscolar": "NO_ESCOLARIZADO",
-      "gradoEscolar": "No aplica",
-      "rendimientoAcademico": "NO_APLICA",
-      "habilidades": [
-        "AUN_NO_EVALUADO"
-      ],
-      "habilidadesDetalle": "Se requiere observar las respuestas y el desarrollo de acuerdo con su edad, sin anticipar habilidades.",
-      "gustos": [
-        "AUN_NO_EVALUADO"
-      ],
-      "gustosDetalle": "Los intereses aún no han sido evaluados.",
-      "personalidad": [
-        "AUN_NO_EVALUADO"
-      ],
-      "personalidadDetalle": "No se atribuyen rasgos estables de personalidad a esta edad.",
-      "alergias": [
-        "NINGUNA_CONOCIDA"
-      ],
-      "alergiasDetalle": "Sin alergias conocidas en los antecedentes simulados disponibles.",
-      "intoleranciaLactosa": "NO_SABE",
-      "condicionesSalud": [
-        "NINGUNA_CONOCIDA"
-      ],
-      "condicionesSaludDetalle": "No se documentan condiciones específicas. Mantener controles de desarrollo.",
-      "necesidadesApoyo": "Acompañamiento de las figuras de cuidado, alimentación y descanso adecuados a su etapa, y seguimiento pediátrico.",
-      "tieneHermanos": "NO_SABE",
-      "cantidadHermanos": null,
-      "hermanosDetalle": "Aún no se ha confirmado si tiene hermanos.",
-      "contextoCultural": "",
-      "idiomaComunicacion": "Se comunica mediante llanto, mirada, sonidos y movimientos. El entorno cuidador utiliza español.",
-      "costumbresTradiciones": "El entorno cuidador refiere canciones y rutinas de cuidado que conviene conocer y preservar cuando contribuyan a su bienestar.",
-      "vinculosCulturales": "Se recomienda valorar la continuidad de las figuras cuidadoras y de los entornos conocidos durante los cambios de cuidado.",
-      "opinionCultural": "Por su etapa de desarrollo no se ha podido obtener su opinión verbal. Se requiere observar sus señales de bienestar y malestar.",
-      "recomendacionesCulturales": "Mantener una comunicación sensible a sus señales, conservar rutinas de cuidado seguras y acompañar los cambios gradualmente con orientación profesional."
-    },
-    {
-      "unidadEdad": "MESES",
-      "edad": 11,
-      "nivelEscolar": "NO_ESCOLARIZADO",
-      "gradoEscolar": "No aplica",
-      "rendimientoAcademico": "NO_APLICA",
-      "habilidades": [
-        "AUN_NO_EVALUADO"
-      ],
-      "habilidadesDetalle": "Se requiere observar las respuestas y el desarrollo de acuerdo con su edad, sin anticipar habilidades.",
-      "gustos": [
-        "AUN_NO_EVALUADO"
-      ],
-      "gustosDetalle": "Los intereses aún no han sido evaluados.",
-      "personalidad": [
-        "AUN_NO_EVALUADO"
-      ],
-      "personalidadDetalle": "No se atribuyen rasgos estables de personalidad a esta edad.",
-      "alergias": [
-        "NINGUNA_CONOCIDA"
-      ],
-      "alergiasDetalle": "Sin alergias conocidas en los antecedentes simulados disponibles.",
-      "intoleranciaLactosa": "NO_SABE",
-      "condicionesSalud": [
-        "NINGUNA_CONOCIDA"
-      ],
-      "condicionesSaludDetalle": "No se documentan condiciones específicas. Mantener controles de desarrollo.",
-      "necesidadesApoyo": "Acompañamiento de las figuras de cuidado, alimentación y descanso adecuados a su etapa, y seguimiento pediátrico.",
-      "tieneHermanos": "NO_SABE",
-      "cantidadHermanos": null,
-      "hermanosDetalle": "Aún no se ha confirmado si tiene hermanos.",
-      "contextoCultural": "",
-      "idiomaComunicacion": "Se comunica mediante llanto, mirada, sonidos y movimientos. El entorno cuidador utiliza español.",
-      "costumbresTradiciones": "El entorno cuidador refiere canciones y rutinas de cuidado que conviene conocer y preservar cuando contribuyan a su bienestar.",
-      "vinculosCulturales": "Se recomienda valorar la continuidad de las figuras cuidadoras y de los entornos conocidos durante los cambios de cuidado.",
-      "opinionCultural": "Por su etapa de desarrollo no se ha podido obtener su opinión verbal. Se requiere observar sus señales de bienestar y malestar.",
-      "recomendacionesCulturales": "Mantener una comunicación sensible a sus señales, conservar rutinas de cuidado seguras y acompañar los cambios gradualmente con orientación profesional."
+      "hermanosDetalle": "La revisión familiar confirma que no tiene hermanos.",
+      "contextoCultural": "Participa en un taller del barrio. Identifica a su instructor como una persona adulta de referencia en sus proyectos.",
+      "idiomaComunicacion": "Usa español en casa, en el colegio y en el taller.",
+      "costumbresTradiciones": "Los sábados comparte avances de sus proyectos con su instructor.",
+      "vinculosCulturales": "Participa en un taller comunitario de reparación y diseño.",
+      "opinionCultural": "Quiere terminar la escuela y continuar participando en el taller.",
+      "recomendacionesCulturales": "Incluir sus metas educativas y sus preferencias en los acuerdos de continuidad."
     }
   ],
   "familia": [
     {
       "tipoFamilia": "PAREJA",
       "especificacionHogar": "",
-      "notaEstructuraHogar": "Hogar de dos adultos con rutinas coordinadas y espacio para acompañar la etapa escolar.",
+      "notaEstructuraHogar": "Vivimos en pareja en una casa con una habitación libre. Trabajamos en horarios complementarios y reservamos la tarde para las actividades escolares.",
       "redApoyo": [
         "PAREJA",
         "FAMILIA_EXTENDIDA"
       ],
-      "notaRedApoyo": "Se distribuyen los cuidados; la familia extendida apoya después de clases.",
+      "notaRedApoyo": "Nos turnamos durante la semana. Mi hermana recoge a su hija en la misma escuela y puede ayudarnos los jueves con aviso previo.",
       "provincia": "PANAMA",
       "disponibilidadViaje": "ALTA",
-      "notaDistancia": "Pueden coordinar visitas semanales con anticipación.",
+      "notaDistancia": "Tenemos carro y podemos coordinar traslados o recibir visitas durante la semana.",
       "edadMinimaAceptada": 6,
       "edadMaximaAceptada": 12,
       "notaRangoEdad": "Preparación centrada en edad escolar y apoyo al aprendizaje.",
       "disposicionHermanos": "DISPUESTA",
-      "notaHermanos": "Dispuestos a recibir un grupo con acompañamiento del equipo.",
+      "notaHermanos": "Podemos recibir a dos hermanos. Conversaríamos con el equipo sobre cómo organizar el espacio y sus rutinas.",
       "condicionesPuedeAcompanarHoy": [
         "ASMA"
       ],
       "condicionesConApoyo": [
         "DIABETES"
       ],
-      "notaCondicionesSalud": "Cuentan con organización para controles de asma; solicitan capacitación para diabetes.",
-      "apoyoIdiomas": "En casa hablamos español; buscaríamos orientación para acompañar otro idioma.",
-      "respetoTradiciones": "Proponemos conocer sus celebraciones e incorporarlas de forma respetuosa.",
-      "recursosComunitarios": "Disponemos de actividades educativas y recreativas en nuestro entorno.",
-      "respetoPreferencias": "Escucharíamos sus preferencias sin exigirle adoptar nuestras costumbres.",
-      "compromisoCultural": "Mantendríamos espacios de conversación y pediríamos orientación profesional. Buscaremos cuentos en su idioma habitual."
+      "notaCondicionesSalud": "Podemos acompañar controles de asma. Para atender la diabetes necesitaríamos capacitación y un plan escrito del equipo de salud.",
+      "apoyoIdiomas": "En casa usamos español e inglés. Queremos conocer qué idioma prefiere el niño para hablar de temas personales.",
+      "respetoTradiciones": "Le preguntaríamos qué actividades o celebraciones desea mantener.",
+      "recursosComunitarios": "Podemos ir a la biblioteca y al taller deportivo del corregimiento después de clases.",
+      "respetoPreferencias": "Podrá decidir cuáles de nuestras actividades quiere compartir al principio.",
+      "compromisoCultural": "Coordinaríamos con su familia y el equipo cómo mantener contactos y rutinas importantes."
     },
     {
       "tipoFamilia": "MONOPARENTAL",
       "especificacionHogar": "",
-      "notaEstructuraHogar": "Una persona adulta responsable con jornada flexible y rutinas estables para primera infancia.",
+      "notaEstructuraHogar": "Vivo con mi hijo adolescente. Trabajo en un comercio y tengo una habitación disponible. Cuento con las tardes de dos días libres por semana.",
       "redApoyo": [
         "FAMILIA_EXTENDIDA",
         "AMISTADES_O_COMUNIDAD"
       ],
-      "notaRedApoyo": "Una familiar y dos amistades cercanas coordinan apoyo cotidiano.",
+      "notaRedApoyo": "Mi madre vive en el mismo barrio y puede acompañar la salida de la escuela cuando mi jornada termina tarde.",
       "provincia": "COCLE",
       "disponibilidadViaje": "MEDIA",
-      "notaDistancia": "Organiza traslados quincenales y necesita anticipación para citas adicionales.",
+      "notaDistancia": "Puedo trasladarme en bus los sábados. Entre semana puedo recibir visitas por la tarde si coordinamos antes.",
       "edadMinimaAceptada": 0,
       "edadMaximaAceptada": 5,
       "notaRangoEdad": "Ha organizado el hogar para juego, descanso y cuidado en primera infancia.",
       "disposicionHermanos": "PREFIERE_UN_SOLO_NINO",
-      "notaHermanos": "Actualmente puede acompañar a un niño; reconoce la importancia de revisar sus vínculos.",
+      "notaHermanos": "Por ahora puedo recibir a un niño. Me comprometo a facilitar encuentros con sus hermanos cuando se acuerden.",
       "condicionesPuedeAcompanarHoy": [],
       "condicionesConApoyo": [
         "ASMA"
       ],
-      "notaCondicionesSalud": "Solicita orientación y capacitación antes de asumir cuidados de asma.",
-      "apoyoIdiomas": "Nos apoyaríamos en recursos educativos y mediación lingüística si fueran necesarios.",
-      "respetoTradiciones": "Compartiríamos relatos, música y comidas importantes para su historia.",
-      "recursosComunitarios": "Buscaríamos talleres artísticos y espacios culturales accesibles.",
-      "respetoPreferencias": "Acordaríamos las actividades culturales según sus intereses y madurez.",
-      "compromisoCultural": "Organizaríamos tiempo para sus actividades significativas y revisaríamos juntos su adaptación. Mantendremos contacto con espacios culturales autorizados."
-    },
-    {
-      "tipoFamilia": "FAMILIA_EXTENDIDA",
-      "especificacionHogar": "",
-      "notaEstructuraHogar": "Hogar de varias generaciones que acuerda responsabilidades y respeta los espacios personales.",
-      "redApoyo": [
-        "FAMILIA_EXTENDIDA",
-        "AMISTADES_O_COMUNIDAD"
-      ],
-      "notaRedApoyo": "Dos adultos pueden acompañar tareas y citas; existe apoyo comunitario cercano.",
-      "provincia": "CHIRIQUI",
-      "disponibilidadViaje": "BAJA",
-      "notaDistancia": "Puede recibir visitas; los viajes a otra provincia requieren organización previa.",
-      "edadMinimaAceptada": 12,
-      "edadMaximaAceptada": 17,
-      "notaRangoEdad": "Preparación para acompañar adolescencia, formación y autonomía progresiva.",
-      "disposicionHermanos": "DISPUESTA_CON_DUDAS",
-      "notaHermanos": "Requiere conversar sobre espacios y responsabilidades ante un grupo de hermanos.",
-      "condicionesPuedeAcompanarHoy": [
-        "ASMA"
-      ],
-      "condicionesConApoyo": [
-        "DISCAPACIDAD_FISICA"
-      ],
-      "notaCondicionesSalud": "Puede acompañar controles de asma; solicita valoración de accesibilidad para otras necesidades.",
-      "apoyoIdiomas": "Escucharíamos su forma habitual de comunicarse y aprenderíamos expresiones de su idioma.",
-      "respetoTradiciones": "Consultaríamos qué costumbres desea preservar antes de introducir cambios.",
-      "recursosComunitarios": "Podemos acompañar su participación en actividades deportivas y comunitarias.",
-      "respetoPreferencias": "Le ofreceríamos opciones para decidir qué celebraciones y vínculos desea mantener.",
-      "compromisoCultural": "Acompañaríamos la preservación de su identidad respetando su ritmo y sus decisiones. Acordaremos celebraciones significativas."
-    },
-    {
-      "tipoFamilia": "OTRA",
-      "especificacionHogar": "Dos personas adultas responsables conviven con una persona mayor con autonomía.",
-      "notaEstructuraHogar": "Los integrantes mantienen horarios complementarios y acuerdan espacios de cuidado y descanso.",
-      "redApoyo": [
-        "AMISTADES_O_COMUNIDAD"
-      ],
-      "notaRedApoyo": "Amistades cercanas ofrecen apoyo en gestiones y traslados.",
-      "provincia": "PANAMA_OESTE",
-      "disponibilidadViaje": "ALTA",
-      "notaDistancia": "Disponibilidad para visitas coordinadas durante la semana.",
-      "edadMinimaAceptada": 5,
-      "edadMaximaAceptada": 10,
-      "notaRangoEdad": "Desean acompañar el inicio y desarrollo de la etapa escolar.",
-      "disposicionHermanos": "OTRA",
-      "notaHermanos": "Necesitan revisar con el equipo la composición del grupo y la organización del hogar antes de responder.",
-      "condicionesPuedeAcompanarHoy": [
-        "DISCAPACIDAD_AUDITIVA"
-      ],
-      "condicionesConApoyo": [
-        "ASMA"
-      ],
-      "notaCondicionesSalud": "Declaran recursos de comunicación accesible y disponibilidad para capacitación.",
-      "apoyoIdiomas": "En casa hablamos español; buscaríamos orientación para acompañar otro idioma.",
-      "respetoTradiciones": "Proponemos conocer sus celebraciones e incorporarlas de forma respetuosa.",
-      "recursosComunitarios": "Disponemos de actividades educativas y recreativas en nuestro entorno.",
-      "respetoPreferencias": "Escucharíamos sus preferencias sin exigirle adoptar nuestras costumbres.",
-      "compromisoCultural": "Mantendríamos espacios de conversación y pediríamos orientación profesional. Ofreceremos talleres musicales cuando le interesen."
-    },
-    {
-      "tipoFamilia": "MONOPARENTAL",
-      "especificacionHogar": "",
-      "notaEstructuraHogar": "Una persona adulta responsable con horarios definidos y espacio para acompañamiento individual.",
-      "redApoyo": [
-        "NINGUNA_POR_AHORA"
-      ],
-      "notaRedApoyo": "Está construyendo una red de apoyo y desea orientación para organizarla.",
-      "provincia": "VERAGUAS",
-      "disponibilidadViaje": "MEDIA",
-      "notaDistancia": "Puede acordar visitas con una semana de anticipación.",
-      "edadMinimaAceptada": 8,
-      "edadMaximaAceptada": 14,
-      "notaRangoEdad": "Preparación para apoyar aprendizaje y cambios de etapa.",
-      "disposicionHermanos": "NINGUNA_DE_LAS_ANTERIORES",
-      "notaHermanos": "Todavía no ha podido valorar su capacidad para un grupo y necesita orientación antes de expresar una disposición.",
-      "condicionesPuedeAcompanarHoy": [],
-      "condicionesConApoyo": [
-        "ASMA",
-        "TDAH"
-      ],
-      "notaCondicionesSalud": "No declara experiencia previa; requiere capacitación y construcción de apoyos.",
-      "apoyoIdiomas": "Nos apoyaríamos en recursos educativos y mediación lingüística si fueran necesarios.",
-      "respetoTradiciones": "Compartiríamos relatos, música y comidas importantes para su historia.",
-      "recursosComunitarios": "Buscaríamos talleres artísticos y espacios culturales accesibles.",
-      "respetoPreferencias": "Acordaríamos las actividades culturales según sus intereses y madurez.",
-      "compromisoCultural": "Organizaríamos tiempo para sus actividades significativas y revisaríamos juntos su adaptación. Respetaremos sus rutinas y espacios de expresión."
+      "notaCondicionesSalud": "Podría acompañar controles por asma con orientación del equipo. Todavía no he recibido esa capacitación.",
+      "apoyoIdiomas": "En casa hablamos español. Si el niño usa otro idioma, pediría apoyo para que pueda seguir comunicándose en él.",
+      "respetoTradiciones": "Me gustaría conocer qué canciones, cuentos o celebraciones forman parte de sus rutinas.",
+      "recursosComunitarios": "La biblioteca permite participar en una hora del cuento los fines de semana.",
+      "respetoPreferencias": "Le daría tiempo para decidir con qué juegos se siente cómodo.",
+      "compromisoCultural": "Acordaría con las personas responsables cómo mantener los vínculos importantes."
     },
     {
       "tipoFamilia": "PAREJA",
       "especificacionHogar": "",
-      "notaEstructuraHogar": "Dos adultos con experiencia de cuidado y horarios complementarios.",
+      "notaEstructuraHogar": "Somos dos adultos con horarios alternos. El hogar cuenta con dos habitaciones disponibles y un presupuesto familiar para traslados y actividades.",
       "redApoyo": [
         "PAREJA",
         "AMISTADES_O_COMUNIDAD"
       ],
-      "notaRedApoyo": "La pareja organiza cuidados y una red de amistades apoya en traslados.",
+      "notaRedApoyo": "Nos turnamos entre semana. Una amistad de confianza puede acompañar los traslados cuando los dos trabajamos.",
       "provincia": "COLON",
       "disponibilidadViaje": "ALTA",
-      "notaDistancia": "Puede organizar visitas frecuentes y recibir al equipo.",
+      "notaDistancia": "Podemos ajustar los turnos para citas programadas y recibir visitas con aviso previo.",
       "edadMinimaAceptada": 9,
       "edadMaximaAceptada": 17,
       "notaRangoEdad": "Preparación para niñez mayor y adolescencia.",
       "disposicionHermanos": "DISPUESTA",
-      "notaHermanos": "Disposición a acompañar al grupo con planificación de espacios y rutinas.",
+      "notaHermanos": "Estamos dispuestos a recibir hermanos conjuntamente y tenemos espacio para dos. Queremos coordinar con el equipo la adaptación de cada uno.",
       "condicionesPuedeAcompanarHoy": [
         "DIABETES",
         "ASMA"
@@ -611,71 +491,68 @@
       "condicionesConApoyo": [
         "EPILEPSIA"
       ],
-      "notaCondicionesSalud": "Puede organizar controles regulares y solicita capacitación adicional cuando se requiera.",
-      "apoyoIdiomas": "Escucharíamos su forma habitual de comunicarse y aprenderíamos expresiones de su idioma.",
-      "respetoTradiciones": "Consultaríamos qué costumbres desea preservar antes de introducir cambios.",
-      "recursosComunitarios": "Podemos acompañar su participación en actividades deportivas y comunitarias.",
-      "respetoPreferencias": "Le ofreceríamos opciones para decidir qué celebraciones y vínculos desea mantener.",
-      "compromisoCultural": "Acompañaríamos la preservación de su identidad respetando su ritmo y sus decisiones. Consultaremos recursos de mediación intercultural."
+      "notaCondicionesSalud": "Tenemos experiencia acompañando el asma y la diabetes en casa. Para cuidados relacionados con epilepsia necesitamos orientación del equipo de salud.",
+      "apoyoIdiomas": "Hablamos español. Una persona adulta del hogar también conversa en ngäbere con sus familiares.",
+      "respetoTradiciones": "Preguntaríamos qué momentos familiares y comunitarios quiere conservar.",
+      "recursosComunitarios": "Hay un centro cultural y un grupo de deportes comunitarios a los que podemos acompañarle.",
+      "respetoPreferencias": "Escucharíamos cómo prefiere mantener contacto con su comunidad.",
+      "compromisoCultural": "Respetaríamos su idioma habitual y pediríamos mediación si se necesita."
     },
     {
-      "tipoFamilia": "FAMILIA_EXTENDIDA",
-      "especificacionHogar": "",
-      "notaEstructuraHogar": "Tres adultos comparten el hogar y acuerdan una figura principal de cuidado.",
+      "tipoFamilia": "OTRA",
+      "especificacionHogar": "Dos personas adultas responsables conviven con una persona mayor con autonomía.",
+      "notaEstructuraHogar": "Vivimos dos adultos con mi padre. Tenemos turnos que se complementan y hemos reservado una habitación para el niño.",
       "redApoyo": [
-        "FAMILIA_EXTENDIDA"
-      ],
-      "notaRedApoyo": "Reparten el acompañamiento cotidiano sin cambiar la figura responsable.",
-      "provincia": "HERRERA",
-      "disponibilidadViaje": "BAJA",
-      "notaDistancia": "Prioriza recibir visitas y puede planificar viajes ocasionales.",
-      "edadMinimaAceptada": 3,
-      "edadMaximaAceptada": 8,
-      "notaRangoEdad": "Acompañamiento de educación inicial y primeros grados.",
-      "disposicionHermanos": "DISPUESTA_CON_DUDAS",
-      "notaHermanos": "Desea orientación sobre cómo sostener rutinas individuales dentro del grupo.",
-      "condicionesPuedeAcompanarHoy": [
-        "ASMA"
-      ],
-      "condicionesConApoyo": [
-        "TEA"
-      ],
-      "notaCondicionesSalud": "Solicita formación antes de declarar capacidad para acompañar necesidades de desarrollo.",
-      "apoyoIdiomas": "En casa hablamos español; buscaríamos orientación para acompañar otro idioma.",
-      "respetoTradiciones": "Proponemos conocer sus celebraciones e incorporarlas de forma respetuosa.",
-      "recursosComunitarios": "Disponemos de actividades educativas y recreativas en nuestro entorno.",
-      "respetoPreferencias": "Escucharíamos sus preferencias sin exigirle adoptar nuestras costumbres.",
-      "compromisoCultural": "Mantendríamos espacios de conversación y pediríamos orientación profesional. Acompañaremos actividades recreativas de su comunidad."
-    },
-    {
-      "tipoFamilia": "PAREJA",
-      "especificacionHogar": "",
-      "notaEstructuraHogar": "Hogar de dos adultos con tiempo reservado para cuidado y adaptación gradual.",
-      "redApoyo": [
-        "PAREJA",
-        "FAMILIA_EXTENDIDA",
         "AMISTADES_O_COMUNIDAD"
       ],
-      "notaRedApoyo": "Cuenta con apoyo cercano para relevo de cuidados y gestiones.",
-      "provincia": "LOS_SANTOS",
-      "disponibilidadViaje": "MEDIA",
-      "notaDistancia": "Coordina traslados y visitas con el equipo según los horarios laborales.",
-      "edadMinimaAceptada": 0,
-      "edadMaximaAceptada": 7,
-      "notaRangoEdad": "Preparación para primera infancia y transición escolar.",
-      "disposicionHermanos": "PREFIERE_UN_SOLO_NINO",
-      "notaHermanos": "En este momento declara capacidad de cuidado para un niño.",
-      "condicionesPuedeAcompanarHoy": [],
-      "condicionesConApoyo": [
-        "DISCAPACIDAD_VISUAL",
+      "notaRedApoyo": "Mi prima puede ayudarnos cuando necesitamos cubrir una cita. Coordinamos con ella con tiempo.",
+      "provincia": "PANAMA_OESTE",
+      "disponibilidadViaje": "ALTA",
+      "notaDistancia": "Podemos viajar con algunos días de anticipación. Recibimos visitas en casa en las tardes.",
+      "edadMinimaAceptada": 5,
+      "edadMaximaAceptada": 10,
+      "notaRangoEdad": "Desean acompañar el inicio y desarrollo de la etapa escolar.",
+      "disposicionHermanos": "OTRA",
+      "notaHermanos": "Antes de definir si podemos recibir hermanos, necesitamos conversar sobre el espacio y los horarios de cada uno.",
+      "condicionesPuedeAcompanarHoy": [
         "DISCAPACIDAD_AUDITIVA"
       ],
-      "notaCondicionesSalud": "Solicita capacitación y revisión de recursos de accesibilidad antes de asumir esos cuidados.",
-      "apoyoIdiomas": "Nos apoyaríamos en recursos educativos y mediación lingüística si fueran necesarios.",
-      "respetoTradiciones": "Compartiríamos relatos, música y comidas importantes para su historia.",
-      "recursosComunitarios": "Buscaríamos talleres artísticos y espacios culturales accesibles.",
-      "respetoPreferencias": "Acordaríamos las actividades culturales según sus intereses y madurez.",
-      "compromisoCultural": "Organizaríamos tiempo para sus actividades significativas y revisaríamos juntos su adaptación. Revisaremos juntos los apoyos que necesita."
+      "condicionesConApoyo": [
+        "ASMA"
+      ],
+      "notaCondicionesSalud": "Podemos facilitar la comunicación con un niño con discapacidad auditiva. Para el asma podemos acompañar si recibimos capacitación y un plan de atención por escrito.",
+      "apoyoIdiomas": "Usamos español y conocimos estrategias de comunicación visual al acompañar a un familiar.",
+      "respetoTradiciones": "Nos interesa incorporar actividades o celebraciones importantes para el niño a la rutina familiar.",
+      "recursosComunitarios": "Podemos usar la biblioteca y los servicios de apoyo educativo del distrito.",
+      "respetoPreferencias": "Podrá elegir cómo participar y explicar qué actividades desea mantener.",
+      "compromisoCultural": "Solicitaríamos orientación para acompañar su idioma y conservar sus vínculos."
+    },
+    {
+      "tipoFamilia": "MONOPARENTAL",
+      "especificacionHogar": "",
+      "notaEstructuraHogar": "Vivo sola y trabajo con horario fijo. Cuento con espacio para un niño y puedo acompañar su rutina al terminar mi jornada.",
+      "redApoyo": [
+        "NINGUNA_POR_AHORA"
+      ],
+      "notaRedApoyo": "Mi hermana puede venir los fines de semana. Por ahora no tiene disponibilidad de lunes a viernes.",
+      "provincia": "VERAGUAS",
+      "disponibilidadViaje": "BAJA",
+      "notaDistancia": "No puedo trasladarme entre semana. Puedo recibir visitas después del trabajo o desplazarme un sábado con aviso.",
+      "edadMinimaAceptada": 8,
+      "edadMaximaAceptada": 14,
+      "notaRangoEdad": "Me siento preparada para acompañar a un niño de 8 a 14 años con cierta autonomía en la rutina escolar.",
+      "disposicionHermanos": "PREFIERE_UN_SOLO_NINO",
+      "notaHermanos": "En este momento solo puedo recibir a un niño. Sí podría facilitar el contacto con sus hermanos cuando el equipo organice los encuentros.",
+      "condicionesPuedeAcompanarHoy": [],
+      "condicionesConApoyo": [
+        "ASMA"
+      ],
+      "notaCondicionesSalud": "Podría acompañar controles de asma si recibo orientación. No puedo asumir el cuidado de la diabetes con mi horario actual.",
+      "apoyoIdiomas": "Hablo español. Buscaría acompañamiento para mantener otro idioma que el niño use en casa.",
+      "respetoTradiciones": "Le preguntaría cuál actividad familiar le gustaría conservar en su rutina.",
+      "recursosComunitarios": "Puedo acompañarlo los sábados a la biblioteca y a actividades del centro comunitario.",
+      "respetoPreferencias": "Evitaría cambiar sus rutinas antes de conversar con él.",
+      "compromisoCultural": "Facilitaría los contactos acordados con su familia y comunidad."
     }
   ],
   "psicologico": [
@@ -685,7 +562,18 @@
         "ADAPTACION_EMOCIONAL",
         "ACOMPANAMIENTO"
       ],
-      "orientacion": "Anticipar las actividades, presentar cambios de forma gradual y revisar cómo responde a los apoyos."
+      "orientacion": "Anticipar las actividades, presentar cambios de forma gradual y revisar cómo responde a los apoyos.",
+      "observacion": "Aceptó un cambio entre dos actividades después de anticiparle la secuencia.",
+      "hallazgo": "Participa mejor cuando conoce la secuencia y sabe qué puede elegir.",
+      "apoyo": "RUTINAS",
+      "observacionLactante": "Se aquietó al escuchar la voz habitual antes de pasar de los brazos de su cuidadora a la colchoneta.",
+      "hallazgoLactante": "La voz familiar favoreció una transición tranquila.",
+      "orientacionLactante": "Anticipar los cambios de posición con la voz y mantener el ritmo habitual de cuidado.",
+      "apoyoLactante": "RUTINAS",
+      "areasLactante": [
+        "ADAPTACION_EMOCIONAL",
+        "ACOMPANAMIENTO"
+      ]
     },
     {
       "foco": "comunicación y expresión de preferencias",
@@ -693,7 +581,18 @@
         "INTERACCION_SOCIAL",
         "ACOMPANAMIENTO"
       ],
-      "orientacion": "Ofrecer oportunidades de expresión acordes con su etapa y respetar el tiempo que necesita para responder."
+      "orientacion": "Ofrecer oportunidades de expresión acordes con su etapa y respetar el tiempo que necesita para responder.",
+      "observacion": "Usó gestos o palabras para pedir que se repitiera una consigna y para escoger entre dos actividades.",
+      "hallazgo": "Utiliza recursos de comunicación para orientar la interacción cuando dispone de tiempo.",
+      "apoyo": "EMOCIONAL",
+      "observacionLactante": "Orientó la mirada hacia el adulto al escuchar su nombre y respondió con sonidos durante el intercambio.",
+      "hallazgoLactante": "La voz y la pausa del adulto favorecieron el intercambio.",
+      "orientacionLactante": "Dar tiempo para responder a la voz y continuar el intercambio con sonidos suaves.",
+      "apoyoLactante": "EMOCIONAL",
+      "areasLactante": [
+        "INTERACCION_SOCIAL",
+        "ACOMPANAMIENTO"
+      ]
     },
     {
       "foco": "vínculos con figuras de referencia",
@@ -701,7 +600,18 @@
         "RELACIONES_AFECTIVAS",
         "ADAPTACION_EMOCIONAL"
       ],
-      "orientacion": "Coordinar transiciones de cuidado con figuras estables y conservar los contactos autorizados."
+      "orientacion": "Coordinar transiciones de cuidado con figuras estables y conservar los contactos autorizados.",
+      "observacion": "Buscó la mirada de la persona de referencia y retomó la actividad después de obtener una respuesta.",
+      "hallazgo": "La presencia de una figura de confianza favoreció su participación.",
+      "apoyo": "VINCULOS",
+      "observacionLactante": "Dirigió la mirada hacia su cuidadora tras escuchar un sonido nuevo y volvió a explorar el material.",
+      "hallazgoLactante": "La presencia de una figura de referencia favoreció que retomara la exploración.",
+      "orientacionLactante": "Mantener la participación de figuras de cuidado conocidas durante cambios de entorno.",
+      "apoyoLactante": "VINCULOS",
+      "areasLactante": [
+        "RELACIONES_AFECTIVAS",
+        "ADAPTACION_EMOCIONAL"
+      ]
     },
     {
       "foco": "participación en actividades compartidas",
@@ -709,7 +619,18 @@
         "INTERACCION_SOCIAL",
         "CONDUCTA"
       ],
-      "orientacion": "Proponer actividades de interés, observar la participación y ajustar la duración y las consignas."
+      "orientacion": "Proponer actividades de interés, ajustar la duración y las consignas.",
+      "observacion": "Esperó su turno tras una indicación breve y compartió los materiales de la actividad.",
+      "hallazgo": "Las instrucciones breves facilitaron su participación en el intercambio.",
+      "apoyo": "EMOCIONAL",
+      "observacionLactante": "Siguió con la mirada el material que le presentó la persona cuidadora y mantuvo la atención durante intercambios breves.",
+      "hallazgoLactante": "Los intercambios breves facilitaron su participación.",
+      "orientacionLactante": "Ofrecer momentos breves de interacción y detener la actividad cuando aparte la mirada.",
+      "apoyoLactante": "EMOCIONAL",
+      "areasLactante": [
+        "INTERACCION_SOCIAL",
+        "CONDUCTA"
+      ]
     },
     {
       "foco": "recursos de aprendizaje",
@@ -717,7 +638,18 @@
         "APRENDIZAJE",
         "ACOMPANAMIENTO"
       ],
-      "orientacion": "Adecuar materiales y tiempos a su escolaridad y a la información documentada, sin asumir dificultades no evaluadas."
+      "orientacion": "Adecuar materiales y tiempos a su escolaridad y a la información documentada, sin asumir dificultades no evaluadas.",
+      "observacion": "Volvió a intentar una consigna al contar con un ejemplo concreto.",
+      "hallazgo": "La demostración práctica facilitó que retomara una tarea nueva.",
+      "apoyo": "EDUCATIVO",
+      "observacionLactante": "Siguió el movimiento lento de un objeto y volvió a mirarlo después de una pausa.",
+      "hallazgoLactante": "La presentación gradual y las pausas sostuvieron su atención.",
+      "orientacionLactante": "Presentar un objeto por vez y respetar las pausas para explorar.",
+      "apoyoLactante": "RUTINAS",
+      "areasLactante": [
+        "APRENDIZAJE",
+        "ACOMPANAMIENTO"
+      ]
     },
     {
       "foco": "necesidades de acompañamiento",
@@ -725,7 +657,18 @@
         "ACOMPANAMIENTO",
         "ADAPTACION_EMOCIONAL"
       ],
-      "orientacion": "Coordinar el seguimiento con trabajo social y las personas responsables, tomando como base los apoyos registrados."
+      "orientacion": "Coordinar el seguimiento con trabajo social y las personas responsables, tomando como base los apoyos registrados.",
+      "observacion": "Aceptó ayuda para iniciar la actividad y continuó con menor acompañamiento en el segundo intento.",
+      "hallazgo": "El apoyo inicial facilitó que participara con mayor autonomía.",
+      "apoyo": "EMOCIONAL",
+      "observacionLactante": "Apartó la mirada cuando aumentó el ruido y reanudó el contacto visual al disminuir el estímulo.",
+      "hallazgoLactante": "Un ambiente con menor estimulación favoreció el intercambio observado.",
+      "orientacionLactante": "Coordinar periodos breves de interacción en un ambiente tranquilo, con descansos según su respuesta.",
+      "apoyoLactante": "EMOCIONAL",
+      "areasLactante": [
+        "ACOMPANAMIENTO",
+        "ADAPTACION_EMOCIONAL"
+      ]
     },
     {
       "foco": "manejo gradual de los cambios",
@@ -733,7 +676,18 @@
         "ADAPTACION_EMOCIONAL",
         "CONDUCTA"
       ],
-      "orientacion": "Organizar transiciones previsibles, explicar lo que ocurrirá con recursos comprensibles y revisar las respuestas en contexto."
+      "orientacion": "Organizar transiciones previsibles, explicar lo que ocurrirá con recursos comprensibles y revisar las respuestas en contexto.",
+      "observacion": "Se detuvo ante un cambio de material y retomó la actividad cuando pudo escoger cómo continuar.",
+      "hallazgo": "La anticipación y la posibilidad de elegir favorecieron la adaptación al cambio.",
+      "apoyo": "RUTINAS",
+      "observacionLactante": "Se sobresaltó ante un cambio de sonido y se calmó cuando su cuidadora le habló.",
+      "hallazgoLactante": "La intervención de la cuidadora facilitó la recuperación tras el cambio observado.",
+      "orientacionLactante": "Introducir estímulos nuevos gradualmente y mantener cerca a la persona cuidadora.",
+      "apoyoLactante": "RUTINAS",
+      "areasLactante": [
+        "ADAPTACION_EMOCIONAL",
+        "CONDUCTA"
+      ]
     },
     {
       "foco": "fortalezas e intereses cotidianos",
@@ -741,7 +695,18 @@
         "INTERACCION_SOCIAL",
         "RELACIONES_AFECTIVAS"
       ],
-      "orientacion": "Incorporar intereses documentados en actividades de vinculación y revisar con el equipo los recursos disponibles."
+      "orientacion": "Incorporar intereses documentados en actividades de vinculación con materiales que pueda usar en su entorno.",
+      "observacion": "Mostró mayor iniciativa cuando la actividad incluyó materiales de su interés.",
+      "hallazgo": "Sus intereses ofrecen recursos concretos para favorecer la expresión y la participación.",
+      "apoyo": "VINCULOS",
+      "observacionLactante": "Volvió espontáneamente la mirada hacia el material con el que inició la actividad.",
+      "hallazgoLactante": "La atención se mantuvo durante el intercambio con un objeto que ya había explorado.",
+      "orientacionLactante": "Incorporar materiales conocidos en el juego acompañado y seguir las señales de interés.",
+      "apoyoLactante": "VINCULOS",
+      "areasLactante": [
+        "INTERACCION_SOCIAL",
+        "RELACIONES_AFECTIVAS"
+      ]
     }
   ]
 }

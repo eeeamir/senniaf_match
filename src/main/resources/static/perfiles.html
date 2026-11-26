@@ -503,19 +503,11 @@ function culturaDetalle(datos) {
     <details id="identidadCultural" class="detalle-grupo pro-detalle-amplio">
       <summary>${Profesionales.icono('personas')}Identidad y continuidad cultural</summary>
       <div class="cultura-contenido">
-        ${mostrarAnterior ? `
-          <aside class="cultura-antecedente">
-            <h3>Información cultural registrada anteriormente</h3>
-            <p class="pro-texto-registrado">${limpiarHtml(datos.contextoCultural)}</p>
-            <p class="ayuda">Este antecedente se conserva sin reinterpretarlo
-              ni repartirlo entre los nuevos campos.</p>
-          </aside>` : ''}
         <dl class="detalle-datos cultura-campos">
-          ${CAMPOS_CULTURA.map(([campo, titulo, ayuda]) => `
-            <div>
-              <dt>${titulo}</dt><dd>${limpiarHtml(datos[campo] || 'Sin información registrada')}</dd>
-              <p class="ayuda">${ayuda}.</p>
-            </div>`).join('')}
+          ${CAMPOS_CULTURA.map(([campo, titulo]) => `
+            <div><dt>${titulo}</dt><dd class="pro-texto-registrado">${limpiarHtml(datos[campo]?.trim() || 'Sin información registrada')}</dd></div>`).join('')}
+          ${mostrarAnterior ? `<div><dt>Contexto cultural</dt>
+            <dd class="pro-texto-registrado">${limpiarHtml(datos.contextoCultural)}</dd></div>` : ''}
         </dl>
         <p data-cultura-estado role="status"></p>
       </div>

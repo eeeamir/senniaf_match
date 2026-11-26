@@ -9,7 +9,7 @@ const EjemplosDemo = {
     }
     const escenarios=this.catalogo[tipo];
     if(!escenarios?.length)throw new Error('No hay escenarios disponibles para este formulario.');
-    const clave='senniaf.ejemplos.'+tipo;
+    const clave='senniaf.ejemplos.'+tipo+'.'+escenarios.length;
     let estado=this.bolsas[tipo];
     if(!estado){
       try{const guardado=JSON.parse(sessionStorage.getItem(clave)||'null');if(guardado&&Array.isArray(guardado.pendientes)&&guardado.pendientes.every(i=>Number.isInteger(i)&&i>=0&&i<escenarios.length)&&new Set(guardado.pendientes).size===guardado.pendientes.length)estado=guardado;}catch(e){/* El almacenamiento es opcional. */}

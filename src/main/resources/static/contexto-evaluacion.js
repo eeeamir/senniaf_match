@@ -39,22 +39,42 @@ const ContextoPsicologico={
   const ejemplo=await EjemplosDemo.siguiente('psicologico');
   const form=document.getElementById('formEvaluacion');
   if(!Profesionales.formulariosBase.has(form))Profesionales.marcarGuardado(form);
-  const edad=expediente.unidadEdad==='MESES'?0:expediente.edad;
-  const etapa=edad<6?'Observar el juego, la comunicación, la exploración y la respuesta a las figuras de cuidado, de acuerdo con su etapa de desarrollo.':edad<12?'Explorar sus actividades de juego, las relaciones con pares y la experiencia escolar de acuerdo con el nivel registrado.':'Dar espacio a su participación, sus intereses, la autonomía progresiva y las expectativas sobre los cambios de cuidado.';
-  const escolar=expediente.nivelEscolar==='NO_ESCOLARIZADO'?'El expediente indica que no está escolarizado; no corresponde atribuirle rendimiento académico.':`Escolaridad registrada: ${Profesionales.etiqueta(expediente.nivelEscolar)}. No se presume un nivel por la edad.`;
-  const hermanos=expediente.tieneHermanos==='SI'?`El expediente registra ${expediente.cantidadHermanos??'una cantidad pendiente de confirmar de'} hermanos; revisar los vínculos y las orientaciones autorizadas.`:expediente.tieneHermanos==='NO'?'El expediente indica que no tiene hermanos.':'La información sobre hermanos está pendiente; debe verificarse antes de extraer conclusiones.';
-  const apoyo=expediente.necesidadesApoyo||'Completar con el equipo la información sobre apoyos requeridos.';
-  const valores={
-   evaluacionPsicologica:`Ejemplo para ${expediente.codigoCaso}, de ${Profesionales.edad(expediente)}. Se propone revisar los siguientes aspectos: ${ejemplo.foco}. ${etapa} ${escolar}`,
-   observacionesPsicologicas:`Revisar las respuestas durante actividades cotidianas y diferenciar la conducta observada de su interpretación. ${hermanos} Las observaciones de este ejemplo deben ajustarse a lo efectivamente registrado por el profesional.`,
-   hallazgosProfesionales:`La información del expediente orienta la revisión de ${ejemplo.foco}. Necesidades de apoyo documentadas: ${apoyo} No se infieren diagnósticos ni antecedentes adicionales a partir de estos datos.`,
-   recomendacionesPsicologicas:`${ejemplo.orientacion} ${etapa} Coordinar las orientaciones con el seguimiento social y de salud ya documentado.`
+  const lactante = expediente.unidadEdad === 'MESES';
+  const primeraInfancia = lactante || expediente.edad < 5;
+  const actividad = lactante ? 'observación del juego y la interacción con su cuidador'
+    : primeraInfancia ? 'observación del juego y la comunicación'
+    : expediente.edad < 12 ? 'entrevista y actividad de expresión con materiales escogidos'
+    : 'entrevista individual sobre sus rutinas, intereses y decisiones cotidianas';
+  const antecedentes = [
+    expediente.nivelEscolar && expediente.nivelEscolar !== 'NO_ESCOLARIZADO'
+      ? 'Escolaridad registrada: ' + Profesionales.etiqueta(expediente.nivelEscolar) + '.' : '',
+    expediente.habilidadesDetalle, expediente.gustosDetalle, expediente.personalidadDetalle,
+    expediente.hermanosDetalle, expediente.idiomaComunicacion, expediente.vinculosCulturales,
+    expediente.condicionesSaludDetalle
+  ].filter(Boolean).join(' ');
+  const observacion = lactante ? ejemplo.observacionLactante : ejemplo.observacion;
+  const hallazgo = lactante ? ejemplo.hallazgoLactante : ejemplo.hallazgo;
+  const apoyo = expediente.necesidadesApoyo;
+  const continuidad = expediente.idiomaComunicacion || expediente.vinculosCulturales
+    ? 'Acordar con la persona cuidadora qué formas de comunicación y vínculos se deben preservar.' : '';
+  const valores = {
+    evaluacionPsicologica: `Se realizó una ${actividad} con énfasis en ${ejemplo.foco}. ${hallazgo}`,
+    observacionesPsicologicas: [observacion, antecedentes && 'Antecedentes pertinentes del expediente: ' + antecedentes].filter(Boolean).join(' '),
+    hallazgosProfesionales: [hallazgo, apoyo && 'Necesidades de apoyo registradas: ' + apoyo].filter(Boolean).join(' '),
+    recomendacionesPsicologicas: [lactante ? ejemplo.orientacionLactante : ejemplo.orientacion, continuidad].filter(Boolean).join(' ')
   };
   Object.entries(valores).forEach(([id,v])=>{const c=document.getElementById(id);c.value=v;c.setCustomValidity('');});
-  document.querySelectorAll('[name="areasObservadas"]').forEach(c=>c.checked=ejemplo.areas.includes(c.value));
+  document.querySelectorAll('[name="areasObservadas"]').forEach(c=>c.checked=(lactante ? ejemplo.areasLactante : ejemplo.areas).includes(c.value));
   document.getElementById('sinDiagnostico').checked=true;document.getElementById('diagnosticoProfesional').value='';
   document.getElementById('sinDiagnostico').dispatchEvent(new Event('change',{bubbles:true}));
-  this.cargar({formato:1,metodos:['REVISION_ANTECEDENTES'],apoyos:['EMOCIONAL','RUTINAS','VINCULOS'],detalleAcompanamiento:`${ejemplo.orientacion} Apoyos consignados: ${apoyo}`});
+  this.cargar({
+    formato: 1,
+    metodos: primeraInfancia ? ['OBSERVACION_DIRECTA', 'REVISION_ANTECEDENTES']
+      : expediente.edad < 12 ? ['ENTREVISTA_INDIVIDUAL', 'OBSERVACION_DIRECTA']
+      : ['ENTREVISTA_INDIVIDUAL', 'REVISION_ANTECEDENTES'],
+    apoyos: [lactante ? ejemplo.apoyoLactante : ejemplo.apoyo],
+    detalleAcompanamiento: valores.recomendacionesPsicologicas
+  });
   document.getElementById('cargarEjemploPsicologico').textContent='Cargar otro ejemplo';
  },
  informe(c){

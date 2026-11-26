@@ -1279,9 +1279,12 @@ async function cargarEjemploInfantil() {
   if(!Profesionales.formulariosBase.has(formulario))Profesionales.marcarGuardado(formulario);
   const ejemplo=await EjemplosDemo.siguiente('nino');
   const profesional=document.getElementById('idFuncionario').value;
+  const contexto=document.getElementById('contextoCultural');
+  const antecedente=contexto.value;
   formulario.reset();document.getElementById('idFuncionario').value=profesional;
   delete document.getElementById('edad').dataset.historicaSinMeses;document.getElementById('ayudaEdadHistorica').hidden=true;
   EjemplosDemo.aplicar(formulario,ejemplo);
+  if(contexto.readOnly)contexto.value=antecedente;
   ReglasPerfil.refrescarNino(ejemplo.gradoEscolar);
   actualizarAvisoMedico();
   document.getElementById('btnEjemplo').textContent='Cargar otro ejemplo';
