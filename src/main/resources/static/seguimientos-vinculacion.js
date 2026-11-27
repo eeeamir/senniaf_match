@@ -340,38 +340,43 @@ const SeguimientosVinculacion = {
     cabecera.append(titulo);
     cabecera.insertAdjacentHTML('beforeend', this.contexto(vinculacion));
     dialogo.insertAdjacentHTML('beforeend', `
-      <p class="seguimiento-etapa">Etapa del proceso <strong data-etapa></strong></p>
       <form class="pro-interrupcion-form" novalidate>
-        <div class="seguimiento-cabecera-campos">
-          <label>Fecha de atención *<input type="date" lang="es-PA" name="fechaAtencion" required min="${limpiarHtml(datos.primeraFecha)}" max="${limpiarHtml(datos.hoy)}"></label>
-          <label>Tipo de seguimiento *<select name="tipo" required><option value="">Selecciona el tipo de seguimiento</option>
-          ${Object.entries(especialidad.tipos).filter(([tipo]) => !['ENCUENTRO', 'ENTREVISTA'].includes(tipo) || tipo === registro?.contenido.tipo).map(([valor, nombre]) => `<option value="${valor}">${nombre}</option>`).join('')}
-          </select></label>
-        </div>
-        <fieldset class="seguimiento-participantes">
-          <legend>Participantes (opcional) <small>Selecciona uno o varios</small></legend>
-          <div class="pro-sugerencias">
-            ${this.opcionesParticipantes.map(nombre => `
-              <label class="seguimiento-opcion"><input type="checkbox" value="${nombre}">
-                <span class="pro-sugerencia">${Profesionales.icono('comprobar')}${nombre}</span></label>`).join('')}
+        <div class="seguimiento-desplazable">
+          <p class="seguimiento-etapa">Etapa del proceso <strong data-etapa></strong></p>
+          <div class="seguimiento-cabecera-campos">
+            <label>Fecha de atención *<input type="date" lang="es-PA" name="fechaAtencion" required min="${limpiarHtml(datos.primeraFecha)}" max="${limpiarHtml(datos.hoy)}"></label>
+            <label>Tipo de seguimiento *<select name="tipo" required><option value="">Selecciona el tipo de seguimiento</option>
+            ${Object.entries(especialidad.tipos).filter(([tipo]) => !['ENCUENTRO', 'ENTREVISTA'].includes(tipo) || tipo === registro?.contenido.tipo).map(([valor, nombre]) => `<option value="${valor}">${nombre}</option>`).join('')}
+            </select></label>
           </div>
-          <label hidden>Especifica quién participó<textarea id="seguimiento-otro-participante" rows="1" maxlength="500"></textarea></label>
-          <input type="hidden" name="participantes">
-        </fieldset>
-        <h3>Observaciones profesionales</h3>
-        ${Object.entries(especialidad.campos).map(([campo, etiqueta]) => `
-          <div><label for="seguimiento-${campo}">${etiqueta} *</label>
-          <p class="seguimiento-pregunta" id="pregunta-${campo}"></p>
-          <textarea id="seguimiento-${campo}" name="${campo}" aria-describedby="pregunta-${campo}" rows="2" maxlength="2000" required></textarea></div>`).join('')}
-        <label>Fecha prevista del próximo seguimiento (opcional)<input type="date" lang="es-PA" name="proximoSeguimiento"></label>
-        ${registro ? '<label>Motivo de modificación (opcional)<textarea name="motivoModificacion" rows="2" maxlength="1000"></textarea></label>' : ''}
-        <p class="mensaje error" role="alert" hidden></p>
-        <div class="pro-acciones">
-          <button class="boton secundario" type="button" data-cancelar>Cancelar</button>
-          <button class="boton" type="submit">${registro ? 'Guardar cambios' : 'Guardar seguimiento'}</button>
+          <fieldset class="seguimiento-participantes">
+            <legend>Participantes (opcional) <small>Selecciona uno o varios</small></legend>
+            <div class="pro-sugerencias">
+              ${this.opcionesParticipantes.map(nombre => `
+                <label class="seguimiento-opcion"><input type="checkbox" value="${nombre}">
+                  <span class="pro-sugerencia">${Profesionales.icono('comprobar')}${nombre}</span></label>`).join('')}
+            </div>
+            <label hidden>Especifica quién participó<textarea id="seguimiento-otro-participante" rows="1" maxlength="500"></textarea></label>
+            <input type="hidden" name="participantes">
+          </fieldset>
+          <h3>Observaciones profesionales</h3>
+          ${Object.entries(especialidad.campos).map(([campo, etiqueta]) => `
+            <div><label for="seguimiento-${campo}">${etiqueta} *</label>
+            <p class="seguimiento-pregunta" id="pregunta-${campo}"></p>
+            <textarea id="seguimiento-${campo}" name="${campo}" aria-describedby="pregunta-${campo}" rows="2" maxlength="2000" required></textarea></div>`).join('')}
+          <label>Fecha prevista del próximo seguimiento (opcional)<input type="date" lang="es-PA" name="proximoSeguimiento"></label>
+          ${registro ? '<label>Motivo de modificación (opcional)<textarea name="motivoModificacion" rows="2" maxlength="1000"></textarea></label>' : ''}
         </div>
+        <footer class="seguimiento-pie">
+          <p class="mensaje error" role="alert" hidden></p>
+          <div class="pro-acciones">
+            <button class="boton secundario" type="button" data-cancelar>Cancelar</button>
+            <button class="boton" type="submit">${registro ? 'Guardar cambios' : 'Guardar seguimiento'}</button>
+          </div>
+        </footer>
       </form>`);
     const form = dialogo.querySelector('form');
+    form.querySelector('.seguimiento-desplazable').prepend(cabecera);
     CamposFormulario.iniciar(form);
     const {fechaAtencion: fecha, proximoSeguimiento: proxima, tipo} = form.elements;
     fecha.value = registro?.fechaAtencion || datos.hoy;

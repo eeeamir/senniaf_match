@@ -444,7 +444,8 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .completadas .visita-contador, .visita-previstas span { color: #087d68; }
 #seguimiento-reportes .menta .vinculacion-emblema, .seguimiento-dialogo.menta .vinculacion-emblema { color: #087d68; background: #e5f4ef; }
 #seguimiento-reportes .lavanda .vinculacion-emblema, .seguimiento-dialogo.lavanda .vinculacion-emblema { color: #694798; background: #f0eaf8; }
-.seguimiento-dialogo { width: min(740px, calc(100% - 1.5rem)); max-width: 740px; box-sizing: border-box; }
+.seguimiento-dialogo { width: min(740px, calc(100% - 1.5rem)); max-width: 740px; box-sizing: border-box; overflow: hidden; }
+.seguimiento-dialogo[open] { display: flex; flex-direction: column; }
 .seguimiento-titulo { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: .65rem; }
 .seguimiento-titulo .vinculacion-emblema { grid-row: span 2; border-radius: 12px; }
 .seguimiento-titulo :is(h2, p) { margin: 0; }
@@ -455,7 +456,14 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
   color: var(--sugerencia-tinta);
 }
 .seguimiento-etapa strong { display: block; }
-.seguimiento-dialogo .pro-interrupcion-form { display: grid; gap: .75rem; }
+.seguimiento-dialogo .pro-interrupcion-form {
+  display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0;
+}
+.seguimiento-desplazable {
+  display: grid; align-content: start; gap: .75rem; min-height: 0;
+  overflow-y: auto; overscroll-behavior: contain; padding: .2rem .3rem .85rem;
+}
+.seguimiento-desplazable > .seguimiento-etapa { margin: 0; }
 .seguimiento-dialogo .seguimiento-cabecera-campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
 .seguimiento-dialogo form label { display: block; font-weight: 600; }
 .seguimiento-dialogo form :is(input, select, textarea) { min-width: 0; margin-top: .25rem; }
@@ -464,10 +472,9 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .s8-acabado .seguimiento-dialogo form textarea { min-height: 0; padding: .45rem .75rem; resize: vertical; }
 .seguimiento-dialogo .seguimiento-pregunta { margin: .15rem 0 .2rem; color: #435367; }
 .seguimiento-dialogo .pro-sugerencias { margin: .25rem 0 0; gap: .35rem; }
-.seguimiento-dialogo form > .pro-acciones {
-  position: sticky; bottom: 0; z-index: 1; margin: 0; padding: .65rem 0 .25rem;
-  background: #fff; border-top: 1px solid #dce5ee;
-}
+.seguimiento-pie { padding: .65rem 0 .25rem; background: #fff; border-top: 1px solid #dce5ee; }
+.seguimiento-dialogo form .seguimiento-pie .pro-acciones { margin: 0; }
+.seguimiento-dialogo .seguimiento-pie .mensaje { margin: 0 0 .65rem; }
 @media (max-width: 600px) {
   .seguimiento-dialogo .seguimiento-cabecera-campos { grid-template-columns: minmax(0, 1fr); }
   .reporte-accion .boton { width: 100%; }
