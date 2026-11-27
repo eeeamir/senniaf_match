@@ -84,7 +84,7 @@ const Familia = {
       <section class="tarjeta">
         <h2>${Profesionales.icono('solicitudes')}Preparación del expediente familiar</h2>
         <p>${limpiarHtml(estado)}</p>
-        ${disponibleDeNuevo ? `<p>Tu expediente está disponible nuevamente para nuevas propuestas.</p>
+        ${disponibleDeNuevo ? `<p>Tu expediente está disponible para recibir nuevas propuestas</p>
           <ol class="familia-etapas">
           ${['Propuesta del Comité','Respuesta familiar','Acompañamiento e interrelación','Autorización preadoptiva','Convivencia preadoptiva'].map((etapa, indice) =>
             `<li class="${indice === 0 ? 'actual' : 'pendiente'}"><span class="familia-paso">${indice + 1}</span><strong>${etapa}</strong><small>${indice === 0 ? 'En espera de propuesta' : 'No iniciada'}</small></li>`).join('')}

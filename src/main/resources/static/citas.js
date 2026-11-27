@@ -1,12 +1,12 @@
 /* Solicitudes durante la vinculación; permisos, agenda y transiciones se validan en el servidor. */
 const Citas = {
   motivos: {
-    ORIENTACION: ['Orientación durante la vinculación', 'Deseo solicitar una cita para recibir orientación sobre mi proceso de vinculación'],
-    SEGUIMIENTO: ['Seguimiento de la vinculación', 'Me gustaría solicitar una cita para conversar sobre el seguimiento de mi proceso de vinculación'],
-    ENCUENTRO: ['Coordinación de un encuentro', 'Deseo solicitar una cita para coordinar un encuentro relacionado con mi proceso de vinculación'],
-    OBSERVACION: ['Consulta sobre una observación', 'Me gustaría aclarar una observación relacionada con mi proceso de vinculación'],
-    DUDAS: ['Aclaración de dudas', 'Deseo solicitar una cita para resolver algunas dudas relacionadas con mi proceso de vinculación'],
-    OTRO: ['Otro motivo', ''],
+    ORIENTACION: ['Orientación durante la vinculación', 'Deseo solicitar una cita para recibir orientación sobre mi proceso de vinculación', 'brujula'],
+    SEGUIMIENTO: ['Seguimiento de la vinculación', 'Me gustaría solicitar una cita para conversar sobre el seguimiento de mi proceso de vinculación', 'solicitudes'],
+    ENCUENTRO: ['Coordinación de un encuentro', 'Deseo solicitar una cita para coordinar un encuentro relacionado con mi proceso de vinculación', 'personas'],
+    OBSERVACION: ['Consulta sobre una observación', 'Me gustaría aclarar una observación relacionada con mi proceso de vinculación', 'conversacion'],
+    DUDAS: ['Aclaración de dudas', 'Deseo solicitar una cita para resolver algunas dudas relacionadas con mi proceso de vinculación', 'pregunta'],
+    OTRO: ['Otro motivo', '', 'calendario'],
   },
   rechazos: {
     SIN_DISPONIBILIDAD: ['Sin disponibilidad en la fecha propuesta', 'Por el momento no contamos con disponibilidad para la fecha y hora solicitadas. Puede presentar otra propuesta'],
@@ -21,9 +21,13 @@ const Citas = {
     OTRO: ['Otro motivo', ''],
   },
   estados: {
-    PENDIENTE: ['Pendiente', 'reloj'], CONFIRMADA: ['Confirmada', 'comprobar'],
-    CAMBIO_PROPUESTO: ['Cambio propuesto', 'calendario'], RECHAZADA: ['Rechazada', 'cerrar'],
+    PENDIENTE: ['Pendiente de respuesta', 'reloj'], CONFIRMADA: ['Confirmada', 'confirmarFecha'],
+    CAMBIO_PROPUESTO: ['Cambio de horario propuesto', 'calendario'], RECHAZADA: ['Rechazada', 'rechazo'],
     CANCELADA: ['Cancelada', 'cerrar'], REALIZADA: ['Realizada', 'comprobar'],
+  },
+  estadosResultado: {
+    PENDIENTE_RESULTADO: ['Pendiente de confirmación de realización', 'reloj'],
+    INASISTENCIA: ['Inasistencia', 'inasistencia'],
   },
   acciones: {
     ACEPTAR: ['Aceptar', 'Confirmar cita', 'Confirmar cita'],
@@ -108,20 +112,24 @@ const Citas = {
     visibles.sort((a,b) => prioridad(a) - prioridad(b)
       || (prioridad(a) === 2 ? -1 : 1) * (new Date(a.inicio) - new Date(b.inicio)) || a.id - b.id);
     lista.innerHTML = visibles.map(c => {
-      const estado = c.pendienteResultado ? ['Pendiente de confirmación','reloj']
-        : c.inasistencia ? ['Inasistencia','cerrar'] : this.estados[c.estado];
+      const estadoVisual = c.pendienteResultado ? 'PENDIENTE_RESULTADO' : c.inasistencia ? 'INASISTENCIA' : c.estado;
+      const [etiqueta, iconoEstado] = this.estados[estadoVisual] || this.estadosResultado[estadoVisual];
+      const [motivo,, iconoMotivo] = this.motivos[c.motivo] || ['Solicitud de cita', '', 'calendario'];
       const explicacion = c.pendienteResultado ? 'El horario programado terminó y aún no se ha registrado el resultado.'
         : c.inasistencia ? 'Trabajo Social registró una inasistencia.' : this.familia ? ({PENDIENTE:'Tu solicitud fue enviada y está pendiente de respuesta de Trabajo Social.',CONFIRMADA:'Tu cita está confirmada para el horario acordado.',CAMBIO_PROPUESTO:'Trabajo Social propuso un nuevo horario. Revisa la propuesta y responde.',RECHAZADA:'Trabajo Social rechazó esta solicitud. Consulta su respuesta.',CANCELADA:'Esta solicitud fue cancelada y ya no está activa.',REALIZADA:'La cita se completó.'})[c.estado] : ({PENDIENTE:'Revisa la solicitud y responde a la familia.',CONFIRMADA:'El horario está confirmado.',CAMBIO_PROPUESTO:'La propuesta está pendiente de respuesta de la familia.',RECHAZADA:'La solicitud fue rechazada.',CANCELADA:'La solicitud ya no está activa.',REALIZADA:'La cita se completó.'})[c.estado];
       return `<article class="tarjeta citas-tarjeta ${prioridad(c) === 0 ? 'citas-requiere-atencion' : ''}" id="cita-${Number(c.id)}" tabindex="-1">
-        <header class="citas-cabecera"><div><p>${limpiarHtml(c.vinculacion)}${this.familia ? '' : ' · Familia ' + limpiarHtml(c.familia)}</p><h2>${limpiarHtml(this.motivos[c.motivo]?.[0] || 'Solicitud de cita')}</h2></div>
-        <span class="citas-estado citas-estado-${c.pendienteResultado ? 'PENDIENTE' : limpiarHtml(c.estado)}">${Profesionales.icono(estado[1])}${limpiarHtml(estado[0])}</span></header>
+        <header class="citas-cabecera"><div class="citas-identificacion">
+          <span class="citas-motivo-icono">${Profesionales.icono(iconoMotivo)}</span>
+          <div><p>CITA-${String(Number(c.id)).padStart(3, '0')} · ${limpiarHtml(c.vinculacion)}${this.familia ? '' : ' · Familia ' + limpiarHtml(c.familia)}</p>
+          <h2>${limpiarHtml(motivo)}</h2></div></div>
+          <span class="citas-estado citas-estado-${limpiarHtml(estadoVisual)}">${Profesionales.icono(iconoEstado)}${limpiarHtml(etiqueta)}</span></header>
         <p class="citas-explicacion">${limpiarHtml(explicacion)}</p>
-        <dl class="citas-datos"><div><dt>${Profesionales.icono('calendario')}${['CONFIRMADA', 'REALIZADA'].includes(c.estado) ? 'Fecha acordada' : ['PENDIENTE', 'CAMBIO_PROPUESTO'].includes(c.estado) ? 'Fecha propuesta' : 'Fecha registrada'}</dt><dd>${limpiarHtml(this.fecha(c.inicio))}</dd></div>
+        <dl class="citas-datos"><div><dt>${Profesionales.icono('calendario')}${['CONFIRMADA', 'REALIZADA'].includes(c.estado) ? 'Fecha acordada' : ['PENDIENTE', 'CAMBIO_PROPUESTO'].includes(c.estado) ? 'Fecha propuesta' : 'Fecha programada'}</dt><dd>${limpiarHtml(this.fecha(c.inicio))}</dd></div>
         <div><dt>${Profesionales.icono('reloj')}Inicio · Panamá</dt><dd>${limpiarHtml(this.hora(c.hora))}</dd></div><div><dt>${Profesionales.icono('reloj')}Finalización</dt><dd>${limpiarHtml(this.horaInstante(c.fin))}</dd></div>
         <div><dt>${Profesionales.icono('reloj')}Duración${['PENDIENTE', 'CAMBIO_PROPUESTO'].includes(c.estado) ? ' estimada' : ''}</dt><dd>${c.duracion === 60 ? '1 hora' : '2 horas'}</dd></div></dl>
         <div class="citas-mensaje"><strong>${Profesionales.icono('informe')}${c.ultimoRol === 'TRABAJADOR_SOCIAL' ? 'Respuesta de Trabajo Social' : this.familia ? 'Tu mensaje' : 'Mensaje de la familia'}</strong><p>${limpiarHtml(c.mensaje)}</p></div>
 
-        <div class="citas-acciones">${c.acciones.map(a => `<button type="button" class="boton ${['RECHAZAR', 'PROPONER', 'OTRO_HORARIO', 'CANCELAR'].includes(a) ? 'secundario' : ''}" data-accion="${a}" data-cita="${Number(c.id)}">${Profesionales.icono(({ACEPTAR:'comprobar',RECHAZAR:'cerrar',PROPONER:'calendario',ACEPTAR_PROPUESTA:'comprobar',OTRO_HORARIO:'calendario',CANCELAR:'cerrar',INASISTENCIA:'cerrar',REALIZADA:'comprobar'})[a])}${limpiarHtml(a === 'CANCELAR' && c.estado === 'CONFIRMADA' ? 'Cancelar cita' : this.acciones[a][0])}</button>`).join('')}</div>
+        ${c.acciones.length ? `<div class="citas-acciones">${c.acciones.map(a => `<button type="button" class="boton ${['RECHAZAR', 'PROPONER', 'OTRO_HORARIO', 'CANCELAR'].includes(a) ? 'secundario' : ''}" data-accion="${a}" data-cita="${Number(c.id)}">${Profesionales.icono(({ACEPTAR:'comprobar',RECHAZAR:'cerrar',PROPONER:'calendario',ACEPTAR_PROPUESTA:'comprobar',OTRO_HORARIO:'calendario',CANCELAR:'cerrar',INASISTENCIA:'cerrar',REALIZADA:'comprobar'})[a])}${limpiarHtml(a === 'CANCELAR' && c.estado === 'CONFIRMADA' ? 'Cancelar cita' : this.acciones[a][0])}</button>`).join('')}</div>` : ''}
         <p class="citas-actualizada">Última actualización: ${limpiarHtml(this.fechaHora(c.actualizada))}</p>
         <details class="citas-historial" data-historial="${Number(c.id)}"><summary class="citas-historial-titulo"><span>${Profesionales.icono('reloj')}Ver historial</span><svg class="citas-chevron" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary><div data-eventos></div></details></article>`;
     }).join('');

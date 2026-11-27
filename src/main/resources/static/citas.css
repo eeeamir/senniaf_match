@@ -6,12 +6,15 @@
 .citas-pagina .citas-tarjeta { min-width: 0; margin: 0; padding: 24px; }
 .citas-pagina .citas-cabecera { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .citas-pagina .citas-cabecera h2 { margin: 4px 0 0; color: #0b3558; font-size: 21px; line-height: 1.35; }
+.citas-pagina .citas-identificacion { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.citas-pagina .citas-motivo-icono { display: grid; place-items: center; flex: 0 0 42px; height: 42px; border-radius: 50%; background: #e3efff; color: #0054cc; }
+.citas-pagina .citas-motivo-icono .pro-icono { width: 22px; height: 22px; margin: 0; }
 .citas-pagina .citas-cabecera p { margin: 0; color: #476788; }
 .citas-pagina .citas-estado { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 12px; background: #eef4ff; color: #174a80; font-size: 14px; font-weight: 700; }
 .citas-pagina .citas-estado svg { width: 19px; height: 19px; }
 .citas-pagina .citas-estado-CONFIRMADA, .citas-pagina .citas-estado-REALIZADA { background: #eaf6ee; color: #21633b; }
-.citas-pagina .citas-estado-RECHAZADA, .citas-pagina .citas-estado-CANCELADA { background: #f4f5f8; color: #4b5568; }
-.citas-pagina .citas-estado-CAMBIO_PROPUESTO { background: #fff5df; color: #705117; }
+.citas-pagina .citas-estado-CANCELADA { background: #f4f5f8; color: #4b5568; }
+.citas-pagina .citas-estado-CAMBIO_PROPUESTO, .citas-pagina .citas-estado-PENDIENTE_RESULTADO { background: #fff5df; color: #705117; }
 .citas-pagina .citas-datos { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; margin: 24px 0; padding: 18px; border: 1px solid #dce7f5; border-radius: 14px; background: #f8faff; }
 .citas-pagina .citas-datos dt { margin-bottom: 6px; color: #476788; font-size: 14px; }
 .citas-pagina .citas-datos dd { margin: 0; color: #0b3558; font-weight: 700; }
@@ -79,7 +82,7 @@
 .citas-pagina .citas-datos .pro-icono { width: 18px; height: 18px; flex-shrink: 0; }
 .citas-pagina .citas-mensaje { padding: 20px; border: 1px solid #dce7f5; border-radius: 14px; }
 .citas-pagina .citas-mensaje strong { display: flex; align-items: center; gap: 10px; }
-.citas-pagina .citas-estado-RECHAZADA { background: #fff0f0; color: #a12232; }
+.citas-pagina .citas-estado-RECHAZADA, .citas-pagina .citas-estado-INASISTENCIA { background: #fff0f0; color: #a12232; }
 .citas-pagina .citas-historial summary .pro-icono { width: 18px; height: 18px; vertical-align: middle; margin-right: 8px; }
 .citas-pagina .citas-eventos summary { font-size: 14px; font-weight: 400; }
 .citas-pagina .citas-acciones [data-accion="CANCELAR"] { color: #a12232; border-color: #e8b9bf; }

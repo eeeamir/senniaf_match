@@ -517,7 +517,7 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
   margin-top: .75rem; padding-top: .55rem; border-top: 1px solid #e1e9f1;
 }
 
-.s8-acabado .vinculacion-detalle .vinculacion-general { background: #fff; }
+.s8-acabado .vinculacion-detalle .vinculacion-general { background: #fff; padding-bottom: 16px; }
 .vinculacion-general > .pro-fila-titulo { padding-bottom: .8rem; border-bottom: 1px solid #dce5ee; }
 .vinculacion-general .vinculacion-tiempos { column-gap: 0; row-gap: 0; padding-inline: 0; }
 .vinculacion-general .vinculacion-tiempos > div { padding: .8rem 0; border-bottom: 0; }
@@ -525,6 +525,8 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .vinculacion-tiempos > div:nth-child(n+3) { border-top: 1px solid #dce5ee; }
 .vinculacion-general .vinculacion-tiempos dd { margin: .4rem 0 0; font-size: 1.12rem; font-weight: 600; }
 .vinculacion-tiempos small { display: block; margin-top: .35rem; }
+.vinculacion-general .vinculacion-tiempos > div:last-child { padding-bottom: 0; }
+.vinculacion-general .vinculacion-periodo-referencia { margin-top: 10px; font-size: .875rem; font-weight: 400; }
 .vinculacion-indicador {
   display: inline-flex; align-items: center; gap: .5rem;
   padding: .65rem .75rem; border-radius: 11px; color: #153952; background: #eaf0f5;

@@ -62,7 +62,7 @@ const Vinculaciones = {
     }
     const resultado = this.resultadosCierre[v.resultadoCierre];
     if (resultado) {
-      icono = resultado[3];
+      icono = familiar && v.resultadoCierre === 'REVOCACION_ASIGNACION' ? 'revocacion' : resultado[3];
       clase = resultado[2] === 'exito' ? 'vinculacion-positiva' : resultado[2] === 'aviso' ? 'vinculacion-interrumpida'
         : resultado[2] === 'error' ? 'vinculacion-negativa' : 'retirado';
     }
@@ -104,7 +104,6 @@ const Vinculaciones = {
               ${this.estado(v, true)}
             </header>
             ${this.progresoFamiliar(v)}
-            ${this.eventosFamiliares(v)}
             <div class="familia-propuesta-acciones">
               ${
                 v.puedeConsultarInformacion
@@ -223,10 +222,14 @@ const Vinculaciones = {
       accion =
         'No hay acciones pendientes de tu parte en esta vinculación. La disponibilidad requiere revisión institucional independiente.';
     }
-    if (v.resultadoCierre === 'REVOCACION_ASIGNACION')
-      accion = v.disponibilidadFamiliarConfirmada
-        ? 'El Comité ya confirmó la disponibilidad de tu expediente.'
-        : 'La disponibilidad de tu expediente está pendiente de revisión por el Comité.';
+    if (revocada) {
+      mensaje = 'La asignación finalizó antes de iniciar la convivencia';
+      accion = v.familiaDisponible
+        ? 'Tu expediente está disponible para recibir nuevas propuestas'
+        : v.disponibilidadFamiliarConfirmada
+          ? 'El Comité confirmó la revisión de tu expediente. Su disponibilidad actual depende de las condiciones vigentes.'
+          : 'La disponibilidad de tu expediente está pendiente de revisión por el Comité.';
+    }
     const titulos = [
       'Propuesta del Comité',
       'Respuesta familiar',
@@ -379,9 +382,9 @@ const Vinculaciones = {
           <dd>${indicador(vigente ? 'menta' : '', inicio ? 'calendario' : 'reloj',
             inicio ? this.fechaCivil(inicio) : 'Sin inicio registrado')}</dd></div>
         <div><dt>Tiempo de convivencia</dt>
-          <dd>${indicador(vigente ? 'menta' : '', vigente ? 'hogar' : 'informacion', this.tiempoConvivencia(tiempos))}
-            ${cierre ? `<small class="vinculacion-estado-convivencia">${cierre}</small>` : ''}</dd>
-          ${tiempos ? `<small>Periodo de referencia · ${tiempos.diasReferencia} días calendario</small>` : ''}</div>
+          <dd>${indicador(vigente ? 'menta' : '', vigente ? 'hogar' : 'informacion', this.tiempoConvivencia(tiempos))}${tiempos
+            ? `<small class="vinculacion-periodo-referencia">Periodo de referencia · ${tiempos.diasReferencia} días calendario</small>` : ''}${cierre
+            ? `<small class="vinculacion-estado-convivencia">${cierre}</small>` : ''}</dd></div>
       </dl>
     </section>`;
   },
@@ -416,12 +419,15 @@ const Vinculaciones = {
     const revocada = v.resultadoCierre === 'REVOCACION_ASIGNACION';
     const fechas = [v.fechaCreacion, v.fechaRespuesta, v.respuestaFamiliar === 'ACEPTADA' || revocada ? v.fechaRespuesta : null,
       v.autorizacionPreadoptiva?.registradaEl, v.autorizacionPreadoptiva?.inicioRegistradoEl];
+    const finalizada = v.estado === 'CERRADA' || v.estado === 'RECHAZADA_POR_FAMILIA';
+    const puedeActualizar = !inicio && !finalizada;
+    const aviso = `<p class="familia-siguiente">${limpiarHtml(progreso.accion)}</p>`;
     const cierre = v.seguimientoFamiliar?.cierreRegistradoEl;
     const interrupcion = v.seguimientoFamiliar?.interrupcionRegistradaEl;
     return `
       <section class="familia-seguimiento" aria-label="Progreso de ${limpiarHtml(v.codigo)}">
         <header>
-          <span class="vinculacion-emblema">${Profesionales.icono('solicitudes')}</span>
+          <span class="vinculacion-emblema ${revocada ? 'familia-emblema-revocado' : ''}">${Profesionales.icono(revocada ? 'revocacion' : 'solicitudes')}</span>
           <div><h3 class="${revocada ? 'familia-resultado-revocado' : ''}">${limpiarHtml(progreso.estado)}</h3><p>${limpiarHtml(progreso.mensaje)}</p></div>
         </header>
         ${revocada && v.motivoRevocacion ? `<p>${limpiarHtml(v.motivoRevocacion)}</p>` : ''}
@@ -429,6 +435,7 @@ const Vinculaciones = {
           ${!inicio && v.tiempos.fechaInicio ? ' · ' + this.tiempoConvivencia(v.tiempos) : ''}
           ${!inicio && v.tiempos.fechaInicio ? '<small>Referencia de convivencia · ' + v.tiempos.diasReferencia + ' días calendario</small>' : ''}
         </p>` : ''}
+        ${finalizada ? aviso : ''}
         <ol class="familia-etapas">
           ${progreso.etapas
             .map(
@@ -446,13 +453,9 @@ const Vinculaciones = {
             )
             .join('')}
         </ol>
-        ${inicio ? '' : '<button class="boton secundario chico" type="button" data-actualizar-familiar>Actualizar seguimiento</button>'}
-        <p data-estado-seguimiento-familiar role="status" hidden></p>
-        <p class="familia-siguiente">${limpiarHtml(progreso.accion)}</p>
+        ${puedeActualizar ? '<button class="boton secundario chico" type="button" data-actualizar-familiar>Actualizar seguimiento</button><p data-estado-seguimiento-familiar role="status" hidden></p>' : ''}
+        ${finalizada ? '' : aviso}
       </section>`;
-  },
-  eventosFamiliares(v) {
-    return this.lineaTiempo(this.obtenerProgreso(v).eventos);
   },
   async informacionFamiliar(id){
     try{

@@ -323,3 +323,7 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 .s8-acabado .familia-etapas .interrumpido .familia-paso { background: #fff0f0; color: #a12232; border-color: #a12232; }
 .s8-acabado .familia-etapas .interrumpido small { color: #a12232; }
 .s8-acabado .vinculacion-cierre p, .s8-acabado .vinculacion-linea p { color: #476788; }
+
+.s8-acabado .familia-seguimiento > header > .familia-emblema-revocado { background: #fff0f0; color: #a12232; }
+.familia-seguimiento .familia-siguiente:has(+ .familia-etapas) { margin-top: 12px; }
+.familia-propuesta-acciones:not(:has(> *)) { display: none; }
