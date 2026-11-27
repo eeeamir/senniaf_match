@@ -283,6 +283,7 @@ public class VinculacionService {
         if(r.fechaEmision().isAfter(hoy))throw new IllegalArgumentException("La fecha de emisión no puede ser futura");
         if (v.getFechaRegistroAutorizacion() != null)
             throw new IllegalStateException("La autorización y el inicio de convivencia ya se registraron en una sola actuación");
+        // Las solicitudes antiguas pueden omitir la fecha efectiva y usan la fecha de la autorización.
         var inicio = r.fechaInicioConvivencia() == null ? r.fechaEmision() : r.fechaInicioConvivencia();
         if (inicio.isAfter(hoy) || inicio.isBefore(r.fechaEmision()))
             throw new IllegalArgumentException("El inicio efectivo debe estar entre la emisión de la autorización y hoy");

@@ -1,3 +1,4 @@
+/* Los datos de contexto ayudan a interpretar la evaluación sin reemplazar el criterio profesional. */
 /* Formulario y lectura del contexto profesional; no infiere técnicas, apoyos ni diagnósticos. */
 const ContextoPsicologico={
  metodos:{ENTREVISTA_INDIVIDUAL:'Entrevista individual',OBSERVACION_DIRECTA:'Observación directa',REVISION_ANTECEDENTES:'Revisión de antecedentes',INSTRUMENTOS:'Aplicación de instrumentos psicológicos',OTRO:'Otro método'},

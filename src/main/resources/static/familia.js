@@ -168,6 +168,7 @@ const Familia = {
           <a href="match.html?vista=propuesta">Consultar mi vinculación</a>
         </section>` : '';
       if (actualizarSeguimiento && document.querySelector('dialog[open]')) return;
+      // Una actualización de datos conserva las tarjetas que la familia abrió o cerró.
       const tarjetasPrevias = new Map([...document.querySelectorAll('details[data-vinculacion-familiar]')]
         .map(tarjeta => [tarjeta.dataset.vinculacionFamiliar, tarjeta.open]));
       document.getElementById('contenido').innerHTML =

@@ -1,3 +1,4 @@
+/* Los seguimientos se presentan por especialidad y conservan su historial de cambios. */
 const SeguimientosVinculacion = {
   especialidades: {
     TRABAJADOR_SOCIAL: {

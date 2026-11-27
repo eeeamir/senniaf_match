@@ -1,3 +1,4 @@
+/* El panel del Comité presenta las decisiones institucionales y el acceso a los expedientes. */
 /* Vistas del Comité sobre las API existentes. No calcula ni altera puntuaciones. */
 const Comite = {
   async iniciar(s) {

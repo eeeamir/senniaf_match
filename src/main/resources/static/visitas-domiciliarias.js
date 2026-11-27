@@ -1,3 +1,4 @@
+/* Las visitas se muestran según su fecha y el estado de la convivencia. */
 const VisitasDomiciliarias = {
   minutos(hora) {
     const [horas, minutos] = hora.split(':').map(Number);

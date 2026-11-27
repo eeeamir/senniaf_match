@@ -1,3 +1,4 @@
+/* Estos estilos completan la presentación de los portales sobre la identidad visual compartida. */
 /* Alcance explícito: Inicio e información social/psicológica infantil no reciben esta clase. */
 body.s8-acabado{background:#f4f7fc;color:#173b5c}
 .s8-acabado :is(.tarjeta,.grupo,.pro-dialogo){border-color:#d9e4f1;box-shadow:0 5px 20px #173b5c06}

@@ -1,3 +1,4 @@
+/* Las pantallas de acceso público funcionan sin cargar datos de expedientes. */
 /* Mantiene la navegación pública sin duplicar los formularios de acceso existentes. */
 (() => {
   const nav = document.querySelector('.publico-nav');

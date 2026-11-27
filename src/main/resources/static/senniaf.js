@@ -1,3 +1,4 @@
+/* Las vistas comparten la gestión de sesión y el formato usado al presentar datos. */
 /* Sesión y cabecera compartidas por todas las pantallas. */
 const ROLES = {
   FAMILIA: 'Familia adoptante',

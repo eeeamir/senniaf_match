@@ -1,3 +1,4 @@
+/* La vista de citas muestra las acciones habilitadas por el servicio para cada solicitud. */
 /* Solicitudes durante la vinculación; permisos, agenda y transiciones se validan en el servidor. */
 const Citas = {
   motivos: {

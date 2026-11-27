@@ -1,3 +1,4 @@
+/* Las reglas de presentación orientan la captura de información antes de enviarla al servidor. */
 /* Reglas de presentación compartidas con las validaciones de los DTO; nunca guardan datos. */
 const ReglasPerfil = {
   exclusivas: new Set(['NINGUNA_CONOCIDA','NINGUNA_IDENTIFICADA','NINGUNO_IDENTIFICADO','NINGUNA_POR_AHORA','AUN_NO_EVALUADO','INFORMACION_INSUFICIENTE','INFORMACION_NO_DISPONIBLE']),

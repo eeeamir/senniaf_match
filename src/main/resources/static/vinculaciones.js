@@ -1,3 +1,4 @@
+/* El portal familiar y el institucional comparten las etapas del proceso. Cada vista presenta los datos que le corresponden. */
 /* Comparte las vistas de vinculaciones sin presumir acogimiento ni adopción formalizada. */
 const Vinculaciones = {
   estados: {
