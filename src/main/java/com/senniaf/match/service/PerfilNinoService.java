@@ -351,9 +351,9 @@ public class PerfilNinoService {
         if (solicitudes.existsByExpedienteIdAndEstado(p.getId(), SolicitudEstadoCaso.Estado.PENDIENTE))
             throw new IllegalStateException("Ya existe una solicitud pendiente para este expediente");
         SolicitudEstadoCaso s = new SolicitudEstadoCaso();
+        comprobarCierrePorVinculacion(request.categoria());
         if (request.categoria() == null || !request.categoria().admite(request.tipo()))
             throw new IllegalArgumentException("El motivo seleccionado no corresponde al tipo de solicitud");
-        comprobarCierrePorVinculacion(request.categoria());
         s.setCategoria(request.categoria());
         s.setExpediente(p); s.setTipo(request.tipo()); s.setSolicitante(actor);
         s.setFechaSolicitud(LocalDateTime.now()); s.setMotivo(motivoValido(request.motivo()));

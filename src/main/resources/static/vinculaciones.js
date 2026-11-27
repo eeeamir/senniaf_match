@@ -233,13 +233,15 @@ const Vinculaciones = {
           AUTORIZADA:'La reincorporación fue autorizada. La participación depende de las condiciones de elegibilidad vigentes.'}[reincorporacion.estado]
           || 'Tu expediente permanece fuera del Match.';
     }
-    if (revocada) {
-      mensaje = 'La asignación finalizó antes de iniciar la convivencia';
-      accion = v.familiaDisponible
-        ? 'Tu expediente está disponible para recibir nuevas propuestas'
-        : v.disponibilidadFamiliarConfirmada
-          ? 'El Comité confirmó la revisión de tu expediente. Su disponibilidad actual depende de las condiciones vigentes.'
-          : 'La disponibilidad de tu expediente está pendiente de revisión por el Comité.';
+    if (revocada) mensaje = 'La asignación finalizó antes de iniciar la convivencia';
+    if (cerrada && v.resultadoCierre !== 'ADOPCION_FORMALIZADA' && v.estadoDisponibilidadFamiliar) {
+      accion = {
+        DISPONIBLE: 'Tu expediente está disponible para recibir nuevas propuestas',
+        NO_ELEGIBLE: 'El Comité ya revisó tu expediente. Su participación está sujeta a las condiciones vigentes.',
+        ASIGNADO: 'La revisión se completó. Tu expediente está reservado por otra vinculación.',
+        PENDIENTE_REVISION: 'La disponibilidad de tu expediente está pendiente de revisión por el Comité.',
+        SIN_CONSTANCIA: 'Este antecedente no contiene una revisión de disponibilidad registrada.'
+      }[v.estadoDisponibilidadFamiliar] || accion;
     }
     const titulos = [
       'Propuesta del Comité',
@@ -811,22 +813,26 @@ const Vinculaciones = {
   panelCierre(v) {
     if (!v.cierre && !v.estadoCierre && !v.puedeCerrar) return '';
     const x = v.cierre;
-    const pendientes = x && !x.ninoLiberado && !x.familiaLiberada ? 'los expedientes infantil y familiar'
-      : x && !x.ninoLiberado ? 'el expediente infantil' : x && !x.familiaLiberada ? 'el expediente familiar' : '';
+    const pendienteInfantil = x?.estadoInfantil === 'PENDIENTE_REVISION';
+    const pendienteFamiliar = x?.estadoFamiliar === 'PENDIENTE_REVISION';
+    const pendientes = pendienteInfantil && pendienteFamiliar ? 'de los expedientes infantil y familiar'
+      : pendienteInfantil ? 'del expediente infantil' : pendienteFamiliar ? 'del expediente familiar' : '';
     const estadoCierre = {CURSO:'Vinculación en curso', REVISION:'Pendiente de revisión',
       CIERRE:'Pendiente de cierre', REGISTRADO:'Cierre registrado'}[v.estadoCierre];
     const resultado = this.resultadosCierre[v.resultadoCierre];
     const adopcion = v.resultadoCierre === 'ADOPCION_FORMALIZADA';
     const estados = {
       PENDIENTE_REVISION: ['Pendiente de revisión', 'El Comité debe revisar su disponibilidad antes de volver al Match.', 'reloj'],
-      DISPONIBLE: ['Disponibilidad autorizada', 'El expediente se ha reincorporado al proceso de compatibilidad y podrá participar en nuevas propuestas de asignación.', 'comprobar'],
-      NO_ELEGIBLE: ['Requiere completar condiciones', 'La revisión está registrada; el expediente todavía no cumple las condiciones vigentes.', 'informacion'],
-      ASIGNADO: ['Con otra asignación vigente', 'No participa en nuevas propuestas mientras conserve esa asignación.', 'vinculacion']
+      DISPONIBLE: ['Disponible en el Match', 'La revisión se completó y el expediente puede participar en nuevas propuestas.', 'comprobar'],
+      NO_ELEGIBLE: ['Revisión completada', 'El expediente aún no cumple las condiciones vigentes para participar en el Match.', 'informacion'],
+      ASIGNADO: ['Con otra asignación vigente', 'La revisión se completó. El expediente sigue reservado por otra vinculación.', 'vinculacion'],
+      RETIRADO_ADOPCION: ['Retiro definitivo', 'El expediente fue retirado del Match por adopción formalizada.', 'comprobar'],
+      SIN_CONSTANCIA: ['Sin constancia de revisión', 'Este antecedente no contiene una revisión de disponibilidad registrada.', 'informacion']
     };
     return `<section class="tarjeta vinculacion-cierre" tabindex="-1"><h2>${Profesionales.icono('informe')}Cierre institucional</h2>
       <div class="vinculacion-cierre-resumen"><span class="chip retirado">${Profesionales.icono(x ? 'informacion' : 'reloj')}${estadoCierre || (x ? 'Cierre registrado' : 'Vinculación en curso')}</span>
       ${resultado ? `<div class="mensaje ${resultado[2]}">${Profesionales.icono(resultado[3])}<div><strong>${resultado[0]}</strong><br>${resultado[1]}</div></div>` : ''}
-      ${x ? `<dl class="detalle-datos"><div><dt>Fecha del cierre</dt><dd>${limpiarHtml(this.fechaCivil(x.fecha))}</dd></div><div><dt>Responsable del registro</dt><dd>${limpiarHtml(x.registradoPor)}</dd></div><div><dt>Registro</dt><dd>${limpiarHtml(this.fechaHora(x.registradoEl))}</dd></div>${x.referencia ? `<div><dt>Referencia institucional</dt><dd>${limpiarHtml(x.referencia)}</dd></div>` : ''}${x.autoridad ? `<div><dt>Autoridad registrada</dt><dd>${limpiarHtml(x.autoridad)}</dd></div>` : ''}</dl><p class="pro-texto-registrado">${limpiarHtml(x.motivo)}</p>` : '<p>El Comité registra un cierre respaldado por la actuación de la autoridad competente.</p>'}</div>
+      ${x ? `<dl class="detalle-datos">${x.fecha ? `<div><dt>Fecha del cierre</dt><dd>${limpiarHtml(this.fechaCivil(x.fecha))}</dd></div>` : ''}${x.registradoPor ? `<div><dt>Responsable del registro</dt><dd>${limpiarHtml(x.registradoPor)}</dd></div>` : ''}${x.registradoEl ? `<div><dt>Registro</dt><dd>${limpiarHtml(this.fechaHora(x.registradoEl))}</dd></div>` : ''}${x.referencia ? `<div><dt>Referencia institucional</dt><dd>${limpiarHtml(x.referencia)}</dd></div>` : ''}${x.autoridad ? `<div><dt>Autoridad registrada</dt><dd>${limpiarHtml(x.autoridad)}</dd></div>` : ''}</dl>${x.motivo ? `<p class="pro-texto-registrado">${limpiarHtml(x.motivo)}</p>` : ''}` : '<p>El Comité registra un cierre respaldado por la actuación de la autoridad competente.</p>'}</div>
       ${x ? `<section class="vinculacion-disponibilidad"><h3>Estado de los expedientes</h3><div class="vinculacion-expedientes">${[['NINO','Expediente infantil',x.ninoLiberado,x.estadoInfantil,v.expedienteInfantil],['FAMILIA','Expediente familiar',x.familiaLiberada,x.estadoFamiliar,v.expedienteFamiliar]].map(([k,n,revisado,estado,codigo]) => {
         const reincorporacion = v.reincorporacion;
         const info = adopcion && (k === 'NINO' || !reincorporacion?.disponible)
@@ -834,9 +840,9 @@ const Vinculaciones = {
             k === 'NINO' ? 'Proceso finalizado. Adopción formalizada. No admite reactivación ordinaria.'
               : reincorporacion?.estado === 'SIN_SOLICITUD' ? 'Proceso finalizado. Adopción formalizada. Puede solicitar su reincorporación.'
               : 'Proceso finalizado. ' + this.estadoReincorporacion(reincorporacion?.estado)]
-          : estados[estado] || estados[revisado ? 'DISPONIBLE' : 'PENDIENTE_REVISION'];
-        return `<article><h4>${Profesionales.icono(k === 'NINO' ? 'carpeta' : 'personas')}${n}</h4><p>${limpiarHtml(codigo)}</p><strong>${info[0]}</strong><p>${info[1]}</p><div class="pro-acciones">${v.puedeRevisarDisponibilidad && !revisado ? `<button class="boton secundario" data-disponibilidad="${k}">${Profesionales.icono('consulta')}Revisar disponibilidad</button>` : ''}<a class="boton secundario" href="perfiles.html?${k === 'NINO' ? 'caso' : 'familia'}=${encodeURIComponent(codigo)}&origen=vinculacion&vinculacionOrigen=${Number(v.id)}">Consultar expediente</a></div></article>`;
-      }).join('')}</div></section>${adopcion ? (v.puedeResolverReincorporacion && v.reincorporacion?.estado !== 'SIN_SOLICITUD' ? '<a class="boton secundario" href="match.html?vista=solicitudes">Consultar solicitud</a>' : '') : pendientes ? `<aside class="vinculacion-proximo"><h3>${Profesionales.icono('flecha')}Próximo paso</h3><p>Corresponde revisar la disponibilidad de ${pendientes}.</p></aside>` : ''}` : ''}
+          : estados[estado] || estados.SIN_CONSTANCIA;
+        return `<article><h4>${Profesionales.icono(k === 'NINO' ? 'carpeta' : 'personas')}${n}</h4><p>${limpiarHtml(codigo)}</p><strong>${info[0]}</strong><p>${info[1]}</p><div class="pro-acciones">${v.puedeRevisarDisponibilidad && estado === 'PENDIENTE_REVISION' ? `<button class="boton secundario" data-disponibilidad="${k}">${Profesionales.icono('consulta')}Revisar disponibilidad</button>` : ''}<a class="boton secundario" href="perfiles.html?${k === 'NINO' ? 'caso' : 'familia'}=${encodeURIComponent(codigo)}&origen=vinculacion&vinculacionOrigen=${Number(v.id)}">Consultar expediente</a></div></article>`;
+      }).join('')}</div></section>${adopcion ? (v.puedeResolverReincorporacion && v.reincorporacion?.estado !== 'SIN_SOLICITUD' ? '<a class="boton secundario" href="match.html?vista=solicitudes">Consultar solicitud</a>' : '') : pendientes ? `<aside class="vinculacion-proximo"><h3>${Profesionales.icono('flecha')}Próximo paso</h3><p>Corresponde revisar la disponibilidad ${pendientes}.</p></aside>` : ''}` : ''}
       ${v.puedeCerrar ? `<button class="boton secundario" data-cierre>${Profesionales.icono('informe')}Registrar cierre institucional</button>` : ''}
       <p class="ayuda">Este registro no sustituye la actuación de la autoridad competente ni formaliza una adopción.</p></section>`;
   },

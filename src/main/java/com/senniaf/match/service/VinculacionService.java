@@ -110,9 +110,9 @@ public class VinculacionService {
         r.put("interrupcion",interrupcion==null?null:detalleInterrupcion(interrupcion));
         r.put("puedeRegistrarAutorizacion","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA && v.isReservaVigente() && interrupcion==null && v.getFechaInicioConvivencia()==null && !v.getNino().isCierrePorAdopcion() && bloqueante == null);
         r.put("puedeCerrar","COMITE".equals(rol) && !resultados.isEmpty());
-        r.put("puedeRevisarDisponibilidad","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.CERRADA && v.getResultadoCierre()!=ResultadoCierre.ADOPCION_FORMALIZADA);
+        r.put("puedeRevisarDisponibilidad","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.CERRADA && v.isReservaVigente() && v.getResultadoCierre()!=ResultadoCierre.ADOPCION_FORMALIZADA);
         r.put("resultadosCierre", resultados);
-        r.put("cierre",v.getFechaCierre()==null?null:datosCierre(v));
+        r.put("cierre",v.getEstado()==Vinculacion.Estado.CERRADA?datosCierre(v):null);
         r.put("puedeResolverReincorporacion", "COMITE".equals(rol) && v.getResultadoCierre() == ResultadoCierre.ADOPCION_FORMALIZADA);
         r.put("puedeReportarInterrupcion","TRABAJADOR_SOCIAL".equals(rol) && interrupcion==null && reportable(v));
         r.put("puedeRevisarInterrupcion","COMITE".equals(rol) && interrupcion!=null && interrupcion.getFechaRevision()==null);
@@ -164,26 +164,34 @@ public class VinculacionService {
         r.put("fechaRespuesta",fecha(v.getFechaRespuesta()));r.put("disponibilidad",!v.isReservaVigente()?"Pendiente de confirmar elegibilidad para Match":v.getEstado()==Vinculacion.Estado.RESPUESTA_RECHAZADA_PENDIENTE_CIERRE?"Reservado; pendiente de confirmación institucional":"Reservado por asignación vigente");
         r.put("siguientePaso",switch(v.getEstado()){
             case RECHAZADA_POR_FAMILIA -> "Tu respuesta quedó registrada. Gracias por revisar la propuesta. El equipo correspondiente podrá continuar con el seguimiento de tu expediente.";
-            case CERRADA -> "La vinculación está cerrada. La disponibilidad de cada expediente requiere revisión institucional independiente.";
+            case CERRADA -> "La vinculación está cerrada.";
             case PENDIENTE_RESPUESTA -> "Esta vinculación está pendiente de respuesta familiar.";
             case RESPUESTA_ACEPTADA -> "La familia aceptó la propuesta. El proceso continuará conforme a las actuaciones institucionales correspondientes.";
             case RESPUESTA_RECHAZADA_PENDIENTE_CIERRE -> "La familia rechazó la propuesta. El equipo debe confirmar el cierre y la disponibilidad de los expedientes.";
         });
         if(familiar)r.put("siguientePaso",switch(v.getEstado()){
             case RECHAZADA_POR_FAMILIA -> "Tu respuesta quedó registrada. Gracias por revisar la propuesta. El equipo correspondiente podrá continuar con el seguimiento de tu expediente.";
-            case CERRADA -> "La vinculación está cerrada. La disponibilidad de cada expediente requiere revisión institucional independiente.";
+            case CERRADA -> "La vinculación está cerrada.";
             case PENDIENTE_RESPUESTA -> "Tienes una propuesta pendiente. Revisa la información disponible antes de responder.";
             case RESPUESTA_ACEPTADA -> "Aceptaste la propuesta. El equipo correspondiente continuará con el proceso.";
             case RESPUESTA_RECHAZADA_PENDIENTE_CIERRE -> "Rechazaste la propuesta. Tu respuesta quedó registrada. El equipo revisará el cierre institucional.";
         });
-        if(v.getEstado()==Vinculacion.Estado.CERRADA)r.put("disponibilidad","Cada expediente requiere revisión independiente; el cierre no libera automáticamente las reservas.");
+        if (v.getEstado() == Vinculacion.Estado.CERRADA && v.getResultadoCierre() != ResultadoCierre.ADOPCION_FORMALIZADA) {
+            String estadoFamiliar = disponibilidadFamiliar(v);
+            if (familiar) {
+                r.put("estadoDisponibilidadFamiliar", estadoFamiliar);
+                r.put("familiaDisponible", "DISPONIBLE".equals(estadoFamiliar));
+            }
+            r.put("disponibilidad", familiar ? estadoFamiliar
+                    : "Consulta el estado de cada expediente en el cierre institucional.");
+        }
         if (v.getResultadoCierre() == ResultadoCierre.ADOPCION_FORMALIZADA) {
             r.put("fechaCierre", v.getFechaCierre());
             r.put("reincorporacion", reincorporaciones.estado(v));
             r.put("siguientePaso", "La vinculación finalizó por adopción formalizada.");
         }
         if (v.getResultadoCierre() == ResultadoCierre.REVOCACION_ASIGNACION) {
-            r.put("siguientePaso", "La asignación fue revocada. El equipo institucional revisará la disponibilidad de los expedientes.");
+            r.put("siguientePaso", "La asignación fue revocada.");
             if (familiar) {
                 var incidencia = bloqueante(incidencias(v));
                 var motivo = incidencia == null ? IncidenciaAsignacion.Motivo.OTRO : incidencia.getMotivo();
@@ -192,10 +200,6 @@ public class VinculacionService {
                     case RECHAZO_NINO -> "Durante el acompañamiento se determinó que la asignación no podía continuar.";
                     case OTRO -> "El Comité determinó que no correspondía continuar con la asignación tras revisar la situación registrada.";
                 });
-                r.put("disponibilidadFamiliarConfirmada", v.isFamiliaLiberada());
-                r.put("familiaDisponible", v.isFamiliaLiberada() && v.getFamilia().isPerfilCompleto()
-                        && !v.getFamilia().isReevaluacionPendiente()
-                        && !repo.existsByFamiliaCodigoCasoAndReservaVigenteTrue(v.getFamilia().getCodigoCaso()));
             }
         }
         var seguimiento=interrupcion(v);
@@ -408,6 +412,8 @@ public class VinculacionService {
         if(v.getEstado()!=Vinculacion.Estado.CERRADA)throw new IllegalStateException("Primero debe registrarse el cierre institucional");
         if (v.getResultadoCierre() == ResultadoCierre.ADOPCION_FORMALIZADA)
             throw new IllegalStateException("La adopción formalizada exige el trámite de reincorporación exclusivamente familiar");
+        if (!v.isReservaVigente())
+            throw new IllegalStateException("Esta vinculación no conserva una reserva pendiente de revisión");
         String motivo=texto(justificacion,10,600,"Documenta la revisión de disponibilidad y elegibilidad");
         if("NINO".equals(expediente)){
             if(v.isNinoLiberado())throw new IllegalStateException("La revisión de este expediente ya fue registrada");
@@ -428,8 +434,25 @@ public class VinculacionService {
     private void exigirComite(String rol){if(!"COMITE".equals(rol))throw new RolNoAutorizadoException("Solo el Comité puede registrar esta actuación institucional");}
     private Map<String,Object> datosCierre(Vinculacion v){
         var r=new LinkedHashMap<String,Object>();r.put("fecha",v.getFechaCierre());r.put("referencia",v.getReferenciaCierre());r.put("autoridad",v.getAutoridadCierre());r.put("motivo",v.getMotivoCierre());r.put("registradoPor",v.getCerradoPor());r.put("registradoEl",fecha(v.getFechaRegistroCierre()));r.put("ninoLiberado",v.isNinoLiberado());r.put("familiaLiberada",v.isFamiliaLiberada());
-        r.put("estadoInfantil",!v.isNinoLiberado()?"PENDIENTE_REVISION":!v.getNino().isPerfilCompleto() || v.getNino().isBajaLogica() || v.getNino().isCierrePorAdopcion()?"NO_ELEGIBLE":repo.existsByNinoCodigoCasoAndReservaVigenteTrue(v.getNino().getCodigoCaso())?"ASIGNADO":"DISPONIBLE");
-        r.put("estadoFamiliar",!v.isFamiliaLiberada()?"PENDIENTE_REVISION":!v.getFamilia().isPerfilCompleto() || v.getFamilia().isReevaluacionPendiente()?"NO_ELEGIBLE":repo.existsByFamiliaCodigoCasoAndReservaVigenteTrue(v.getFamilia().getCodigoCaso())?"ASIGNADO":"DISPONIBLE");return r;
+        r.put("estadoInfantil", disponibilidadInfantil(v));
+        r.put("estadoFamiliar", disponibilidadFamiliar(v));
+        return r;
+    }
+
+    private String disponibilidadInfantil(Vinculacion v) {
+        if (v.getNino().isCierrePorAdopcion()) return "RETIRADO_ADOPCION";
+        if (!v.isNinoLiberado()) return v.isReservaVigente() ? "PENDIENTE_REVISION" : "SIN_CONSTANCIA";
+        if (!v.getNino().isPerfilCompleto() || v.getNino().isBajaLogica()) return "NO_ELEGIBLE";
+        return repo.existsByNinoCodigoCasoAndReservaVigenteTrue(v.getNino().getCodigoCaso()) ? "ASIGNADO" : "DISPONIBLE";
+    }
+
+    private String disponibilidadFamiliar(Vinculacion v) {
+        if (!v.isFamiliaLiberada()) {
+            if (v.getResultadoCierre() == ResultadoCierre.ADOPCION_FORMALIZADA) return "REINCORPORACION";
+            return v.isReservaVigente() ? "PENDIENTE_REVISION" : "SIN_CONSTANCIA";
+        }
+        if (!v.getFamilia().isPerfilCompleto() || v.getFamilia().isReevaluacionPendiente()) return "NO_ELEGIBLE";
+        return repo.existsByFamiliaCodigoCasoAndReservaVigenteTrue(v.getFamilia().getCodigoCaso()) ? "ASIGNADO" : "DISPONIBLE";
     }
     /** Solo lee el fundamento guardado; nunca invoca el cálculo actual. */
     private Map<String,Object> compatibilidadOriginal(DecisionComite d){

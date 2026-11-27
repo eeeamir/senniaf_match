@@ -423,10 +423,10 @@ document.getElementById('historialSolicitudes').addEventListener('click',e=>{
   const boton=e.target.closest('[data-resolver]');if(!boton)return;
   const s=solicitudesDelCaso.find(s=>String(s.id)===boton.dataset.resolver);if(!s)return;
   const aprobar=boton.dataset.aprobar==='si',adopcion=s.categoria==='ADOPCION_FORMALIZADA',reactivar=s.tipo==='REACTIVACION';
-  const opciones=adopcion&&!aprobar?[
-    ['INFORMACION_INSUFICIENTE','Falta información o documentación para aprobar el cierre.','Después de revisar la solicitud, se determinó que falta información o documentación para confirmar la adopción formalizada. Por este motivo, no se aprueba el cierre de participación y el expediente conserva su estado actual'],
-    ['NO_PROCEDE','La solicitud no corresponde al estado actual del expediente.','Al revisar la solicitud y el expediente, se identificó que su estado actual no permite tramitar el cierre solicitado. Por ello, se rechaza la solicitud y se mantiene el estado del expediente'],
-    ['OTRO','Otro motivo.','']
+  if (adopcion && aprobar) return;
+  const opciones=adopcion?[
+    ['PROCEDIMIENTO_VIGENTE','Corresponde al cierre institucional','La solicitud se rechaza porque la adopción formalizada se registra mediante el cierre institucional de la vinculación. El expediente conserva su estado actual.'],
+    ['OTRO','Otro motivo','']
   ]:!aprobar?[
     reactivar ? ['CONDICIONES_PENDIENTES','Condiciones pendientes de restablecer','La revisión establece que aún no se han restablecido las condiciones de participación del expediente.']
       : ['NO_JUSTIFICADA','Desactivación no justificada','La información revisada no justifica suspender la participación del expediente.'],
@@ -445,9 +445,11 @@ document.getElementById('historialSolicitudes').addEventListener('click',e=>{
     ['SITUACION','Cambio de situación verificado','La documentación revisada sustenta suspender temporalmente la participación del expediente en nuevas propuestas. Su posible regreso requerirá autorización del Comité.'],
     ['OTRO','Otro','']
   ];
-  const confirmacion=!aprobar?'¿Estás seguro de que deseas rechazar esta solicitud? El estado del expediente se mantendrá sin cambios.':adopcion?'¿Deseas cerrar la participación de este expediente por adopción formalizada? Se conservará el historial y no se permitirá una reactivación ordinaria.':reactivar?'¿Deseas reactivar este expediente? Volverá a estar disponible para el análisis de compatibilidad, siempre que cumpla los requisitos del sistema.':'¿Estás seguro de que deseas desactivar este expediente? Dejará de participar en nuevas propuestas de compatibilidad hasta que se autorice su reactivación.';
-  Profesionales.justificar({titulo:adopcion?(aprobar?'Aprobar solicitud de cierre':'Rechazar solicitud de cierre'):(aprobar?'Aprobar solicitud':'Rechazar solicitud'),
-    ...(adopcion?{instruccion:aprobar?'Selecciona el motivo de aprobación':'Selecciona el motivo de rechazo',textoRevisar:aprobar?'Revisar aprobación':'Revisar rechazo',tituloConfirmacion:aprobar?'Confirmar aprobación':'Confirmar rechazo',textoConfirmar:aprobar?'Confirmar aprobación':'Confirmar rechazo',ayuda:aprobar?'Puedes editar la justificación. Antes de aprobar, verifica la documentación que confirma la adopción, también si eliges «Otro motivo».':'Puedes editar la justificación. Si eliges «Otro motivo», escribe tu propia explicación.'}:{}),contexto:s.codigoCaso+' · '+(adopcion?'Cierre por adopción formalizada':Profesionales.etiqueta(s.tipo)),opciones,confirmacion,
+  const confirmacion = !aprobar ? '¿Deseas rechazar esta solicitud? El estado del expediente se mantendrá sin cambios.'
+    : reactivar ? '¿Deseas reactivar este expediente? Volverá al análisis de compatibilidad si cumple los requisitos del sistema.'
+    : '¿Deseas desactivar este expediente? Dejará de participar en nuevas propuestas hasta que se autorice su reactivación.';
+  Profesionales.justificar({titulo:adopcion ? 'Rechazar solicitud del procedimiento anterior' : aprobar ? 'Aprobar solicitud' : 'Rechazar solicitud',
+    contexto:s.codigoCaso+' · '+Profesionales.tituloSolicitud(s),opciones,confirmacion,
     alConfirmar:motivo=>leerApi(`/api/ninos/solicitudes-estado/${s.id}/resolucion`,{method:'POST',body:JSON.stringify({aprobar,motivo})}),
     alGuardar:async datos=>{try{await cargarCaso();Profesionales.mensaje(document.getElementById('mensajeEstado'),datos.estado==='APROBADA'?(reactivar?'Solicitud aprobada. El expediente fue reactivado.':'Solicitud aprobada. El expediente fue desactivado temporalmente.'):'Solicitud rechazada. El estado del expediente se conserva.','exito');}catch(error){Profesionales.mensaje(document.getElementById('mensajeEstado'),'La resolución se guardó. Recarga el expediente para consultar su estado actualizado.','aviso');}}
   });
@@ -548,7 +550,7 @@ function detalleSecciones(datos, campos, grupos) {
       <p>La familia registra una asignación revocada antes del inicio de la convivencia preadoptiva.</p>
       <p><strong>Motivo</strong> · ${limpiarHtml({DESISTIMIENTO_FAMILIA:'Desistimiento de la asignación por parte de la familia',RECHAZO_NINO:'Rechazo de la asignación por parte del niño, niña o adolescente'}[revocacion.motivo] || 'Otro motivo')}</p>
       ${revocacion.fundamento ? `<p class="pro-texto-registrado">${limpiarHtml(revocacion.fundamento)}</p>` : ''}
-      <p><strong>Disponibilidad actual</strong> · ${{DISPONIBLE:'Confirmada por el Comité',PENDIENTE_REVISION:'Pendiente de revisión por el Comité',ASIGNADO:'Con otra asignación vigente',NO_ELEGIBLE:'Requiere completar condiciones'}[revocacion.estado] || ''}</p>
+      <p><strong>Disponibilidad actual</strong> · ${{DISPONIBLE:'Confirmada por el Comité',PENDIENTE_REVISION:'Pendiente de revisión por el Comité',ASIGNADO:'Con otra asignación vigente',NO_ELEGIBLE:'Requiere completar condiciones',SIN_CONSTANCIA:'Sin constancia de revisión'}[revocacion.estado] || ''}</p>
       <a href="vinculaciones.html?id=${Number(revocacion.vinculacionId)}">Consultar vinculación</a>
       </div></aside>` : '';
     aviso += Profesionales.avisoInterrupcion(datos.antecedenteInterrupcion)

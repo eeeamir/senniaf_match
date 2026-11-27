@@ -66,14 +66,37 @@ const Comite = {
     const gruposFamilia=[['informe','Información general','Datos registrados por la familia'],['hogar','Composición del hogar','Estructura y entorno familiar'],['solicitudes','Entrevista familiar','Respuestas y preferencias registradas'],['salud','Capacidad de acompañamiento','Cuidados y necesidades que puede atender'],['personas','Red de apoyo','Apoyos disponibles para la familia'],['heart-handshake','Apoyos culturales y comunitarios','Apoyos que la familia puede ofrecer para respetar la identidad y los vínculos del niño']];
     const tarjeta=(titulo,codigo,grupos,href,clase='')=>`<section class="tarjeta pro-expediente-tarjeta ${clase}"><header>${this.icono('personas')}<div><h2>${titulo}</h2><p>${limpiarHtml(codigo)}</p></div></header><ul>${grupos.map(([icono,t,d])=>`<li>${this.icono(icono)}<div><strong>${t}</strong><small>${d}</small></div></li>`).join('')}</ul><a class="boton secundario" href="${href}">Ver ${titulo.toLocaleLowerCase('es')} completo ${this.icono('flecha')}</a></section>`;
     this.contenido.innerHTML=`<p class="pro-breadcrumb"><a href="match.html?vista=compatibilidad">← Volver a compatibilidad</a></p>`+Profesionales.encabezado(caso.codigo+' y '+familia.codigo,'Revisa los dos expedientes y los criterios utilizados para esta propuesta.','salud')+this.avisoProgramacion(this.programacion?.pendiente,'mini')+`
-      <section class="tarjeta pro-analisis-resumen">${familia.maximoAplicable===0?'':`<div class="pro-circulo">${this.puntaje(familia,"de ")}</div>`}<div><h3>Resultado de compatibilidad</h3>${familia.maximoAplicable===0?'<p>Sin criterios aplicables con peso.</p>':''}<p>Máximo aplicable: ${familia.maximoAplicable}. Peso de criterios evaluados: ${familia.pesoEvaluado}. Un criterio pendiente de aclaración puede incluir puntos por coberturas ya declaradas. Los criterios que no aplican se excluyen del máximo y sus puntos no se redistribuyen.</p></div><span class="chip">${this.estadoInformacion(familia)}</span></section>
       ${Profesionales.avisoInterrupcion(familia.antecedenteInterrupcion)}<div class="pro-dashboard">${tarjeta('Expediente infantil',caso.codigo,gruposNino,`perfiles.html?caso=${encodeURIComponent(caso.codigo)}&origen=match&familiaOrigen=${encodeURIComponent(familia.codigo)}`)}${tarjeta('Expediente familiar',familia.codigo,gruposFamilia,`perfiles.html?familia=${encodeURIComponent(familia.codigo)}&casoOrigen=${encodeURIComponent(caso.codigo)}&origen=match`,'verde')}</div>
-      <section class="tarjeta pro-seccion pro-analisis-criterios" aria-labelledby="tituloAnalisisCompatibilidad"><header class="pro-analisis-cabecera"><div class="pro-analisis-titulo"><span class="pro-simbolo">${this.icono('criterios')}</span><div><h2 id="tituloAnalisisCompatibilidad">Análisis de compatibilidad</h2><p>Consulta el resultado y sus criterios</p></div></div><button type="button" class="boton secundario" id="reevaluarCompatibilidad">${this.icono('refrescar')}Actualizar análisis</button></header><p id="estadoReevaluacion" role="status" aria-live="polite"></p><details><summary><strong>Cómo se calculó la compatibilidad</strong></summary><p>Revisa cada criterio del análisis.</p><div class="tabla"><table><thead><tr><th>Criterio</th><th>Puntos</th><th>Estado</th><th>Razón</th></tr></thead><tbody>${Object.entries(familia.f).map(([k,[p,nota]])=>`<tr><td>${limpiarHtml(FACTORES[k]?.n||k)}</td><td>${familia.estadosFactores?.[k]==='NO_APLICA'?'—':p+' de '+pesos[k]}</td><td>${limpiarHtml(Profesionales.etiqueta(familia.estadosFactores?.[k]||'EVALUADO'))}</td><td>${limpiarHtml(nota)}</td></tr>`).join('')}</tbody></table></div></details></section>
+      ${this.resultadoCriterios(familia,pesos)}
 ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
       <section class="tarjeta pro-seccion"><h2>Decisión del Comité</h2><p>${bloqueado?'Este expediente ya tiene una propuesta aceptada.':'Selecciona la acción que corresponde a esta propuesta.'}</p>${bloqueado?'':`<div class="pro-acciones"><button class="boton" type="button" data-decision="ACEPTADA">${this.icono('comprobar')}Aceptar propuesta</button><button class="boton secundario" type="button" data-decision="DESCARTADA">Rechazar propuesta</button><button class="boton secundario" type="button" data-decision="REEVALUACION">Solicitar reevaluación</button></div>`}<p id="estadoDecision" role="status"></p></section>`;
 
     this.contenido.querySelector('#reevaluarCompatibilidad')?.addEventListener('click', () => this.reevaluar());
     this.contenido.querySelectorAll('[data-decision]').forEach(b=>b.addEventListener('click',()=>this.decidir(caso,familia,b.dataset.decision)));
+  },
+  resultadoCriterios(familia, pesos) {
+    const iconos = {edad:'calendario',hermanos:'personas',salud:'salud',apoyo:'heart-handshake',logistica:'transporte'};
+    const etiquetas = {EVALUADO:'Evaluado',DESCONOCIDO:'Información por aclarar',NO_APLICA:'No aplica'};
+    const filas = Object.entries(familia.f).map(([criterio, [puntos, razon]]) => {
+      const estado = familia.estadosFactores?.[criterio] || 'EVALUADO';
+      const peso = pesos[criterio];
+      const tono = estado === 'NO_APLICA' || peso === 0 ? 'neutro' : puntos >= peso ? 'completo' : 'parcial';
+      return `<tr><th scope="row"><span class="analisis-factor"><span class="pro-simbolo">${this.icono(iconos[criterio])}</span>
+        ${limpiarHtml(FACTORES[criterio]?.n || criterio)}</span></th>
+        <td><div class="analisis-puntos ${tono}">${estado === 'NO_APLICA' ? 'No aplica' : `<strong>${puntos} / ${peso}</strong>
+          ${peso > 0 ? `<progress max="${peso}" value="${puntos}" aria-label="${limpiarHtml(FACTORES[criterio]?.n || criterio)}"></progress>` : ''}`}</div>
+          ${estado === 'NO_APLICA' ? '' : `<small>${limpiarHtml(etiquetas[estado] || Profesionales.etiqueta(estado))}</small>`}</td>
+        <td class="analisis-razon">${limpiarHtml(razon)}</td></tr>`;
+    }).join('');
+    return `<section class="tarjeta pro-seccion pro-analisis-criterios" aria-labelledby="tituloAnalisisCompatibilidad">
+      <header class="pro-analisis-cabecera"><div class="pro-analisis-titulo"><span class="pro-simbolo">${this.icono('criterios')}</span>
+        <div><h2 id="tituloAnalisisCompatibilidad">Análisis de compatibilidad</h2><p>Consulta el resultado y sus criterios.</p></div></div>
+        <button type="button" class="boton secundario" id="reevaluarCompatibilidad">${this.icono('refrescar')}Actualizar análisis</button></header>
+      <p id="estadoReevaluacion" role="status" aria-live="polite"></p>
+      <div class="analisis-total"><h3>Resultado por criterio</h3><span>${this.puntaje(familia,' / ')}${familia.maximoAplicable > 0 ? ' puntos' : ''}</span></div>
+      ${this.medidor(familia)}
+      <div class="tabla"><table class="analisis-tabla"><thead><tr><th scope="col">Criterio</th><th scope="col">Puntos</th><th scope="col">Razón del resultado</th></tr></thead><tbody>${filas}</tbody></table></div>
+      <p class="ayuda">${this.icono('informacion')} Los criterios que no aplican se excluyen del puntaje máximo. Peso de criterios evaluados: ${familia.pesoEvaluado}.</p></section>`;
   },
   async reevaluar() {
     if (this.reevaluando) return;

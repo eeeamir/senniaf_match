@@ -50,7 +50,7 @@ const Familia = {
       }
       this.version = version;
       const ultima = Vinculaciones.seleccionarVinculacion(vinculaciones);
-      const disponibleDeNuevo = (ultima?.resultadoCierre === 'REVOCACION_ASIGNACION' && ultima.familiaDisponible)
+      const disponibleDeNuevo = (ultima?.estado === 'CERRADA' && ultima.familiaDisponible)
         || (ultima?.resultadoCierre === 'ADOPCION_FORMALIZADA' && ultima.reincorporacion?.disponible);
       const vigente = disponibleDeNuevo ? null : ultima;
       const progreso = Vinculaciones.obtenerProgreso(vigente);

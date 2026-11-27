@@ -8,6 +8,7 @@ const Profesionales = {
       refrescar:'M20 8a8 8 0 0 0-14-3L3 8 M3 3v5h5 M4 16a8 8 0 0 0 14 3l3-3 M21 21v-5h-5',
       vinculacion:'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2',
       conversacion:'M3 4h13v10H8l-5 4V4 M16 8h5v12l-4-3h-5v-3',
+      transporte:'M2 5h13v12H2z M15 9h4l3 4v4h-7 M7 19a2 2 0 1 1-4 0 2 2 0 0 1 4 0 M21 19a2 2 0 1 1-4 0 2 2 0 0 1 4 0',
       telefono:'M5 3h4l2 5-3 2a15 15 0 0 0 6 6l2-3 5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2Z',
       brujula:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0 M16 8l-2 6-6 2 2-6z',
       pregunta:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0 M9.5 9a2.5 2.5 0 1 1 4 2c-1 .7-1.5 1-1.5 2.5 M12 17h.01',

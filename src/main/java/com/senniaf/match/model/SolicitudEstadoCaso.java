@@ -14,7 +14,8 @@ public class SolicitudEstadoCaso {
         public boolean admite(Tipo tipo) {
             return switch (this) {
                 case OTRO -> true;
-                case ADOPCION_FORMALIZADA, CAMBIO_SITUACION, TRASLADO, SUSPENSION_TEMPORAL
+                case ADOPCION_FORMALIZADA -> false;
+                case CAMBIO_SITUACION, TRASLADO, SUSPENSION_TEMPORAL
                         -> tipo == Tipo.DESACTIVACION;
                 case SITUACION_RESUELTA, REVISION_COMPLETADA, CONDICIONES_RESTABLECIDAS
                         -> tipo == Tipo.REACTIVACION;
