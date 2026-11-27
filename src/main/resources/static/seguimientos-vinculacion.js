@@ -115,47 +115,79 @@ const SeguimientosVinculacion = {
       const medio = tipo === 'TELEFONICO' ? 'la llamada' : tipo === 'ORIENTACION_FAMILIAR' ? 'la orientación' : 'la entrevista';
       variaciones = {
         adaptacion: [`¿Qué comunicó la familia durante ${medio} sobre la adaptación del niño?`,
-          ['Adaptación referida', `La familia informó que el niño se siente progresivamente más cómodo con ${relacion}.`]],
+          ['Adaptación referida', `La familia informó que el niño se siente progresivamente más cómodo con ${relacion}.`],
+          ['Avances comunicados', 'La familia informó que el niño participa con mayor confianza.'],
+          ['Adaptación con apoyo', 'La familia comunicó que el niño se beneficia de contar con apoyo al afrontar cambios.']],
         contexto: [social ? `¿Qué comunicó la familia durante ${medio} sobre la organización de los cuidados?`
           : `¿Qué comunicó la familia durante ${medio} sobre el vínculo afectivo?`,
           social ? ['Organización de cuidados', convivencia ? 'La familia informó cómo distribuye los cuidados y quiénes brindan apoyo.'
             : 'La familia informó cómo prevé organizar los cuidados y con quién podría contar.']
-            : ['Confianza referida', 'La familia informó que el niño se comunica con mayor confianza.']],
+            : ['Confianza referida', 'La familia informó que el niño se comunica con mayor confianza.'],
+          social ? ['Apoyo familiar', 'La familia identificó personas de confianza a quienes puede acudir para recibir apoyo.']
+            : ['Búsqueda de apoyo', 'La familia informó que el niño acude a una figura de confianza cuando necesita ayuda.'],
+          social ? ['Orientación solicitada', 'La familia solicitó orientación sobre los cuidados que necesita el niño.']
+            : ['Acercamiento referido', 'La familia describió un acercamiento gradual, a un ritmo que el niño considera cómodo.']],
         dificultades: [`¿Qué dificultades o preocupaciones se comunicaron durante ${medio}?`,
           ['Sin dificultades reportadas', 'No se reportaron dificultades relevantes durante la atención.'],
-          ['Preocupaciones comunicadas', `La familia expresó inquietudes sobre ${relacion} y solicitó orientación.`]]
+          ['Preocupaciones comunicadas', `La familia expresó inquietudes sobre ${relacion} y solicitó orientación.`],
+          ['Información por ampliar', 'La familia señaló que necesita más tiempo para describir las dificultades presentadas.']]
       };
       if (tipo === 'ORIENTACION_FAMILIAR') variaciones.recomendaciones = [
         '¿Qué orientaciones o acuerdos conviene retomar con la familia?',
         ['Revisar acuerdos', `Retomar los acuerdos sobre ${relacion} y revisar las dudas de la familia en la próxima atención.`],
-        ...base.recomendaciones.slice(1)];
+        ...base.recomendaciones.slice(1, 3)];
     } else if (individual) {
       variaciones = {
         adaptacion: [`¿Qué expresó el niño en la sesión sobre ${relacion}?`,
-          ['Expresión emocional', `El niño pudo expresar cómo se siente respecto a ${relacion} durante la sesión.`]],
+          ['Expresión emocional', `El niño pudo expresar cómo se siente respecto a ${relacion} durante la sesión.`],
+          ['Mayor confianza', 'El niño se mostró más cómodo al hablar conforme avanzó la sesión.'],
+          ['Sentimientos diversos', 'El niño expresó sentimientos diversos al hablar de los cambios en su entorno.']],
         contexto: ['¿Cómo describe el niño su relación con la familia durante la sesión?',
-          ['Confianza expresada', 'El niño expresó que se siente más cómodo al conversar con la familia.']],
+          ['Confianza expresada', 'El niño expresó que se siente más cómodo al conversar con la familia.'],
+          ['Figura de apoyo', 'El niño identificó a una persona de la familia a quien puede pedir ayuda.'],
+          ['Acercamiento gradual', 'El niño expresó su preferencia por acercarse a la familia de manera gradual.']],
         dificultades: ['¿Qué preocupaciones expresó el niño durante la sesión?',
           ['Sin dificultades expresadas', 'El niño no expresó preocupaciones relevantes durante la sesión.'],
-          ['Preocupación expresada', `El niño expresó inquietud por los cambios relacionados con ${relacion}.`]]
+          ['Preocupación expresada', `El niño expresó inquietud por los cambios relacionados con ${relacion}.`],
+          ['Inquietudes difíciles de expresar', 'Durante la sesión, al niño le resultó difícil poner en palabras algunas de sus inquietudes.']]
       };
     } else if (tipo === 'VISITA_DOMICILIARIA') {
       variaciones = {
         adaptacion: [`¿Qué pudo observarse durante la visita en relación con ${relacion}?`,
           convivencia ? ['Participación en el hogar', 'Durante la visita, el niño participó en las actividades cotidianas del hogar.']
-            : ['Preparación observada', 'Durante la visita se conversó con la familia sobre la preparación de los próximos encuentros.']],
+            : ['Preparación observada', 'Durante la visita se conversó con la familia sobre la preparación de los próximos encuentros.'],
+          ['Rutinas abordadas', 'Durante la visita se conversó con la familia sobre el apoyo que el niño necesita en sus rutinas.'],
+          ['Participación por ampliar', 'La visita ofreció información parcial sobre la participación del niño y conviene ampliarla.']],
         contexto: [social ? '¿Qué condiciones de cuidado se pudieron valorar durante la visita?'
           : '¿Qué pudo observarse del vínculo afectivo durante la visita?',
           social ? ['Condiciones del hogar', 'Durante la visita se identificaron espacios y recursos del hogar que pueden apoyar el cuidado del niño.']
-            : ['Interacción observada', 'Durante la visita se observó una interacción tranquila entre el niño y la familia.']],
+            : ['Interacción observada', 'Durante la visita se observó una interacción tranquila entre el niño y la familia.'],
+          social ? ['Recursos disponibles', 'Durante la visita se identificaron recursos que la familia puede utilizar para apoyar los cuidados.']
+            : ['Escucha familiar', 'Durante la visita se observó que la familia dio espacio al niño para expresar sus preferencias.'],
+          social ? ['Cuidados por revisar', 'Durante la visita se identificaron aspectos de la organización del cuidado que requieren seguimiento.']
+            : ['Acercamiento gradual', 'Durante la visita el niño se acercó a la familia de forma gradual.']],
         dificultades: ['¿Qué situaciones observadas durante la visita requieren acompañamiento?',
-          ['Sin dificultades observadas', 'Durante la visita no se observaron dificultades relevantes.']]
+          ['Sin dificultades observadas', 'Durante la visita no se observaron dificultades relevantes.'],
+          ['Situación por revisar', 'Durante la visita se identificó una situación que requiere seguimiento.'],
+          ['Observación limitada', 'El tiempo de observación fue limitado y conviene revisar este aspecto en otra atención.']]
       };
     } else if (tipo === 'OTRO') {
       variaciones = {
-        adaptacion: [`¿Qué información se obtuvo en esta atención sobre ${relacion}?`],
-        contexto: ['¿Qué aspectos pudieron valorarse durante esta atención?'],
-        dificultades: ['¿Qué dificultades se observaron o se comunicaron durante la atención?']
+        adaptacion: [`¿Qué información se obtuvo en esta atención sobre ${relacion}?`,
+          ['Avances identificados', `La información obtenida indica avances en la adaptación del niño a ${relacion}.`],
+          ['Adaptación gradual', 'La información recabada describe una adaptación que avanza gradualmente.'],
+          ['Apoyo adicional', 'La información recabada indica que el niño requiere apoyo adicional durante los cambios.']],
+        contexto: [social ? '¿Qué información se obtuvo sobre los cuidados y apoyos familiares?'
+          : '¿Qué información se obtuvo sobre el vínculo afectivo?',
+          social ? ['Cuidados organizados', 'La información disponible indica que la familia ha organizado las tareas de cuidado.']
+            : ['Confianza en desarrollo', 'La información disponible indica un aumento gradual de la confianza en la familia.'],
+          social ? ['Apoyos disponibles', 'Se identificaron apoyos familiares que pueden contribuir a los cuidados.']
+            : ['Apoyo afectivo', 'Se identificó una figura familiar a la que el niño puede acudir en busca de apoyo.'],
+          ['Información parcial', 'La información disponible es parcial y conviene ampliarla en otra atención.']],
+        dificultades: ['¿Qué dificultades se observaron o se comunicaron durante la atención?',
+          ['Sin dificultades comunicadas', 'Durante la atención no se comunicaron dificultades relevantes.'],
+          ['Inquietudes identificadas', `La información recabada indica inquietudes relacionadas con ${relacion}.`],
+          ['Situación por aclarar', 'La información disponible requiere aclaración antes de valorar las dificultades.']]
       };
     }
     return Object.fromEntries(Object.entries({...base, ...variaciones}).map(([campo, [pregunta, ...opciones]]) => [
@@ -253,14 +285,61 @@ const SeguimientosVinculacion = {
     dialogo.showModal();
   },
 
+  opcionesParticipantes: ['Niño', 'Familia', 'Trabajador social', 'Psicólogo', 'Cuidador', 'Otro'],
+
+  enlazarParticipantes(form, anterior = '') {
+    const grupo = form.querySelector('.seguimiento-participantes');
+    const opciones = [...grupo.querySelectorAll('input[type=checkbox]')];
+    const otro = opciones.at(-1);
+    const detalle = grupo.querySelector('textarea');
+    const campo = form.elements.participantes;
+    const separar = anterior.match(/^(?:(.*?), )?Otro: ([\s\S]+)$/);
+    const listado = separar ? separar[1] || '' : anterior;
+    const nombres = listado.split(', ');
+    const conocidas = opciones.filter(opcion => nombres.includes(opcion.value));
+    const canonico = conocidas.map(opcion => opcion.value).join(', ') === listado;
+    const legado = Boolean(anterior) && !canonico;
+    if (legado) {
+      otro.checked = true;
+      detalle.value = anterior;
+    } else {
+      conocidas.forEach(opcion => { opcion.checked = true; });
+      if (separar) {
+        otro.checked = true;
+        detalle.value = separar[2];
+      }
+    }
+    const descripcionInicial = detalle.value;
+    const actualizar = () => {
+      detalle.closest('label').hidden = !otro.checked;
+      detalle.disabled = !otro.checked;
+      const seleccionadas = opciones.filter(opcion => opcion.checked && opcion !== otro).map(opcion => opcion.value);
+      if (otro.checked) {
+        const descripcion = detalle.value.trim();
+        seleccionadas.push(legado && detalle.value === descripcionInicial && !seleccionadas.length ? anterior
+          : descripcion ? 'Otro: ' + descripcion : 'Otro');
+      }
+      campo.value = seleccionadas.join(', ');
+    };
+    grupo.addEventListener('change', actualizar);
+    detalle.addEventListener('input', actualizar);
+    actualizar();
+    return detalle;
+  },
+
   formulario(vinculacion, datos, registro, disparador, alGuardar) {
     const rol = registro?.rol || datos.rolRegistro;
     const especialidad = this.especialidades[rol];
     const dialogo = this.dialogo((registro ? 'Editar ' : 'Registrar ') + especialidad.titulo.toLowerCase(), disparador);
     dialogo.classList.add('seguimiento-dialogo', especialidad.color);
-    dialogo.querySelector('h2').insertAdjacentHTML('afterbegin',
-      `<span class="vinculacion-emblema">${Profesionales.icono(especialidad.icono)}</span>`);
-    dialogo.insertAdjacentHTML('beforeend', this.contexto(vinculacion) + `
+    const titulo = dialogo.querySelector('h2');
+    const cabecera = document.createElement('header');
+    cabecera.className = 'seguimiento-titulo';
+    titulo.before(cabecera);
+    cabecera.innerHTML = `<span class="vinculacion-emblema">${Profesionales.icono(especialidad.icono)}</span>`;
+    cabecera.append(titulo);
+    cabecera.insertAdjacentHTML('beforeend', this.contexto(vinculacion));
+    dialogo.insertAdjacentHTML('beforeend', `
       <p class="seguimiento-etapa">Etapa del proceso <strong data-etapa></strong></p>
       <form class="pro-interrupcion-form" novalidate>
         <div class="seguimiento-cabecera-campos">
@@ -269,7 +348,16 @@ const SeguimientosVinculacion = {
           ${Object.entries(especialidad.tipos).filter(([tipo]) => !['ENCUENTRO', 'ENTREVISTA'].includes(tipo) || tipo === registro?.contenido.tipo).map(([valor, nombre]) => `<option value="${valor}">${nombre}</option>`).join('')}
           </select></label>
         </div>
-        <label>Participantes (opcional)<textarea name="participantes" rows="1" maxlength="500" placeholder="Ej.: Niño y familia."></textarea></label>
+        <fieldset class="seguimiento-participantes">
+          <legend>Participantes (opcional) <small>Selecciona uno o varios</small></legend>
+          <div class="pro-sugerencias">
+            ${this.opcionesParticipantes.map(nombre => `
+              <label class="seguimiento-opcion"><input type="checkbox" value="${nombre}">
+                <span class="pro-sugerencia">${Profesionales.icono('comprobar')}${nombre}</span></label>`).join('')}
+          </div>
+          <label hidden>Especifica quién participó<textarea id="seguimiento-otro-participante" rows="1" maxlength="500"></textarea></label>
+          <input type="hidden" name="participantes">
+        </fieldset>
         <h3>Observaciones profesionales</h3>
         ${Object.entries(especialidad.campos).map(([campo, etiqueta]) => `
           <div><label for="seguimiento-${campo}">${etiqueta} *</label>
@@ -288,8 +376,9 @@ const SeguimientosVinculacion = {
     const {fechaAtencion: fecha, proximoSeguimiento: proxima, tipo} = form.elements;
     fecha.value = registro?.fechaAtencion || datos.hoy;
     Object.entries(registro?.contenido || {}).forEach(([campo, valor]) => {
-      if (form.elements[campo]) form.elements[campo].value = valor ?? '';
+      if (campo !== 'participantes' && form.elements[campo]) form.elements[campo].value = valor ?? '';
     });
+    const participantes = this.enlazarParticipantes(form, registro?.contenido.participantes ?? '');
     let contextoActual;
     const actualizarEtapa = () => {
       proxima.min = fecha.value;
@@ -299,7 +388,7 @@ const SeguimientosVinculacion = {
       const contexto = etapa + ':' + tipo.value;
       if (contexto === contextoActual) return;
       contextoActual = contexto;
-      Object.entries(this.orientaciones(rol, etapa, tipo.value || 'OTRO')).forEach(([campo, [pregunta, opciones]]) => {
+      Object.entries(this.orientaciones(rol, etapa, tipo.value)).forEach(([campo, [pregunta, opciones]]) => {
         const control = form.elements[campo];
         dialogo.querySelector('#pregunta-' + campo).textContent = pregunta;
         control.parentElement.querySelector('.pro-sugerencias')?.remove();
@@ -336,6 +425,7 @@ const SeguimientosVinculacion = {
       if (!tipo.value) return invalido(tipo, 'Selecciona el tipo de seguimiento.');
       if (!proxima.validity.valid) return invalido(proxima, 'El próximo seguimiento no puede ser anterior a la fecha de atención.');
       const payload = Object.fromEntries(new FormData(form));
+      if (payload.participantes.length > 500) return invalido(participantes, 'Los participantes admiten hasta 500 caracteres en total.');
       for (const campo of Object.keys(especialidad.campos)) {
         if (!payload[campo].trim()) return invalido(form.elements[campo], `Completa el campo «${this.etiqueta(rol, campo)}».`);
       }
