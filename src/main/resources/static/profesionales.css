@@ -650,3 +650,31 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 
 .profesional .pro-dialogo .pro-motivo { align-items: center; gap: 8px; }
 .pro-dialogo-decision textarea { font-weight: 400; }
+
+.pro-expedientes-completos > .antecedentes-familia {
+  grid-column: 1 / -1; background: #fff; border: 1px solid #d4e2f5; border-radius: 14px;
+}
+.antecedentes-familia > summary {
+  display: flex; align-items: center; gap: 12px; padding: 18px; cursor: pointer; list-style: none; color: #153e63;
+}
+.antecedentes-familia > summary::-webkit-details-marker { display: none; }
+.antecedentes-familia > summary strong, .antecedentes-familia h3 { font-size: 1.2rem; font-weight: 600; }
+.antecedentes-familia > summary small { display: block; margin-top: 4px; color: #476788; }
+.profesional .antecedentes-familia .pro-simbolo { flex: 0 0 48px; width: 48px; height: 48px; margin: 0; }
+.antecedentes-flecha { margin-inline-start: auto; color: #1469dc; }
+.antecedentes-familia[open] .antecedentes-flecha { transform: rotate(180deg); }
+.antecedentes-contenido { display: grid; gap: 12px; padding: 12px; border-top: 1px solid #dce5ee; }
+.antecedente-tarjeta { border: 1px solid #d4e2f5; border-radius: 13px; padding: 18px; }
+.antecedente-tarjeta h3 { display: flex; align-items: center; gap: 12px; margin: 0; color: #153e63; }
+.antecedentes-familia .antecedente-tarjeta .pro-simbolo.revocado { color: #ad2634; background: #fbe8ea; }
+.antecedentes-familia .antecedente-tarjeta .pro-simbolo.interrumpido { color: #a96313; background: #fff0dc; }
+.antecedente-tarjeta dt { font-weight: 600; color: #153e63; }
+.antecedente-tarjeta dd { margin: 4px 0 12px; color: #476788; white-space: pre-wrap; overflow-wrap: anywhere; }
+.antecedente-revision, .antecedente-tarjeta footer a { display: inline-flex; align-items: center; gap: 8px; }
+.antecedente-revision .pro-icono { flex-shrink: 0; }
+.antecedente-tarjeta .confirmada { color: #087d68; }
+.antecedente-tarjeta .pendiente { color: #a96313; }
+.antecedente-tarjeta footer { display: flex; justify-content: flex-end; border-top: 1px solid #dce5ee; padding-top: 14px; }
+.antecedente-reevaluaciones { display: flex; align-items: center; gap: 12px; }
+.antecedente-reevaluaciones p, .antecedentes-contenido > p { margin: 0; }
+.antecedente-reevaluaciones > strong { margin-inline-start: auto; color: #1469dc; font-size: 1.55rem; }

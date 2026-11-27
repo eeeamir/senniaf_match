@@ -56,15 +56,29 @@ public class VinculacionService {
                 .orElseGet(Map::of);
     }
 
-    public Map<String, Object> antecedenteRevocacion(Long familiaId) {
-        return repo.findFirstByFamiliaIdAndResultadoCierreOrderByFechaRegistroCierreDescIdDesc(familiaId, ResultadoCierre.REVOCACION_ASIGNACION)
-                .map(v -> {
-                    var incidencia = bloqueante(incidencias(v));
-                    return Map.<String, Object>of("vinculacionId", v.getId(),
-                            "estado", datosCierre(v).get("estadoFamiliar"),
-                            "motivo", incidencia == null ? "OTRO" : incidencia.getMotivo(),
-                            "fundamento", v.getMotivoCierre() == null ? "" : v.getMotivoCierre());
-                }).orElseGet(Map::of);
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> antecedentesFamilia(String actor) {
+        List<Map<String, Object>> antecedentes = new ArrayList<>();
+        for (var v : repo.findByFamiliaRegistradoPorOrderByIdDesc(actor)) {
+            if (v.getEstado() != Vinculacion.Estado.CERRADA) continue;
+            var registro = new LinkedHashMap<String, Object>();
+            if (v.getResultadoCierre() == ResultadoCierre.REVOCACION_ASIGNACION) {
+                var incidencia = bloqueante(incidencias(v));
+                registro.put("tipo", "REVOCACION");
+                registro.put("motivo", incidencia == null ? null : incidencia.getMotivo());
+                registro.put("detalle", incidencia == null ? v.getMotivoCierre() : incidencia.getJustificacion());
+            } else {
+                var interrupcion = interrupcion(v);
+                if (interrupcion == null) continue;
+                registro.put("tipo", "INTERRUPCION");
+                registro.put("motivo", interrupcion.getMotivo());
+                registro.put("detalle", interrupcion.getJustificacion());
+            }
+            registro.put("vinculacionId", v.getId());
+            registro.put("revision", v.isFamiliaLiberada() ? "CONFIRMADA" : v.isReservaVigente() ? "PENDIENTE" : null);
+            antecedentes.add(registro);
+        }
+        return antecedentes;
     }
     public List<Map<String,Object>> propias(String actor){
         return repo.findByFamiliaRegistradoPorOrderByIdDesc(actor).stream().map(v->vista(v,true)).toList();

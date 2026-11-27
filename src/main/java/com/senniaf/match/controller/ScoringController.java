@@ -44,7 +44,7 @@ public class ScoringController {
         Map<String,Object> r=new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules().disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).convertValue(perfil,new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>(){});
         r.put("antecedenteInterrupcion",scoring.antecedenteInterrupcion(codigo));
         if (vinculaciones != null) {
-            r.put("antecedenteRevocacion", vinculaciones.antecedenteRevocacion(perfil.getId()));
+            r.put("antecedentesVinculacion", vinculaciones.antecedentesFamilia(perfil.getRegistradoPor()));
             r.put("antecedenteAdopcion", vinculaciones.antecedenteAdopcion(perfil.getId()));
         }
         if(perfil.isReevaluacionPendiente() && familias!=null)familias.consultarPorCedula(perfil.getRegistradoPor()).ifPresent(revision->{

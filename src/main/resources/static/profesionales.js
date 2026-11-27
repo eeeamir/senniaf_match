@@ -28,6 +28,7 @@ const Profesionales = {
       documentoEditable:'M6 3h9l4 4v4 M14 3v5h5 M6 3v18h5 M13 17l5-5 3 3-5 5-4 1z',
       documentoVerificado:'M6 3h9l4 4v14H6z M14 3v5h5 M9 14l2 2 5-5',
       informe:'M6 3h9l4 4v14H6z M14 3v5h5M9 12h7M9 16h7',
+      historial:'M3 11a9 9 0 1 0 3-6L3 8 M3 3v5h5 M12 7v5l3 2',
       reloj:'M12 7v5l3 2 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',
       buscar:'M16 16l5 5 M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',
       personas:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M18 4a4 4 0 0 1 0 8 M22 21v-2a4 4 0 0 0-3-4',

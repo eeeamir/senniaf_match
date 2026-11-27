@@ -542,20 +542,50 @@ function culturaDetalle(datos) {
       </div>
     </details>`;
 }
+function antecedentesFamilia(datos) {
+  const antecedentes = datos.antecedentesVinculacion || [];
+  const reevaluaciones = Number(datos.numeroReevaluaciones) || 0;
+  if (!antecedentes.length && !reevaluaciones) return '';
+  const resumen = [
+    `${antecedentes.length} ${antecedentes.length === 1 ? 'antecedente' : 'antecedentes'}`,
+    `${reevaluaciones} ${reevaluaciones === 1 ? 'reevaluación completada' : 'reevaluaciones completadas'}`
+  ].join(' · ');
+  const motivos = {
+    DESISTIMIENTO_FAMILIA:'Desistimiento de la asignación por parte de la familia.',
+    RECHAZO_NINO:'Rechazo de la asignación por parte del niño, niña o adolescente.',
+    DIFICULTADES_CONTINUAR:'La familia manifestó dificultades para continuar.',
+    ADAPTACION:'Se presentaron dificultades importantes de adaptación.',
+    BIENESTAR_NINO:'Se identificó una situación que requiere proteger el bienestar del niño.',
+    CONDICIONES_CUIDADO:'Cambiaron las condiciones de cuidado de la familia.'
+  };
+  const tarjetas = antecedentes.map(a => {
+    const revocada = a.tipo === 'REVOCACION';
+    const estado = {CONFIRMADA:['Confirmada por el Comité','comprobar'], PENDIENTE:['Pendiente de revisión por el Comité','reloj']}[a.revision];
+    const motivo = motivos[a.motivo] || a.detalle;
+    return `<article class="antecedente-tarjeta">
+      <h3><span class="pro-simbolo ${revocada ? 'revocado' : 'interrumpido'}">${Profesionales.icono(revocada ? 'revocacion' : 'advertencia')}</span>
+        ${revocada ? 'Asignación revocada' : 'Convivencia interrumpida'}</h3>
+      <dl><dt>Motivo</dt><dd>${limpiarHtml(motivo || 'Sin motivo documentado')}</dd>
+      ${estado ? `<dt>Revisión de disponibilidad</dt><dd class="antecedente-revision ${a.revision === 'CONFIRMADA' ? 'confirmada' : 'pendiente'}">${Profesionales.icono(estado[1])}<span>${estado[0]}</span></dd>` : ''}</dl>
+      <footer><a class="enlace" href="vinculaciones.html?id=${Number(a.vinculacionId)}">Consultar vinculación ${Profesionales.icono('flecha')}</a></footer>
+    </article>`;
+  }).join('');
+  return `<details class="antecedentes-familia"><summary>
+    <span class="pro-simbolo">${Profesionales.icono('historial')}</span>
+    <span><strong>Antecedentes y reevaluaciones</strong><small>${resumen}</small></span>
+    <span class="antecedentes-flecha" aria-hidden="true">⌄</span>
+    </summary><div class="antecedentes-contenido">${tarjetas}
+    ${reevaluaciones ? `<article class="antecedente-tarjeta antecedente-reevaluaciones">
+      <span class="pro-simbolo">${Profesionales.icono('documentoVerificado')}</span>
+      <div><h3>Historial de reevaluaciones</h3><p>Reevaluaciones completadas</p></div><strong>${reevaluaciones}</strong></article>` : ''}
+    <p class="ayuda pro-ayuda-con-icono">${Profesionales.icono('informacion')}<span>Los antecedentes no modifican automáticamente la puntuación ni la idoneidad del expediente.</span></p>
+    </div></details>`;
+}
 function detalleSecciones(datos, campos, grupos) {
   let aviso = '';
   if (grupos === GRUPOS_FAMILIA && sesion.rol === 'COMITE') {
-    const revocacion = datos.antecedenteRevocacion;
-    aviso = revocacion?.vinculacionId ? `<aside class="pro-aviso-interrupcion" role="note"><span class="pro-simbolo">${Profesionales.icono('informacion')}</span><div>
-      <h3>Antecedente de asignación revocada</h3>
-      <p>La familia registra una asignación revocada antes del inicio de la convivencia preadoptiva.</p>
-      <p><strong>Motivo</strong> · ${limpiarHtml({DESISTIMIENTO_FAMILIA:'Desistimiento de la asignación por parte de la familia',RECHAZO_NINO:'Rechazo de la asignación por parte del niño, niña o adolescente'}[revocacion.motivo] || 'Otro motivo')}</p>
-      ${revocacion.fundamento ? `<p class="pro-texto-registrado">${limpiarHtml(revocacion.fundamento)}</p>` : ''}
-      <p><strong>Disponibilidad actual</strong> · ${{DISPONIBLE:'Confirmada por el Comité',PENDIENTE_REVISION:'Pendiente de revisión por el Comité',ASIGNADO:'Con otra asignación vigente',NO_ELEGIBLE:'Requiere completar condiciones',SIN_CONSTANCIA:'Sin constancia de revisión'}[revocacion.estado] || ''}</p>
-      <a href="vinculaciones.html?id=${Number(revocacion.vinculacionId)}">Consultar vinculación</a>
-      </div></aside>` : '';
-    aviso += Profesionales.avisoInterrupcion(datos.antecedenteInterrupcion)
-      + Profesionales.avisoReevaluaciones(datos.numeroReevaluaciones);
+    aviso = (datos.antecedenteInterrupcion?.cierrePendiente ? Profesionales.avisoInterrupcion(datos.antecedenteInterrupcion) : '')
+      + antecedentesFamilia(datos);
   }
   const secciones = Object.entries(grupos).map(([titulo, claves], indice) => {
     if (titulo === 'Identidad y continuidad cultural') return culturaDetalle(datos);
