@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
@@ -77,7 +78,16 @@ public class PerfilFamiliaController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/mi-perfil")
+    @PutMapping(value = "/mi-perfil", params = "reincorporacion")
+    public PerfilFamiliaResponse corregirParaReincorporacion(@Valid @RequestBody PerfilFamiliaRequest request,
+                                           @RequestHeader("X-User-Role") String rol,
+                                           @RequestHeader("X-User-Id") String id,
+                                           @RequestParam(required = false) Long reincorporacion,
+                                           @RequestParam(defaultValue = "false") boolean confirmacion) {
+        if (!"FAMILIA".equals(rol)) throw new RolNoAutorizadoException("Solo la familia puede corregir su entrevista");
+        return service.actualizarPropio(request, id, reincorporacion, confirmacion);
+    }
+    @PutMapping(value = "/mi-perfil", params = "!reincorporacion")
     public PerfilFamiliaResponse corregir(@Valid @RequestBody PerfilFamiliaRequest request,
                                            @RequestHeader("X-User-Role") String rol,
                                            @RequestHeader("X-User-Id") String id) {

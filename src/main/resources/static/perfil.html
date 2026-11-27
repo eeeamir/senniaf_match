@@ -1133,11 +1133,16 @@ const btnRegistrar = document.getElementById('btnRegistrar');
 const formularioFamilia = document.getElementById('formularioFamilia');
 const resultadoFamilia = document.getElementById('resultadoFamilia');
 const btnRegistrarFamilia = document.getElementById('btnRegistrarFamilia');
-const modoCorreccionFamilia = new URLSearchParams(location.search).get('reevaluacion') === '1';
+const parametrosFamilia = new URLSearchParams(location.search);
+const idReincorporacion = parametrosFamilia.get('reincorporacion');
+const modoCorreccionFamilia = parametrosFamilia.get('reevaluacion') === '1';
+const destinoEdicionFamilia = idReincorporacion ? 'match.html?vista=propuesta' : 'match.html?vista=entrevista';
+if (modoCorreccionFamilia && idReincorporacion) formularioFamilia.insertAdjacentHTML('afterbegin',
+  '<p class="mensaje aviso">Actualiza la entrevista para confirmar la información de tu hogar en la solicitud de reincorporación.</p>');
 let textoEnviarFamilia = modoCorreccionFamilia ? 'Guardar cambios' : 'Enviar entrevista';
 document.getElementById('cancelarEdicionFamilia').hidden=!modoCorreccionFamilia;
 document.getElementById('cancelarEdicionFamilia').addEventListener('click',()=>{
- const volver=()=>{location.href='match.html?vista=entrevista';};
+ const volver=()=>{location.href=destinoEdicionFamilia;};
  if(Profesionales.formulariosPendientes().includes(formularioFamilia))Profesionales.confirmar('¿Descartar cambios sin guardar?','Las modificaciones de este formulario no se guardarán. Tu entrevista registrada se conservará.',volver);
  else volver();
 });
@@ -1454,10 +1459,19 @@ document.getElementById('btnEjemploFamilia').addEventListener('click',()=>{
    REGISTRO DEL PERFIL DE LA FAMILIA
    =============================================== */
 
+let confirmacionEntrevistaReincorporacion = false;
 formularioFamilia.addEventListener('submit', async (evento) => {
 
   evento.preventDefault();
   if(btnRegistrarFamilia.disabled)return;
+  if (modoCorreccionFamilia && idReincorporacion && !confirmacionEntrevistaReincorporacion) {
+    Profesionales.confirmar('Confirmar entrevista actualizada', 'Confirma que la información refleja la situación actual de tu hogar. El Comité revisará tu solicitud.', () => {
+      confirmacionEntrevistaReincorporacion = true;
+      formularioFamilia.requestSubmit();
+      confirmacionEntrevistaReincorporacion = false;
+    });
+    return;
+  }
   ReglasPerfil.refrescarFamilia();
 
   resultadoFamilia.className = 'resultado';
@@ -1507,7 +1521,10 @@ formularioFamilia.addEventListener('submit', async (evento) => {
 
   try {
 
-    const respuesta = await fetch(modoCorreccionFamilia ? '/api/familias/mi-perfil' : '/api/familias', {
+    const ruta = modoCorreccionFamilia ? '/api/familias/mi-perfil' : '/api/familias';
+    const consulta = modoCorreccionFamilia && idReincorporacion
+      ? '?' + new URLSearchParams({reincorporacion:idReincorporacion,confirmacion:'true'}) : '';
+    const respuesta = await fetch(ruta + consulta, {
       method: modoCorreccionFamilia ? 'PUT' : 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1527,7 +1544,7 @@ formularioFamilia.addEventListener('submit', async (evento) => {
         <span class="codigo">${datos.codigoCaso}</span>` +
         (datos.perfilCompleto ? '' : ' · el perfil quedó marcado como incompleto.') +
         '<br><small>Abriendo tu seguimiento…</small>';
-      setTimeout(() => { location.href = 'match.html'; }, 1600);
+      setTimeout(() => { location.href = idReincorporacion ? destinoEdicionFamilia : 'match.html'; }, 1600);
 
     } else if (respuesta.status === 403) {
 
@@ -1594,7 +1611,7 @@ if (sesion) {
         .then(r => { if (!r.ok) throw new Error('No encontramos tu entrevista'); return r.json(); })
         .then(p => {
           fetch('/api/familias/mi-perfil',{headers:Sesion.encabezados()}).then(r=>{if(!r.ok)throw new Error('No se pudo consultar la solicitud');return r.json();}).then(revision=>{if(revision.reevaluacionPendiente)document.getElementById('formularioFamilia').insertAdjacentHTML('afterbegin',`<aside class="familia-revision-pendiente"><h2>Revisión solicitada por el Comité</h2><p>${(revision.apartadosReevaluacion||[]).map(limpiarHtml).join(', ')}</p><p class="pro-texto-registrado">${limpiarHtml(revision.observacionReevaluacion||'')}</p></aside>`);}).catch(error=>{resultadoFamilia.textContent=error.message;});
-          textoEnviarFamilia=p.reevaluacionPendiente?'Enviar correcciones':'Guardar cambios';
+          textoEnviarFamilia=idReincorporacion?'Enviar entrevista':p.reevaluacionPendiente?'Enviar correcciones':'Guardar cambios';
           btnRegistrarFamilia.textContent=textoEnviarFamilia;
           ['tipoFamilia','notaEstructuraHogar','notaRedApoyo','provincia','disponibilidadViaje',
            'notaDistancia','edadMinimaAceptada','edadMaximaAceptada','notaRangoEdad',

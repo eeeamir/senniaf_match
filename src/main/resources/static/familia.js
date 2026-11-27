@@ -89,7 +89,11 @@ const Familia = {
             : ''
         }
       </section>`;
-      const propuesta = Vinculaciones.familiar(vinculaciones);
+      const antecedente = vinculaciones.find(v => v.resultadoCierre === 'ADOPCION_FORMALIZADA');
+      const mostrarReincorporacion = antecedente && !vinculaciones.some(v =>
+        ['PENDIENTE_RESPUESTA','RESPUESTA_ACEPTADA'].includes(v.estado));
+      const propuesta = (mostrarReincorporacion ? this.reincorporacion(antecedente) : '')
+        + Vinculaciones.familiar(vinculaciones);
       const actividad = (todos = false) => {
         const visibles = todos ? eventos : eventos.slice(0, 3);
         return `
@@ -161,6 +165,8 @@ const Familia = {
         + (['inicio', 'entrevista'].includes(vista) ? this.avisoReevaluacion(p) : '')
         + contenidoVista;
       Vinculaciones.enlazarRespuestas(sesion);
+      document.querySelector('[data-solicitar-reincorporacion]')?.addEventListener('click', () =>
+        this.confirmarReincorporacion(antecedente, sesion));
     } catch (e) {
       if (actualizarSeguimiento) throw e;
       this.version = null;
@@ -169,6 +175,59 @@ const Familia = {
     } finally {
       this.cargando = false;
     }
+  },
+  reincorporacion(v) {
+    const r = v.reincorporacion || {}, estado = r.estado;
+    const resuelta = ['AUTORIZADA','NO_AUTORIZADA'].includes(estado);
+    const entrevista = estado !== 'ENTREVISTA_PENDIENTE';
+    const pasos = [['Solicitud registrada', 'comprobar'],
+      ['Entrevista actualizada', entrevista ? 'comprobar' : 'reloj'],
+      ['Revisión institucional', resuelta ? 'comprobar' : entrevista ? 'reloj' : 'informacion'],
+      ['Resolución de solicitud', estado === 'AUTORIZADA' ? 'comprobar' : estado === 'NO_AUTORIZADA' ? 'advertencia' : 'informacion']];
+    return `<section class="tarjeta"><div class="mensaje exito">${Profesionales.icono('comprobar')}
+      <div><strong>${estado === 'SIN_SOLICITUD' ? 'Proceso finalizado' : 'Proceso anterior finalizado'}</strong><br>Adopción formalizada.<br>Tu proceso de vinculación ha concluido satisfactoriamente.</div></div>
+      <dl class="detalle-datos"><div><dt>Código de vinculación</dt><dd>${limpiarHtml(v.codigo)}</dd></div>
+        <div><dt>Fecha de cierre</dt><dd>${limpiarHtml(Vinculaciones.fechaCivil(v.fechaCierre))}</dd></div></dl>
+      ${r.puedeSolicitar ? `<h3>¿Deseas iniciar un nuevo proceso de adopción?</h3>
+        <p>Puedes solicitar una nueva revisión de tu expediente. Deberás actualizar la información de tu hogar y cumplir los requisitos institucionales correspondientes.</p>
+        <button class="boton" type="button" data-solicitar-reincorporacion>Solicitar reincorporación</button>
+        <p class="ayuda">La solicitud no autoriza automáticamente tu regreso al Match.</p>` : ''}
+      ${estado && estado !== 'SIN_SOLICITUD' ? `<h3>Solicitud de reincorporación</h3>
+        <div class="mensaje ${estado === 'AUTORIZADA' ? 'exito' : estado === 'NO_AUTORIZADA' ? 'error' : 'aviso'}">
+          <div><strong>${Vinculaciones.estadoReincorporacion(estado)}</strong>
+          ${estado === 'ENTREVISTA_PENDIENTE' ? '<p>Completa la actualización de tu entrevista para continuar.</p>'
+            : estado === 'REVISION_PENDIENTE' ? '<p>Tu entrevista actualizada fue recibida. El Comité revisará la solicitud.</p>' : ''}</div></div>
+        <ul class="familia-actividad reincorporacion-pasos">${pasos.map(([texto,icono])=>`<li class="${icono}">${Profesionales.icono(icono)}${texto}</li>`).join('')}</ul>
+        ${estado === 'ENTREVISTA_PENDIENTE' ? `<a class="boton" href="perfil.html?reevaluacion=1&reincorporacion=${encodeURIComponent(v.id)}">Actualizar mi entrevista</a>` : ''}
+        <p>Estado de participación · <strong>${r.disponible ? 'Disponible para Match' : 'Fuera del Match'}</strong></p>` : ''}
+      </section>`;
+  },
+  confirmarReincorporacion(v, sesion) {
+    if (!v?.reincorporacion?.puedeSolicitar || document.querySelector('[data-reincorporacion-dialogo]')) return;
+    const d=document.createElement('dialog');
+    d.className='pro-dialogo';d.dataset.reincorporacionDialogo='';d.setAttribute('aria-label','Solicitar reincorporación');
+    d.innerHTML=`<h2>${Profesionales.icono('solicitudes')}Solicitar reincorporación</h2>
+      <ol><li>Actualizar la información de tu hogar.</li><li>Enviar tu entrevista familiar.</li><li>Esperar la revisión institucional.</li></ol>
+      <p>Conservarás tu cuenta, expediente e historial de vinculaciones.</p>
+      <p class="mensaje error" role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button>
+      <button type="button" class="boton" data-confirmar>Confirmar solicitud</button></div>`;
+    const confirmar=d.querySelector('[data-confirmar]'), cancelar=d.querySelector('[data-cancelar]');
+    d.onclose=()=>d.remove();
+    d.oncancel=e=>{if(confirmar.disabled)e.preventDefault();};
+    cancelar.onclick=()=>d.close();
+    confirmar.onclick=async()=>{
+      confirmar.disabled=cancelar.disabled=true;
+      try {
+        await Vinculaciones.api(`/api/reincorporaciones/vinculaciones/${encodeURIComponent(v.id)}`,{method:'POST',body:JSON.stringify({confirmacion:true})});
+        d.close();
+        await this.mostrar(sesion);
+      } catch(error) {
+        d.querySelector('[role=alert]').textContent=error.message;
+        confirmar.disabled=cancelar.disabled=false;
+      }
+    };
+    document.body.append(d);
+    d.showModal();
   },
  avisoReevaluacion(p){
   if(!p.reevaluacionPendiente)return '';

@@ -118,15 +118,97 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
     });
   },
   async solicitudes(){
-    const expedientes=await this.api('/api/ninos?incluirInactivos=true');
-    const datos=(await Promise.all(expedientes.map(p=>this.api(`/api/ninos/${encodeURIComponent(p.codigoCaso)}/solicitudes-estado`)))).flat();
-    const pendientes=datos.filter(s=>s.estado==='PENDIENTE');
-    this.contenido.innerHTML=Profesionales.encabezado('Solicitudes de expedientes','Revisa las solicitudes de desactivación o reactivación.','solicitudes')+`<section class="tarjeta"><div class="pro-fila-titulo"><div><h2>Solicitudes</h2><p>Consulta las solicitudes recibidas y sus decisiones.</p></div><span class="pro-conteo">${pendientes.length} <small>Por revisar</small></span></div><div class="pro-pestanas" role="tablist" aria-label="Estado de solicitudes"><button id="tabPendientes" type="button" role="tab" aria-selected="true" aria-controls="listaSolicitudesComite">Pendientes · ${pendientes.length}</button><button id="tabResueltas" type="button" role="tab" aria-selected="false" aria-controls="listaSolicitudesComite">Resueltas · ${datos.length-pendientes.length}</button></div><div id="listaSolicitudesComite" role="tabpanel" aria-labelledby="tabPendientes"></div></section>`;
+    const [expedientes,familiares]=await Promise.all([this.api('/api/ninos?incluirInactivos=true'),this.api('/api/reincorporaciones')]);
+    const infantiles=(await Promise.all(expedientes.map(p=>this.api(`/api/ninos/${encodeURIComponent(p.codigoCaso)}/solicitudes-estado`)))).flat();
+    const datos=[...infantiles,...familiares.map(s=>({...s,familiar:true}))];
+    const pendiente=s=>['PENDIENTE','ENTREVISTA_PENDIENTE','REVISION_PENDIENTE'].includes(s.estado);
+    const pendientes=datos.filter(pendiente);
+    const porRevisar=pendientes.filter(s=>s.estado!=='ENTREVISTA_PENDIENTE').length;
+    this.contenido.innerHTML=Profesionales.encabezado('Solicitudes de expedientes','Consulta las solicitudes recibidas y sus decisiones.','solicitudes')+`<section class="tarjeta"><div class="pro-fila-titulo"><div><h2>Solicitudes</h2><p>Consulta las solicitudes recibidas y sus decisiones.</p></div><span class="pro-conteo">${porRevisar} <small>Por revisar</small></span></div><div class="pro-pestanas" role="tablist" aria-label="Estado de solicitudes"><button id="tabPendientes" type="button" role="tab" aria-selected="true" aria-controls="listaSolicitudesComite">Pendientes · ${pendientes.length}</button><button id="tabResueltas" type="button" role="tab" aria-selected="false" aria-controls="listaSolicitudesComite">Resueltas · ${datos.length-pendientes.length}</button></div><label>Tipo de expediente<select id="filtroSolicitudesComite"><option value="">Todos los expedientes</option><option value="infantil">Expedientes infantiles</option><option value="familiar">Expedientes familiares</option></select></label><div id="listaSolicitudesComite" role="tabpanel" aria-labelledby="tabPendientes"></div></section>`;
     const pintar=resueltas=>{
-      const seleccion=datos.filter(s=>resueltas?s.estado!=='PENDIENTE':s.estado==='PENDIENTE').sort((a,b)=>String(b.fechaSolicitud).localeCompare(String(a.fechaSolicitud)));
+      const filtro=document.getElementById('filtroSolicitudesComite').value;
+      const seleccion=datos.filter(s=>pendiente(s)!==resueltas && (!filtro || Boolean(s.familiar)===(filtro==='familiar'))).sort((a,b)=>String(b.fechaSolicitud).localeCompare(String(a.fechaSolicitud)));
       document.getElementById('tabPendientes').setAttribute('aria-selected',String(!resueltas));document.getElementById('tabResueltas').setAttribute('aria-selected',String(resueltas));const lista=document.getElementById('listaSolicitudesComite');lista.setAttribute('aria-labelledby',resueltas?'tabResueltas':'tabPendientes');
-      lista.innerHTML=seleccion.length?seleccion.map(s=>`<article class="pro-reciente"><span class="pro-simbolo">${this.icono('solicitudes')}</span><div><strong>${limpiarHtml(s.codigoCaso)} · ${s.categoria==='ADOPCION_FORMALIZADA'?'Cierre por adopción':limpiarHtml(Profesionales.etiqueta(s.tipo))}</strong><p>${limpiarHtml(Profesionales.etiqueta(s.estado))} · ${limpiarHtml(Profesionales.fecha(s.fechaSolicitud))}</p><p>${limpiarHtml(s.motivo)}</p>${s.resueltoPor?`<p>${limpiarHtml(s.resueltoPor)} · ${limpiarHtml(Profesionales.fecha(s.fechaResolucion))}</p><p>${limpiarHtml(s.motivoResolucion)}</p>`:''}</div><a class="boton secundario chico" href="perfiles.html?caso=${encodeURIComponent(s.codigoCaso)}&origen=solicitudes#panelSolicitudes">${resueltas?'Consultar':'Revisar solicitud'} ${this.icono('flecha')}</a></article>`).join(''):`<div class="pro-vacio"><span class="pro-simbolo">${this.icono('comprobar')}</span><div><h3>${resueltas?'Sin solicitudes resueltas':'Todo está al día'}</h3><p>${resueltas?'Las decisiones del Comité aparecerán aquí.':'No hay solicitudes pendientes de revisión.'}</p></div></div>`;
-    };document.getElementById('tabPendientes').addEventListener('click',()=>pintar(false));document.getElementById('tabResueltas').addEventListener('click',()=>pintar(true));pintar(false);
+      lista.innerHTML=seleccion.length?seleccion.map(s=>s.familiar?this.tarjetaReincorporacion(s):`<article class="pro-reciente"><span class="pro-simbolo">${this.icono('solicitudes')}</span><div><strong>${limpiarHtml(s.codigoCaso)} · ${s.categoria==='ADOPCION_FORMALIZADA'?'Cierre por adopción':limpiarHtml(Profesionales.etiqueta(s.tipo))}</strong><p>${limpiarHtml(Profesionales.etiqueta(s.estado))} · ${limpiarHtml(Profesionales.fecha(s.fechaSolicitud))}</p><p>${limpiarHtml(s.motivo)}</p>${s.resueltoPor?`<p>${limpiarHtml(s.resueltoPor)} · ${limpiarHtml(Profesionales.fecha(s.fechaResolucion))}</p><p>${limpiarHtml(s.motivoResolucion)}</p>`:''}</div><a class="boton secundario chico" href="perfiles.html?caso=${encodeURIComponent(s.codigoCaso)}&origen=solicitudes#panelSolicitudes">${resueltas?'Consultar':'Revisar solicitud'} ${this.icono('flecha')}</a></article>`).join(''):`<div class="pro-vacio"><span class="pro-simbolo">${this.icono('comprobar')}</span><div><h3>${resueltas?'Sin solicitudes resueltas':'Todo está al día'}</h3><p>${resueltas?'Las decisiones del Comité aparecerán aquí.':'No hay solicitudes pendientes de revisión.'}</p></div></div>`;
+      lista.querySelectorAll('[data-revisar-reincorporacion]').forEach(b=>b.onclick=()=>
+        this.revisarReincorporacion(familiares.find(s=>String(s.id)===b.dataset.revisarReincorporacion)));
+    };document.getElementById('tabPendientes').addEventListener('click',()=>pintar(false));document.getElementById('tabResueltas').addEventListener('click',()=>pintar(true));
+    document.getElementById('filtroSolicitudesComite').addEventListener('change',()=>pintar(document.getElementById('tabResueltas').getAttribute('aria-selected')==='true'));
+    pintar(false);
+  },
+  tarjetaReincorporacion(s) {
+    return `<article class="pro-reciente"><span class="pro-simbolo">${this.icono('personas')}</span>
+      <div><strong>Reincorporación familiar · ${limpiarHtml(s.codigoCaso)}</strong>
+        <p>${limpiarHtml(Profesionales.fecha(s.fechaSolicitud))} · ${Vinculaciones.estadoReincorporacion(s.estado)}</p>
+        <p>Solicitud para iniciar un nuevo proceso de adopción.</p>
+        <small>${s.estado === 'ENTREVISTA_PENDIENTE' ? 'Pendiente de actualización de entrevista' : this.icono('comprobar')+' Entrevista actualizada'}</small></div>
+      <button type="button" class="boton secundario chico" data-revisar-reincorporacion="${Number(s.id)}">
+        ${s.estado === 'REVISION_PENDIENTE' ? 'Revisar solicitud' : 'Consultar'}</button></article>`;
+  },
+  revisarReincorporacion(s) {
+    if (!s || document.querySelector('[data-revisar-reincorporacion-dialogo]')) return;
+    const revisable=s.estado==='REVISION_PENDIENTE', d=document.createElement('dialog');
+    d.className='pro-dialogo';d.dataset.revisarReincorporacionDialogo='';d.setAttribute('aria-label','Revisar reincorporación familiar');
+    d.innerHTML=`<h2>${this.icono('solicitudes')}Revisar reincorporación familiar</h2>
+      <p>${limpiarHtml(s.codigoCaso)} · Antecedente ${limpiarHtml(s.vinculacion)} · ${limpiarHtml(Profesionales.fecha(s.fechaSolicitud))}</p>
+      <dl class="detalle-datos"><div><dt>Proceso anterior</dt><dd>Adopción formalizada</dd></div>
+        <div><dt>Entrevista familiar</dt><dd>${s.estado==='ENTREVISTA_PENDIENTE'?'Pendiente de actualización':'Actualizada'}</dd></div></dl>
+      <p><a class="boton secundario" href="perfiles.html?familia=${encodeURIComponent(s.codigoCaso)}&origen=solicitudes" target="_blank" rel="noopener">${this.icono('consulta')}Consultar expediente familiar</a></p>
+      ${revisable?`<form class="pro-interrupcion-form" novalidate>
+        <fieldset class="pro-motivos"><legend>Resultado de la revisión *</legend>
+        <label class="pro-motivo"><input type="radio" name="resultado" value="autorizar"><span>Autorizar reincorporación</span></label>
+        <label class="pro-motivo"><input type="radio" name="resultado" value="denegar"><span>No autorizar reincorporación</span></label></fieldset>
+        <label>Justificación de la decisión *<textarea name="fundamento" rows="4" maxlength="2000"></textarea></label>
+        <p data-efecto hidden></p><label class="pro-confirmacion-check"><input type="checkbox" name="confirmacion">
+        <span>Confirmo que se realizó la revisión institucional y, si autorizo, que la familia reúne las condiciones de elegibilidad.</span></label>
+        <p class="mensaje error" role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button>
+        <button type="submit" class="boton">Registrar decisión</button></div></form>`:`
+        <p>${Vinculaciones.estadoReincorporacion(s.estado)}</p>
+        ${s.resueltoPor?`<p>${limpiarHtml(s.resueltoPor)} · ${limpiarHtml(Profesionales.fecha(s.fechaResolucion))}</p><p class="pro-texto-registrado">${limpiarHtml(s.motivoResolucion)}</p>`:''}
+        <button type="button" class="boton secundario" data-cancelar>Cerrar</button>`}`;
+    const cancelar=d.querySelector('[data-cancelar]');
+    d.onclose=()=>d.remove();cancelar.onclick=()=>d.close();
+    if(revisable){
+      const form=d.querySelector('form'), campo=form.elements.fundamento, enviar=form.querySelector('[type=submit]');
+      const sugerir=Profesionales.sugerenciasDecision(campo);
+      const opciones={
+        autorizar:[
+          ['Condiciones favorables','Tras revisar la información actualizada y los antecedentes familiares, se confirma que la familia reúne las condiciones institucionales para participar nuevamente en el Match.'],
+          ['Reevaluación favorable','Se registra la autorización de reincorporación con fundamento en el resultado favorable de la evaluación familiar correspondiente.']],
+        denegar:[
+          ['Evaluaciones pendientes','No se autoriza la reincorporación debido a que se requieren evaluaciones institucionales complementarias.'],
+          ['Condiciones insuficientes','Tras la revisión institucional, se determina que las condiciones actuales no permiten autorizar la reincorporación.'],
+          ['Requisitos pendientes','La reincorporación no se autoriza debido a que existen requisitos institucionales pendientes de cumplimiento.']]
+      };
+      for(const item of form.querySelectorAll('[name=resultado]')) item.onchange=()=>{
+        sugerir([...opciones[item.value],['Otro motivo','']]);
+        const efecto=form.querySelector('[data-efecto]');
+        efecto.hidden=false;
+        efecto.className='mensaje '+(item.value==='autorizar'?'exito':'aviso');
+        efecto.textContent=item.value==='autorizar'?'La reincorporación es exclusivamente familiar. La adopción anterior permanece cerrada.'
+          :'La familia permanecerá fuera del Match.';
+      };
+      d.oncancel=e=>{if(enviar.disabled)e.preventDefault();};
+      form.onsubmit=async e=>{
+        e.preventDefault();
+        if(enviar.disabled)return;
+        const error=form.querySelector('[role=alert]');
+        const resultado=form.elements.resultado.value;
+        if(!resultado||campo.value.trim().length<10||!form.elements.confirmacion.checked){
+          error.textContent='Selecciona el resultado, escribe una justificación de al menos 10 caracteres y confirma la revisión.';return;
+        }
+        enviar.disabled=cancelar.disabled=true;
+        try{
+          await this.api(`/api/reincorporaciones/${Number(s.id)}/resolucion`,{method:'POST',
+            body:JSON.stringify({autorizar:resultado==='autorizar',fundamento:campo.value,confirmacion:true})});
+        }catch(fallo){
+          error.textContent=fallo.message;enviar.disabled=cancelar.disabled=false;return;
+        }
+        d.close();
+        await this.solicitudes();
+      };
+    }
+    document.body.append(d);d.showModal();
   },
   fechaProgramada(fecha){return new Intl.DateTimeFormat('es-PA',{timeZone:'America/Panama',dateStyle:'long',timeStyle:'short',hour12:true}).format(new Date(fecha));},
   avisoProgramacion(p,modo='resumen'){

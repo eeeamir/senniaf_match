@@ -13,6 +13,7 @@ import com.senniaf.match.dto.ResolverSolicitudRequest;
 import com.senniaf.match.repository.EvaluacionPsicologicaRepository;
 import org.springframework.transaction.annotation.Transactional;
 import com.senniaf.match.model.PerfilNino;
+import com.senniaf.match.model.Vinculacion;
 import com.senniaf.match.model.EventoCaso;
 import com.senniaf.match.model.enums.Alergia;
 import com.senniaf.match.model.enums.CondicionSalud;
@@ -323,6 +324,18 @@ public class PerfilNinoService {
                 .map(SolicitudEstadoResponse::de).toList();
     }
 
+    @org.springframework.beans.factory.annotation.Autowired private com.senniaf.match.repository.VinculacionRepository vinculacionesParaCierre;
+
+    public boolean tieneVinculacionVigente(PerfilNino p) {
+        return vinculacionesParaCierre != null && vinculacionesParaCierre.existsByNinoIdAndEstadoIn(p.getId(), java.util.Set.of(
+                Vinculacion.Estado.PENDIENTE_RESPUESTA, Vinculacion.Estado.RESPUESTA_ACEPTADA));
+    }
+
+    private void comprobarCierrePorVinculacion(PerfilNino p, SolicitudEstadoCaso.Categoria categoria) {
+        if (categoria == SolicitudEstadoCaso.Categoria.ADOPCION_FORMALIZADA && tieneVinculacionVigente(p))
+            throw new IllegalStateException("La adopción debe registrarse desde el cierre de la vinculación vigente");
+    }
+
     @Transactional
     public SolicitudEstadoResponse solicitarCambioEstado(String codigo, String actor, String rol, SolicitudEstadoRequest request) {
         if (!"TRABAJADOR_SOCIAL".equals(rol))
@@ -335,6 +348,7 @@ public class PerfilNinoService {
         SolicitudEstadoCaso s = new SolicitudEstadoCaso();
         if (request.categoria() == null || !request.categoria().admite(request.tipo()))
             throw new IllegalArgumentException("El motivo seleccionado no corresponde al tipo de solicitud");
+        comprobarCierrePorVinculacion(p, request.categoria());
         s.setCategoria(request.categoria());
         s.setExpediente(p); s.setTipo(request.tipo()); s.setSolicitante(actor);
         s.setFechaSolicitud(LocalDateTime.now()); s.setMotivo(motivoValido(request.motivo()));
@@ -353,6 +367,7 @@ public class PerfilNinoService {
         String motivo = motivoValido(request.motivo());
         if (request.aprobar()) {
             comprobarEstado(p, s.getTipo());
+            comprobarCierrePorVinculacion(p, s.getCategoria());
             if (s.getTipo() == SolicitudEstadoCaso.Tipo.REACTIVACION && !p.isPerfilCompleto())
                 throw new IllegalStateException("Completa y revisa el expediente antes de aprobar su reactivación al Match");
             p.setBajaLogica(s.getTipo() == SolicitudEstadoCaso.Tipo.DESACTIVACION);

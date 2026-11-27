@@ -14,6 +14,7 @@ import java.util.List;
 public class PerfilFamiliaService {
 
     @org.springframework.beans.factory.annotation.Autowired private com.senniaf.match.repository.VinculacionRepository vinculaciones;
+    @org.springframework.beans.factory.annotation.Autowired private ReincorporacionService reincorporaciones;
     private final PerfilFamiliaRepository repositorio;
     private final com.senniaf.match.repository.EventoCasoRepository auditoria;
     private final com.senniaf.match.repository.DecisionComiteRepository decisiones;
@@ -65,6 +66,12 @@ public class PerfilFamiliaService {
     /** La familia actualiza su entrevista propia; una revisión solicitada se contabiliza al completarse. */
     @Transactional
     public PerfilFamiliaResponse actualizarPropio(PerfilFamiliaRequest request, String cedula) {
+        return actualizarPropio(request, cedula, null, false);
+    }
+
+    @Transactional
+    public PerfilFamiliaResponse actualizarPropio(PerfilFamiliaRequest request, String cedula,
+                                                  Long reincorporacion, boolean confirmacion) {
         request.validarCoherencia();
         PerfilFamilia perfil = repositorio.bloquearPorRegistradoPor(cedula)
                 .orElseThrow(() -> new IllegalArgumentException("Todavía no existe una entrevista para modificar"));
@@ -74,7 +81,9 @@ public class PerfilFamiliaService {
         perfil.setPerfilCompleto(completo);
         // Abrir o abandonar el formulario nunca cuenta. Una solicitud pendiente
         // cuenta una sola vez al recibirse la corrección completa y válida.
-        if (perfil.isReevaluacionPendiente() && completo) {
+        if (reincorporacion != null) {
+            reincorporaciones.confirmarEntrevista(perfil, reincorporacion, confirmacion);
+        } else if (perfil.isReevaluacionPendiente() && completo) {
             perfil.setNumeroReevaluaciones(perfil.getNumeroReevaluaciones() + 1);
             perfil.setReevaluacionPendiente(false);
         }

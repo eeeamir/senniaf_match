@@ -1,6 +1,12 @@
 package com.senniaf.match.dto;
 import jakarta.validation.constraints.*;
+import com.senniaf.match.model.Vinculacion.ResultadoCierre;
 /** Constancia registrada por el Comité, sin atribuirle competencias de otra autoridad. */
 public record CierreInstitucionalRequest(
  @NotBlank(message="Explica el motivo o resultado") @Size(min=10,max=2000,message="El motivo debe tener entre 10 y 2000 caracteres") String motivo,
- @AssertTrue(message="Confirma que el cierre cuenta con respaldo institucional") boolean confirmacionAutoridad) {}
+ @AssertTrue(message="Confirma que el cierre cuenta con respaldo institucional") boolean confirmacionAutoridad,
+ @NotNull(message="Selecciona el resultado de la vinculación") ResultadoCierre resultado) {
+    public CierreInstitucionalRequest(String motivo, boolean confirmacionAutoridad) {
+        this(motivo, confirmacionAutoridad, null);
+    }
+}

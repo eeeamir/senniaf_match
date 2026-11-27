@@ -10,6 +10,9 @@ public interface PerfilFamiliaRepository extends JpaRepository<PerfilFamilia, Lo
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("select p from PerfilFamilia p where p.codigoCaso=:codigo")
     Optional<PerfilFamilia> bloquear(@org.springframework.data.repository.query.Param("codigo") String codigo);
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select p from PerfilFamilia p where p.id=:id")
+    Optional<PerfilFamilia> bloquearPorId(@org.springframework.data.repository.query.Param("id") Long id);
     Optional<PerfilFamilia> findByCodigoCaso(String codigoCaso);
     boolean existsByCodigoCaso(String codigoCaso);
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)

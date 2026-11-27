@@ -544,3 +544,15 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
   .vinculacion-general .vinculacion-tiempos > div:nth-child(even) { padding-inline-start: 0; }
   .vinculacion-tiempos > div:nth-child(n+2) { border-top: 1px solid #dce5ee; }
 }
+
+.pro-sugerencias-decision .pro-sugerencia { user-select: none; }
+.pro-sugerencias-decision .pro-icono { display: none; }
+.pro-sugerencias-decision [aria-pressed=true] { background: #e2f3eb; color: #08705f; border-color: #08705f; }
+.pro-sugerencias-decision [aria-pressed=true] .pro-icono { display: inline-block; vertical-align: middle; margin-inline-end: .25rem; }
+
+.chip.vinculacion-vigente { color: #205b9b; background: #e7f0ff; }
+.reincorporacion-pasos > li { display: flex; align-items: center; gap: .6rem; padding: .5rem 0; }
+.reincorporacion-pasos .comprobar > .pro-icono { color: #08705f; }
+.reincorporacion-pasos .reloj > .pro-icono { color: #895e1e; }
+.reincorporacion-pasos .advertencia > .pro-icono { color: #a52e38; }
+.reincorporacion-pasos .informacion > .pro-icono { color: #65758b; }

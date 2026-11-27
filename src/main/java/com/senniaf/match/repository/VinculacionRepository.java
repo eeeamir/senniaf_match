@@ -11,6 +11,11 @@ public interface VinculacionRepository extends JpaRepository<Vinculacion,Long> {
     @Query("select v from Vinculacion v where v.id=:id")
     Optional<Vinculacion> bloquear(@Param("id") Long id);
     List<Vinculacion> findByFamiliaRegistradoPorOrderByIdDesc(String actor);
+    boolean existsByNinoIdAndEstadoIn(Long ninoId, Collection<Vinculacion.Estado> estados);
+    Optional<Vinculacion> findFirstByFamiliaIdAndResultadoCierreOrderByFechaRegistroCierreDescIdDesc(
+            Long familiaId, Vinculacion.ResultadoCierre resultado);
+    @Query("select count(v)>0 from Vinculacion v where v.familia.id=:familia and v.id<>:id and v.reservaVigente=true and v.familiaLiberada=false")
+    boolean otraReservaFamiliar(@Param("familia") Long familia, @Param("id") Long id);
     List<Vinculacion> findAllByOrderByIdDesc();
     @Query("select count(v)>0 from Vinculacion v where v.nino.codigoCaso=:codigo and v.reservaVigente=true and v.ninoLiberado=false")
     boolean existsByNinoCodigoCasoAndReservaVigenteTrue(@Param("codigo") String codigo);

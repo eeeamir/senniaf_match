@@ -22,6 +22,12 @@ public class Vinculacion {
     public String getReferenciaCierre(){return referenciaCierre;} public void setReferenciaCierre(String v){referenciaCierre=v;}
     @Column(length=200) private String autoridadCierre;
     public String getAutoridadCierre(){return autoridadCierre;} public void setAutoridadCierre(String v){autoridadCierre=v;}
+    public enum ResultadoCierre { ADOPCION_FORMALIZADA, INTERRUPCION_CONVIVENCIA, CIERRE_DOCUMENTADO }
+    @Enumerated(EnumType.STRING)
+    @Column(length = 32)
+    private ResultadoCierre resultadoCierre;
+    public ResultadoCierre getResultadoCierre() { return resultadoCierre; }
+    public void setResultadoCierre(ResultadoCierre resultado) { this.resultadoCierre = resultado; }
     @Column(length=2000) private String motivoCierre;
     public String getMotivoCierre(){return motivoCierre;} public void setMotivoCierre(String v){motivoCierre=v;}
     @Column(length=40) private String cerradoPor;

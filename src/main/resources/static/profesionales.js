@@ -153,6 +153,23 @@ const Profesionales = {
     });
     campo.insertAdjacentElement('afterend', bloque);
   },
+  sugerenciasDecision(campo) {
+    let anteriores = [];
+    let bloque;
+    return opciones => {
+      if (bloque) {
+        const indice = [...bloque.children].findIndex(boton => boton.getAttribute('aria-pressed') === 'true');
+        if (indice >= 0 && campo.value === anteriores[indice][1]) campo.value = '';
+        bloque.remove();
+      }
+      anteriores = opciones;
+      if (opciones.length) {
+        this.sugerencias(campo, opciones, {seleccionUnica: true});
+        bloque = campo.nextElementSibling;
+        bloque.classList.add('pro-sugerencias-decision');
+      } else bloque = null;
+    };
+  },
   mostrarAntecedenteCultural(valor, datos, campos) {
     const normalizar = (texto) =>
       String(texto || '')

@@ -101,6 +101,12 @@ public class PerfilNinoController {
                       @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
         comprobarProfesional(rol); return service.consultarExpediente(codigo, actor, rol);
     }
+    @GetMapping("/{codigo}/opciones-estado")
+    public Map<String, Boolean> opcionesEstado(@PathVariable String codigo,
+            @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
+        comprobarTrabajoSocial(rol);
+        return Map.of("vinculacionVigente", service.tieneVinculacionVigente(service.consultarExpediente(codigo, actor, rol)));
+    }
     @GetMapping("/{codigo}/auditoria")
     public java.util.List<?> auditoria(@PathVariable String codigo,
                       @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {

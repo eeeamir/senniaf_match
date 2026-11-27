@@ -404,19 +404,24 @@ document.getElementById('historialSolicitudes').addEventListener('click',e=>{
     ['NO_PROCEDE','La solicitud no corresponde al estado actual del expediente.','Al revisar la solicitud y el expediente, se identificó que su estado actual no permite tramitar el cierre solicitado. Por ello, se rechaza la solicitud y se mantiene el estado del expediente'],
     ['OTRO','Otro motivo.','']
   ]:!aprobar?[
+    reactivar ? ['CONDICIONES_PENDIENTES','Condiciones pendientes de restablecer','La revisión establece que aún no se han restablecido las condiciones de participación del expediente.']
+      : ['NO_JUSTIFICADA','Desactivación no justificada','La información revisada no justifica suspender la participación del expediente.'],
     ['INFORMACION_INSUFICIENTE','Información insuficiente','La documentación disponible no permite autorizar el cambio solicitado. El expediente conserva su estado y se recomienda completar la información.'],
-    ['NO_PROCEDE','La solicitud no procede en el estado actual','Después de revisar el estado del expediente y la solicitud, no se considera procedente el cambio. Se conserva el estado actual para su seguimiento.'],
-    ['OTRO','Otro','']
+    reactivar ? ['REQUISITOS_PENDIENTES','Requisitos pendientes','La reactivación queda pendiente de que se acrediten los requisitos institucionales aplicables.']
+      : ['NO_PROCEDE','Solicitud no procedente','Después de revisar el estado del expediente y la solicitud, no se considera procedente la desactivación.'],
+    ['OTRO','Otro motivo','']
   ]:adopcion?[
     ['DOCUMENTACION','Se verificó la documentación de la adopción.','Se revisó la documentación que confirma la adopción formalizada. Por este motivo, se aprueba el cierre de participación del expediente en SENNIAF Match. El historial se conservará y no procederá su reactivación ordinaria'],
     ['OTRO','Otro motivo.','']
   ]:reactivar?[
+    ['SITUACION_RESUELTA','Situación resuelta','La revisión confirma que se resolvió la situación que motivó el retiro temporal y que procede la reactivación.'],
     ['REVISION_COMPLETADA','Revisión del expediente completada','Se completó la revisión del expediente y se autoriza su reactivación para el análisis de compatibilidad, sujeta al cumplimiento de los requisitos del sistema.'],
     ['CONDICIONES_RESTABLECIDAS','Condiciones de participación restablecidas','La información revisada permite autorizar la reactivación del expediente, al haberse restablecido las condiciones para participar en el análisis de compatibilidad.'],
     ['OTRO','Otro','']
   ]:[
+    ['TRASLADO','Traslado confirmado','Se confirmó el traslado a otra unidad responsable. Se autoriza el retiro temporal y se conservan los antecedentes del expediente.'],
     ['SUSPENSION','Suspensión temporal justificada','Se revisó la solicitud y se autoriza la desactivación temporal del expediente mientras se actualiza o revisa su situación. Se conserva el seguimiento y el historial.'],
-    ['SITUACION','Cambio de situación documentado','La documentación revisada sustenta suspender temporalmente la participación del expediente en nuevas propuestas. Su posible regreso requerirá autorización del Comité.'],
+    ['SITUACION','Cambio de situación verificado','La documentación revisada sustenta suspender temporalmente la participación del expediente en nuevas propuestas. Su posible regreso requerirá autorización del Comité.'],
     ['OTRO','Otro','']
   ];
   const confirmacion=!aprobar?'¿Estás seguro de que deseas rechazar esta solicitud? El estado del expediente se mantendrá sin cambios.':adopcion?'¿Deseas cerrar la participación de este expediente por adopción formalizada? Se conservará el historial y no se permitirá una reactivación ordinaria.':reactivar?'¿Deseas reactivar este expediente? Volverá a estar disponible para el análisis de compatibilidad, siempre que cumpla los requisitos del sistema.':'¿Estás seguro de que deseas desactivar este expediente? Dejará de participar en nuevas propuestas de compatibilidad hasta que se autorice su reactivación.';
@@ -548,25 +553,46 @@ function resumenParticipacion(p) {
 
 const MOTIVOS_RETIRO=[
  ['ADOPCION_FORMALIZADA','La adopción ya fue formalizada.','Cierre de participación por adopción','Solicito cerrar la participación del expediente en el Match porque la adopción ya fue formalizada. El Comité podrá verificar la documentación correspondiente antes de resolver.'],
- ['CAMBIO_SITUACION','Cambió la situación del niño, niña o adolescente.','Retiro temporal','Solicito retirar temporalmente el expediente del Match mientras se revisa el cambio en la situación del niño, niña o adolescente.'],
- ['TRASLADO','El expediente fue trasladado a otra unidad responsable.','Retiro por traslado','Solicito retirar el expediente del Match debido a su traslado a otra unidad responsable. Se conserva la información registrada para su seguimiento.'],
- ['SUSPENSION_TEMPORAL','Se requiere suspender temporalmente su participación.','Retiro temporal','Solicito suspender temporalmente la participación del expediente en el Match hasta que se revisen las condiciones para su regreso.'],
+ ['CAMBIO_SITUACION','Cambio en la situación del niño','Retiro temporal mientras se revisa su situación.','Solicito retirar temporalmente el expediente del Match mientras se revisa el cambio en la situación del niño, niña o adolescente.'],
+ ['TRASLADO','Traslado a otra unidad responsable','Conservación del expediente y sus antecedentes.','Solicito retirar el expediente del Match debido a su traslado a otra unidad responsable. Se conserva la información registrada para su seguimiento.'],
+ ['SUSPENSION_TEMPORAL','Suspensión temporal de participación','Retiro hasta revisar las condiciones de participación.','Solicito suspender temporalmente la participación del expediente en el Match hasta que se revisen las condiciones para su regreso.'],
  ['OTRO','Otro motivo.','Describe la situación','']];
 const MOTIVOS_REACTIVACION=[
- ['SITUACION_RESUELTA','Se resolvió la situación que motivó el retiro.','Requiere revisión del Comité','Solicito revisar la reactivación del expediente porque se resolvió la situación que motivó su retiro temporal.'],
- ['REVISION_COMPLETADA','Se completó la revisión del expediente.','Requiere revisión de elegibilidad','Solicito la reactivación del expediente tras completar su revisión y actualizar la información necesaria para evaluar su elegibilidad.'],
- ['CONDICIONES_RESTABLECIDAS','Se restablecieron las condiciones para participar.','Regreso sujeto a autorización','Solicito que el Comité revise el regreso del expediente al Match, ya que se restablecieron las condiciones para su participación.'],
+ ['SITUACION_RESUELTA','Situación que motivó la desactivación resuelta','Se resolvió la circunstancia que originó el retiro.','Solicito revisar la reactivación del expediente porque se resolvió la situación que motivó su retiro temporal.'],
+ ['REVISION_COMPLETADA','Revisión del expediente completada','Información revisada y actualizada.','Solicito la reactivación del expediente tras completar su revisión y actualizar la información necesaria para evaluar su elegibilidad.'],
+ ['CONDICIONES_RESTABLECIDAS','Condiciones de participación restablecidas','Regreso sujeto a autorización institucional.','Solicito que el Comité revise el regreso del expediente al Match, ya que se restablecieron las condiciones para su participación.'],
  ['OTRO','Otro motivo.','Describe la situación','']];
-function prepararMotivos(){
- const opciones=expedienteSeleccionado.bajaLogica?MOTIVOS_REACTIVACION:MOTIVOS_RETIRO;
+function prepararMotivos(vinculacionVigente = true){
+ const opciones=expedienteSeleccionado.bajaLogica?MOTIVOS_REACTIVACION:MOTIVOS_RETIRO.filter(
+   ([tipo])=>!vinculacionVigente||tipo!=='ADOPCION_FORMALIZADA');
  document.getElementById('motivosPredeterminados').innerHTML='<legend>Motivo de la solicitud</legend>'+opciones.map(([clave,titulo,ayuda])=>`<label class="pro-motivo"><input type="radio" name="categoriaSolicitud" value="${clave}" required>${Profesionales.icono(clave==='ADOPCION_FORMALIZADA'?'hogar':'solicitudes')}<span>${titulo}<small>${ayuda}</small></span></label>`).join('');
- document.querySelectorAll('[name="categoriaSolicitud"]').forEach(r=>r.addEventListener('change',()=>{document.getElementById('motivoSolicitud').value=opciones.find(m=>m[0]===r.value)[3];}));
+ const controles=[...document.querySelectorAll('[name="categoriaSolicitud"]')];
+ const texto=document.getElementById('motivoSolicitud');
+ let anterior='', plantilla='';
+ controles.forEach(control=>control.addEventListener('change',()=>{
+   const aplicar=()=>{
+     anterior=control.value;plantilla=opciones.find(m=>m[0]===anterior)[3];control.checked=true;
+     texto.value=plantilla;texto.dispatchEvent(new Event('input',{bubbles:true}));
+   };
+   if(texto.value.trim() && texto.value!==plantilla){
+     controles.forEach(c=>{c.checked=c.value===anterior;});
+     Profesionales.confirmar('¿Reemplazar la justificación?', 'Se sustituirá el texto que escribiste. Cancela para conservarlo.', aplicar);
+   }else aplicar();
+ }));
 }
 function cerrarSolicitud(){document.getElementById('formSolicitud').reset();document.getElementById('errorSolicitud').textContent='';document.getElementById('dialogoSolicitud').close();}
 document.getElementById('cancelarSolicitud').addEventListener('click',cerrarSolicitud);
 document.getElementById('cerrarDialogoSolicitud').addEventListener('click',cerrarSolicitud);
 document.getElementById('dialogoSolicitud').addEventListener('cancel',cerrarSolicitud);
-document.getElementById('abrirSolicitud').addEventListener('click',()=>{document.getElementById('formSolicitud').reset();document.getElementById('errorSolicitud').textContent='';document.getElementById('dialogoSolicitud').showModal();});
+document.getElementById('abrirSolicitud').addEventListener('click',async evento=>{
+ const boton=evento.currentTarget;boton.disabled=true;
+ let vigente=true;
+ try{vigente=(await leerApi(`/api/ninos/${encodeURIComponent(codigoEvaluacion)}/opciones-estado`)).vinculacionVigente;}
+ catch(error){Profesionales.mensaje(document.getElementById('mensajeEstado'),error.message,'error');return;}
+ finally{boton.disabled=false;}
+ document.getElementById('formSolicitud').reset();prepararMotivos(vigente);
+ document.getElementById('errorSolicitud').textContent='';document.getElementById('dialogoSolicitud').showModal();
+});
 
 
 function configurarPestanas(){
