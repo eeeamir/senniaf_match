@@ -75,28 +75,12 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
     this.contenido.querySelectorAll('[data-decision]').forEach(b=>b.addEventListener('click',()=>this.decidir(caso,familia,b.dataset.decision)));
   },
   resultadoCriterios(familia, pesos) {
-    const iconos = {edad:'calendario',hermanos:'personas',salud:'salud',apoyo:'heart-handshake',logistica:'transporte'};
-    const etiquetas = {EVALUADO:'Evaluado',DESCONOCIDO:'Información por aclarar',NO_APLICA:'No aplica'};
-    const filas = Object.entries(familia.f).map(([criterio, [puntos, razon]]) => {
-      const estado = familia.estadosFactores?.[criterio] || 'EVALUADO';
-      const peso = pesos[criterio];
-      const tono = estado === 'NO_APLICA' || peso === 0 ? 'neutro' : puntos >= peso ? 'completo' : 'parcial';
-      return `<tr><th scope="row"><span class="analisis-factor"><span class="pro-simbolo">${this.icono(iconos[criterio])}</span>
-        ${limpiarHtml(FACTORES[criterio]?.n || criterio)}</span></th>
-        <td><div class="analisis-puntos ${tono}">${estado === 'NO_APLICA' ? 'No aplica' : `<strong>${puntos} / ${peso}</strong>
-          ${peso > 0 ? `<progress max="${peso}" value="${puntos}" aria-label="${limpiarHtml(FACTORES[criterio]?.n || criterio)}"></progress>` : ''}`}</div>
-          ${estado === 'NO_APLICA' ? '' : `<small>${limpiarHtml(etiquetas[estado] || Profesionales.etiqueta(estado))}</small>`}</td>
-        <td class="analisis-razon">${limpiarHtml(razon)}</td></tr>`;
-    }).join('');
-    return `<section class="tarjeta pro-seccion pro-analisis-criterios" aria-labelledby="tituloAnalisisCompatibilidad">
-      <header class="pro-analisis-cabecera"><div class="pro-analisis-titulo"><span class="pro-simbolo">${this.icono('criterios')}</span>
-        <div><h2 id="tituloAnalisisCompatibilidad">Análisis de compatibilidad</h2><p>Consulta el resultado y sus criterios.</p></div></div>
-        <button type="button" class="boton secundario" id="reevaluarCompatibilidad">${this.icono('refrescar')}Actualizar análisis</button></header>
-      <p id="estadoReevaluacion" role="status" aria-live="polite"></p>
-      <div class="analisis-total"><h3>Resultado por criterio</h3><span>${this.puntaje(familia,' / ')}${familia.maximoAplicable > 0 ? ' puntos' : ''}</span></div>
-      ${this.medidor(familia)}
-      <div class="tabla"><table class="analisis-tabla"><thead><tr><th scope="col">Criterio</th><th scope="col">Puntos</th><th scope="col">Razón del resultado</th></tr></thead><tbody>${filas}</tbody></table></div>
-      <p class="ayuda">${this.icono('informacion')} Los criterios que no aplican se excluyen del puntaje máximo. Peso de criterios evaluados: ${familia.pesoEvaluado}.</p></section>`;
+    return Profesionales.analisisCompatibilidad({
+      titulo:'Análisis de compatibilidad', descripcion:'Consulta el resultado y sus criterios.',
+      puntaje:familia.puntaje, maximo:familia.maximoAplicable, factores:familia.f,
+      pesos, estados:familia.estadosFactores, actualizar:true,
+      nota:`<p class="ayuda">${this.icono('informacion')} Los criterios que no aplican se excluyen del puntaje máximo. Peso de criterios evaluados: ${familia.pesoEvaluado}.</p>`
+    });
   },
   async reevaluar() {
     if (this.reevaluando) return;
@@ -108,6 +92,8 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
       const actual = await this.api('/api/scoring/casos/' + encodeURIComponent(this.codigo));
       this.casos = this.casos.map(c => c.codigo === actual.codigo ? actual : c);
       await this.analisis();
+      const detalle = this.contenido.querySelector('.analisis-desglose');
+      if (detalle) detalle.open = true;
       const estado = document.getElementById('estadoReevaluacion');
       if (estado) estado.textContent = 'Análisis actualizado con la información vigente.';
       document.getElementById('reevaluarCompatibilidad')?.focus();
@@ -166,10 +152,9 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
     return `<article class="pro-reciente solicitud-resumen">
       <span class="pro-simbolo">${this.icono(s.familiar ? 'personas' : 'solicitudes')}</span>
       <div><strong>${limpiarHtml(s.codigoCaso)} · ${limpiarHtml(Profesionales.tituloSolicitud(s))}</strong>
-        ${Profesionales.estadoSolicitud(s)}
         <dl class="solicitud-meta"><div><dt>Solicitante</dt><dd>${limpiarHtml(s.solicitante || 'Sin registro')} · ${limpiarHtml(Profesionales.fechaSolicitud(s.fechaSolicitud))}</dd></div>
         ${s.resueltoPor || s.fechaResolucion ? `<div><dt>Resolución</dt><dd>${limpiarHtml(s.resueltoPor || 'Sin registro')} · ${limpiarHtml(Profesionales.fechaSolicitud(s.fechaResolucion))}</dd></div>` : ''}</dl>
-      </div><div class="pro-acciones">
+      </div><div class="solicitud-estado">${Profesionales.estadoSolicitud(s)}</div><div class="pro-acciones">
         <a class="boton secundario chico" href="${destino}">Consultar expediente ${this.icono('flecha')}</a>
         ${s.familiar && s.estado === 'REVISION_PENDIENTE' ? `<button type="button" class="boton chico" data-revisar-reincorporacion="${Number(s.id)}">Revisar solicitud</button>` : ''}
       </div></article>`;

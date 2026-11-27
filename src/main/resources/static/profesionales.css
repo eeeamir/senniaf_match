@@ -604,3 +604,34 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 @media (max-width: 620px) {
   .analisis-tabla { min-width: 510px; }
 }
+
+#listaSolicitudesComite .solicitud-resumen {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start;
+}
+.solicitud-resumen .solicitud-estado { justify-self: end; }
+#listaSolicitudesComite .solicitud-resumen > .pro-acciones { grid-column: 2 / -1; justify-self: end; }
+.analisis-puntaje { color: #0866f5; font-size: 1.7rem; font-weight: 700; white-space: nowrap; }
+.analisis-general-barra { display: block; width: 100%; height: 9px; margin: 12px 0; appearance: none; accent-color: #159987; }
+.analisis-general-barra::-webkit-progress-bar { background: #e3ebf4; border-radius: 10px; }
+.analisis-general-barra::-webkit-progress-value { background: #159987; border-radius: 10px; }
+.analisis-general-barra::-moz-progress-bar { background: #159987; border-radius: 10px; }
+.pro-analisis-criterios:has(.analisis-desglose[open]) :is(.analisis-puntaje-cerrado,.analisis-barra-cerrada) { display: none; }
+.pro-analisis-criterios > .analisis-desglose > summary { display: flex; align-items: center; gap: 9px; list-style: none; color: #0866f5; }
+.analisis-desglose > summary::-webkit-details-marker { display: none; }
+.profesional .analisis-desglose > summary:has(>.pro-icono)::after { content: none; }
+.analisis-desglose > summary > span { margin-inline-start: auto; }
+.analisis-desglose[open] > summary > span { transform: rotate(180deg); }
+.analisis-desglose .analisis-total { border-top: 0; margin-top: 12px; padding-top: 0; }
+.analisis-desglose .analisis-tabla thead th { width: 33.33%; background: #ecf1f6; }
+.analisis-desglose .analisis-tabla tbody :is(th,td) { background: #fff; padding-block: 16px; border-bottom: 1px solid #dce5ee; }
+.analisis-desglose .analisis-tabla tbody td { vertical-align: top; }
+@media (max-width: 520px) {
+  #listaSolicitudesComite .solicitud-resumen { grid-template-columns: minmax(0, 1fr) auto; }
+  .solicitud-resumen > .pro-simbolo { display: none; }
+  #listaSolicitudesComite .solicitud-resumen > .pro-acciones { grid-column: 1 / -1; }
+  .analisis-puntaje { font-size: 1.35rem; }
+}
+.pro-analisis-criterios .pro-analisis-titulo h2, .analisis-total h3 { font-weight: 600; }
+.analisis-desglose .analisis-tabla thead th { text-align: start; font-weight: 600; }
+.analisis-desglose .analisis-tabla tbody th { color: #153e63; }
+.analisis-desglose .analisis-razon { color: #476788; line-height: 1.5; }

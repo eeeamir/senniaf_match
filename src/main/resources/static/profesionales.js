@@ -50,6 +50,38 @@ const Profesionales = {
     const d=new Date(valor);if(Number.isNaN(d.getTime()))return {fecha:'Fecha no disponible',hora:'Hora no disponible'};
     return {fecha:new Intl.DateTimeFormat('es-PA',{dateStyle:'medium',timeZone:'America/Panama'}).format(d),hora:new Intl.DateTimeFormat('es-PA',{timeStyle:'short',timeZone:'America/Panama'}).format(d)};
   },
+  analisisCompatibilidad({titulo, descripcion, puntaje, maximo, factores, pesos, estados, meta='', nota='', actualizar=false}) {
+    const iconos = {edad:'calendario',hermanos:'personas',salud:'salud',apoyo:'heart-handshake',logistica:'transporte'};
+    const etiquetas = {EVALUADO:'Evaluado',DESCONOCIDO:'Información por aclarar',NO_APLICA:'No aplica'};
+    const filas = Object.entries(factores || {}).map(([criterio, [puntos, razon]]) => {
+      const estado = estados?.[criterio];
+      const peso = pesos?.[criterio];
+      const tono = estado === 'NO_APLICA' || peso === 0 ? 'neutro' : puntos != null && puntos >= peso ? 'completo' : 'parcial';
+      return `<tr><th scope="row"><span class="analisis-factor"><span class="pro-simbolo">${this.icono(iconos[criterio])}</span>
+        ${limpiarHtml(FACTORES[criterio]?.n || criterio)}</span></th>
+        <td><div class="analisis-puntos ${tono}">${estado === 'NO_APLICA' ? 'No aplica' : `<strong>${puntos ?? '—'} / ${peso ?? '—'}</strong>
+          ${peso > 0 && puntos != null ? `<progress max="${peso}" value="${puntos}" aria-label="${limpiarHtml(FACTORES[criterio]?.n || criterio)}"></progress>` : ''}`}</div>
+          ${!estado || estado === 'NO_APLICA' ? '' : `<small>${limpiarHtml(etiquetas[estado] || Profesionales.etiqueta(estado))}</small>`}</td>
+        <td class="analisis-razon">${limpiarHtml(razon ?? 'Sin fundamento registrado')}</td></tr>`;
+    }).join('');
+    const total = puntaje == null ? 'Sin puntaje registrado' : `${puntaje} / ${maximo ?? '—'}`;
+    const barra = maximo > 0 && puntaje != null
+      ? `<progress class="analisis-general-barra" max="${maximo}" value="${puntaje}" aria-label="Puntaje total de compatibilidad"></progress>` : '';
+    const puntuacion = `<strong class="analisis-puntaje">${limpiarHtml(total)}</strong>`;
+    return `<section class="tarjeta pro-analisis-criterios">
+      <header class="pro-analisis-cabecera"><div class="pro-analisis-titulo"><span class="pro-simbolo">${this.icono('criterios')}</span>
+      <div><h2>${titulo}</h2><p>${descripcion}</p></div></div><span class="analisis-puntaje-cerrado">${puntuacion}</span></header>
+      <div class="analisis-barra-cerrada">${barra}</div>${meta}
+      ${actualizar ? '<p id="estadoReevaluacion" role="status" aria-live="polite"></p>' : ''}
+      <details class="analisis-desglose"><summary>${this.icono('consulta')}Ver desglose de compatibilidad <span aria-hidden="true">⌄</span></summary>
+      <div class="analisis-total"><h3>Resultado por criterio</h3><span>${puntuacion}${maximo != null ? ' puntos' : ''}</span></div>
+      ${barra}
+      ${filas ? `<div class="tabla"><table class="analisis-tabla"><thead><tr><th scope="col">Criterio</th><th scope="col">Puntos</th><th scope="col">Razón del resultado</th></tr></thead><tbody>${filas}</tbody></table></div>`
+        : '<p>Este antecedente no conserva el desglose.</p>'}
+      ${nota}
+      ${actualizar ? `<button type="button" class="boton secundario" id="reevaluarCompatibilidad">${this.icono('refrescar')}Actualizar análisis</button>` : ''}
+      </details></section>`;
+  },
   fechaSolicitud(valor) {
     const fecha = new Date(valor);
     if (!valor || Number.isNaN(fecha.getTime())) return 'Sin fecha registrada';
@@ -61,7 +93,7 @@ const Profesionales = {
   },
   tituloSolicitud(s) {
     if (s.familiar) return 'Reincorporación familiar';
-    if (s.categoria === 'ADOPCION_FORMALIZADA') return 'Cierre por adopción · Procedimiento anterior';
+    if (s.categoria === 'ADOPCION_FORMALIZADA') return 'Cierre por adopción';
     return s.tipo === 'REACTIVACION' ? 'Reactivación de expediente' : 'Desactivación de expediente';
   },
   estadoSolicitud(s) {

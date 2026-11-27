@@ -118,11 +118,11 @@ const Citas = {
       const explicacion = c.pendienteResultado ? 'El horario programado terminó y aún no se ha registrado el resultado.'
         : c.inasistencia ? 'Trabajo Social registró una inasistencia.' : this.familia ? ({PENDIENTE:'Tu solicitud fue enviada y está pendiente de respuesta de Trabajo Social.',CONFIRMADA:'Tu cita está confirmada para el horario acordado.',CAMBIO_PROPUESTO:'Trabajo Social propuso un nuevo horario. Revisa la propuesta y responde.',RECHAZADA:'Trabajo Social rechazó esta solicitud. Consulta su respuesta.',CANCELADA:'Esta solicitud fue cancelada y ya no está activa.',REALIZADA:'La cita se completó.'})[c.estado] : ({PENDIENTE:'Revisa la solicitud y responde a la familia.',CONFIRMADA:'El horario está confirmado.',CAMBIO_PROPUESTO:'La propuesta está pendiente de respuesta de la familia.',RECHAZADA:'La solicitud fue rechazada.',CANCELADA:'La solicitud ya no está activa.',REALIZADA:'La cita se completó.'})[c.estado];
       return `<article class="tarjeta citas-tarjeta ${prioridad(c) === 0 ? 'citas-requiere-atencion' : ''}" id="cita-${Number(c.id)}" tabindex="-1">
-        <header class="citas-cabecera"><div class="citas-identificacion">
-          <span class="citas-motivo-icono">${Profesionales.icono(iconoMotivo)}</span>
-          <div><p>CITA-${String(Number(c.id)).padStart(3, '0')} · ${limpiarHtml(c.vinculacion)}${this.familia ? '' : ' · Familia ' + limpiarHtml(c.familia)}</p>
-          <h2>${limpiarHtml(motivo)}</h2></div></div>
-          <span class="citas-estado citas-estado-${limpiarHtml(estadoVisual)}">${Profesionales.icono(iconoEstado)}${limpiarHtml(etiqueta)}</span></header>
+        <header class="citas-cabecera">
+          <p class="citas-identificadores">CITA-${String(Number(c.id)).padStart(3, '0')} · ${limpiarHtml(c.vinculacion)}${this.familia ? '' : ' · ' + limpiarHtml(c.familia)}</p>
+          <span class="citas-estado citas-estado-${limpiarHtml(estadoVisual)}">${Profesionales.icono(iconoEstado)}${limpiarHtml(etiqueta)}</span>
+          <div class="citas-identificacion"><span class="citas-motivo-icono">${Profesionales.icono(iconoMotivo)}</span>
+          <h2>${limpiarHtml(motivo)}</h2></div></header>
         <p class="citas-explicacion">${limpiarHtml(explicacion)}</p>
         <dl class="citas-datos"><div><dt>${Profesionales.icono('calendario')}${['CONFIRMADA', 'REALIZADA'].includes(c.estado) ? 'Fecha acordada' : ['PENDIENTE', 'CAMBIO_PROPUESTO'].includes(c.estado) ? 'Fecha propuesta' : 'Fecha programada'}</dt><dd>${limpiarHtml(this.fecha(c.inicio))}</dd></div>
         <div><dt>${Profesionales.icono('reloj')}Inicio · Panamá</dt><dd>${limpiarHtml(this.hora(c.hora))}</dd></div><div><dt>${Profesionales.icono('reloj')}Finalización</dt><dd>${limpiarHtml(this.horaInstante(c.fin))}</dd></div>

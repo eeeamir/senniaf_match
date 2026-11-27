@@ -584,7 +584,7 @@ const Vinculaciones = {
       ${this.compatibilidadOriginal(v.compatibilidadOriginal,d.fecha)}
       <nav class="pro-pestanas vinculacion-pestanas" role="tablist" aria-label="Apartados de seguimiento">${pestañas.map(([k,i,n])=>`<button type="button" role="tab" id="tab-seguimiento-${k}" aria-controls="seguimiento-${k}" aria-selected="false" data-seguimiento="${k}">${Profesionales.icono(i)}${n}</button>`).join('')}</nav>
       <div class="vinculacion-panel" role="tabpanel" id="seguimiento-proceso" aria-labelledby="tab-seguimiento-proceso" hidden>
-        ${this.proceso(v)}${this.panelAutorizacion(v)}${this.panelCierre(v)}
+        ${this.proceso(v)}${this.panelAutorizacion(v)}${this.panelCierre(v,sesion.rol)}
       </div>
       <div class="vinculacion-panel" role="tabpanel" id="seguimiento-reportes" aria-labelledby="tab-seguimiento-reportes" hidden><p role="status">Cargando seguimientos profesionales…</p></div>
       ${mostrarIncidencias ? `<div class="vinculacion-panel" role="tabpanel" id="seguimiento-incidencias" aria-labelledby="tab-seguimiento-incidencias" hidden>
@@ -794,13 +794,18 @@ const Vinculaciones = {
   },
   compatibilidadOriginal(h,fecha){
     if(!h)return '<section id="compatibilidadRegistrada" class="tarjeta"><h2>Compatibilidad original</h2><p>No hay análisis histórico disponible.</p></section>';
-    const c=h.contexto||{},factores={edad:'Rango de edad',hermanos:'Vínculos entre hermanos',salud:'Salud y desarrollo',apoyo:'Red de apoyo',logistica:'Logística'},dato=v=>v==null?'No disponible':limpiarHtml(String(v));
+    const c=h.contexto||{},dato=v=>v==null?'No disponible':limpiarHtml(String(v));
     const notaSalud = c.reglas === 'EVIDENCIA_2' && c.pesos?.salud > 0
       && c.factores?.salud?.[0] === c.pesos.salud
       && c.factores.salud[1]?.includes('con apoyo adicional se acredita la mitad')
       ? '<p class="ayuda">El fundamento original menciona la regla general de cobertura con apoyo adicional. El cálculo registrado acreditó todos los puntos de Salud y desarrollo.</p>' : '';
-    return `<section id="compatibilidadRegistrada" class="tarjeta vinculacion-historica"><div class="pro-fila-titulo"><div><h2>${Profesionales.icono('criterios')}Compatibilidad original</h2><p>Se conserva el análisis registrado al crear esta propuesta.</p><span class="chip">Versión de criterios: ${dato(h.version)}</span> <span class="chip retirado">Resultado histórico</span></div><div class="pro-puntaje">${Sesion.puntajeHistorico(h.puntaje,h.maximoAplicable ?? c.maximoAplicable)}</div></div>
-      ${fecha?`<p class="ayuda">${Profesionales.icono('calendario')}${limpiarHtml(this.fechaHora(fecha))}</p>`:''}<details class="pro-seccion"><summary>${Profesionales.icono('consulta')}Ver desglose de compatibilidad</summary><div class="tabla"><table><thead><tr><th>Factor</th><th>Peso original</th><th>Puntos</th><th>Fundamento registrado</th></tr></thead><tbody>${Object.entries(factores).map(([k,n])=>`<tr><td>${n}</td><td>${dato(c.pesos?.[k])}</td><td>${dato(c.factores?.[k]?.[0])}</td><td>${dato(c.factores?.[k]?.[1])}</td></tr>`).join('')}</tbody></table></div>${notaSalud}${!h.contexto?'<p class="ayuda">Este antecedente no conserva el desglose. No se sustituye por un cálculo nuevo.</p>':''}<p class="ayuda">Máximo aplicable registrado: ${dato(c.maximoAplicable)} · Peso evaluado: ${dato(c.pesoEvaluado)}</p></details></section>`;
+    return `<div id="compatibilidadRegistrada">${Profesionales.analisisCompatibilidad({
+      titulo:'Compatibilidad original', descripcion:'Se conserva el análisis registrado al crear esta propuesta.',
+      puntaje:h.puntaje, maximo:h.maximoAplicable ?? c.maximoAplicable,
+      factores:c.factores, pesos:c.pesos, estados:c.estadosFactores,
+      meta:`<p class="ayuda">Versión de criterios: ${dato(h.version)}${fecha ? ' · ' + dato(this.fechaHora(fecha)) : ''}</p>`,
+      nota:notaSalud + (c.pesoEvaluado == null ? '' : `<p class="ayuda">Peso evaluado registrado: ${dato(c.pesoEvaluado)}</p>`)
+    })}</div>`;
   },
   estadoReincorporacion(estado) {
     return {
@@ -810,7 +815,7 @@ const Vinculaciones = {
       NO_AUTORIZADA: 'Reincorporación no autorizada'
     }[estado] || 'Sin solicitud de reincorporación';
   },
-  panelCierre(v) {
+  panelCierre(v, rol) {
     if (!v.cierre && !v.estadoCierre && !v.puedeCerrar) return '';
     const x = v.cierre;
     const pendienteInfantil = x?.estadoInfantil === 'PENDIENTE_REVISION';
@@ -833,7 +838,7 @@ const Vinculaciones = {
       <div class="vinculacion-cierre-resumen"><span class="chip retirado">${Profesionales.icono(x ? 'informacion' : 'reloj')}${estadoCierre || (x ? 'Cierre registrado' : 'Vinculación en curso')}</span>
       ${resultado ? `<div class="mensaje ${resultado[2]}">${Profesionales.icono(resultado[3])}<div><strong>${resultado[0]}</strong><br>${resultado[1]}</div></div>` : ''}
       ${x ? `<dl class="detalle-datos">${x.fecha ? `<div><dt>Fecha del cierre</dt><dd>${limpiarHtml(this.fechaCivil(x.fecha))}</dd></div>` : ''}${x.registradoPor ? `<div><dt>Responsable del registro</dt><dd>${limpiarHtml(x.registradoPor)}</dd></div>` : ''}${x.registradoEl ? `<div><dt>Registro</dt><dd>${limpiarHtml(this.fechaHora(x.registradoEl))}</dd></div>` : ''}${x.referencia ? `<div><dt>Referencia institucional</dt><dd>${limpiarHtml(x.referencia)}</dd></div>` : ''}${x.autoridad ? `<div><dt>Autoridad registrada</dt><dd>${limpiarHtml(x.autoridad)}</dd></div>` : ''}</dl>${x.motivo ? `<p class="pro-texto-registrado">${limpiarHtml(x.motivo)}</p>` : ''}` : '<p>El Comité registra un cierre respaldado por la actuación de la autoridad competente.</p>'}</div>
-      ${x ? `<section class="vinculacion-disponibilidad"><h3>Estado de los expedientes</h3><div class="vinculacion-expedientes">${[['NINO','Expediente infantil',x.ninoLiberado,x.estadoInfantil,v.expedienteInfantil],['FAMILIA','Expediente familiar',x.familiaLiberada,x.estadoFamiliar,v.expedienteFamiliar]].map(([k,n,revisado,estado,codigo]) => {
+      ${x && rol === 'COMITE' ? `<section class="vinculacion-disponibilidad"><h3>Estado de los expedientes</h3><div class="vinculacion-expedientes">${[['NINO','Expediente infantil',x.ninoLiberado,x.estadoInfantil,v.expedienteInfantil],['FAMILIA','Expediente familiar',x.familiaLiberada,x.estadoFamiliar,v.expedienteFamiliar]].map(([k,n,revisado,estado,codigo]) => {
         const reincorporacion = v.reincorporacion;
         const info = adopcion && (k === 'NINO' || !reincorporacion?.disponible)
           ? [k === 'FAMILIA' && revisado ? 'Sujeto a disponibilidad actual' : 'Retirado del Match',

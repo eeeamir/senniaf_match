@@ -99,3 +99,11 @@
 .citas-pagina .citas-historial[open] > summary .citas-chevron { transform: rotate(180deg); }
 
 .citas-tarjeta.citas-requiere-atencion { border-inline-start: 3px solid #1761b6; }
+
+.citas-pagina .citas-cabecera {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px;
+}
+.citas-pagina .citas-cabecera .citas-estado { justify-self: end; }
+.citas-pagina .citas-cabecera .citas-identificacion { grid-column: 1 / -1; }
+.citas-pagina .citas-identificacion h2 { margin: 0; }
+.citas-pagina .citas-identificadores { overflow-wrap: anywhere; }
