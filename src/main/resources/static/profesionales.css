@@ -678,3 +678,53 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .antecedente-reevaluaciones { display: flex; align-items: center; gap: 12px; }
 .antecedente-reevaluaciones p, .antecedentes-contenido > p { margin: 0; }
 .antecedente-reevaluaciones > strong { margin-inline-start: auto; color: #1469dc; font-size: 1.55rem; }
+
+.profesional .pro-historial-pesos > summary {
+  display: flex; align-items: center; gap: 12px; cursor: pointer; list-style: none; color: #153e63;
+}
+.pro-historial-pesos > summary::-webkit-details-marker { display: none; }
+.pro-historial-pesos > summary > .pro-simbolo { width: 48px; height: 48px; flex: 0 0 48px; margin: 0; }
+.pro-historial-pesos > summary strong { display: block; font-size: 1.2rem; font-weight: 600; }
+.pro-historial-pesos > summary small { display: block; margin-top: 4px; color: #476788; font-size: .9rem; }
+.pesos-flecha { margin-inline-start: auto; color: #1761b6; }
+.pro-historial-pesos[open] .pesos-flecha { transform: rotate(180deg); }
+.pro-historial-pesos .pesos-linea {
+  --separacion: 14px; --interior: 14px; --alto-estado: 44px;
+  --centro: calc(var(--interior) + 1px + var(--alto-estado) / 2);
+  display: grid; gap: var(--separacion); padding: 20px 0 0; margin: 18px 0 0;
+  border-top: 1px solid #dce5ee; list-style: none;
+}
+.pesos-linea > li { position: relative; padding-inline-start: 34px; margin: 0; }
+.pesos-linea > li::before {
+  content: ''; position: absolute; inset-inline-start: 10px; top: var(--centro);
+  bottom: calc(0px - var(--separacion) - var(--centro)); width: 2px; background: #c7dbf5;
+}
+.pesos-linea > li:last-child::before { content: none; }
+.pesos-linea > li::after {
+  content: ''; position: absolute; inset-inline-start: 4px; top: calc(var(--centro) - 7px);
+  width: 14px; height: 14px; border-radius: 50%; background: #087d68; z-index: 1;
+}
+.pesos-linea > .programado::after { background: #1761b6; }
+.pesos-registro { padding: var(--interior); border: 1px solid #d4e2f5; border-radius: 14px; }
+.pesos-registro h3 { margin: 16px 0; font-size: 1.1rem; font-weight: 600; color: #153e63; }
+.pesos-estado { display: inline-flex; align-items: center; gap: 8px; height: var(--alto-estado); padding-inline: 12px; border-radius: 12px; font-weight: 600; color: #087d68; background: #e1f3ec; }
+.programado .pesos-estado { color: #1761b6; background: #e7effd; }
+.pesos-meta { display: flex; align-items: flex-start; gap: 8px; margin: 14px 0 0; color: #476788; }
+.pesos-meta > .pro-icono { width: 18px; height: 1lh; flex: 0 0 18px; margin: 0; }
+.pesos-cambios { margin: 0; padding: 0 12px; background: #eff4fa; border-radius: 10px; }
+.pesos-cambios > div { display: flex; justify-content: space-between; gap: 8px; padding: 14px 0; }
+.pesos-cambios > div + div { border-top: 1px solid #d6e4f5; }
+.pesos-cambios dd { margin: 0; text-align: end; font-weight: 600; }
+.pesos-justificacion { margin-top: 18px; padding-top: 14px; border-top: 1px solid #d6e4f5; }
+.pesos-justificacion h4 { margin: 0 0 10px; color: #153e63; }
+.pesos-justificacion p { max-width: none; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: #476788; }
+.profesional .pro-modulo-pesos p.ayuda.pro-ayuda-con-icono:has(> .pro-icono) { gap: 8px; align-items: flex-start; }
+.pro-modulo-pesos :is(h2,h3,summary,button):has(> .pro-icono) { align-items: center; gap: 8px; }
+.pro-modulo-pesos :is(h2,h3,button):has(> .pro-icono) { display: inline-flex; }
+.pro-modulo-pesos :is(h2,h3,summary,button) > .pro-icono { flex-shrink: 0; margin: 0; }
+@media (max-width: 500px) {
+  .pesos-linea > li { padding-inline-start: 25px; }
+  .pro-historial-pesos > summary { gap: 8px; }
+}
+.pro-historial-pesos .pesos-meta { margin-top: 14px; }
+.pro-modulo-pesos .pro-ayuda-con-icono > span { min-width: 0; }
