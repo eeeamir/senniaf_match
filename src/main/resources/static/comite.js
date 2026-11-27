@@ -170,8 +170,8 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
       <p><a class="boton secundario" href="perfiles.html?familia=${encodeURIComponent(s.codigoCaso)}&origen=solicitudes" target="_blank" rel="noopener">${this.icono('consulta')}Consultar expediente familiar</a></p>
       ${revisable?`<form class="pro-interrupcion-form" novalidate>
         <fieldset class="pro-motivos"><legend>Resultado de la revisión *</legend>
-        <label class="pro-motivo"><input type="radio" name="resultado" value="autorizar"><span>Autorizar reincorporación</span></label>
-        <label class="pro-motivo"><input type="radio" name="resultado" value="denegar"><span>No autorizar reincorporación</span></label></fieldset>
+        <label class="pro-motivo"><input type="radio" name="resultado" value="autorizar">${this.icono("comprobar")}<span>Autorizar reincorporación</span></label>
+        <label class="pro-motivo"><input type="radio" name="resultado" value="denegar">${this.icono("advertencia")}<span>No autorizar reincorporación</span></label></fieldset>
         <label>Justificación de la decisión *<textarea name="fundamento" rows="4" maxlength="2000"></textarea></label>
         <p data-efecto hidden></p><label class="pro-confirmacion-check"><input type="checkbox" name="confirmacion">
         <span>Confirmo que se realizó la revisión institucional y, si autorizo, que la familia reúne las condiciones de elegibilidad.</span></label>

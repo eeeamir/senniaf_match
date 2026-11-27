@@ -122,7 +122,7 @@ public class VinculacionService {
         }
         r.put("compatibilidadOriginal",compatibilidadOriginal(v.getDecision()));
         r.put("interrupcion",interrupcion==null?null:detalleInterrupcion(interrupcion));
-        r.put("puedeRegistrarAutorizacion","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA && v.isReservaVigente() && interrupcion==null && v.getFechaInicioConvivencia()==null && !v.getNino().isCierrePorAdopcion() && bloqueante == null);
+        r.put("puedeRegistrarAutorizacion","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA && v.isReservaVigente() && interrupcion==null && v.getFechaRegistroAutorizacion()==null && !v.getNino().isCierrePorAdopcion() && bloqueante == null);
         r.put("puedeCerrar","COMITE".equals(rol) && !resultados.isEmpty());
         r.put("puedeRevisarDisponibilidad","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.CERRADA && v.isReservaVigente() && v.getResultadoCierre()!=ResultadoCierre.ADOPCION_FORMALIZADA);
         r.put("resultadosCierre", resultados);
@@ -281,16 +281,24 @@ public class VinculacionService {
         String referencia=texto(r.referencia(),5,200,"Identifica la resolución o autorización institucional existente");
         var hoy=java.time.LocalDate.now(ZoneId.of("America/Panama"));
         if(r.fechaEmision().isAfter(hoy))throw new IllegalArgumentException("La fecha de emisión no puede ser futura");
-        if(r.fechaInicioConvivencia()!=null && (r.fechaInicioConvivencia().isAfter(hoy) || r.fechaInicioConvivencia().isBefore(r.fechaEmision())))throw new IllegalArgumentException("El inicio efectivo debe estar entre la emisión de la autorización y hoy");
-        boolean nueva=v.getFechaRegistroAutorizacion()==null;
-        if(!nueva && (!referencia.equals(v.getReferenciaAutorizacion()) || !r.fechaEmision().equals(v.getFechaEmisionAutorizacion())))throw new IllegalStateException("La autorización registrada se conserva sin reemplazarla");
-        if(!nueva && (v.getFechaInicioConvivencia()!=null || r.fechaInicioConvivencia()==null))throw new IllegalStateException("La constancia ya está registrada; no hay un inicio efectivo nuevo para guardar");
-        var ahora=LocalDateTime.now();
-        if(nueva){v.setReferenciaAutorizacion(referencia);v.setFechaEmisionAutorizacion(r.fechaEmision());v.setAutorizacionRegistradaPor(actor);v.setAutorizacionRol(rol);v.setFechaRegistroAutorizacion(ahora);}
-        if(r.fechaInicioConvivencia()!=null){v.setFechaInicioConvivencia(r.fechaInicioConvivencia());v.setInicioRegistradoPor(actor);v.setInicioRol(rol);v.setFechaRegistroInicio(ahora);}
+        if (v.getFechaRegistroAutorizacion() != null)
+            throw new IllegalStateException("La autorización y el inicio de convivencia ya se registraron en una sola actuación");
+        var inicio = r.fechaInicioConvivencia() == null ? r.fechaEmision() : r.fechaInicioConvivencia();
+        if (inicio.isAfter(hoy) || inicio.isBefore(r.fechaEmision()))
+            throw new IllegalArgumentException("El inicio efectivo debe estar entre la emisión de la autorización y hoy");
+        var ahora = LocalDateTime.now();
+        v.setReferenciaAutorizacion(referencia);
+        v.setFechaEmisionAutorizacion(r.fechaEmision());
+        v.setAutorizacionRegistradaPor(actor);
+        v.setAutorizacionRol(rol);
+        v.setFechaRegistroAutorizacion(ahora);
+        v.setFechaInicioConvivencia(inicio);
+        v.setInicioRegistradoPor(actor);
+        v.setInicioRol(rol);
+        v.setFechaRegistroInicio(ahora);
         repo.saveAndFlush(v);
-        if(nueva)auditar(v,actor,"AUTORIZACION_PREADOPTIVA_REGISTRADA","El Comité dejó constancia de una autorización preadoptiva ya emitida por SENNIAF; el portal no concede la autorización.");
-        if(r.fechaInicioConvivencia()!=null)auditar(v,actor,"CONVIVENCIA_INICIADA","Se registró la fecha de inicio efectivo de la convivencia preadoptiva autorizada.");
+        auditar(v, actor, "AUTORIZACION_PREADOPTIVA_REGISTRADA",
+                "El Comité registró en una sola actuación la autorización institucional y el inicio de convivencia.");
         return detalle(id,rol,actor);
     }
     @Transactional

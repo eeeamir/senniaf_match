@@ -168,10 +168,16 @@ const Familia = {
           <a href="match.html?vista=propuesta">Consultar mi vinculación</a>
         </section>` : '';
       if (actualizarSeguimiento && document.querySelector('dialog[open]')) return;
+      const tarjetasPrevias = new Map([...document.querySelectorAll('details[data-vinculacion-familiar]')]
+        .map(tarjeta => [tarjeta.dataset.vinculacionFamiliar, tarjeta.open]));
       document.getElementById('contenido').innerHTML =
         Profesionales.encabezado(titulo, descripcion, icono) + avisoPropuesta
         + (['inicio', 'entrevista'].includes(vista) ? this.avisoReevaluacion(p) : '')
         + contenidoVista;
+      document.querySelectorAll('details[data-vinculacion-familiar]').forEach(tarjeta => {
+        const abierta = tarjetasPrevias.get(tarjeta.dataset.vinculacionFamiliar);
+        if (abierta !== undefined) tarjeta.open = abierta;
+      });
       Vinculaciones.enlazarRespuestas(sesion);
       document.querySelector('[data-solicitar-reincorporacion]')?.addEventListener('click', () =>
         this.confirmarReincorporacion(antecedente, sesion));
@@ -193,10 +199,11 @@ const Familia = {
       ['Revisión institucional', resuelta ? 'comprobar' : entrevista ? 'reloj' : 'informacion'],
       ['Resolución de solicitud', estado === 'AUTORIZADA' ? 'comprobar' : estado === 'NO_AUTORIZADA' ? 'advertencia' : 'informacion']];
     if (!r.puedeSolicitar && (!estado || estado === 'SIN_SOLICITUD')) return '';
-    return `<section class="tarjeta">
-      ${r.puedeSolicitar ? `<h3>Reincorporación del expediente</h3>
-        <button class="boton" type="button" data-solicitar-reincorporacion>Solicitar reincorporación</button>` : ''}
-      ${estado && estado !== 'SIN_SOLICITUD' ? `<h3>Solicitud de reincorporación</h3>
+    return `<section class="tarjeta familia-reincorporacion">
+      <header><span class="pro-simbolo">${Profesionales.icono('solicitudes')}</span><div>
+      <h3>${estado && estado !== 'SIN_SOLICITUD' ? 'Solicitud de reincorporación' : 'Reincorporación del expediente'}</h3><p>${limpiarHtml(v.codigo)} · Expediente familiar ${limpiarHtml(v.expedienteFamiliar)}</p></div></header>
+      ${r.puedeSolicitar ? `<button class="boton" type="button" data-solicitar-reincorporacion>Solicitar reincorporación</button>` : ''}
+      ${estado && estado !== 'SIN_SOLICITUD' ? `
         <div class="mensaje ${estado === 'AUTORIZADA' ? 'exito' : estado === 'NO_AUTORIZADA' ? 'error' : 'aviso'}">
           <div><strong>${Vinculaciones.estadoReincorporacion(estado)}</strong>
           ${estado === 'ENTREVISTA_PENDIENTE' ? '<p>Completa la actualización de tu entrevista para continuar.</p>'
@@ -210,7 +217,7 @@ const Familia = {
     if (!v?.reincorporacion?.puedeSolicitar || document.querySelector('[data-reincorporacion-dialogo]')) return;
     const d=document.createElement('dialog');
     d.className='pro-dialogo';d.dataset.reincorporacionDialogo='';d.setAttribute('aria-label','Solicitar reincorporación');
-    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('solicitudes')}</span><h2>Solicitar reincorporación</h2></div><p class="pro-identificadores">${limpiarHtml(v.codigo)}</p>
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('solicitudes')}</span><h2>Solicitar reincorporación</h2></div><p class="pro-identificadores">${limpiarHtml(v.codigo)} · Expediente familiar ${limpiarHtml(v.expedienteFamiliar)}</p>
       <ol><li>Actualizar la información de tu hogar.</li><li>Enviar tu entrevista familiar.</li><li>Esperar la revisión institucional.</li></ol>
       <p>Conservarás tu cuenta, expediente e historial de vinculaciones.</p>
       <p class="mensaje error" role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button>

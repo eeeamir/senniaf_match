@@ -103,8 +103,8 @@ const Vinculaciones = {
         ${lista
           .map(
             (v) => `
-          <section class="tarjeta vinculacion-familiar vinculacion-tarjeta">
-            <header class="vinculacion-cabecera">
+          <details class="tarjeta vinculacion-familiar vinculacion-tarjeta" data-vinculacion-familiar="${v.id}" ${v.estado === 'PENDIENTE_RESPUESTA' ? 'open' : ''}>
+            <summary class="vinculacion-cabecera">
               <div class="familia-identificacion">
                 <span class="vinculacion-emblema">${Profesionales.icono('heart-handshake')}</span>
                 <div>
@@ -113,7 +113,8 @@ const Vinculaciones = {
                 </div>
               </div>
               ${this.estado(v, true)}
-            </header>
+              <span class="familia-flecha" aria-hidden="true">⌄</span>
+            </summary>
             ${this.progresoFamiliar(v)}
             <div class="familia-propuesta-acciones">
               ${
@@ -153,7 +154,7 @@ const Vinculaciones = {
               <span>La respuesta en este portal no sustituye las formalidades legales
                 ni autoriza el acogimiento preadoptivo.</span>
             </p>
-          </section>`,
+          </details>`,
           )
           .join('')}
       </div>`;
@@ -315,7 +316,7 @@ const Vinculaciones = {
       },
       {
         titulo: 'Inicio de convivencia registrado',
-        fecha: autorizacion?.inicioRegistradoEl,
+        fecha: autorizacion?.inicioRegistradoEl !== autorizacion?.registradaEl ? autorizacion?.inicioRegistradoEl : null,
         detalle: autorizacion?.fechaInicioConvivencia
           ? 'Inicio de convivencia: ' + this.fechaCivil(autorizacion.fechaInicioConvivencia) : '',
       },
@@ -391,25 +392,33 @@ const Vinculaciones = {
       </dl>
     </section>`;
   },
-  tiemposEtapa(v, indice, familiar = false) {
+  tiemposEtapa(v, indice, fechaFamiliar) {
     const t = v.tiempos;
     if (!t) return '';
     const a = v.autorizacionPreadoptiva;
     const duracion = (titulo, valor) => valor == null ? '' :
       `<p class="vinculacion-tiempo">${titulo}: <strong>${this.dias(valor)}</strong></p>`;
+    const familiar = fechaFamiliar !== undefined;
+    const transcurrido = familiar ? this.haceDias(fechaFamiliar) : '';
+    if (indice !== 3 && familiar) return transcurrido;
     if (indice === 1) return duracion('Desde la propuesta', t.respuesta);
     if (indice !== 3) return '';
     const fecha = (titulo, valor) => valor
       ? `<p class="familia-actuacion"><span>${titulo}</span><time>${limpiarHtml(valor)}</time></p>` : '';
     const interrupcion = v.seguimientoFamiliar?.interrupcionRegistradaEl;
-    return (a ? `<div class="familia-actuaciones">
+    return transcurrido + (a ? `<div class="familia-actuaciones">
       ${fecha('Autorización preadoptiva', a.fechaEmision && this.fechaCivil(a.fechaEmision))}
       ${fecha('Registro de autorización', a.registradaEl && this.fechaHora(a.registradaEl))}
       ${duracion('Desde la aceptación', t.autorizacion)}
-      ${fecha('Inicio de convivencia', t.fechaInicio && this.fechaCivil(t.fechaInicio))}
-      ${duracion('Desde la autorización', t.inicio)}
+      ${a.registradaEl !== a.inicioRegistradoEl ? fecha('Inicio de convivencia', t.fechaInicio && this.fechaCivil(t.fechaInicio)) : ''}
       ${duracion(t.convivenciaInterrumpida ? 'Hasta la interrupción' : t.convivenciaFinalizada ? 'Hasta el cierre' : 'Tiempo de convivencia', t.convivencia)}
       </div>` : '') + (familiar && interrupcion ? fecha('Interrupción de convivencia', this.fechaHora(interrupcion)) : '');
+  },
+  haceDias(valor) {
+    if (!valor) return '';
+    const civil = f => new Intl.DateTimeFormat('sv-SE', {dateStyle: 'short', timeZone: 'America/Panama'}).format(new Date(f));
+    const dias = (Date.parse(civil(Date.now())) - Date.parse(civil(valor))) / 86400000;
+    return Number.isFinite(dias) && dias >= 0 ? `<p class="vinculacion-tiempo"><strong>Hace ${this.dias(dias)}</strong></p>` : '';
   },
   indicadorEtapa(etapa, indice) {
     const icono = {interrumpido: 'advertencia', completado: 'comprobar'}[etapa.clase];
@@ -423,7 +432,6 @@ const Vinculaciones = {
     }));
     const tituloHorizontal = titulo => titulo
       .replace('Acompañamiento', 'Acompaña&shy;miento')
-      .replace('interrelación', 'interrela&shy;ción')
       .replace('Convivencia', 'Convi&shy;vencia')
       .replace('preadoptiva', 'preadop&shy;tiva');
     return `<section class="familia-seguimiento familia-inicio-proceso">
@@ -467,7 +475,7 @@ const Vinculaciones = {
             ${etapa.fecha ? `<time>${limpiarHtml(this.fechaHora(etapa.fecha))}</time>` : ''}</header>
             ${etapa.detalle ? `<p>${limpiarHtml(etapa.detalle)}</p>` : ''}
             ${etapa.fechaHecho ? `<p>Fecha de interrupción: ${this.fechaCivil(etapa.fechaHecho)}</p>` : ''}
-            ${this.tiemposEtapa(v, indice, true)}
+            ${this.tiemposEtapa(v, indice, etapa.fecha)}
           </div></li>`).join('')}
       </ol>
       ${finalizada || v.interrupcionRegistrada ? `<div class="familia-resultado">
@@ -950,14 +958,14 @@ const Vinculaciones = {
           </dl>` : ''}
         ${v.puedeRegistrarAutorizacion ? `
           <button type="button" class="boton" data-autorizacion>
-            ${Profesionales.icono('informe')}${autorizacion ? 'Registrar inicio de convivencia' : 'Registrar autorización preadoptiva'}
+            ${Profesionales.icono('informe')}Registrar autorización preadoptiva
           </button>` : ''}
       </section>`;
   },
   registrarAutorizacion(c,v,sesion){
     const a=v.autorizacionPreadoptiva,d=document.createElement('dialog');d.className='pro-dialogo s8-autorizacion-dialogo';d.setAttribute('aria-labelledby','tituloAutorizacion');
     const hoy=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('informe')}</span><h2 id="tituloAutorizacion">${a ? 'Registrar inicio de convivencia' : 'Registrar autorización de convivencia preadoptiva'}</h2></div><p>Confirma que SENNIAF ya emitió la autorización institucional correspondiente. Esta acción registrará su existencia en SENNIAF Match y actualizará la etapa del proceso.</p><form><label>Resolución o referencia institucional existente<input name="referencia" required minlength="5" maxlength="200" value="${limpiarHtml(a?.referencia||'')}" ${a?'readonly':''}></label><label>Fecha de emisión<input name="fechaEmision" type="date" required max="${hoy}" value="${limpiarHtml(a?.fechaEmision||'')}" ${a?'readonly':''}></label><label>Fecha de inicio de convivencia (opcional)<input name="fechaInicioConvivencia" type="date" max="${hoy}"></label><p class="ayuda">${a?'La autorización registrada se conserva. Registra la fecha de inicio de convivencia únicamente si ya ocurrió.':'Deja el inicio vacío si la convivencia todavía no ha comenzado. No registres fechas previstas como hechos ocurridos.'}</p><label class="pro-confirmacion-check"><input name="confirmacion" type="checkbox" required><span>Confirmo que SENNIAF emitió la autorización y que los datos corresponden a la actuación institucional existente.</span></label><p data-error role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="submit" class="boton">Revisar y confirmar</button></div></form>`;
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('informe')}</span><h2 id="tituloAutorizacion">Registrar autorización de convivencia preadoptiva</h2></div><p>Confirma que SENNIAF ya emitió la autorización institucional correspondiente. Esta acción registrará su existencia en SENNIAF Match y actualizará la etapa del proceso.</p><form><label>Resolución o referencia institucional existente<input name="referencia" required minlength="5" maxlength="200" value="${limpiarHtml(a?.referencia||'')}" ${a?'readonly':''}></label><label>Fecha de emisión<input name="fechaEmision" type="date" required max="${hoy}" value="${limpiarHtml(a?.fechaEmision||'')}" ${a?'readonly':''}></label><label>Fecha efectiva de inicio de convivencia<input name="fechaInicioConvivencia" type="date" required max="${hoy}"></label><p class="ayuda">La autorización y el inicio efectivo se registran juntos. Indica la fecha en que comenzó la convivencia.</p><label class="pro-confirmacion-check"><input name="confirmacion" type="checkbox" required><span>Confirmo que SENNIAF emitió la autorización y que los datos corresponden a la actuación institucional existente.</span></label><p data-error role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="submit" class="boton">Revisar y confirmar</button></div></form>`;
     document.body.append(d);const f=d.querySelector('form');let guardando=false;CamposFormulario.iniciar(f);d.onclose=()=>d.remove();d.oncancel=e=>{if(guardando)e.preventDefault();};d.querySelector('[data-cancelar]').onclick=()=>d.close();
     f.onsubmit=e=>{e.preventDefault();if(guardando||!Profesionales.validarFormulario(f))return;const datos={referencia:f.elements.referencia.value,fechaEmision:f.elements.fechaEmision.value,fechaInicioConvivencia:f.elements.fechaInicioConvivencia.value||null,confirmacion:f.elements.confirmacion.checked};
       Profesionales.confirmar('Confirmar constancia institucional','Se registrará una autorización existente. El portal no emitirá una resolución ni autorizará legalmente la convivencia.',async()=>{if(guardando)return;guardando=true;f.querySelectorAll('button,input').forEach(b=>b.disabled=true);
