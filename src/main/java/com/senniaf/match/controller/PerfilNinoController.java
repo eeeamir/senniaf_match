@@ -67,6 +67,7 @@ public class PerfilNinoController {
                     resumen.put("psicologoAsignado", perfil.getPsicologoAsignado());
                     resumen.put("bajaLogica", perfil.isBajaLogica());
                     resumen.put("cierrePorAdopcion", perfil.isCierrePorAdopcion());
+                    resumen.put("reservaMatch", !perfil.isBajaLogica() && service.tieneReservaMatch(perfil));
                     var pendientes=service.resumenSolicitudesPendientes(perfil);
                     resumen.put("solicitudesPendientes", pendientes.size());
                     resumen.put("solicitudesPendientesDetalle", pendientes);
@@ -104,8 +105,10 @@ public class PerfilNinoController {
     @GetMapping("/{codigo}/opciones-estado")
     public Map<String, Boolean> opcionesEstado(@PathVariable String codigo,
             @RequestHeader("X-User-Role") String rol, @RequestHeader("X-User-Id") String actor) {
-        comprobarTrabajoSocial(rol);
-        return Map.of("vinculacionVigente", service.tieneVinculacionVigente(service.consultarExpediente(codigo, actor, rol)));
+        comprobarProfesional(rol);
+        var expediente = service.consultarExpediente(codigo, actor, rol);
+        return Map.of("vinculacionVigente", service.tieneVinculacionVigente(expediente),
+                "reservaMatch", service.tieneReservaMatch(expediente));
     }
     @GetMapping("/{codigo}/auditoria")
     public java.util.List<?> auditoria(@PathVariable String codigo,

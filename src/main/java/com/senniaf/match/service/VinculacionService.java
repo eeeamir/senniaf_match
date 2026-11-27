@@ -50,6 +50,12 @@ public class VinculacionService {
         r.put("habilidades",n.getHabilidades());r.put("gustos",n.getGustos());r.put("personalidad",n.getPersonalidad());
         return r;
     }
+    public Map<String, Object> antecedenteAdopcion(Long familiaId) {
+        return repo.findFirstByFamiliaIdAndResultadoCierreOrderByFechaRegistroCierreDescIdDesc(familiaId, ResultadoCierre.ADOPCION_FORMALIZADA)
+                .map(v -> Map.<String, Object>of("vinculacionId", v.getId(), "reincorporacion", reincorporaciones.estado(v)))
+                .orElseGet(Map::of);
+    }
+
     public Map<String, Object> antecedenteRevocacion(Long familiaId) {
         return repo.findFirstByFamiliaIdAndResultadoCierreOrderByFechaRegistroCierreDescIdDesc(familiaId, ResultadoCierre.REVOCACION_ASIGNACION)
                 .map(v -> {

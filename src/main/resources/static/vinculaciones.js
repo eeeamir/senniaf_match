@@ -222,6 +222,17 @@ const Vinculaciones = {
       accion =
         'No hay acciones pendientes de tu parte en esta vinculación. La disponibilidad requiere revisión institucional independiente.';
     }
+    if (v.resultadoCierre === 'ADOPCION_FORMALIZADA' && v.reincorporacion) {
+      const reincorporacion = v.reincorporacion;
+      accion = reincorporacion.disponible ? 'Tu expediente está disponible para recibir nuevas propuestas'
+        : reincorporacion.puedeSolicitar ? 'Si deseas participar en un nuevo proceso de adopción, puedes solicitar la reincorporación de tu expediente.'
+        : reincorporacion.otraReserva ? 'Tu expediente está reservado por otra vinculación.'
+        : {ENTREVISTA_PENDIENTE:'Actualiza tu entrevista para continuar con la solicitud.',
+          REVISION_PENDIENTE:'Tu solicitud está pendiente de revisión institucional.',
+          NO_AUTORIZADA:'El Comité resolvió la solicitud. Tu expediente permanece fuera del Match.',
+          AUTORIZADA:'La reincorporación fue autorizada. La participación depende de las condiciones de elegibilidad vigentes.'}[reincorporacion.estado]
+          || 'Tu expediente permanece fuera del Match.';
+    }
     if (revocada) {
       mensaje = 'La asignación finalizó antes de iniciar la convivencia';
       accion = v.familiaDisponible
@@ -419,6 +430,7 @@ const Vinculaciones = {
     const revocada = v.resultadoCierre === 'REVOCACION_ASIGNACION';
     const fechas = [v.fechaCreacion, v.fechaRespuesta, v.respuestaFamiliar === 'ACEPTADA' || revocada ? v.fechaRespuesta : null,
       v.autorizacionPreadoptiva?.registradaEl, v.autorizacionPreadoptiva?.inicioRegistradoEl];
+    const adopcion = v.resultadoCierre === 'ADOPCION_FORMALIZADA';
     const finalizada = v.estado === 'CERRADA' || v.estado === 'RECHAZADA_POR_FAMILIA';
     const puedeActualizar = !inicio && !finalizada;
     const aviso = `<p class="familia-siguiente">${limpiarHtml(progreso.accion)}</p>`;
@@ -427,7 +439,7 @@ const Vinculaciones = {
     return `
       <section class="familia-seguimiento" aria-label="Progreso de ${limpiarHtml(v.codigo)}">
         <header>
-          <span class="vinculacion-emblema ${revocada ? 'familia-emblema-revocado' : ''}">${Profesionales.icono(revocada ? 'revocacion' : 'solicitudes')}</span>
+          <span class="vinculacion-emblema ${revocada ? 'familia-emblema-revocado' : adopcion ? 'familia-emblema-adopcion' : ''}">${Profesionales.icono(revocada ? 'revocacion' : adopcion ? 'comprobar' : 'solicitudes')}</span>
           <div><h3 class="${revocada ? 'familia-resultado-revocado' : ''}">${limpiarHtml(progreso.estado)}</h3><p>${limpiarHtml(progreso.mensaje)}</p></div>
         </header>
         ${revocada && v.motivoRevocacion ? `<p>${limpiarHtml(v.motivoRevocacion)}</p>` : ''}

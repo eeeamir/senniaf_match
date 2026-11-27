@@ -49,6 +49,38 @@ const Profesionales = {
     const d=new Date(valor);if(Number.isNaN(d.getTime()))return {fecha:'Fecha no disponible',hora:'Hora no disponible'};
     return {fecha:new Intl.DateTimeFormat('es-PA',{dateStyle:'medium',timeZone:'America/Panama'}).format(d),hora:new Intl.DateTimeFormat('es-PA',{timeStyle:'short',timeZone:'America/Panama'}).format(d)};
   },
+  fechaSolicitud(valor) {
+    const fecha = new Date(valor);
+    if (!valor || Number.isNaN(fecha.getTime())) return 'Sin fecha registrada';
+    const partes = new Intl.DateTimeFormat('es-PA', {
+      day:'2-digit', month:'2-digit', year:'numeric', timeZone:'America/Panama'
+    }).formatToParts(fecha);
+    const valorDe = tipo => partes.find(parte => parte.type === tipo).value;
+    return ['day','month','year'].map(valorDe).join('/') + ' · ' + this.momento(valor).hora;
+  },
+  tituloSolicitud(s) {
+    if (s.familiar) return 'Reincorporación familiar';
+    if (s.categoria === 'ADOPCION_FORMALIZADA') return 'Cierre por adopción · Procedimiento anterior';
+    return s.tipo === 'REACTIVACION' ? 'Reactivación de expediente' : 'Desactivación de expediente';
+  },
+  estadoSolicitud(s) {
+    const etiqueta = {PENDIENTE:'Pendiente', APROBADA:'Aprobada', RECHAZADA:'Rechazada',
+      ENTREVISTA_PENDIENTE:'Entrevista pendiente', REVISION_PENDIENTE:'Pendiente de revisión',
+      AUTORIZADA:'Autorizada', NO_AUTORIZADA:'No autorizada'}[s.estado] || this.etiqueta(s.estado);
+    const tono = ['APROBADA','AUTORIZADA'].includes(s.estado) ? 'positiva'
+      : ['RECHAZADA','NO_AUTORIZADA'].includes(s.estado) ? 'negativa' : 'pendiente';
+    return `<span class="chip vinculacion-${tono}">${this.icono({positiva:'comprobar',negativa:'cerrar',pendiente:'reloj'}[tono])}${limpiarHtml(etiqueta)}</span>`;
+  },
+  detalleSolicitud(s) {
+    const bloque = (titulo, icono, rol, persona, fecha, texto) => `<section><h4>${this.icono(icono)}${titulo}</h4>
+      <dl class="solicitud-meta"><div><dt>${rol}</dt><dd>${limpiarHtml(persona || 'Sin responsable registrado')}</dd></div>
+      <div><dt>Fecha y hora</dt><dd>${limpiarHtml(this.fechaSolicitud(fecha))}</dd></div></dl>
+      ${texto ? `<p><strong>Justificación</strong></p><p class="pro-texto-registrado">${limpiarHtml(texto)}</p>` : ''}</section>`;
+    return `<div class="solicitud-actuaciones">
+      ${bloque('Solicitud original','informe',s.familiar ? 'Familia solicitante' : 'Profesional solicitante',s.solicitante,s.fechaSolicitud,s.motivo)}
+      ${s.fechaResolucion || s.resueltoPor || s.motivoResolucion ? bloque('Resolución del Comité','solicitudes','Responsable de la resolución',s.resueltoPor,s.fechaResolucion,s.motivoResolucion) : ''}
+      </div>`;
+  },
   informe(e,mostrarMetadatos=true) {
     const m=this.momento(e.fecha),s=Sesion.leer();
     const seccion=(icono,titulo,valor)=>`<details class="detalle-grupo pro-informe-bloque"><summary>${this.icono(icono)}${titulo}</summary><div class="pro-informe-contenido"><p>${limpiarHtml(valor||'Sin información registrada')}</p></div></details>`;
@@ -65,7 +97,7 @@ const Profesionales = {
     const unidad=p.unidadEdad==='MESES'?(Number(p.edad)===1?'mes':'meses'):(Number(p.edad)===1?'año':'años');
     return `${p.edad} ${unidad}`;
   },
-  estado(p) { return p.cierrePorAdopcion?'Cierre por adopción':p.bajaLogica?'Fuera del Match':p.perfilCompleto?'Disponible para análisis':'Pendiente de información'; },
+  estado(p) { return p.cierrePorAdopcion?'Retiro definitivo por adopción':p.bajaLogica?'Fuera del Match':p.reservaMatch?'Reservado':p.perfilCompleto?'Disponible para análisis':'Pendiente de información'; },
   encabezado(titulo,texto,icono='carpeta') {
     return `<section class="hero"><h1>${limpiarHtml(titulo)}</h1><p>${limpiarHtml(texto)}</p><span class="pro-hero-icono" aria-hidden="true">${this.icono(icono)}</span></section>`;
   },

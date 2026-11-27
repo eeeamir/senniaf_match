@@ -42,9 +42,11 @@ public class ReincorporacionService {
         resultado.put("estado", solicitud.map(this::estado).orElse("SIN_SOLICITUD"));
         resultado.put("puedeSolicitar", solicitud.isEmpty() && habilitada(v, v.getFamilia())
                 && v.getFamilia().isPerfilCompleto() && !v.getFamilia().isReevaluacionPendiente());
+        boolean otraReserva = vinculaciones.otraReservaFamiliar(v.getFamilia().getId(), v.getId());
+        resultado.put("otraReserva", otraReserva);
         resultado.put("disponible", solicitud.map(s -> Boolean.TRUE.equals(s.getAutorizada())).orElse(false)
                 && v.isFamiliaLiberada() && v.getFamilia().isPerfilCompleto() && !v.getFamilia().isReevaluacionPendiente()
-                && !vinculaciones.otraReservaFamiliar(v.getFamilia().getId(), v.getId()));
+                && !otraReserva);
         return resultado;
     }
 
@@ -81,6 +83,7 @@ public class ReincorporacionService {
             Map<String, Object> dto = new LinkedHashMap<>();
             dto.put("id", s.getId());
             dto.put("codigoCaso", v.getFamilia().getCodigoCaso());
+            dto.put("solicitante", v.getFamilia().getRegistradoPor());
             dto.put("vinculacion", "VIN-" + v.getId());
             dto.put("fechaSolicitud", fecha(s.getSolicitada()));
             dto.put("fechaResolucion", fecha(s.getResuelta()));

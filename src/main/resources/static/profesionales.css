@@ -567,3 +567,18 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .familia-etapas time { color: #476788; font-size: .875rem; }
 .familia-tiempo-total { color: #234766; font-weight: 600; }
 .familia-seguimiento .familia-etapas small { background: transparent; }
+
+#listaSolicitudesComite { margin-top: 18px; }
+#listaSolicitudesComite .solicitud-resumen { flex-wrap: wrap; }
+#listaSolicitudesComite .solicitud-resumen > .pro-acciones { margin: 0 0 0 auto; }
+.solicitud-resumen .chip { margin-inline-start: .5rem; }
+.solicitud-meta { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; margin: .5rem 0 0; }
+.solicitud-meta dt { font-weight: 600; }
+.solicitud-meta dd { margin: 0; }
+.solicitud-actuaciones { display: grid; gap: .8rem; }
+.solicitud-actuaciones > section { border-top: 1px solid #dce5ee; padding-top: .75rem; }
+.solicitud-actuaciones h4 { margin: 0; }
+.historial-gestion { margin-top: 1rem; }
+#listaSolicitudesComite .chip.vinculacion-positiva, .solicitud .chip.vinculacion-positiva { background: #eaf6ee; color: #21633b; }
+#listaSolicitudesComite .chip.vinculacion-negativa, .solicitud .chip.vinculacion-negativa { background: #fff0f0; color: #a12232; }
+.s8-acabado .familia-seguimiento > header > .vinculacion-emblema.familia-emblema-adopcion { background: #eaf6ee; color: #21633b; }

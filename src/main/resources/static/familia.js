@@ -50,8 +50,8 @@ const Familia = {
       }
       this.version = version;
       const ultima = Vinculaciones.seleccionarVinculacion(vinculaciones);
-      const disponibleDeNuevo = ultima?.resultadoCierre === 'REVOCACION_ASIGNACION'
-        && ultima.familiaDisponible;
+      const disponibleDeNuevo = (ultima?.resultadoCierre === 'REVOCACION_ASIGNACION' && ultima.familiaDisponible)
+        || (ultima?.resultadoCierre === 'ADOPCION_FORMALIZADA' && ultima.reincorporacion?.disponible);
       const vigente = disponibleDeNuevo ? null : ultima;
       const progreso = Vinculaciones.obtenerProgreso(vigente);
       const eventos = [
@@ -101,8 +101,8 @@ const Familia = {
       const antecedente = vinculaciones.find(v => v.resultadoCierre === 'ADOPCION_FORMALIZADA');
       const mostrarReincorporacion = antecedente && !vinculaciones.some(v =>
         ['PENDIENTE_RESPUESTA','RESPUESTA_ACEPTADA'].includes(v.estado));
-      const propuesta = (mostrarReincorporacion ? this.reincorporacion(antecedente) : '')
-        + Vinculaciones.familiar(vinculaciones);
+      const propuesta = Vinculaciones.familiar(vinculaciones)
+        + (mostrarReincorporacion ? this.reincorporacion(antecedente) : '');
       const actividad = (todos = false) => {
         const visibles = todos ? eventos : eventosInicio.slice(0, 3);
         return `
@@ -193,14 +193,10 @@ const Familia = {
       ['Entrevista actualizada', entrevista ? 'comprobar' : 'reloj'],
       ['Revisión institucional', resuelta ? 'comprobar' : entrevista ? 'reloj' : 'informacion'],
       ['Resolución de solicitud', estado === 'AUTORIZADA' ? 'comprobar' : estado === 'NO_AUTORIZADA' ? 'advertencia' : 'informacion']];
-    return `<section class="tarjeta"><div class="mensaje exito">${Profesionales.icono('comprobar')}
-      <div><strong>${estado === 'SIN_SOLICITUD' ? 'Proceso finalizado' : 'Proceso anterior finalizado'}</strong><br>Adopción formalizada.<br>Tu proceso de vinculación ha concluido satisfactoriamente.</div></div>
-      <dl class="detalle-datos"><div><dt>Código de vinculación</dt><dd>${limpiarHtml(v.codigo)}</dd></div>
-        <div><dt>Fecha de cierre</dt><dd>${limpiarHtml(Vinculaciones.fechaCivil(v.fechaCierre))}</dd></div></dl>
-      ${r.puedeSolicitar ? `<h3>¿Deseas iniciar un nuevo proceso de adopción?</h3>
-        <p>Puedes solicitar una nueva revisión de tu expediente. Deberás actualizar la información de tu hogar y cumplir los requisitos institucionales correspondientes.</p>
-        <button class="boton" type="button" data-solicitar-reincorporacion>Solicitar reincorporación</button>
-        <p class="ayuda">La solicitud no autoriza automáticamente tu regreso al Match.</p>` : ''}
+    if (!r.puedeSolicitar && (!estado || estado === 'SIN_SOLICITUD')) return '';
+    return `<section class="tarjeta">
+      ${r.puedeSolicitar ? `<h3>Reincorporación del expediente</h3>
+        <button class="boton" type="button" data-solicitar-reincorporacion>Solicitar reincorporación</button>` : ''}
       ${estado && estado !== 'SIN_SOLICITUD' ? `<h3>Solicitud de reincorporación</h3>
         <div class="mensaje ${estado === 'AUTORIZADA' ? 'exito' : estado === 'NO_AUTORIZADA' ? 'error' : 'aviso'}">
           <div><strong>${Vinculaciones.estadoReincorporacion(estado)}</strong>

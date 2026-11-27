@@ -331,9 +331,14 @@ public class PerfilNinoService {
                 Vinculacion.Estado.PENDIENTE_RESPUESTA, Vinculacion.Estado.RESPUESTA_ACEPTADA));
     }
 
-    private void comprobarCierrePorVinculacion(PerfilNino p, SolicitudEstadoCaso.Categoria categoria) {
-        if (categoria == SolicitudEstadoCaso.Categoria.ADOPCION_FORMALIZADA && tieneVinculacionVigente(p))
-            throw new IllegalStateException("La adopción debe registrarse desde el cierre de la vinculación vigente");
+    public boolean tieneReservaMatch(PerfilNino p) {
+        return vinculacionesParaCierre != null
+                && vinculacionesParaCierre.existsByNinoCodigoCasoAndReservaVigenteTrue(p.getCodigoCaso());
+    }
+
+    private void comprobarCierrePorVinculacion(SolicitudEstadoCaso.Categoria categoria) {
+        if (categoria == SolicitudEstadoCaso.Categoria.ADOPCION_FORMALIZADA)
+            throw new IllegalStateException("La adopción debe registrarse desde el cierre institucional de la vinculación");
     }
 
     @Transactional
@@ -348,7 +353,7 @@ public class PerfilNinoService {
         SolicitudEstadoCaso s = new SolicitudEstadoCaso();
         if (request.categoria() == null || !request.categoria().admite(request.tipo()))
             throw new IllegalArgumentException("El motivo seleccionado no corresponde al tipo de solicitud");
-        comprobarCierrePorVinculacion(p, request.categoria());
+        comprobarCierrePorVinculacion(request.categoria());
         s.setCategoria(request.categoria());
         s.setExpediente(p); s.setTipo(request.tipo()); s.setSolicitante(actor);
         s.setFechaSolicitud(LocalDateTime.now()); s.setMotivo(motivoValido(request.motivo()));
@@ -367,12 +372,10 @@ public class PerfilNinoService {
         String motivo = motivoValido(request.motivo());
         if (request.aprobar()) {
             comprobarEstado(p, s.getTipo());
-            comprobarCierrePorVinculacion(p, s.getCategoria());
+            comprobarCierrePorVinculacion(s.getCategoria());
             if (s.getTipo() == SolicitudEstadoCaso.Tipo.REACTIVACION && !p.isPerfilCompleto())
                 throw new IllegalStateException("Completa y revisa el expediente antes de aprobar su reactivación al Match");
             p.setBajaLogica(s.getTipo() == SolicitudEstadoCaso.Tipo.DESACTIVACION);
-            if (s.getCategoria() == SolicitudEstadoCaso.Categoria.ADOPCION_FORMALIZADA)
-                p.setCierrePorAdopcion(true);
         }
         s.setEstado(request.aprobar() ? SolicitudEstadoCaso.Estado.APROBADA : SolicitudEstadoCaso.Estado.RECHAZADA);
         s.setResueltoPor(actor); s.setFechaResolucion(LocalDateTime.now()); s.setMotivoResolucion(motivo);

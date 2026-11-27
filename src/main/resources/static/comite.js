@@ -127,30 +127,36 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
     this.contenido.innerHTML=Profesionales.encabezado('Solicitudes de expedientes','Consulta las solicitudes recibidas y sus decisiones.','solicitudes')+`<section class="tarjeta"><div class="pro-fila-titulo"><div><h2>Solicitudes</h2><p>Consulta las solicitudes recibidas y sus decisiones.</p></div><span class="pro-conteo">${porRevisar} <small>Por revisar</small></span></div><div class="pro-pestanas" role="tablist" aria-label="Estado de solicitudes"><button id="tabPendientes" type="button" role="tab" aria-selected="true" aria-controls="listaSolicitudesComite">Pendientes · ${pendientes.length}</button><button id="tabResueltas" type="button" role="tab" aria-selected="false" aria-controls="listaSolicitudesComite">Resueltas · ${datos.length-pendientes.length}</button></div><label>Tipo de expediente<select id="filtroSolicitudesComite"><option value="">Todos los expedientes</option><option value="infantil">Expedientes infantiles</option><option value="familiar">Expedientes familiares</option></select></label><div id="listaSolicitudesComite" role="tabpanel" aria-labelledby="tabPendientes"></div></section>`;
     const pintar=resueltas=>{
       const filtro=document.getElementById('filtroSolicitudesComite').value;
-      const seleccion=datos.filter(s=>pendiente(s)!==resueltas && (!filtro || Boolean(s.familiar)===(filtro==='familiar'))).sort((a,b)=>String(b.fechaSolicitud).localeCompare(String(a.fechaSolicitud)));
+      const seleccion=datos.filter(s=>pendiente(s)!==resueltas && (!filtro || Boolean(s.familiar)===(filtro==='familiar'))).sort((a,b)=>new Date(b.fechaSolicitud)-new Date(a.fechaSolicitud));
       document.getElementById('tabPendientes').setAttribute('aria-selected',String(!resueltas));document.getElementById('tabResueltas').setAttribute('aria-selected',String(resueltas));const lista=document.getElementById('listaSolicitudesComite');lista.setAttribute('aria-labelledby',resueltas?'tabResueltas':'tabPendientes');
-      lista.innerHTML=seleccion.length?seleccion.map(s=>s.familiar?this.tarjetaReincorporacion(s):`<article class="pro-reciente"><span class="pro-simbolo">${this.icono('solicitudes')}</span><div><strong>${limpiarHtml(s.codigoCaso)} · ${s.categoria==='ADOPCION_FORMALIZADA'?'Cierre por adopción':limpiarHtml(Profesionales.etiqueta(s.tipo))}</strong><p>${limpiarHtml(Profesionales.etiqueta(s.estado))} · ${limpiarHtml(Profesionales.fecha(s.fechaSolicitud))}</p><p>${limpiarHtml(s.motivo)}</p>${s.resueltoPor?`<p>${limpiarHtml(s.resueltoPor)} · ${limpiarHtml(Profesionales.fecha(s.fechaResolucion))}</p><p>${limpiarHtml(s.motivoResolucion)}</p>`:''}</div><a class="boton secundario chico" href="perfiles.html?caso=${encodeURIComponent(s.codigoCaso)}&origen=solicitudes#panelSolicitudes">${resueltas?'Consultar':'Revisar solicitud'} ${this.icono('flecha')}</a></article>`).join(''):`<div class="pro-vacio"><span class="pro-simbolo">${this.icono('comprobar')}</span><div><h3>${resueltas?'Sin solicitudes resueltas':'Todo está al día'}</h3><p>${resueltas?'Las decisiones del Comité aparecerán aquí.':'No hay solicitudes pendientes de revisión.'}</p></div></div>`;
+      lista.innerHTML=seleccion.length?seleccion.map(s=>this.tarjetaSolicitud(s)).join(''):`<div class="pro-vacio"><span class="pro-simbolo">${this.icono('comprobar')}</span><div><h3>${resueltas?'Sin solicitudes resueltas':'Sin solicitudes pendientes'}</h3><p>${filtro?'No hay solicitudes con los filtros seleccionados.':resueltas?'Las decisiones del Comité aparecerán aquí.':'No hay solicitudes pendientes de revisión.'}</p></div></div>`;
       lista.querySelectorAll('[data-revisar-reincorporacion]').forEach(b=>b.onclick=()=>
         this.revisarReincorporacion(familiares.find(s=>String(s.id)===b.dataset.revisarReincorporacion)));
     };document.getElementById('tabPendientes').addEventListener('click',()=>pintar(false));document.getElementById('tabResueltas').addEventListener('click',()=>pintar(true));
     document.getElementById('filtroSolicitudesComite').addEventListener('change',()=>pintar(document.getElementById('tabResueltas').getAttribute('aria-selected')==='true'));
     pintar(false);
   },
-  tarjetaReincorporacion(s) {
-    return `<article class="pro-reciente"><span class="pro-simbolo">${this.icono('personas')}</span>
-      <div><strong>Reincorporación familiar · ${limpiarHtml(s.codigoCaso)}</strong>
-        <p>${limpiarHtml(Profesionales.fecha(s.fechaSolicitud))} · ${Vinculaciones.estadoReincorporacion(s.estado)}</p>
-        <p>Solicitud para iniciar un nuevo proceso de adopción.</p>
-        <small>${s.estado === 'ENTREVISTA_PENDIENTE' ? 'Pendiente de actualización de entrevista' : this.icono('comprobar')+' Entrevista actualizada'}</small></div>
-      <button type="button" class="boton secundario chico" data-revisar-reincorporacion="${Number(s.id)}">
-        ${s.estado === 'REVISION_PENDIENTE' ? 'Revisar solicitud' : 'Consultar'}</button></article>`;
+  tarjetaSolicitud(s) {
+    const codigo = encodeURIComponent(s.codigoCaso);
+    const destino = s.familiar ? `perfiles.html?familia=${codigo}&origen=solicitudes#gestionFamiliar`
+      : `perfiles.html?caso=${codigo}&origen=solicitudes#panelSolicitudes`;
+    return `<article class="pro-reciente solicitud-resumen">
+      <span class="pro-simbolo">${this.icono(s.familiar ? 'personas' : 'solicitudes')}</span>
+      <div><strong>${limpiarHtml(s.codigoCaso)} · ${limpiarHtml(Profesionales.tituloSolicitud(s))}</strong>
+        ${Profesionales.estadoSolicitud(s)}
+        <dl class="solicitud-meta"><div><dt>Solicitante</dt><dd>${limpiarHtml(s.solicitante || 'Sin registro')} · ${limpiarHtml(Profesionales.fechaSolicitud(s.fechaSolicitud))}</dd></div>
+        ${s.resueltoPor || s.fechaResolucion ? `<div><dt>Resolución</dt><dd>${limpiarHtml(s.resueltoPor || 'Sin registro')} · ${limpiarHtml(Profesionales.fechaSolicitud(s.fechaResolucion))}</dd></div>` : ''}</dl>
+      </div><div class="pro-acciones">
+        <a class="boton secundario chico" href="${destino}">Consultar expediente ${this.icono('flecha')}</a>
+        ${s.familiar && s.estado === 'REVISION_PENDIENTE' ? `<button type="button" class="boton chico" data-revisar-reincorporacion="${Number(s.id)}">Revisar solicitud</button>` : ''}
+      </div></article>`;
   },
   revisarReincorporacion(s) {
     if (!s || document.querySelector('[data-revisar-reincorporacion-dialogo]')) return;
     const revisable=s.estado==='REVISION_PENDIENTE', d=document.createElement('dialog');
     d.className='pro-dialogo';d.dataset.revisarReincorporacionDialogo='';d.setAttribute('aria-label','Revisar reincorporación familiar');
     d.innerHTML=`<h2>${this.icono('solicitudes')}Revisar reincorporación familiar</h2>
-      <p>${limpiarHtml(s.codigoCaso)} · Antecedente ${limpiarHtml(s.vinculacion)} · ${limpiarHtml(Profesionales.fecha(s.fechaSolicitud))}</p>
+      <p>${limpiarHtml(s.codigoCaso)} · Antecedente ${limpiarHtml(s.vinculacion)} · ${limpiarHtml(Profesionales.fechaSolicitud(s.fechaSolicitud))}</p>
       <dl class="detalle-datos"><div><dt>Proceso anterior</dt><dd>Adopción formalizada</dd></div>
         <div><dt>Entrevista familiar</dt><dd>${s.estado==='ENTREVISTA_PENDIENTE'?'Pendiente de actualización':'Actualizada'}</dd></div></dl>
       <p><a class="boton secundario" href="perfiles.html?familia=${encodeURIComponent(s.codigoCaso)}&origen=solicitudes" target="_blank" rel="noopener">${this.icono('consulta')}Consultar expediente familiar</a></p>
@@ -164,7 +170,7 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
         <p class="mensaje error" role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button>
         <button type="submit" class="boton">Registrar decisión</button></div></form>`:`
         <p>${Vinculaciones.estadoReincorporacion(s.estado)}</p>
-        ${s.resueltoPor?`<p>${limpiarHtml(s.resueltoPor)} · ${limpiarHtml(Profesionales.fecha(s.fechaResolucion))}</p><p class="pro-texto-registrado">${limpiarHtml(s.motivoResolucion)}</p>`:''}
+        ${s.resueltoPor?`<p>${limpiarHtml(s.resueltoPor)} · ${limpiarHtml(Profesionales.fechaSolicitud(s.fechaResolucion))}</p><p class="pro-texto-registrado">${limpiarHtml(s.motivoResolucion)}</p>`:''}
         <button type="button" class="boton secundario" data-cancelar>Cerrar</button>`}`;
     const cancelar=d.querySelector('[data-cancelar]');
     d.onclose=()=>d.remove();cancelar.onclick=()=>d.close();
