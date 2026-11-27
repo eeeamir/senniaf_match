@@ -254,7 +254,6 @@ document.getElementById('formEvaluacion').addEventListener('submit', async e => 
 });
 
 const CAMPOS_NINO = {
-  numeroExpedienteInstitucional: 'Número de expediente institucional',
   codigoCaso:'Código del expediente', edad:'Edad', unidadEdad:'Unidad de edad', nivelEscolar:'Nivel escolar', gradoEscolar:'Grado escolar',
   rendimientoAcademico:'Rendimiento académico', habilidades:'Habilidades', habilidadesDetalle:'Detalle de habilidades',
   gustos:'Intereses', gustosDetalle:'Detalle de intereses', personalidad:'Rasgos de personalidad', personalidadDetalle:'Detalle de personalidad',
@@ -263,7 +262,7 @@ const CAMPOS_NINO = {
   tieneHermanos:'Tiene hermanos', cantidadHermanos:'Cantidad de hermanos', hermanosDetalle:'Información de hermanos',
   idiomaComunicacion:'Idioma y comunicación',costumbresTradiciones:'Costumbres y tradiciones significativas',vinculosCulturales:'Vínculos culturales y comunitarios',opinionCultural:'Preferencias y opinión del niño',recomendacionesCulturales:'Recomendaciones de continuidad cultural',contextoCultural:'Contexto cultural', registradoPor:'Creador del expediente', fechaRegistro:'Fecha de registro',
   trabajadorSocialAsignado:'Responsable de trabajo social', psicologoAsignado:'Profesional de psicología',
-  perfilCompleto:'Perfil completo', alertaMedica:'Alerta médica', bajaLogica:'Excluido del Match (seguimiento permitido)'
+  perfilCompleto:'Perfil completo', bajaLogica:'Excluido del Match (seguimiento permitido)'
 };
 const CAMPOS_FAMILIA = {
   codigoCaso:'Código del expediente', tipoFamilia:'Estructura familiar', especificacionHogar:'Composición del hogar (otra)', notaEstructuraHogar:'Notas del hogar', redApoyo:'Red de apoyo',
@@ -274,7 +273,7 @@ const CAMPOS_FAMILIA = {
   registradoPor:'Responsable familiar', fechaRegistro:'Fecha de registro', perfilCompleto:'Entrevista completa',
   reevaluacionPendiente:'Reevaluación pendiente', numeroReevaluaciones:'Reevaluaciones completadas'
 };
-const ICONOS_REGISTRO = {codigoCaso:'carpeta',numeroExpedienteInstitucional:'carpeta',registradoPor:'persona',fechaRegistro:'calendario',trabajadorSocialAsignado:'credencial',psicologoAsignado:'psicologia'};
+const ICONOS_REGISTRO = {codigoCaso:'carpeta',registradoPor:'persona',fechaRegistro:'calendario',trabajadorSocialAsignado:'credencial',psicologoAsignado:'psicologia'};
 function detalleCampos(datos, campos) {
   return '<dl class="detalle-datos">' + Object.entries(campos).filter(([k])=>k!=='especificacionHogar'||datos.tipoFamilia==='OTRA').map(([k, titulo]) => {
     let valor = datos[k];
@@ -482,9 +481,9 @@ const GRUPOS_NINO = {
  'Datos generales y escolaridad':['edad','nivelEscolar','gradoEscolar','rendimientoAcademico'],
  'Habilidades, gustos y personalidad':['habilidades','habilidadesDetalle','gustos','gustosDetalle','personalidad','personalidadDetalle'],
  'Hermanos y contexto familiar':['tieneHermanos','cantidadHermanos','hermanosDetalle'],
- 'Salud y necesidades de apoyo':['alergias','alergiasDetalle','intoleranciaLactosa','condicionesSalud','condicionesSaludDetalle','necesidadesApoyo','alertaMedica'],
+ 'Salud y necesidades de apoyo':['alergias','alergiasDetalle','intoleranciaLactosa','condicionesSalud','condicionesSaludDetalle','necesidadesApoyo'],
  'Identidad y continuidad cultural':['idiomaComunicacion','costumbresTradiciones','vinculosCulturales','opinionCultural','recomendacionesCulturales'],
- 'Registro y profesionales responsables':['codigoCaso','numeroExpedienteInstitucional','registradoPor','fechaRegistro','trabajadorSocialAsignado','psicologoAsignado']
+ 'Registro y profesionales responsables':['codigoCaso','registradoPor','fechaRegistro','trabajadorSocialAsignado','psicologoAsignado']
 };
 const GRUPOS_FAMILIA = {
  'Hogar y red de apoyo':['tipoFamilia','especificacionHogar','notaEstructuraHogar','redApoyo','notaRedApoyo'],
@@ -521,7 +520,16 @@ function culturaDetalle(datos) {
 function detalleSecciones(datos, campos, grupos) {
   let aviso = '';
   if (grupos === GRUPOS_FAMILIA && sesion.rol === 'COMITE') {
-    aviso = Profesionales.avisoInterrupcion(datos.antecedenteInterrupcion)
+    const revocacion = datos.antecedenteRevocacion;
+    aviso = revocacion?.vinculacionId ? `<aside class="pro-aviso-interrupcion" role="note"><span class="pro-simbolo">${Profesionales.icono('informacion')}</span><div>
+      <h3>Antecedente de asignación revocada</h3>
+      <p>La familia registra una asignación revocada antes del inicio de la convivencia preadoptiva.</p>
+      <p><strong>Motivo</strong> · ${limpiarHtml({DESISTIMIENTO_FAMILIA:'Desistimiento de la asignación por parte de la familia',RECHAZO_NINO:'Rechazo de la asignación por parte del niño, niña o adolescente'}[revocacion.motivo] || 'Otro motivo')}</p>
+      ${revocacion.fundamento ? `<p class="pro-texto-registrado">${limpiarHtml(revocacion.fundamento)}</p>` : ''}
+      <p><strong>Disponibilidad actual</strong> · ${{DISPONIBLE:'Confirmada por el Comité',PENDIENTE_REVISION:'Pendiente de revisión por el Comité',ASIGNADO:'Con otra asignación vigente',NO_ELEGIBLE:'Requiere completar condiciones'}[revocacion.estado] || ''}</p>
+      <a href="vinculaciones.html?id=${Number(revocacion.vinculacionId)}">Consultar vinculación</a>
+      </div></aside>` : '';
+    aviso += Profesionales.avisoInterrupcion(datos.antecedenteInterrupcion)
       + Profesionales.avisoReevaluaciones(datos.numeroReevaluaciones);
   }
   const secciones = Object.entries(grupos).map(([titulo, claves], indice) => {
@@ -529,7 +537,8 @@ function detalleSecciones(datos, campos, grupos) {
     const esCultura = titulo === 'Apoyos culturales y comunitarios';
     const identificador = esCultura ? 'apoyosCulturales' : 'grupo-' + indice;
     const icono = esCultura ? 'personas' : ['escuela', 'estrella', 'personas'][indice] || 'informe';
-    const visibles = claves.filter(campo => campo !== 'continuidadCultural'
+    const visibles = claves.filter(campo => !['alergiasDetalle','condicionesSaludDetalle'].includes(campo) || datos[campo]?.trim())
+      .filter(campo => campo !== 'continuidadCultural'
       || Profesionales.mostrarAntecedenteCultural(
         datos.continuidadCultural, datos, Profesionales.culturaFamilia.map(([clave]) => clave)
       ));

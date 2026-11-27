@@ -226,7 +226,7 @@ const Profesionales = {
       const apartados=[...form.querySelectorAll('[name=apartadoFamiliar]:checked')].map(c=>c.value);
       const justificacion=!incluirMotivo||titulo==='Solicitar reevaluación'?texto.value.trim():`${motivo[1].replace(/\.$/,'')}: ${texto.value.trim()}`;
       const confirmar=document.createElement('dialog');confirmar.className='pro-dialogo';confirmar.setAttribute('aria-label',tituloConfirmacion);
-      confirmar.innerHTML=`<h2>${limpiarHtml(tituloConfirmacion)}</h2><p>${limpiarHtml(confirmacion)}</p><div class="pro-acciones"><button class="boton secundario" type="button" data-volver>Volver</button><button class="boton" type="button" data-confirmar>${limpiarHtml(textoConfirmar)}</button></div>`;
+      confirmar.innerHTML=`<h2>${limpiarHtml(tituloConfirmacion)}</h2><p>${limpiarHtml(typeof confirmacion === 'function' ? confirmacion(motivo[0]) : confirmacion)}</p><div class="pro-acciones"><button class="boton secundario" type="button" data-volver>Volver</button><button class="boton" type="button" data-confirmar>${limpiarHtml(textoConfirmar)}</button></div>`;
       if(titulo==='Solicitar reevaluación')confirmar.querySelector('h2').insertAdjacentHTML('afterend',`<p>Revisar: ${apartados.map(limpiarHtml).join(', ')}.</p><p class="pro-texto-registrado">${limpiarHtml(justificacion)}</p>`);
       document.body.append(confirmar);boton.disabled=true;
       confirmar.addEventListener('close',()=>{confirmar.remove();if(!guardando)boton.disabled=false;},{once:true});

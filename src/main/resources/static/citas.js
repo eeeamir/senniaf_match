@@ -32,6 +32,7 @@ const Citas = {
     ACEPTAR_PROPUESTA: ['Aceptar nueva fecha', 'Aceptar nueva fecha', 'Confirmar aceptación'],
     OTRO_HORARIO: ['Solicitar otro horario', 'Solicitar otro horario', 'Enviar propuesta'],
     CANCELAR: ['Cancelar solicitud', 'Cancelar solicitud', 'Confirmar cancelación'],
+    INASISTENCIA: ['Registrar inasistencia', 'Registrar inasistencia', 'Confirmar inasistencia'],
     REALIZADA: ['Marcar realizada', 'Registrar cita realizada', 'Confirmar realización'],
   },
   async api(ruta, opciones = {}) {
@@ -65,7 +66,7 @@ const Citas = {
       <aside id="contextoCitas" class="citas-contexto" role="status"></aside>
       <section aria-labelledby="tituloSolicitudes"><h2 class="pro-subtitulo" id="tituloSolicitudes">${this.familia ? 'Mis solicitudes' : 'Solicitudes de las familias'}</h2><div id="listaCitas" class="citas-lista"></div></section>`;
     this.filtro = document.getElementById('filtroCitas');
-    this.filtro.value = this.familia ? 'TODAS' : 'PENDIENTE';
+    this.filtro.value = 'TODAS';
     this.filtro.addEventListener('change', () => this.pintar());
     document.getElementById('actualizarCitas').addEventListener('click', () => this.cargar());
     document.getElementById('solicitarCita')?.addEventListener('click', () => this.dialogo('SOLICITAR'));
@@ -102,19 +103,25 @@ const Citas = {
       lista.innerHTML = `<div class="tarjeta citas-vacio"><span class="pro-simbolo">${Profesionales.icono('calendario')}</span><h2>${this.solicitudes.length ? 'No hay solicitudes con este estado' : this.familia ? 'Todavía no tienes solicitudes de cita' : 'No hay solicitudes de cita'}</h2><p>${this.solicitudes.length ? 'Selecciona otro estado para consultar las demás solicitudes.' : this.familia ? 'Aquí podrás consultar tus propuestas y las respuestas de Trabajo Social.' : 'Las solicitudes de las familias asignadas aparecerán aquí.'}</p></div>`;
       return;
     }
+    const prioridad = c => c.pendienteResultado || ['ACEPTAR','RECHAZAR','PROPONER','ACEPTAR_PROPUESTA','OTRO_HORARIO'].some(a => c.acciones.includes(a))
+      ? 0 : new Date(c.inicio) >= new Date() && ['PENDIENTE','CONFIRMADA','CAMBIO_PROPUESTO'].includes(c.estado) ? 1 : 2;
+    visibles.sort((a,b) => prioridad(a) - prioridad(b)
+      || (prioridad(a) === 2 ? -1 : 1) * (new Date(a.inicio) - new Date(b.inicio)) || a.id - b.id);
     lista.innerHTML = visibles.map(c => {
-      const estado = this.estados[c.estado];
-      const explicacion = this.familia ? ({PENDIENTE:'Tu solicitud fue enviada y está pendiente de respuesta de Trabajo Social.',CONFIRMADA:'Tu cita está confirmada para el horario acordado.',CAMBIO_PROPUESTO:'Trabajo Social propuso un nuevo horario. Revisa la propuesta y responde.',RECHAZADA:'Trabajo Social rechazó esta solicitud. Consulta su respuesta.',CANCELADA:'Esta solicitud fue cancelada y ya no está activa.',REALIZADA:'La cita se completó.'})[c.estado] : ({PENDIENTE:'Revisa la solicitud y responde a la familia.',CONFIRMADA:'El horario está confirmado.',CAMBIO_PROPUESTO:'La propuesta está pendiente de respuesta de la familia.',RECHAZADA:'La solicitud fue rechazada.',CANCELADA:'La solicitud ya no está activa.',REALIZADA:'La cita se completó.'})[c.estado];
-      return `<article class="tarjeta citas-tarjeta" id="cita-${Number(c.id)}" tabindex="-1">
+      const estado = c.pendienteResultado ? ['Pendiente de confirmación','reloj']
+        : c.inasistencia ? ['Inasistencia','cerrar'] : this.estados[c.estado];
+      const explicacion = c.pendienteResultado ? 'El horario programado terminó y aún no se ha registrado el resultado.'
+        : c.inasistencia ? 'Trabajo Social registró una inasistencia.' : this.familia ? ({PENDIENTE:'Tu solicitud fue enviada y está pendiente de respuesta de Trabajo Social.',CONFIRMADA:'Tu cita está confirmada para el horario acordado.',CAMBIO_PROPUESTO:'Trabajo Social propuso un nuevo horario. Revisa la propuesta y responde.',RECHAZADA:'Trabajo Social rechazó esta solicitud. Consulta su respuesta.',CANCELADA:'Esta solicitud fue cancelada y ya no está activa.',REALIZADA:'La cita se completó.'})[c.estado] : ({PENDIENTE:'Revisa la solicitud y responde a la familia.',CONFIRMADA:'El horario está confirmado.',CAMBIO_PROPUESTO:'La propuesta está pendiente de respuesta de la familia.',RECHAZADA:'La solicitud fue rechazada.',CANCELADA:'La solicitud ya no está activa.',REALIZADA:'La cita se completó.'})[c.estado];
+      return `<article class="tarjeta citas-tarjeta ${prioridad(c) === 0 ? 'citas-requiere-atencion' : ''}" id="cita-${Number(c.id)}" tabindex="-1">
         <header class="citas-cabecera"><div><p>${limpiarHtml(c.vinculacion)}${this.familia ? '' : ' · Familia ' + limpiarHtml(c.familia)}</p><h2>${limpiarHtml(this.motivos[c.motivo]?.[0] || 'Solicitud de cita')}</h2></div>
-        <span class="citas-estado citas-estado-${limpiarHtml(c.estado)}">${Profesionales.icono(estado[1])}${limpiarHtml(estado[0])}</span></header>
+        <span class="citas-estado citas-estado-${c.pendienteResultado ? 'PENDIENTE' : limpiarHtml(c.estado)}">${Profesionales.icono(estado[1])}${limpiarHtml(estado[0])}</span></header>
         <p class="citas-explicacion">${limpiarHtml(explicacion)}</p>
         <dl class="citas-datos"><div><dt>${Profesionales.icono('calendario')}${['CONFIRMADA', 'REALIZADA'].includes(c.estado) ? 'Fecha acordada' : ['PENDIENTE', 'CAMBIO_PROPUESTO'].includes(c.estado) ? 'Fecha propuesta' : 'Fecha registrada'}</dt><dd>${limpiarHtml(this.fecha(c.inicio))}</dd></div>
         <div><dt>${Profesionales.icono('reloj')}Inicio · Panamá</dt><dd>${limpiarHtml(this.hora(c.hora))}</dd></div><div><dt>${Profesionales.icono('reloj')}Finalización</dt><dd>${limpiarHtml(this.horaInstante(c.fin))}</dd></div>
         <div><dt>${Profesionales.icono('reloj')}Duración${['PENDIENTE', 'CAMBIO_PROPUESTO'].includes(c.estado) ? ' estimada' : ''}</dt><dd>${c.duracion === 60 ? '1 hora' : '2 horas'}</dd></div></dl>
         <div class="citas-mensaje"><strong>${Profesionales.icono('informe')}${c.ultimoRol === 'TRABAJADOR_SOCIAL' ? 'Respuesta de Trabajo Social' : this.familia ? 'Tu mensaje' : 'Mensaje de la familia'}</strong><p>${limpiarHtml(c.mensaje)}</p></div>
 
-        <div class="citas-acciones">${c.acciones.map(a => `<button type="button" class="boton ${['RECHAZAR', 'PROPONER', 'OTRO_HORARIO', 'CANCELAR'].includes(a) ? 'secundario' : ''}" data-accion="${a}" data-cita="${Number(c.id)}">${Profesionales.icono(({ACEPTAR:'comprobar',RECHAZAR:'cerrar',PROPONER:'calendario',ACEPTAR_PROPUESTA:'comprobar',OTRO_HORARIO:'calendario',CANCELAR:'cerrar',REALIZADA:'comprobar'})[a])}${limpiarHtml(a === 'CANCELAR' && c.estado === 'CONFIRMADA' ? 'Cancelar cita' : this.acciones[a][0])}</button>`).join('')}</div>
+        <div class="citas-acciones">${c.acciones.map(a => `<button type="button" class="boton ${['RECHAZAR', 'PROPONER', 'OTRO_HORARIO', 'CANCELAR'].includes(a) ? 'secundario' : ''}" data-accion="${a}" data-cita="${Number(c.id)}">${Profesionales.icono(({ACEPTAR:'comprobar',RECHAZAR:'cerrar',PROPONER:'calendario',ACEPTAR_PROPUESTA:'comprobar',OTRO_HORARIO:'calendario',CANCELAR:'cerrar',INASISTENCIA:'cerrar',REALIZADA:'comprobar'})[a])}${limpiarHtml(a === 'CANCELAR' && c.estado === 'CONFIRMADA' ? 'Cancelar cita' : this.acciones[a][0])}</button>`).join('')}</div>
         <p class="citas-actualizada">Última actualización: ${limpiarHtml(this.fechaHora(c.actualizada))}</p>
         <details class="citas-historial" data-historial="${Number(c.id)}"><summary class="citas-historial-titulo"><span>${Profesionales.icono('reloj')}Ver historial</span><svg class="citas-chevron" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary><div data-eventos></div></details></article>`;
     }).join('');
@@ -124,7 +131,7 @@ const Citas = {
       d.dataset.cargado = 'si'; const bloque = d.querySelector('[data-eventos]'); bloque.textContent = 'Consultando historial…';
       try {
         const c = await this.api('/api/citas/' + Number(d.dataset.historial));
-        const acciones = {SOLICITAR:'Solicitud enviada',ACEPTAR:'Cita confirmada',RECHAZAR:'Solicitud rechazada',PROPONER:'Nuevo horario propuesto',ACEPTAR_PROPUESTA:'Propuesta aceptada',OTRO_HORARIO:'Otro horario solicitado',CANCELAR:'Cancelación registrada',REALIZADA:'Cita realizada'};
+        const acciones = {SOLICITAR:'Solicitud enviada',ACEPTAR:'Cita confirmada',RECHAZAR:'Solicitud rechazada',PROPONER:'Nuevo horario propuesto',ACEPTAR_PROPUESTA:'Propuesta aceptada',OTRO_HORARIO:'Otro horario solicitado',CANCELAR:'Cancelación registrada',INASISTENCIA:'Inasistencia registrada',REALIZADA:'Cita realizada'};
         bloque.innerHTML = `<ol class="citas-eventos">${c.historial.map((e, i) => {
           const anterior = c.historial[i - 1];
           const cambioHorario = !anterior || e.inicio !== anterior.inicio || e.fin !== anterior.fin;
@@ -151,7 +158,7 @@ const Citas = {
     const vinculo = nueva && this.disponibles.length > 1 ? campo('citaVinculacion', 'Vinculación', `<select id="citaVinculacion" required>${this.disponibles.map(v => `<option value="${Number(v.id)}">${limpiarHtml(v.codigo)}</option>`).join('')}</select>`) : `<p class="citas-ayuda">${limpiarHtml(nueva ? this.disponibles[0].codigo : cita.vinculacion)}</p>`;
     d.innerHTML = `<h2 id="tituloDialogoCita">${limpiarHtml(titulo)}</h2><form novalidate><div class="citas-campos">${vinculo}
       ${motivos ? campo('citaMotivo', nueva ? 'Motivo de la cita' : accion === 'RECHAZAR' ? 'Motivo del rechazo' : 'Motivo del cambio', `<select id="citaMotivo" required><option value="">Selecciona un motivo</option>${Object.entries(motivos).map(([k, [n]]) => `<option value="${k}">${limpiarHtml(n)}</option>`).join('')}</select>`) : ''}
-      ${editableFecha ? `<div class="citas-fecha-hora">${campo('citaFecha', 'Fecha propuesta', `<input type="date" id="citaFecha" min="${this.opciones.hoy}" required>`)}${campo('citaHora', 'Hora · Panamá', '<select id="citaHora" required disabled><option value="">Selecciona primero una fecha</option></select>')}</div>` : confirmarFecha ? `<div class="citas-resumen"><p><strong>${limpiarHtml(this.fecha(cita.inicio))}</strong></p><p>${limpiarHtml(this.hora(cita.hora))} · Panamá</p></div>` : `<p class="citas-ayuda">${accion === 'CANCELAR' ? 'La cancelación quedará registrada y conservará las propuestas anteriores.' : 'Confirma que la cita se realizó. La actuación quedará registrada en el historial.'}</p>`}
+      ${editableFecha ? `<div class="citas-fecha-hora">${campo('citaFecha', 'Fecha propuesta', `<input type="date" id="citaFecha" min="${this.opciones.hoy}" required>`)}${campo('citaHora', 'Hora · Panamá', '<select id="citaHora" required disabled><option value="">Selecciona primero una fecha</option></select>')}</div>` : confirmarFecha ? `<div class="citas-resumen"><p><strong>${limpiarHtml(this.fecha(cita.inicio))}</strong></p><p>${limpiarHtml(this.hora(cita.hora))} · Panamá</p></div>` : `<p class="citas-ayuda">${accion === 'CANCELAR' ? 'La cancelación quedará registrada y conservará las propuestas anteriores.' : accion === 'INASISTENCIA' ? 'Confirma la inasistencia a la cita. La actuación quedará registrada en el historial.' : 'Confirma que la cita se realizó. La actuación quedará registrada en el historial.'}</p>`}
       ${editarDuracion ? campo('citaDuracion', 'Duración', '<select id="citaDuracion"><option value="120">2 horas</option><option value="60">1 hora</option></select>') : editableFecha || confirmarFecha ? `<p class="citas-ayuda">Duración estimada: ${duracionInicial === 60 ? '1 hora' : '2 horas'}</p>` : ''}
       ${editableFecha || confirmarFecha ? '<p id="citaFinalizacion" class="citas-ayuda" aria-live="polite"></p><p id="citaDisponibilidad" class="citas-ayuda citas-disponibilidad" role="status"></p>' : ''}
       ${editableFecha ? '<p class="citas-ayuda">La fecha y hora propuestas están sujetas a confirmación.</p>' : ''}
@@ -245,7 +252,7 @@ const Citas = {
       try {
         const guardada = await this.api(nueva ? '/api/citas' : `/api/citas/${Number(cita.id)}/acciones`, { method: 'POST', body: JSON.stringify(datos) });
         d.close(); await this.cargar();
-        this.aviso(nueva ? 'Solicitud enviada correctamente' : ['ACEPTAR', 'ACEPTAR_PROPUESTA'].includes(accion) ? 'Cita confirmada' : ['PROPONER', 'OTRO_HORARIO'].includes(accion) ? 'Propuesta enviada' : accion === 'RECHAZAR' ? 'Solicitud rechazada' : accion === 'CANCELAR' ? 'Solicitud cancelada' : 'Cita registrada como realizada');
+        this.aviso(nueva ? 'Solicitud enviada correctamente' : ['ACEPTAR', 'ACEPTAR_PROPUESTA'].includes(accion) ? 'Cita confirmada' : ['PROPONER', 'OTRO_HORARIO'].includes(accion) ? 'Propuesta enviada' : accion === 'RECHAZAR' ? 'Solicitud rechazada' : accion === 'CANCELAR' ? 'Solicitud cancelada' : accion === 'INASISTENCIA' ? 'Inasistencia registrada' : 'Cita registrada como realizada');
         document.getElementById('cita-' + Number(guardada.id))?.focus();
       } catch (error) {
         d.querySelector('[data-error]').textContent = error.message;

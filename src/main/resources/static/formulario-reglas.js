@@ -19,7 +19,6 @@ const ReglasPerfil = {
         const otro=nombre==='condicionesPuedeAcompanarHoy'?'condicionesConApoyo':nombre==='condicionesConApoyo'?'condicionesPuedeAcompanarHoy':null;
         if(otro&&e.target.checked)document.querySelectorAll(`[data-grupo="${otro}"] input`).forEach(c=>{if(c.value===e.target.value)c.checked=false;});
         this.revisarGrupo(grupo);
-        if(['alergias','condicionesSalud'].includes(nombre)&&typeof actualizarAvisoMedico==='function')actualizarAvisoMedico();
       });
     });
     ['edad','unidadEdad'].forEach(id=>document.getElementById(id).addEventListener('input',()=>this.actualizarEdad()));

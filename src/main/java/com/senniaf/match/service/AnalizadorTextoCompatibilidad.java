@@ -24,7 +24,7 @@ public final class AnalizadorTextoCompatibilidad {
 
         public List<Hallazgo> necesidadesSalud() {
             return conceptos.values().stream()
-                    .filter(h -> h.dominio() == Dominio.SALUD)
+                    .filter(h -> h.dominio() == Dominio.SALUD && !h.concepto().equals("COBERTURA_GENERAL_SALUD"))
                     .filter(h -> h.declaracion() == Declaracion.NECESIDAD
                             || h.declaracion() == Declaracion.AMBIGUA)
                     .toList();
@@ -88,7 +88,7 @@ public final class AnalizadorTextoCompatibilidad {
             "\\b(?:(no|nunca|jamas|tampoco)\\s+)?(?:(?:puedo|podemos|podria|podriamos|podre|podremos|"
                     + "estoy dispuest[oa] a|estamos dispuest[oa]s a|"
                     + "estoy preparad[oa] para|estamos preparad[oa]s para|"
-                    + "tengo capacidad para|tenemos capacidad para|tengo disponibilidad para|tenemos disponibilidad para|"
+                    + "tengo capacidad para|tenemos capacidad para|tengo la capacidad de|tenemos la capacidad de|tengo disponibilidad para|tenemos disponibilidad para|"
                     + "estamos disponibles para|estoy disponible para|tenemos disposicion para|tengo disposicion para|"
                     + "estamos en condiciones de|estoy en condiciones de|nos sentimos capaces de|me siento capaz de|"
                     + "me comprometo a|nos comprometemos a|nuestra familia puede|la familia puede|"
@@ -580,8 +580,14 @@ public final class AnalizadorTextoCompatibilidad {
         return Collections.unmodifiableMap(porDominio);
     }
 
+    static boolean condicionMedica(String concepto) {
+        return Arrays.stream(CondicionSalud.values()).anyMatch(c -> c.name().equals(concepto));
+    }
+
     private static Map<String, Concepto> vocabulario() {
         Map<String, Concepto> conceptos = new LinkedHashMap<>();
+        definir(conceptos, "COBERTURA_GENERAL_SALUD", "capacidad general de cuidado", Dominio.SALUD,
+                "cualquier condicion(?: de salud| medica)?|todas las condiciones(?: de salud| medicas)?");
         definir(conceptos, "ASMA", "Asma", Dominio.SALUD, "asma bronquial|asma");
         definir(conceptos, "DIABETES", "Diabetes", Dominio.SALUD, "diabetes");
         definir(conceptos, "EPILEPSIA", "Epilepsia", Dominio.SALUD, "epilepsia|epilepcia");

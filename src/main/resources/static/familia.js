@@ -49,15 +49,20 @@ const Familia = {
         if (version === this.version) return;
       }
       this.version = version;
-      const vigente = Vinculaciones.seleccionarVinculacion(vinculaciones);
+      const ultima = Vinculaciones.seleccionarVinculacion(vinculaciones);
+      const disponibleDeNuevo = ultima?.resultadoCierre === 'REVOCACION_ASIGNACION'
+        && ultima.familiaDisponible;
+      const vigente = disponibleDeNuevo ? null : ultima;
       const progreso = Vinculaciones.obtenerProgreso(vigente);
       const eventos = [
         ...(p.actividad || []),
         ...vinculaciones.flatMap((v) => Vinculaciones.obtenerProgreso(v).eventos),
       ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      const progresoAnterior = disponibleDeNuevo ? Vinculaciones.obtenerProgreso(ultima).eventos.map(e => e.descripcion) : [];
+      const eventosInicio = eventos.filter(e => !progresoAnterior.includes(e.descripcion));
       const ultimo = progreso
         ? [...progreso.eventos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0]
-        : eventos[0];
+        : eventosInicio[0];
       let estado = 'Entrevista incompleta';
       let accion = 'Revisa y completa tu entrevista.';
       if (p.perfilCompleto) {
@@ -74,12 +79,16 @@ const Familia = {
         accion = progreso.accion;
       }
       const proceso = progreso
-        ? `<section class="tarjeta">${Vinculaciones.progresoFamiliar(vigente)}</section>`
+        ? `<section class="tarjeta">${Vinculaciones.progresoFamiliar(vigente, true)}</section>`
         : `
       <section class="tarjeta">
         <h2>${Profesionales.icono('solicitudes')}Preparación del expediente familiar</h2>
         <p>${limpiarHtml(estado)}</p>
-        <p>Todavía no tienes una propuesta registrada.</p>
+        ${disponibleDeNuevo ? `<p>Tu expediente está disponible nuevamente para nuevas propuestas.</p>
+          <ol class="familia-etapas">
+          ${['Propuesta del Comité','Respuesta familiar','Acompañamiento e interrelación','Autorización preadoptiva','Convivencia preadoptiva'].map((etapa, indice) =>
+            `<li class="${indice === 0 ? 'actual' : 'pendiente'}"><span class="familia-paso">${indice + 1}</span><strong>${etapa}</strong><small>${indice === 0 ? 'En espera de propuesta' : 'No iniciada'}</small></li>`).join('')}
+          </ol>` : '<p>Todavía no tienes una propuesta registrada.</p>'}
         ${
           p.reevaluacionPendiente || !p.perfilCompleto
             ? `
@@ -95,7 +104,7 @@ const Familia = {
       const propuesta = (mostrarReincorporacion ? this.reincorporacion(antecedente) : '')
         + Vinculaciones.familiar(vinculaciones);
       const actividad = (todos = false) => {
-        const visibles = todos ? eventos : eventos.slice(0, 3);
+        const visibles = todos ? eventos : eventosInicio.slice(0, 3);
         return `
           <section class="tarjeta">
             <div class="pro-fila-titulo">

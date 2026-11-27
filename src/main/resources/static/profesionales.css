@@ -556,3 +556,12 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .reincorporacion-pasos .reloj > .pro-icono { color: #895e1e; }
 .reincorporacion-pasos .advertencia > .pro-icono { color: #a52e38; }
 .reincorporacion-pasos .informacion > .pro-icono { color: #65758b; }
+
+.profesional summary:has(> :is(.pro-desplegar,.familia-desplegar))::after { content: none; }
+.vinculacion-cierre-resumen > .chip + p { margin-top: 16px; }
+.vinculacion-incidencia-bloque { margin-top: 16px; padding-top: 16px; border-top: 1px solid #dce7f5; }
+
+.familia-resultado-revocado { color: #a12232; }
+.familia-etapas time { color: #476788; font-size: .875rem; }
+.familia-tiempo-total { color: #234766; font-weight: 600; }
+.familia-seguimiento .familia-etapas small { background: transparent; }

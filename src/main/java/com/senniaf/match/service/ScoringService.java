@@ -218,9 +218,10 @@ public class ScoringService {
                                            int peso) {
         var pendientes = necesidades.necesidadesSalud();
         if (pendientes.isEmpty()) {
-            return new EvaluacionCriterio(0, "NO_APLICA",
-                    "El expediente no registra necesidades específicas de salud o acompañamiento aplicables. Se excluye el peso de este criterio del máximo.");
+            return new EvaluacionCriterio(peso, "EVALUADO",
+                    "El menor no presenta condiciones de salud conocidas ni otras necesidades de cuidado específicas registradas. Se acreditan " + peso + " puntos.");
         }
+        var general = capacidades.obtener("COBERTURA_GENERAL_SALUD");
         double cubiertas = 0;
         boolean desconocido = false;
         List<String> razones = new ArrayList<>();
@@ -241,6 +242,11 @@ public class ScoringService {
                 cobertura = "la declaración familiar es ambigua o contradictoria y requiere aclaración";
             } else if (es(capacidad, AnalizadorTextoCompatibilidad.Declaracion.NEGATIVA)) {
                 cobertura = "la familia declaró que no puede atender esta necesidad y no se acredita su cobertura";
+            } else if ((capacidad == null || es(capacidad, AnalizadorTextoCompatibilidad.Declaracion.INSUFICIENTE))
+                    && AnalizadorTextoCompatibilidad.condicionMedica(necesidad.concepto())
+                    && es(general, AnalizadorTextoCompatibilidad.Declaracion.ACTUAL)) {
+                cubiertas += 1;
+                cobertura = "la familia declaró capacidad general para atender condiciones de salud";
             } else {
                 cobertura = "la familia no declaró disponibilidad específica; se requiere aclaración";
                 desconocido = true;

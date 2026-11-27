@@ -141,10 +141,12 @@ public class CitaService {
                 if(anterior==Estado.CONFIRMADA && !c.getInicio().isAfter(ahora()))throw new IllegalStateException("Una cita que ya comenzó no admite cancelación");
                 c.setEstado(Estado.CANCELADA);sugerencia="La solicitud de cita ha sido cancelada";
             }
-            case "REALIZADA" -> {
+            case "REALIZADA", "INASISTENCIA" -> {
                 exigirRol(rol,"TRABAJADOR_SOCIAL");exigirEstado(c,Estado.CONFIRMADA);
-                if(c.getFin().isAfter(ahora()))throw new IllegalStateException("Solo puedes registrar la cita como realizada después de su finalización");
-                c.setEstado(Estado.REALIZADA);sugerencia="La cita se realizó";
+                if(c.getFin().isAfter(ahora()))throw new IllegalStateException("Solo puedes registrar el resultado después del horario programado");
+                boolean realizada = "REALIZADA".equals(accion);
+                c.setEstado(realizada ? Estado.REALIZADA : Estado.CANCELADA);
+                sugerencia = realizada ? "La cita se realizó" : "Se registró inasistencia a la cita";
             }
             default -> throw new IllegalArgumentException("Selecciona una acción válida");
         }
@@ -220,7 +222,7 @@ public class CitaService {
         c.setUltimoRol(rol);historial.save(new CitaHistorial(c,actor,rol,accion,anterior,motivo));
         EventoCaso evento=new EventoCaso();evento.setCodigoCaso(c.getVinculacion().getNino().getCodigoCaso());evento.setActor(actor);
         evento.setAccion("CITA_"+accion);evento.setFecha(LocalDateTime.ofInstant(reloj.instant(),ZoneId.systemDefault()));
-        try{evento.setDescripcion(json.writeValueAsString(Map.of("vinculacionId",c.getVinculacion().getId(),"citaId",c.getId(),"resumen","Cita: "+c.getEstado().name().toLowerCase(Locale.ROOT).replace('_',' ')+".")));}
+        try{evento.setDescripcion(json.writeValueAsString(Map.of("vinculacionId",c.getVinculacion().getId(),"citaId",c.getId(),"resumen","INASISTENCIA".equals(accion) ? "Cita: inasistencia registrada." : "Cita: "+c.getEstado().name().toLowerCase(Locale.ROOT).replace('_',' ')+".")));}
         catch(com.fasterxml.jackson.core.JsonProcessingException e){throw new IllegalStateException("No se pudo registrar la trazabilidad de la cita");}
         auditoria.save(evento);
     }
@@ -231,12 +233,18 @@ public class CitaService {
         r.put("fin",c.getFin().atZone(HorarioCitas.ZONA).toOffsetDateTime());r.put("duracion",c.getDuracion());
         r.put("mensajeInicial",c.getMensajeInicial());r.put("mensaje",c.getMensaje());r.put("respuesta",c.getRespuesta());r.put("ultimoRol",c.getUltimoRol());
         r.put("creada",c.getCreada());r.put("actualizada",c.getActualizada());boolean activa=habilitada(c.getVinculacion()) && horario.configurado();
+        boolean pendienteResultado = c.getEstado() == Estado.CONFIRMADA && !c.getFin().isAfter(ahora());
+        r.put("pendienteResultado", pendienteResultado);
+        r.put("inasistencia", c.getEstado() == Estado.CANCELADA && historial.existsByCitaIdAndAccion(c.getId(), "INASISTENCIA"));
         List<String> acciones=new ArrayList<>();
         if(!TERMINALES.contains(c.getEstado())) {
             if("TRABAJADOR_SOCIAL".equals(rol) && c.getEstado()==Estado.PENDIENTE){if(activa){acciones.add("ACEPTAR");acciones.add("PROPONER");}acciones.add("RECHAZAR");}
             if("FAMILIA".equals(rol) && c.getEstado()==Estado.CAMBIO_PROPUESTO && activa){acciones.add("ACEPTAR_PROPUESTA");acciones.add("OTRO_HORARIO");}
             if(("FAMILIA".equals(rol) || c.getEstado()!=Estado.PENDIENTE) && (c.getEstado()!=Estado.CONFIRMADA || c.getInicio().isAfter(ahora())))acciones.add("CANCELAR");
-            if("TRABAJADOR_SOCIAL".equals(rol) && c.getEstado()==Estado.CONFIRMADA && !c.getFin().isAfter(ahora()))acciones.add("REALIZADA");
+            if ("TRABAJADOR_SOCIAL".equals(rol) && pendienteResultado) {
+                acciones.add("REALIZADA");
+                acciones.add("INASISTENCIA");
+            }
         }
         r.put("acciones",acciones);
         if("TRABAJADOR_SOCIAL".equals(rol))r.put("familia",c.getVinculacion().getFamilia().getCodigoCaso());

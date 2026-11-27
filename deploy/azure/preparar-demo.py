@@ -112,12 +112,12 @@ def infantil(escenario, letra, *, evaluacion_personalizada=None):
     listas = '\n'.join(f'INSERT INTO {tabla}(perfil_id,{col}) VALUES (perfil,{sql(v)});'
                        for clave, tabla, col in colecciones for v in d[clave])
     alerta = any(v != 'NINGUNA_CONOCIDA' for v in d['alergias'] + d['condicionesSalud']) or d['intoleranciaLactosa'] == 'SI'
-    etapa = ('Juego, comunicación y respuesta a las figuras de cuidado.' if d['edad'] < 6 else
-             'Participación escolar, expresión de intereses y relación con pares.' if d['edad'] < 12 else
-             'Participación del adolescente, autonomía progresiva y orientación de su formación.')
-    evaluacion = f"Escenario simulado de {d['edad']} años. {etapa} {d['personalidadDetalle']}"
+    etapa = ('Se observaron el juego, la comunicación y la respuesta a las figuras de cuidado.' if d['edad'] < 6 else
+             'Se revisaron la participación escolar, la expresión de intereses y la relación con pares.' if d['edad'] < 12 else
+             'Se revisaron la participación, la autonomía progresiva y la orientación de su formación.')
+    evaluacion = f"{etapa} {d['personalidadDetalle']}"
     observaciones = f"Información descriptiva del expediente: {d['habilidadesDetalle']} Intereses: {d['gustosDetalle']} {d['hermanosDetalle']}"
-    valoracion = 'La valoración se limita al escenario académico y a los apoyos documentados. No se establece diagnóstico clínico.'
+    valoracion = 'La valoración se basa en los antecedentes y apoyos documentados. No se establece diagnóstico clínico.'
     recomendaciones = d['necesidadesApoyo']
     if evaluacion_personalizada is not None:
         evaluacion = evaluacion_personalizada['evaluacion']
@@ -146,7 +146,7 @@ def infantil(escenario, letra, *, evaluacion_personalizada=None):
           '["ADAPTACION_EMOCIONAL","ACOMPANAMIENTO"]',{sql(valoracion)},{sql(contexto)});
         INSERT INTO auditoria_casos(codigo_caso,actor,accion,descripcion,fecha)
         VALUES(codigo,'CONFIGURACION_FICTICIA','VINCULACION_INSTITUCIONAL_FICTICIA',
-          json_build_object('rol','OPERACION_TECNICA','resumen','Expediente simulado preparado para demostración; asignación equilibrada exclusiva de este contexto.','trabajadorSocial',ts,'psicologo',ps)::text,localtimestamp);
+          json_build_object('rol','OPERACION_TECNICA','resumen','Se registró la asignación de los profesionales responsables del seguimiento del expediente.','trabajadorSocial',ts,'psicologo',ps)::text,localtimestamp);
       END IF;
     END $infantil$;"""
 

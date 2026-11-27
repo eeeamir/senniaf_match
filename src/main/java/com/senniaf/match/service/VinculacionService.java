@@ -50,6 +50,16 @@ public class VinculacionService {
         r.put("habilidades",n.getHabilidades());r.put("gustos",n.getGustos());r.put("personalidad",n.getPersonalidad());
         return r;
     }
+    public Map<String, Object> antecedenteRevocacion(Long familiaId) {
+        return repo.findFirstByFamiliaIdAndResultadoCierreOrderByFechaRegistroCierreDescIdDesc(familiaId, ResultadoCierre.REVOCACION_ASIGNACION)
+                .map(v -> {
+                    var incidencia = bloqueante(incidencias(v));
+                    return Map.<String, Object>of("vinculacionId", v.getId(),
+                            "estado", datosCierre(v).get("estadoFamiliar"),
+                            "motivo", incidencia == null ? "OTRO" : incidencia.getMotivo(),
+                            "fundamento", v.getMotivoCierre() == null ? "" : v.getMotivoCierre());
+                }).orElseGet(Map::of);
+    }
     public List<Map<String,Object>> propias(String actor){
         return repo.findByFamiliaRegistradoPorOrderByIdDesc(actor).stream().map(v->vista(v,true)).toList();
     }
@@ -166,8 +176,22 @@ public class VinculacionService {
             r.put("reincorporacion", reincorporaciones.estado(v));
             r.put("siguientePaso", "La vinculación finalizó por adopción formalizada.");
         }
-        if (v.getResultadoCierre() == ResultadoCierre.REVOCACION_ASIGNACION)
+        if (v.getResultadoCierre() == ResultadoCierre.REVOCACION_ASIGNACION) {
             r.put("siguientePaso", "La asignación fue revocada. El equipo institucional revisará la disponibilidad de los expedientes.");
+            if (familiar) {
+                var incidencia = bloqueante(incidencias(v));
+                var motivo = incidencia == null ? IncidenciaAsignacion.Motivo.OTRO : incidencia.getMotivo();
+                r.put("motivoRevocacion", switch (motivo) {
+                    case DESISTIMIENTO_FAMILIA -> "La familia decidió no continuar con la asignación.";
+                    case RECHAZO_NINO -> "Durante el acompañamiento se determinó que la asignación no podía continuar.";
+                    case OTRO -> "El Comité determinó que no correspondía continuar con la asignación tras revisar la situación registrada.";
+                });
+                r.put("disponibilidadFamiliarConfirmada", v.isFamiliaLiberada());
+                r.put("familiaDisponible", v.isFamiliaLiberada() && v.getFamilia().isPerfilCompleto()
+                        && !v.getFamilia().isReevaluacionPendiente()
+                        && !repo.existsByFamiliaCodigoCasoAndReservaVigenteTrue(v.getFamilia().getCodigoCaso()));
+            }
+        }
         var seguimiento=interrupcion(v);
         if(seguimiento!=null && v.getEstado()!=Vinculacion.Estado.CERRADA)r.put("siguientePaso",familiar
                 ?"El equipo institucional te orientará sobre los siguientes pasos de esta vinculación."

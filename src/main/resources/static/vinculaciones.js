@@ -160,13 +160,14 @@ const Vinculaciones = {
   obtenerProgreso(v) {
     if (!v) return null;
     const autorizacion = v.autorizacionPreadoptiva;
+    const revocada = v.resultadoCierre === 'REVOCACION_ASIGNACION';
     const seguimiento = v.seguimientoFamiliar || {};
     const rechazada =
       ['RECHAZADA_POR_FAMILIA', 'RESPUESTA_RECHAZADA_PENDIENTE_CIERRE'].includes(v.estado) ||
       v.respuestaFamiliar === 'RECHAZADA';
     const aceptada =
       v.estado === 'RESPUESTA_ACEPTADA' ||
-      v.respuestaFamiliar === 'ACEPTADA';
+      v.respuestaFamiliar === 'ACEPTADA' || revocada;
     const cerrada = v.estado === 'CERRADA';
     // Compatibilidad de presentación del único antecedente confirmado; no crea constancia documental.
     const autorizacionHistorica = Number(v.id) === 1 && v.codigo === 'VIN-1' && cerrada && v.interrupcionRegistrada && !autorizacion;
@@ -223,7 +224,9 @@ const Vinculaciones = {
         'No hay acciones pendientes de tu parte en esta vinculación. La disponibilidad requiere revisión institucional independiente.';
     }
     if (v.resultadoCierre === 'REVOCACION_ASIGNACION')
-      accion = 'El equipo institucional te orientará sobre la revisión de disponibilidad.';
+      accion = v.disponibilidadFamiliarConfirmada
+        ? 'El Comité ya confirmó la disponibilidad de tu expediente.'
+        : 'La disponibilidad de tu expediente está pendiente de revisión por el Comité.';
     const titulos = [
       'Propuesta del Comité',
       'Respuesta familiar',
@@ -275,6 +278,10 @@ const Vinculaciones = {
       if (indice === 1 && v.fechaRespuesta && !aceptada && !rechazada) {
         clase = 'registrada';
         texto = 'Respuesta registrada';
+      }
+      if (indice === 2 && revocada) {
+        clase = 'interrumpido';
+        texto = 'Asignación revocada';
       }
       const rolInterrupcion = seguimiento.interrupcionRol || v.interrupcion?.rolProfesional;
       const detalle = indice === 4 && v.interrupcionRegistrada
@@ -383,9 +390,7 @@ const Vinculaciones = {
     if (!t) return '';
     const a = v.autorizacionPreadoptiva;
     const texto = [];
-    if (familiar && indice === 0 && v.fechaCreacion) texto.push(this.fechaHora(v.fechaCreacion));
     if (indice === 1 && (v.fechaRespuesta || v.estado === 'PENDIENTE_RESPUESTA')) {
-      if (familiar && v.fechaRespuesta) texto.push(this.fechaHora(v.fechaRespuesta));
       texto.push(this.dias(t.respuesta) + (t.respuesta == null ? '' : ' desde la propuesta'));
     }
     if (indice === 3 && a?.fechaEmision) {
@@ -405,18 +410,24 @@ const Vinculaciones = {
     const etiqueta = familiar ? 'small' : 'p';
     return texto.map(linea => `<${etiqueta} class="vinculacion-tiempo">${limpiarHtml(linea)}</${etiqueta}>`).join('');
   },
-  progresoFamiliar(v) {
+  progresoFamiliar(v, inicio = false) {
     const progreso = this.obtenerProgreso(v);
     if (!progreso) return '';
+    const revocada = v.resultadoCierre === 'REVOCACION_ASIGNACION';
+    const fechas = [v.fechaCreacion, v.fechaRespuesta, v.respuestaFamiliar === 'ACEPTADA' || revocada ? v.fechaRespuesta : null,
+      v.autorizacionPreadoptiva?.registradaEl, v.autorizacionPreadoptiva?.inicioRegistradoEl];
+    const cierre = v.seguimientoFamiliar?.cierreRegistradoEl;
+    const interrupcion = v.seguimientoFamiliar?.interrupcionRegistradaEl;
     return `
       <section class="familia-seguimiento" aria-label="Progreso de ${limpiarHtml(v.codigo)}">
         <header>
           <span class="vinculacion-emblema">${Profesionales.icono('solicitudes')}</span>
-          <div><h3>${limpiarHtml(progreso.estado)}</h3><p>${limpiarHtml(progreso.mensaje)}</p></div>
+          <div><h3 class="${revocada ? 'familia-resultado-revocado' : ''}">${limpiarHtml(progreso.estado)}</h3><p>${limpiarHtml(progreso.mensaje)}</p></div>
         </header>
-        ${v.tiempos ? `<p class="vinculacion-tiempo">Tiempo de vinculación · ${this.dias(v.tiempos.vinculacion)}
-          · ${this.tiempoConvivencia(v.tiempos)}
-          ${v.tiempos.fechaInicio ? '<small>Referencia de convivencia · ' + v.tiempos.diasReferencia + ' días calendario</small>' : ''}
+        ${revocada && v.motivoRevocacion ? `<p>${limpiarHtml(v.motivoRevocacion)}</p>` : ''}
+        ${v.tiempos?.vinculacion != null ? `<p class="familia-tiempo-total">Tiempo de vinculación · ${this.dias(v.tiempos.vinculacion)}
+          ${!inicio && v.tiempos.fechaInicio ? ' · ' + this.tiempoConvivencia(v.tiempos) : ''}
+          ${!inicio && v.tiempos.fechaInicio ? '<small>Referencia de convivencia · ' + v.tiempos.diasReferencia + ' días calendario</small>' : ''}
         </p>` : ''}
         <ol class="familia-etapas">
           ${progreso.etapas
@@ -425,13 +436,17 @@ const Vinculaciones = {
             <li class="${etapa.clase}" ${etapa.clase === 'actual' ? 'aria-current="step"' : ''}>
               <span class="familia-paso">${etapa.clase === 'interrumpido' ? Profesionales.icono('advertencia') : etapa.clase === 'completado' ? Profesionales.icono('comprobar') : indice + 1}</span>
               <strong>${etapa.titulo}</strong><small>${etapa.texto}</small>${etapa.detalle ? `<small class="familia-etapa-detalle">${limpiarHtml(etapa.detalle)}</small>` : ''}${etapa.fechaHecho ? `<small class="familia-etapa-detalle">Fecha de interrupción: ${limpiarHtml(this.fechaCivil(etapa.fechaHecho))}</small>` : ''}
-              ${this.tiemposEtapa(v, indice, true)}
+              ${fechas[indice] ? `<time>${limpiarHtml(this.fechaHora(fechas[indice]))}</time>` : ''}
+              ${indice === 2 && revocada && cierre ? `<time>Revocación · ${limpiarHtml(this.fechaHora(cierre))}</time>` : ''}
+              ${indice === 4 && interrupcion ? `<time>Interrupción · ${limpiarHtml(this.fechaHora(interrupcion))}</time>` : ''}
+              ${indice === 4 && !revocada && cierre ? `<time>Cierre · ${limpiarHtml(this.fechaHora(cierre))}</time>` : ''}
+              ${!inicio ? this.tiemposEtapa(v, indice, true) : ''}
             </li>
           `,
             )
             .join('')}
         </ol>
-        <button class="boton secundario chico" type="button" data-actualizar-familiar>Actualizar seguimiento</button>
+        ${inicio ? '' : '<button class="boton secundario chico" type="button" data-actualizar-familiar>Actualizar seguimiento</button>'}
         <p data-estado-seguimiento-familiar role="status" hidden></p>
         <p class="familia-siguiente">${limpiarHtml(progreso.accion)}</p>
       </section>`;
@@ -577,6 +592,12 @@ const Vinculaciones = {
       } finally { actualizar.disabled = false; }
     };
     c.querySelector('[data-autorizacion]')?.addEventListener('click',()=>this.registrarAutorizacion(c,v,sesion));
+    c.querySelector('[data-ir-cierre]')?.addEventListener('click', () => {
+      c.querySelector('[data-seguimiento="proceso"]').click();
+      const destino = c.querySelector('.vinculacion-cierre');
+      destino?.focus({ preventScroll: true });
+      destino?.scrollIntoView({ block: 'start' });
+    });
     c.querySelector('[data-cierre]')?.addEventListener('click',()=>this.registrarCierre(c,v,sesion));
     c.querySelectorAll('[data-disponibilidad]').forEach(b=>b.onclick=()=>Profesionales.justificar({
       titulo:'Revisar disponibilidad del expediente',maximo:500,contexto:b.dataset.disponibilidad==='NINO'?'Expediente infantil':'Expediente familiar',
@@ -594,6 +615,7 @@ const Vinculaciones = {
     c.querySelector('[data-revisar-interrupcion]')?.addEventListener('click',()=>Profesionales.justificar({
       titulo:'Revisar interrupción de convivencia',contexto:v.codigo,
       opciones:[['REVISION','Revisión institucional','Se revisaron los antecedentes de la interrupción y se documentan las actuaciones de seguimiento correspondientes.'],['OTRO','Otro','']],
+      textoRevisar:'Registrar revisión',
       confirmacion:'La revisión quedará registrada. La reserva de los expedientes se mantiene hasta la actuación institucional correspondiente.',
       alConfirmar:justificacion=>this.api(`/api/vinculaciones/${v.id}/interrupcion/revision`,{method:'POST',body:JSON.stringify({justificacion})}),
       alGuardar:async datos=>{await this.detalle(c,v.id,sesion,datos);c.insertAdjacentHTML('afterbegin','<p class="mensaje exito" role="status">La revisión quedó registrada.</p>');}
@@ -619,9 +641,10 @@ const Vinculaciones = {
   proceso(v) {
     const progreso = this.obtenerProgreso(v);
     const autorizacion = v.autorizacionPreadoptiva;
+    const revocada = v.resultadoCierre === 'REVOCACION_ASIGNACION';
     const fechas = [
       v.fechaCreacion, v.fechaRespuesta,
-      progreso.etapas[2].texto === 'Iniciada' || progreso.etapas[2].clase === 'actual'
+      revocada || progreso.etapas[2].texto === 'Iniciada' || progreso.etapas[2].clase === 'actual'
         ? v.fechaRespuesta : null,
       autorizacion?.registradaEl, v.interrupcionRegistrada ? v.seguimientoFamiliar?.interrupcionRegistradaEl || v.interrupcion?.fechaRegistro : autorizacion?.inicioRegistradoEl
     ];
@@ -637,6 +660,7 @@ const Vinculaciones = {
               <div><h3>${etapa.titulo}</h3>${etapa.detalle ? `<p>${limpiarHtml(etapa.detalle)}</p>` : ''}${etapa.fechaHecho ? `<p>Fecha de interrupción: ${limpiarHtml(this.fechaCivil(etapa.fechaHecho))}</p>` : ''}${this.tiemposEtapa(v, indice)}</div>
               <div class="vinculacion-etapa-meta">
                 <span class="chip ${etapa.clase === 'interrumpido' ? 'vinculacion-negativa' : etapa.clase === 'completado' ? 'vinculacion-positiva' : 'retirado'}">${etapa.texto}</span>
+                ${revocada && indice === 2 && v.cierre?.registradoEl ? `<time>Revocación · ${limpiarHtml(this.fechaHora(v.cierre.registradoEl))}</time>` : ''}
                 ${fechas[indice] ? `<time>${indice === 3 || indice === 4 ? 'Registro · ' : ''}${limpiarHtml(this.fechaHora(fechas[indice]))}</time>` : ''}
               </div>
             </li>`).join('')}
@@ -772,17 +796,19 @@ const Vinculaciones = {
   panelCierre(v) {
     if (!v.cierre && !v.estadoCierre && !v.puedeCerrar) return '';
     const x = v.cierre;
+    const pendientes = x && !x.ninoLiberado && !x.familiaLiberada ? 'los expedientes infantil y familiar'
+      : x && !x.ninoLiberado ? 'el expediente infantil' : x && !x.familiaLiberada ? 'el expediente familiar' : '';
     const estadoCierre = {CURSO:'Vinculación en curso', REVISION:'Pendiente de revisión',
       CIERRE:'Pendiente de cierre', REGISTRADO:'Cierre registrado'}[v.estadoCierre];
     const resultado = this.resultadosCierre[v.resultadoCierre];
     const adopcion = v.resultadoCierre === 'ADOPCION_FORMALIZADA';
     const estados = {
       PENDIENTE_REVISION: ['Pendiente de revisión', 'El Comité debe revisar su disponibilidad antes de volver al Match.', 'reloj'],
-      DISPONIBLE: ['Disponibilidad autorizada', 'Puede participar en nuevas propuestas si cumple las condiciones vigentes.', 'comprobar'],
+      DISPONIBLE: ['Disponibilidad autorizada', 'El expediente se ha reincorporado al proceso de compatibilidad y podrá participar en nuevas propuestas de asignación.', 'comprobar'],
       NO_ELEGIBLE: ['Requiere completar condiciones', 'La revisión está registrada; el expediente todavía no cumple las condiciones vigentes.', 'informacion'],
       ASIGNADO: ['Con otra asignación vigente', 'No participa en nuevas propuestas mientras conserve esa asignación.', 'vinculacion']
     };
-    return `<section class="tarjeta vinculacion-cierre"><h2>${Profesionales.icono('informe')}Cierre institucional</h2>
+    return `<section class="tarjeta vinculacion-cierre" tabindex="-1"><h2>${Profesionales.icono('informe')}Cierre institucional</h2>
       <div class="vinculacion-cierre-resumen"><span class="chip retirado">${Profesionales.icono(x ? 'informacion' : 'reloj')}${estadoCierre || (x ? 'Cierre registrado' : 'Vinculación en curso')}</span>
       ${resultado ? `<div class="mensaje ${resultado[2]}">${Profesionales.icono(resultado[3])}<div><strong>${resultado[0]}</strong><br>${resultado[1]}</div></div>` : ''}
       ${x ? `<dl class="detalle-datos"><div><dt>Fecha del cierre</dt><dd>${limpiarHtml(this.fechaCivil(x.fecha))}</dd></div><div><dt>Responsable del registro</dt><dd>${limpiarHtml(x.registradoPor)}</dd></div><div><dt>Registro</dt><dd>${limpiarHtml(this.fechaHora(x.registradoEl))}</dd></div>${x.referencia ? `<div><dt>Referencia institucional</dt><dd>${limpiarHtml(x.referencia)}</dd></div>` : ''}${x.autoridad ? `<div><dt>Autoridad registrada</dt><dd>${limpiarHtml(x.autoridad)}</dd></div>` : ''}</dl><p class="pro-texto-registrado">${limpiarHtml(x.motivo)}</p>` : '<p>El Comité registra un cierre respaldado por la actuación de la autoridad competente.</p>'}</div>
@@ -795,7 +821,7 @@ const Vinculaciones = {
               : 'Proceso finalizado. ' + this.estadoReincorporacion(reincorporacion?.estado)]
           : estados[estado] || estados[revisado ? 'DISPONIBLE' : 'PENDIENTE_REVISION'];
         return `<article><h4>${Profesionales.icono(k === 'NINO' ? 'carpeta' : 'personas')}${n}</h4><p>${limpiarHtml(codigo)}</p><strong>${info[0]}</strong><p>${info[1]}</p><div class="pro-acciones">${v.puedeRevisarDisponibilidad && !revisado ? `<button class="boton secundario" data-disponibilidad="${k}">${Profesionales.icono('consulta')}Revisar disponibilidad</button>` : ''}<a class="boton secundario" href="perfiles.html?${k === 'NINO' ? 'caso' : 'familia'}=${encodeURIComponent(codigo)}&origen=vinculacion&vinculacionOrigen=${Number(v.id)}">Consultar expediente</a></div></article>`;
-      }).join('')}</div></section>${adopcion ? (v.puedeResolverReincorporacion && v.reincorporacion?.estado !== 'SIN_SOLICITUD' ? '<a class="boton secundario" href="match.html?vista=solicitudes">Consultar solicitud</a>' : '') : `<aside class="vinculacion-proximo"><h3>${Profesionales.icono('flecha')}Próximo paso</h3><p>Después del cierre, los expedientes del niño y de la familia se revisan por separado. Una vez autorizados, podrán volver a participar en nuevas propuestas de compatibilidad si cumplen las condiciones vigentes.</p></aside>`}` : ''}
+      }).join('')}</div></section>${adopcion ? (v.puedeResolverReincorporacion && v.reincorporacion?.estado !== 'SIN_SOLICITUD' ? '<a class="boton secundario" href="match.html?vista=solicitudes">Consultar solicitud</a>' : '') : pendientes ? `<aside class="vinculacion-proximo"><h3>${Profesionales.icono('flecha')}Próximo paso</h3><p>Corresponde revisar la disponibilidad de ${pendientes}.</p></aside>` : ''}` : ''}
       ${v.puedeCerrar ? `<button class="boton secundario" data-cierre>${Profesionales.icono('informe')}Registrar cierre institucional</button>` : ''}
       <p class="ayuda">Este registro no sustituye la actuación de la autoridad competente ni formaliza una adopción.</p></section>`;
   },
@@ -932,13 +958,18 @@ const Vinculaciones = {
     if (!v.puedeReportarIncidencia && !registros.length && !(v.estado === 'RESPUESTA_ACEPTADA' && !v.autorizacionPreadoptiva)) return '';
     return `<section class="tarjeta"><h2>${Profesionales.icono('advertencia')}Incidencias de asignación</h2>
       ${registros.length ? registros.map(i=>`<article class="pro-informe">
-        <p><strong>${i.fechaRevision ? 'Revisión registrada' : 'Pendiente de revisión'}</strong></p>
-        <h3>${limpiarHtml(this.motivosAsignacion[i.motivo]?.[0] || i.motivo)}</h3>
-        <p class="pro-texto-registrado">${limpiarHtml(i.justificacion)}</p>
-        <p>${Profesionales.icono('persona')}${limpiarHtml(i.registradoPor)} · ${limpiarHtml(this.fechaHora(i.fechaRegistro))}</p>
-        ${i.fechaRevision ? `<h4>${i.procedeRevocacion ? 'Procede la revocación' : 'No procede la revocación'}</h4>
-          <p class="pro-texto-registrado">${limpiarHtml(i.fundamentoRevision)}</p>
-          <p>${limpiarHtml(i.revisadoPor)} · ${limpiarHtml(this.fechaHora(i.fechaRevision))}</p>` : ''}
+        <div class="pro-fila-titulo"><h3>${limpiarHtml(this.motivosAsignacion[i.motivo]?.[0] || i.motivo)}</h3>
+          <span class="chip ${i.fechaRevision ? 'vinculacion-positiva' : 'retirado'}">${i.fechaRevision ? 'Revisión registrada' : 'Pendiente de revisión'}</span></div>
+        <section class="vinculacion-incidencia-bloque"><h4>${Profesionales.icono('personas')}Reporte de Trabajo Social</h4>
+          <p>${limpiarHtml(i.registradoPor)} · ${limpiarHtml(this.fechaHora(i.fechaRegistro))}</p>
+          <p class="pro-texto-registrado">${limpiarHtml(i.justificacion)}</p></section>
+        ${i.fechaRevision ? `<section class="vinculacion-incidencia-bloque"><h4>${Profesionales.icono('solicitudes')}Revisión del Comité</h4>
+          <p>${limpiarHtml(i.revisadoPor)} · ${limpiarHtml(this.fechaHora(i.fechaRevision))}</p>
+          <p><strong class="${i.procedeRevocacion ? 'familia-resultado-revocado' : ''}">${i.procedeRevocacion ? 'Procede la revocación' : 'No procede la revocación'}</strong></p>
+          <p class="pro-texto-registrado">${limpiarHtml(i.fundamentoRevision)}</p></section>` : ''}
+        ${i.procedeRevocacion && v.puedeCerrar && !v.cierre ? `<section class="vinculacion-incidencia-bloque">
+          <h4>Próximo paso</h4><p>La revisión del Comité ha sido registrada. Corresponde completar el cierre institucional de la vinculación.</p>
+          <button class="boton" type="button" data-ir-cierre>Ir al cierre institucional ${Profesionales.icono('flecha')}</button></section>` : ''}
         ${v.puedeRevisarIncidencia && !i.fechaRevision ? `<button class="boton" type="button" data-revisar-incidencia-asignacion="${Number(i.id)}">
           ${Profesionales.icono('solicitudes')}Registrar revisión</button>` : ''}</article>`).join('')
         : '<p>No hay incidencias de asignación registradas en esta vinculación.</p>'}
@@ -953,9 +984,11 @@ const Vinculaciones = {
     Profesionales.justificar({
       titulo: 'Revisar incidencia de asignación', contexto:v.codigo, instruccion:'Resultado de la revisión',
       incluirMotivo:false, maximo:2000, ayuda:'La justificación es editable. Si la opción no ofrece una sugerencia, escribe el fundamento de la revisión.',
-      opciones: [...(compatible ? [compatible] : []), ['OTRO','Procede la revocación (otro motivo)',''],
+      opciones: [['CONFIRMADA','Procede la revocación',compatible?.[2] || ''],
         ['NO_PROCEDE','No procede la revocación','']],
-      confirmacion:'La revisión quedará registrada. Esta actuación no libera los expedientes.',
+      confirmacion: categoria => categoria === 'CONFIRMADA'
+        ? 'La revisión quedará registrada. Después podrás completar el cierre institucional.'
+        : 'La incidencia quedará revisada y la vinculación conservará su estado actual. La decisión se registrará en el historial.',
       alConfirmar:(fundamento,datos)=>this.api(`/api/vinculaciones/${v.id}/incidencias-asignacion/${i.id}/revision`,
         {method:'POST',body:JSON.stringify({fundamento,procede:datos.categoria!=='NO_PROCEDE'})}),
       alGuardar:async datos=>{await this.detalle(c,v.id,sesion,datos);

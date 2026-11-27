@@ -548,12 +548,6 @@
             style="margin-top: 8px;"
           >
 
-          <div class="aviso-medico" id="avisoMedico">
-            Este perfil quedará marcado con una alerta médica para que el
-            Comité lo revise con atención (alergia, condición de salud o
-            intolerancia declarada).
-          </div>
-
         </div>
 
 
@@ -1243,36 +1237,6 @@ document
    La validación completa ocurre al pulsar "Registrar perfil".
    =============================================== */
 
-/* ===============================================
-   AVISO MÉDICO (perfil del niño/a)
-   =============================================== */
-
-function actualizarAvisoMedico() {
-  const alergiaRelevante = valoresMarcados('alergias')
-    .some((valor) => !['NINGUNA_CONOCIDA','INFORMACION_NO_DISPONIBLE'].includes(valor));
-  const condicionRelevante = valoresMarcados('condicionesSalud')
-    .some((valor) => !['NINGUNA_CONOCIDA','INFORMACION_NO_DISPONIBLE'].includes(valor));
-  const intolerante =
-    document.getElementById('intoleranciaLactosa').value === 'SI';
-
-  document.getElementById('avisoMedico').classList.toggle(
-    'visible',
-    alergiaRelevante || condicionRelevante || intolerante
-  );
-}
-
-document
-  .querySelectorAll(
-    '.grupo-checks[data-grupo="alergias"] input, ' +
-    '.grupo-checks[data-grupo="condicionesSalud"] input'
-  )
-  .forEach((casilla) => casilla.addEventListener('change', actualizarAvisoMedico));
-
-document
-  .getElementById('intoleranciaLactosa')
-  .addEventListener('change', actualizarAvisoMedico);
-
-
 
 /* ===============================================
    DATOS DE EJEMPLO: NIÑO/A
@@ -1291,7 +1255,7 @@ async function cargarEjemploInfantil() {
   EjemplosDemo.aplicar(formulario,ejemplo);
   if(contexto.readOnly)contexto.value=antecedente;
   ReglasPerfil.refrescarNino(ejemplo.gradoEscolar);
-  actualizarAvisoMedico();
+
   document.getElementById('btnEjemplo').textContent='Cargar otro ejemplo';
   resultado.className='resultado';resultado.textContent='Ejemplo cargado. Revisa y modifica las respuestas antes de guardar.';
  } catch(e){resultado.className='resultado error';resultado.textContent=e.message;}finally{boton.disabled=false;}
@@ -1383,7 +1347,6 @@ formulario.addEventListener('submit', async (evento) => {
         `<strong>Perfil guardado correctamente.</strong><br>` +
         `${datos.mensaje} · Código de caso: <span class="codigo">${datos.codigoCaso}</span>` +
         (datos.perfilCompleto ? '' : ' · El perfil quedó marcado como incompleto.') +
-        (datos.alertaMedica ? ' · <strong>Alerta médica activa.</strong>' : '') +
         '<br><small>Volviendo a Mis expedientes…</small>';
 
       if (!editarCodigo) sessionStorage.setItem('senniaf.flash', datos.mensaje);
@@ -1654,7 +1617,7 @@ if (sesion) {
         document.getElementById('edad').dataset.historicaSinMeses=String(p.edad===0&&p.unidadEdad!=='MESES');
         document.getElementById('ayudaEdadHistorica').hidden=p.edad!==0||p.unidadEdad==='MESES';
         ReglasPerfil.refrescarNino(p.gradoEscolar);
-        actualizarAvisoMedico();
+
         btnRegistrar.textContent = 'Guardar correcciones';
         Profesionales.marcarGuardado(formulario);
       }).catch(e => { resultado.textContent = e.message; });

@@ -94,3 +94,5 @@
 .citas-pagina .citas-historial-titulo > span .pro-icono { margin: 0; }
 .citas-pagina .citas-historial-titulo .citas-chevron { width: 22px; height: 22px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .citas-pagina .citas-historial[open] > summary .citas-chevron { transform: rotate(180deg); }
+
+.citas-tarjeta.citas-requiere-atencion { border-inline-start: 3px solid #1761b6; }
