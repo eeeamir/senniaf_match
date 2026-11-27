@@ -550,7 +550,7 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .pro-sugerencias-decision [aria-pressed=true] { background: #e2f3eb; color: #08705f; border-color: #08705f; }
 .pro-sugerencias-decision [aria-pressed=true] .pro-icono { display: inline-block; vertical-align: middle; margin-inline-end: .25rem; }
 
-.chip.vinculacion-vigente { color: #205b9b; background: #e7f0ff; }
+.vinculacion-estados .chip.vinculacion-interrumpida { color: #895e1e; background: #fff2df; }
 .reincorporacion-pasos > li { display: flex; align-items: center; gap: .6rem; padding: .5rem 0; }
 .reincorporacion-pasos .comprobar > .pro-icono { color: #08705f; }
 .reincorporacion-pasos .reloj > .pro-icono { color: #895e1e; }

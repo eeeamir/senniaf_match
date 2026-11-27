@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.util.*;
 
 public interface VisitaDomiciliariaRepository extends JpaRepository<VisitaDomiciliaria, Long> {
+    long countByVinculacionId(Long vinculacionId);
     List<VisitaDomiciliaria> findByVinculacionIdOrderByFechaAscInicioAscIdAsc(Long vinculacionId);
     Optional<VisitaDomiciliaria> findByVinculacionIdAndId(Long vinculacionId, Long id);
     Optional<VisitaDomiciliaria> findByVinculacionIdAndAutorAndClaveRegistro(Long vinculacionId, String autor, UUID claveRegistro);

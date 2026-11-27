@@ -18,6 +18,8 @@ public class VinculacionService {
     @org.springframework.beans.factory.annotation.Autowired private PerfilFamiliaRepository familias;
     @org.springframework.beans.factory.annotation.Autowired private SolicitudEstadoCasoRepository solicitudesInfantiles;
     @org.springframework.beans.factory.annotation.Autowired private ReincorporacionService reincorporaciones;
+    @org.springframework.beans.factory.annotation.Autowired private IncidenciaAsignacionRepository incidenciasAsignacion;
+    @org.springframework.beans.factory.annotation.Autowired private VisitaDomiciliariaRepository visitasDomiciliarias;
     private final VinculacionRepository repo;
     private final EventoCasoRepository auditoria;
     private final com.fasterxml.jackson.databind.ObjectMapper json = new com.fasterxml.jackson.databind.ObjectMapper();
@@ -68,12 +70,32 @@ public class VinculacionService {
         if(!autorizado(v,rol,actor))throw new RolNoAutorizadoException("No tienes acceso a esta vinculación");
         var r=vista(v,false);
         var interrupcion=interrupcion(v);
+        var incidencias = incidencias(v);
+        var bloqueante = bloqueante(incidencias);
+        var resultados = cierreDisponible(v, interrupcion, bloqueante);
+        boolean comite = "COMITE".equals(rol);
+        if (comite || "TRABAJADOR_SOCIAL".equals(rol)) {
+            r.put("incidenciasAsignacion", incidencias.stream().map(this::datosIncidencia).toList());
+            r.put("puedeReportarIncidencia", "TRABAJADOR_SOCIAL".equals(rol) && enAcompanamiento(v) && bloqueante == null);
+            r.put("puedeRevisarIncidencia", comite && enAcompanamiento(v) && bloqueante != null && bloqueante.getFechaRevision() == null);
+        }
+        r.put("estadoCierre", v.getEstado() == Vinculacion.Estado.CERRADA ? "REGISTRADO"
+                : v.getEstado() != Vinculacion.Estado.RESPUESTA_ACEPTADA ? null
+                : (interrupcion != null && interrupcion.getFechaRevision() == null)
+                  || (bloqueante != null && bloqueante.getFechaRevision() == null) ? "REVISION"
+                : interrupcion != null || bloqueante != null ? "CIERRE" : "CURSO");
+        if (comite && resultados.contains(ResultadoCierre.ADOPCION_FORMALIZADA)) {
+            var tiempos = TiemposVinculacion.calcular(v, "ACEPTADA", false, false, null);
+            r.put("indicadoresAdopcionPendientes", tiempos.convivencia() == null
+                    || tiempos.convivencia() < TiemposVinculacion.DIAS_REFERENCIA_ACOGIMIENTO
+                    || visitasDomiciliarias.countByVinculacionId(v.getId()) < TiemposVinculacion.VISITAS_REFERENCIA_ACOGIMIENTO);
+        }
         r.put("compatibilidadOriginal",compatibilidadOriginal(v.getDecision()));
         r.put("interrupcion",interrupcion==null?null:detalleInterrupcion(interrupcion));
-        r.put("puedeRegistrarAutorizacion","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA && v.isReservaVigente() && interrupcion==null && v.getFechaInicioConvivencia()==null && !v.getNino().isCierrePorAdopcion());
-        r.put("puedeCerrar","COMITE".equals(rol) && !cierreDisponible(v, interrupcion).isEmpty());
+        r.put("puedeRegistrarAutorizacion","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.RESPUESTA_ACEPTADA && v.isReservaVigente() && interrupcion==null && v.getFechaInicioConvivencia()==null && !v.getNino().isCierrePorAdopcion() && bloqueante == null);
+        r.put("puedeCerrar","COMITE".equals(rol) && !resultados.isEmpty());
         r.put("puedeRevisarDisponibilidad","COMITE".equals(rol) && v.getEstado()==Vinculacion.Estado.CERRADA && v.getResultadoCierre()!=ResultadoCierre.ADOPCION_FORMALIZADA);
-        r.put("resultadosCierre", cierreDisponible(v, interrupcion));
+        r.put("resultadosCierre", resultados);
         r.put("cierre",v.getFechaCierre()==null?null:datosCierre(v));
         r.put("puedeResolverReincorporacion", "COMITE".equals(rol) && v.getResultadoCierre() == ResultadoCierre.ADOPCION_FORMALIZADA);
         r.put("puedeReportarInterrupcion","TRABAJADOR_SOCIAL".equals(rol) && interrupcion==null && reportable(v));
@@ -144,6 +166,8 @@ public class VinculacionService {
             r.put("reincorporacion", reincorporaciones.estado(v));
             r.put("siguientePaso", "La vinculación finalizó por adopción formalizada.");
         }
+        if (v.getResultadoCierre() == ResultadoCierre.REVOCACION_ASIGNACION)
+            r.put("siguientePaso", "La asignación fue revocada. El equipo institucional revisará la disponibilidad de los expedientes.");
         var seguimiento=interrupcion(v);
         if(seguimiento!=null && v.getEstado()!=Vinculacion.Estado.CERRADA)r.put("siguientePaso",familiar
                 ?"El equipo institucional te orientará sobre los siguientes pasos de esta vinculación."
@@ -190,6 +214,8 @@ public class VinculacionService {
         var v=repo.bloquear(id).orElseThrow(()->new IllegalArgumentException("La vinculación no está disponible"));
         if(v.getEstado()!=Vinculacion.Estado.RESPUESTA_ACEPTADA || !v.isReservaVigente() || v.getNino().isCierrePorAdopcion() || interrupcion(v)!=null)
             throw new IllegalStateException("Se requiere una propuesta aceptada y vigente, sin interrupción ni cierre");
+        if (bloqueante(incidencias(v)) != null)
+            throw new IllegalStateException("Resuelve primero la incidencia de asignación registrada");
         if(r==null || !Boolean.TRUE.equals(r.confirmacion()) || r.fechaEmision()==null)throw new IllegalArgumentException("Confirma la autorización institucional y su fecha de emisión");
         String referencia=texto(r.referencia(),5,200,"Identifica la resolución o autorización institucional existente");
         var hoy=java.time.LocalDate.now(ZoneId.of("America/Panama"));
@@ -242,7 +268,7 @@ public class VinculacionService {
         if(v.getEstado()==Vinculacion.Estado.CERRADA)throw new IllegalStateException("El cierre ya está registrado y se conserva en el historial");
         if(solicitud==null || !solicitud.confirmacionAutoridad())throw new IllegalArgumentException("Confirma la actuación de la autoridad competente");
         var resultado = solicitud.resultado();
-        if (resultado == null || !cierreDisponible(v, interrupcion(v)).contains(resultado))
+        if (resultado == null || !cierreDisponible(v, interrupcion(v), bloqueante(incidencias(v))).contains(resultado))
             throw new IllegalStateException("El resultado seleccionado no corresponde a las actuaciones registradas");
         if (resultado == ResultadoCierre.ADOPCION_FORMALIZADA) {
             var nino = ninos.bloquearPorId(v.getNino().getId()).orElseThrow();
@@ -253,6 +279,16 @@ public class VinculacionService {
             nino.setCierrePorAdopcion(true);
             nino.setBajaLogica(true);
         }
+        if (resultado == ResultadoCierre.REVOCACION_ASIGNACION
+                && !excluidas.existsByCodigoNinoAndCodigoFamilia(v.getNino().getCodigoCaso(), v.getFamilia().getCodigoCaso())) {
+            var exclusion = new CombinacionExcluida();
+            exclusion.codigoNino = v.getNino().getCodigoCaso();
+            exclusion.codigoFamilia = v.getFamilia().getCodigoCaso();
+            exclusion.origen = "REVOCACION";
+            exclusion.responsable = actor;
+            exclusion.fecha = LocalDateTime.now();
+            excluidas.save(exclusion);
+        }
         v.setResultadoCierre(resultado);
         var ahora=LocalDateTime.now();
         v.setMotivoCierre(texto(solicitud.motivo(),10,2000,"Explica el motivo o resultado del cierre"));
@@ -260,18 +296,79 @@ public class VinculacionService {
         auditar(v,actor,"CIERRE_INSTITUCIONAL",switch (resultado) {
             case ADOPCION_FORMALIZADA -> "El Comité registró el cierre por adopción formalizada. El expediente infantil quedó retirado definitivamente.";
             case INTERRUPCION_CONVIVENCIA -> "El Comité registró el cierre por interrupción revisada. Las disponibilidades se revisan por separado.";
-            case CIERRE_DOCUMENTADO -> "El Comité registró el cierre documentado con respaldo institucional confirmado.";
+            case REVOCACION_ASIGNACION -> "El Comité registró la revocación de asignación. Las disponibilidades se revisan por separado.";
+            case CIERRE_DOCUMENTADO -> throw new IllegalStateException("Este resultado se conserva únicamente como antecedente");
         });
         return detalle(id,rol,actor);
     }
-    private Set<ResultadoCierre> cierreDisponible(Vinculacion v, InterrupcionConvivencia interrupcion) {
-        if (v.getEstado() == Vinculacion.Estado.CERRADA || rechazoPortal(v)) return Set.of();
+    private Set<ResultadoCierre> cierreDisponible(Vinculacion v, InterrupcionConvivencia interrupcion,
+                                                  IncidenciaAsignacion incidencia) {
+        if (v.getEstado() != Vinculacion.Estado.RESPUESTA_ACEPTADA || !v.isReservaVigente()) return Set.of();
         if (interrupcion != null) return interrupcion.getFechaRevision() == null
                 ? Set.of() : Set.of(ResultadoCierre.INTERRUPCION_CONVIVENCIA);
-        if (v.getFechaInicioConvivencia() == null) return Set.of(ResultadoCierre.CIERRE_DOCUMENTADO);
+        if (enAcompanamiento(v) && incidencia != null && Boolean.TRUE.equals(incidencia.getProcedeRevocacion()))
+            return Set.of(ResultadoCierre.REVOCACION_ASIGNACION);
         return reportable(v) && v.getFechaRegistroInicio() != null
                 && !v.getFechaInicioConvivencia().isAfter(java.time.LocalDate.now(TiemposVinculacion.PANAMA))
                 ? Set.of(ResultadoCierre.ADOPCION_FORMALIZADA) : Set.of();
+    }
+    private boolean enAcompanamiento(Vinculacion v) {
+        return v.getEstado() == Vinculacion.Estado.RESPUESTA_ACEPTADA && v.isReservaVigente()
+                && v.getFechaRespuesta() != null && v.getFechaRegistroAutorizacion() == null
+                && v.getFechaInicioConvivencia() == null && interrupcion(v) == null;
+    }
+
+    private List<IncidenciaAsignacion> incidencias(Vinculacion v) {
+        return incidenciasAsignacion == null ? List.of() : incidenciasAsignacion.findByVinculacionIdOrderByIdDesc(v.getId());
+    }
+
+    private IncidenciaAsignacion bloqueante(List<IncidenciaAsignacion> incidencias) {
+        return incidencias.stream().filter(i -> !Boolean.FALSE.equals(i.getProcedeRevocacion())).findFirst().orElse(null);
+    }
+
+    private Map<String, Object> datosIncidencia(IncidenciaAsignacion i) {
+        var r = new LinkedHashMap<String, Object>();
+        r.put("id", i.getId());
+        r.put("motivo", i.getMotivo());
+        r.put("justificacion", i.getJustificacion());
+        r.put("registradoPor", i.getRegistradoPor());
+        r.put("fechaRegistro", fecha(i.getFechaRegistro()));
+        r.put("procedeRevocacion", i.getProcedeRevocacion());
+        r.put("fundamentoRevision", i.getFundamentoRevision());
+        r.put("revisadoPor", i.getRevisadoPor());
+        r.put("fechaRevision", fecha(i.getFechaRevision()));
+        return r;
+    }
+
+    @Transactional
+    public Map<String, Object> registrarIncidencia(Long id, String rol, String actor, IncidenciaAsignacion.Motivo motivo,
+                                                   String justificacion) {
+        if (!"TRABAJADOR_SOCIAL".equals(rol))
+            throw new RolNoAutorizadoException("Solo Trabajo Social puede registrar incidencias de asignación");
+        var v = repo.bloquear(id).orElseThrow(() -> new IllegalArgumentException("La vinculación no está disponible"));
+        if (!autorizado(v, rol, actor)) throw new RolNoAutorizadoException("No tienes asignada esta vinculación");
+        if (!enAcompanamiento(v) || bloqueante(incidencias(v)) != null)
+            throw new IllegalStateException("La etapa o una incidencia vigente impiden un nuevo registro");
+        if (motivo == null) throw new IllegalArgumentException("Selecciona el motivo de la incidencia");
+        incidenciasAsignacion.saveAndFlush(new IncidenciaAsignacion(v, motivo,
+                texto(justificacion, 10, 2000, "Fundamenta la incidencia en 10 a 2000 caracteres"), actor));
+        auditar(v, actor, "INCIDENCIA_ASIGNACION_REGISTRADA", "Trabajo Social registró una incidencia de asignación pendiente de revisión.");
+        return detalle(id, rol, actor);
+    }
+
+    @Transactional
+    public Map<String, Object> revisarIncidencia(Long id, Long incidenciaId, String rol, String actor,
+                                                boolean procede, String fundamento) {
+        exigirComite(rol);
+        var v = repo.bloquear(id).orElseThrow(() -> new IllegalArgumentException("La vinculación no está disponible"));
+        var i = bloqueante(incidencias(v));
+        if (!enAcompanamiento(v) || i == null || !i.getId().equals(incidenciaId) || i.getFechaRevision() != null)
+            throw new IllegalStateException("La incidencia ya no está pendiente de revisión");
+        i.revisar(procede, texto(fundamento, 10, 2000, "Fundamenta la revisión en 10 a 2000 caracteres"), actor);
+        auditar(v, actor, "INCIDENCIA_ASIGNACION_REVISADA", procede
+                ? "El Comité confirmó que procede la revocación. Los expedientes conservan sus reservas."
+                : "El Comité determinó que la revocación no procede. La vinculación puede continuar.");
+        return detalle(id, rol, actor);
     }
     @Transactional
     public Map<String,Object> revisarDisponibilidad(Long id,String rol,String actor,String expediente,String justificacion){

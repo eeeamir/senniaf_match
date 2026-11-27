@@ -32,7 +32,8 @@ final class TiemposVinculacion {
                 dias(propuesta, pendiente ? hoy : fechaRespuesta, hoy),
                 "ACEPTADA".equals(respuesta) ? dias(fechaRespuesta, emision, hoy) : null,
                 dias(emision, inicio, hoy), dias(inicio, finConvivencia, hoy), inicio,
-                DIAS_REFERENCIA_ACOGIMIENTO, interrumpida, cerrada);
+                DIAS_REFERENCIA_ACOGIMIENTO, interrumpida,
+                cerrada && vinculacion.getResultadoCierre() != Vinculacion.ResultadoCierre.REVOCACION_ASIGNACION);
     }
 
     static LocalDate fechaCivil(LocalDateTime fecha) {

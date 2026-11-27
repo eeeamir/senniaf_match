@@ -22,7 +22,7 @@ public class Vinculacion {
     public String getReferenciaCierre(){return referenciaCierre;} public void setReferenciaCierre(String v){referenciaCierre=v;}
     @Column(length=200) private String autoridadCierre;
     public String getAutoridadCierre(){return autoridadCierre;} public void setAutoridadCierre(String v){autoridadCierre=v;}
-    public enum ResultadoCierre { ADOPCION_FORMALIZADA, INTERRUPCION_CONVIVENCIA, CIERRE_DOCUMENTADO }
+    public enum ResultadoCierre { ADOPCION_FORMALIZADA, INTERRUPCION_CONVIVENCIA, CIERRE_DOCUMENTADO, REVOCACION_ASIGNACION }
     @Enumerated(EnumType.STRING)
     @Column(length = 32)
     private ResultadoCierre resultadoCierre;

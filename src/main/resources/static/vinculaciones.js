@@ -3,7 +3,7 @@ const Vinculaciones = {
   estados: {
     RECHAZADA_POR_FAMILIA: 'Propuesta rechazada por la familia',
     CERRADA: 'Vinculación cerrada',
-    PENDIENTE_RESPUESTA: 'Pendiente de respuesta familiar',
+    PENDIENTE_RESPUESTA: 'Propuesta pendiente de respuesta',
     RESPUESTA_ACEPTADA: 'Propuesta aceptada por la familia',
     RESPUESTA_RECHAZADA_PENDIENTE_CIERRE: 'Respuesta rechazada — pendiente de cierre institucional'
   },
@@ -21,25 +21,38 @@ const Vinculaciones = {
   resultadosCierre: {
     ADOPCION_FORMALIZADA: ['Adopción formalizada', 'Vinculación finalizada satisfactoriamente.', 'exito', 'comprobar'],
     INTERRUPCION_CONVIVENCIA: ['Cierre por interrupción', 'La convivencia preadoptiva no continuó.', 'aviso', 'advertencia'],
-    CIERRE_DOCUMENTADO: ['Cierre institucional documentado', 'La vinculación concluyó por una actuación institucional documentada.', '', 'informacion']
+    REVOCACION_ASIGNACION: ['Asignación revocada', 'La asignación concluyó antes del inicio de la convivencia.', 'error', 'cerrar'],
+    CIERRE_DOCUMENTADO: ['Vinculación cerrada', 'Antecedente de cierre institucional.', '', 'informacion']
   },
   fundamentosCierre: {
     ADOPCION_FORMALIZADA: [
-      ['Formalización confirmada', 'Se registra el cierre de la vinculación tras confirmarse la formalización de la adopción por la autoridad competente.'],
-      ['Culminación del proceso', 'Se confirma la culminación del proceso de adopción conforme a la actuación de la autoridad competente.']
+      ['Formalización confirmada', 'Se registra el cierre de la vinculación tras confirmarse la formalización de la adopción por la autoridad judicial competente.'],
+      ['Culminación del proceso', 'Se confirma la culminación del proceso de adopción conforme a la actuación de la autoridad judicial competente.']
     ],
     INTERRUPCION_CONVIVENCIA: [
       ['Interrupción revisada', 'Se registra el cierre de la vinculación tras la revisión institucional de la interrupción de la convivencia preadoptiva.'],
       ['Protección del niño', 'Se registra el cierre conforme a la actuación institucional adoptada para salvaguardar el bienestar y los derechos del niño.'],
       ['Imposibilidad de continuar', 'Tras la revisión de las circunstancias documentadas, se registra el cierre debido a la imposibilidad de continuar la vinculación.']
     ],
-    CIERRE_DOCUMENTADO: [['Actuación confirmada', 'Se registra el cierre conforme a la actuación institucional documentada.']]
+  },
+  motivosAsignacion: {
+    DESISTIMIENTO_FAMILIA: ['Desistimiento de la asignación por parte de la familia',
+      'La familia manifestó su decisión de no continuar con la asignación. Se remite la situación al Comité para su revisión.'],
+    RECHAZO_NINO: ['Rechazo de la asignación por parte del niño, niña o adolescente',
+      'Durante el proceso de acompañamiento, el niño, niña o adolescente manifestó su rechazo a continuar con la asignación. Se remite la situación al Comité para su revisión.'],
+    OTRO: ['Otro motivo', '']
+  },
+  fundamentosRevocacion: {
+    DESISTIMIENTO_FAMILIA: ['Desistimiento familiar',
+      'Se registra la revocación de la asignación tras confirmarse el desistimiento de la familia y realizarse la revisión institucional correspondiente.'],
+    RECHAZO_NINO: ['Rechazo de la asignación',
+      'Se registra la revocación de la asignación tras la revisión institucional del rechazo manifestado por el niño, niña o adolescente.']
   },
   estado(v, familiar = false) {
     const rechazado = ['RECHAZADA_POR_FAMILIA', 'RESPUESTA_RECHAZADA_PENDIENTE_CIERRE']
       .includes(v.estado);
     let icono = 'comprobar';
-    let clase = v.estado === 'RESPUESTA_ACEPTADA' ? 'vinculacion-vigente' : '';
+    let clase = v.estado === 'RESPUESTA_ACEPTADA' ? 'vinculacion-positiva' : '';
     if (v.estado === 'PENDIENTE_RESPUESTA') {
       icono = 'reloj';
       clase = 'vinculacion-pendiente';
@@ -50,7 +63,8 @@ const Vinculaciones = {
     const resultado = this.resultadosCierre[v.resultadoCierre];
     if (resultado) {
       icono = resultado[3];
-      clase = resultado[2] === 'exito' ? 'vinculacion-positiva' : resultado[2] === 'aviso' ? 'vinculacion-pendiente' : 'retirado';
+      clase = resultado[2] === 'exito' ? 'vinculacion-positiva' : resultado[2] === 'aviso' ? 'vinculacion-interrumpida'
+        : resultado[2] === 'error' ? 'vinculacion-negativa' : 'retirado';
     }
     const etiqueta = resultado ? resultado[0] : familiar && v.estado === 'RESPUESTA_ACEPTADA'
       ? 'Propuesta aceptada' : this.estados[v.estado] || v.estado;
@@ -208,6 +222,8 @@ const Vinculaciones = {
       accion =
         'No hay acciones pendientes de tu parte en esta vinculación. La disponibilidad requiere revisión institucional independiente.';
     }
+    if (v.resultadoCierre === 'REVOCACION_ASIGNACION')
+      accion = 'El equipo institucional te orientará sobre la revisión de disponibilidad.';
     const titulos = [
       'Propuesta del Comité',
       'Respuesta familiar',
@@ -522,6 +538,7 @@ const Vinculaciones = {
     const enlaceNino = `perfiles.html?caso=${encodeURIComponent(v.expedienteInfantil)}&${contexto}`;
     const enlaceFamilia = `perfiles.html?familia=${encodeURIComponent(v.expedienteFamiliar)}&${contexto}`;
     const mostrarIncidencias = sesion.rol !== 'PSICOLOGO';
+    const panelAsignacion = mostrarIncidencias ? this.panelIncidenciasAsignacion(v) : '';
     const pestañas = [['proceso','solicitudes','Proceso'], ['reportes','informe','Reportes profesionales'],
       ...(mostrarIncidencias ? [['incidencias','advertencia','Incidencias']] : []), ['historial','reloj','Historial de cambios']];
     const panelActivo=c.querySelector('[data-seguimiento][aria-selected="true"]')?.dataset.seguimiento||'proceso';
@@ -539,7 +556,8 @@ const Vinculaciones = {
       </div>
       <div class="vinculacion-panel" role="tabpanel" id="seguimiento-reportes" aria-labelledby="tab-seguimiento-reportes" hidden><p role="status">Cargando seguimientos profesionales…</p></div>
       ${mostrarIncidencias ? `<div class="vinculacion-panel" role="tabpanel" id="seguimiento-incidencias" aria-labelledby="tab-seguimiento-incidencias" hidden>
-        ${this.panelInterrupcion(v)||`<section class="tarjeta vinculacion-vacio"><span class="vinculacion-emblema durazno">${Profesionales.icono('advertencia')}</span><h2>Sin incidencias registradas</h2><p>No hay una interrupción de convivencia registrada en esta vinculación.</p></section>`}
+         ${panelAsignacion}
+        ${this.panelInterrupcion(v)|| (panelAsignacion ? '' : `<section class="tarjeta vinculacion-vacio"><span class="vinculacion-emblema durazno">${Profesionales.icono('advertencia')}</span><h2>Sin incidencias registradas</h2><p>No hay una interrupción de convivencia registrada en esta vinculación.</p></section>`)}
       </div>` : ''}
       <div class="vinculacion-panel" role="tabpanel" id="seguimiento-historial" aria-labelledby="tab-seguimiento-historial" hidden>${this.historialConDecision(v)}</div></div>`;
     c.querySelector('.hero').insertAdjacentHTML('beforeend',`<div class="vinculacion-estado-hero">${this.estado(v)}</div>`);
@@ -567,6 +585,11 @@ const Vinculaciones = {
       alConfirmar:justificacion=>this.api(`/api/vinculaciones/${v.id}/disponibilidad`,{method:'POST',body:JSON.stringify({expediente:b.dataset.disponibilidad,justificacion})}),
       alGuardar:async datos=>{await this.detalle(c,v.id,sesion,datos);c.insertAdjacentHTML('afterbegin','<p class="mensaje exito" role="status">La revisión de este expediente quedó registrada.</p>');}
     }));
+    c.querySelector('[data-incidencia-asignacion]')?.addEventListener('click',()=>this.registrarInterrupcion(c,v,sesion,true));
+    c.querySelector('[data-revisar-incidencia-asignacion]')?.addEventListener('click',evento=>{
+      const incidencia=v.incidenciasAsignacion.find(i=>String(i.id)===evento.currentTarget.dataset.revisarIncidenciaAsignacion);
+      if(incidencia) this.revisarIncidenciaAsignacion(c,v,sesion,incidencia);
+    });
     c.querySelector('[data-interrupcion]')?.addEventListener('click',()=>this.registrarInterrupcion(c,v,sesion));
     c.querySelector('[data-revisar-interrupcion]')?.addEventListener('click',()=>Profesionales.justificar({
       titulo:'Revisar interrupción de convivencia',contexto:v.codigo,
@@ -747,8 +770,10 @@ const Vinculaciones = {
     }[estado] || 'Sin solicitud de reincorporación';
   },
   panelCierre(v) {
-    if (!v.cierre && !v.puedeCerrar) return '';
+    if (!v.cierre && !v.estadoCierre && !v.puedeCerrar) return '';
     const x = v.cierre;
+    const estadoCierre = {CURSO:'Vinculación en curso', REVISION:'Pendiente de revisión',
+      CIERRE:'Pendiente de cierre', REGISTRADO:'Cierre registrado'}[v.estadoCierre];
     const resultado = this.resultadosCierre[v.resultadoCierre];
     const adopcion = v.resultadoCierre === 'ADOPCION_FORMALIZADA';
     const estados = {
@@ -758,7 +783,7 @@ const Vinculaciones = {
       ASIGNADO: ['Con otra asignación vigente', 'No participa en nuevas propuestas mientras conserve esa asignación.', 'vinculacion']
     };
     return `<section class="tarjeta vinculacion-cierre"><h2>${Profesionales.icono('informe')}Cierre institucional</h2>
-      <div class="vinculacion-cierre-resumen"><span class="chip retirado">${Profesionales.icono(x ? 'informacion' : 'reloj')}${x ? 'Cierre registrado' : 'Pendiente de cierre'}</span>
+      <div class="vinculacion-cierre-resumen"><span class="chip retirado">${Profesionales.icono(x ? 'informacion' : 'reloj')}${estadoCierre || (x ? 'Cierre registrado' : 'Vinculación en curso')}</span>
       ${resultado ? `<div class="mensaje ${resultado[2]}">${Profesionales.icono(resultado[3])}<div><strong>${resultado[0]}</strong><br>${resultado[1]}</div></div>` : ''}
       ${x ? `<dl class="detalle-datos"><div><dt>Fecha del cierre</dt><dd>${limpiarHtml(this.fechaCivil(x.fecha))}</dd></div><div><dt>Responsable del registro</dt><dd>${limpiarHtml(x.registradoPor)}</dd></div><div><dt>Registro</dt><dd>${limpiarHtml(this.fechaHora(x.registradoEl))}</dd></div>${x.referencia ? `<div><dt>Referencia institucional</dt><dd>${limpiarHtml(x.referencia)}</dd></div>` : ''}${x.autoridad ? `<div><dt>Autoridad registrada</dt><dd>${limpiarHtml(x.autoridad)}</dd></div>` : ''}</dl><p class="pro-texto-registrado">${limpiarHtml(x.motivo)}</p>` : '<p>El Comité registra un cierre respaldado por la actuación de la autoridad competente.</p>'}</div>
       ${x ? `<section class="vinculacion-disponibilidad"><h3>Estado de los expedientes</h3><div class="vinculacion-expedientes">${[['NINO','Expediente infantil',x.ninoLiberado,x.estadoInfantil,v.expedienteInfantil],['FAMILIA','Expediente familiar',x.familiaLiberada,x.estadoFamiliar,v.expedienteFamiliar]].map(([k,n,revisado,estado,codigo]) => {
@@ -777,16 +802,17 @@ const Vinculaciones = {
   registrarCierre(c,v,sesion){
     if(document.querySelector('[data-dialogo-cierre]'))return;
     const d=document.createElement('dialog');d.className='pro-dialogo';d.dataset.dialogoCierre='';d.setAttribute('aria-labelledby','tituloCierre');
-    const opciones = ['ADOPCION_FORMALIZADA', 'INTERRUPCION_CONVIVENCIA', 'CIERRE_DOCUMENTADO'];
+    const opciones = v.resultadosCierre || [];
     d.innerHTML=`<h2 id="tituloCierre">${Profesionales.icono('informe')}Registrar cierre institucional</h2>
       <p>${limpiarHtml(v.codigo)} · ${limpiarHtml(v.expedienteInfantil)} · ${limpiarHtml(v.expedienteFamiliar)}</p>
       <form class="pro-interrupcion-form" novalidate><fieldset class="pro-motivos"><legend>Resultado de la vinculación *</legend>
-      ${opciones.filter(k => k !== 'CIERRE_DOCUMENTADO' || v.resultadosCierre.includes(k)).map(k => `
-        <label class="pro-motivo"><input type="radio" name="resultado" value="${k}" required ${v.resultadosCierre.includes(k) ? '' : 'disabled'}>
+      ${opciones.map(k => `
+        <label class="pro-motivo"><input type="radio" name="resultado" value="${k}" required>
         <span>${k === 'INTERRUPCION_CONVIVENCIA' ? 'Cierre por interrupción de convivencia' : this.resultadosCierre[k][0]}</span></label>`).join('')}</fieldset>
       <label>Fundamento del cierre *<textarea name="motivo" rows="4" minlength="10" maxlength="2000" required></textarea></label>
       <p data-efecto hidden></p>
-      <label class="pro-confirmacion-check"><input type="checkbox" name="confirmacionAutoridad" required><span>Confirmo que este cierre cuenta con el respaldo de la autoridad competente.</span></label>
+      <p class="mensaje aviso" data-indicadores-adopcion hidden>Existen indicadores de seguimiento de convivencia pendientes. Verifica los antecedentes y la actuación judicial correspondiente antes de registrar el cierre.</p>
+      <label class="pro-confirmacion-check"><input type="checkbox" name="confirmacionAutoridad" required><span data-confirmacion-cierre>Confirmo que este cierre cuenta con el respaldo de la autoridad competente.</span></label>
       <p data-error class="mensaje error" role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="submit" class="boton">Registrar cierre</button></div></form>`;
     document.body.append(d);
     let guardando=false;
@@ -794,19 +820,29 @@ const Vinculaciones = {
     CamposFormulario.iniciar(form);
     const sugerir=Profesionales.sugerenciasDecision(campo);
     form.querySelectorAll('[name=resultado]').forEach(control=>control.addEventListener('change',()=>{
-      sugerir([...this.fundamentosCierre[control.value],['Otro motivo','']]);
+      const revocacion = this.fundamentosRevocacion[v.incidenciasAsignacion?.find(i=>i.procedeRevocacion)?.motivo];
+      const fundamentos = control.value==='REVOCACION_ASIGNACION' ? (revocacion ? [revocacion] : []) : this.fundamentosCierre[control.value];
+      sugerir([...fundamentos,['Otro motivo','']]);
+      const adopcion = control.value==='ADOPCION_FORMALIZADA';
+      d.querySelector('[data-indicadores-adopcion]').hidden = !adopcion || !v.indicadoresAdopcionPendientes;
+      form.elements.confirmacionAutoridad.checked = false;
+      d.querySelector('[data-confirmacion-cierre]').textContent = adopcion
+        ? 'Confirmo que la adopción ya fue formalizada por la autoridad judicial competente.'
+        : 'Confirmo que este cierre cuenta con el respaldo de la autoridad competente.';
       const efecto=d.querySelector('[data-efecto]');
       efecto.hidden=false;
       efecto.className='mensaje '+(this.resultadosCierre[control.value][2]||'aviso');
       efecto.textContent=control.value==='ADOPCION_FORMALIZADA'
         ? 'El expediente infantil quedará retirado definitivamente. La familia podrá solicitar su reincorporación.'
-        : 'Los expedientes conservarán sus reservas hasta las revisiones correspondientes.';
+        : control.value==='REVOCACION_ASIGNACION'
+          ? 'La asignación finalizará. Los expedientes conservarán sus reservas hasta completar las revisiones de disponibilidad correspondientes.'
+          : 'Los expedientes conservarán sus reservas hasta las revisiones correspondientes.';
     }));
     d.onclose=()=>d.remove();
     d.addEventListener('cancel',e=>{if(guardando)e.preventDefault();});
     d.querySelector('[data-cancelar]').onclick=()=>{if(!guardando)d.close();};
     form.onsubmit=async e=>{e.preventDefault();if(guardando)return;
-      if(!form.elements.resultado.value || campo.value.trim().length<10 || !form.elements.confirmacionAutoridad.checked) {
+      if(!form.querySelector('[name=resultado]:checked') || campo.value.trim().length<10 || !form.elements.confirmacionAutoridad.checked) {
         d.querySelector('[data-error]').textContent='Selecciona el resultado, escribe un fundamento de al menos 10 caracteres y confirma el respaldo institucional.';return;
       }
       guardando=true;form.querySelectorAll('button').forEach(b=>b.disabled=true);
@@ -891,22 +927,76 @@ const Vinculaciones = {
       ${v.puedeReportarInterrupcion?`<button class="boton secundario" data-interrupcion>${Profesionales.icono('advertencia')}Registrar interrupción de convivencia</button>`:''}
       ${v.puedeRevisarInterrupcion?`<button class="boton" data-revisar-interrupcion>${Profesionales.icono('solicitudes')}Registrar revisión</button>`:''}</section>`;
   },
-  registrarInterrupcion(c,v,sesion){
+  panelIncidenciasAsignacion(v) {
+    const registros = v.incidenciasAsignacion || [];
+    if (!v.puedeReportarIncidencia && !registros.length && !(v.estado === 'RESPUESTA_ACEPTADA' && !v.autorizacionPreadoptiva)) return '';
+    return `<section class="tarjeta"><h2>${Profesionales.icono('advertencia')}Incidencias de asignación</h2>
+      ${registros.length ? registros.map(i=>`<article class="pro-informe">
+        <p><strong>${i.fechaRevision ? 'Revisión registrada' : 'Pendiente de revisión'}</strong></p>
+        <h3>${limpiarHtml(this.motivosAsignacion[i.motivo]?.[0] || i.motivo)}</h3>
+        <p class="pro-texto-registrado">${limpiarHtml(i.justificacion)}</p>
+        <p>${Profesionales.icono('persona')}${limpiarHtml(i.registradoPor)} · ${limpiarHtml(this.fechaHora(i.fechaRegistro))}</p>
+        ${i.fechaRevision ? `<h4>${i.procedeRevocacion ? 'Procede la revocación' : 'No procede la revocación'}</h4>
+          <p class="pro-texto-registrado">${limpiarHtml(i.fundamentoRevision)}</p>
+          <p>${limpiarHtml(i.revisadoPor)} · ${limpiarHtml(this.fechaHora(i.fechaRevision))}</p>` : ''}
+        ${v.puedeRevisarIncidencia && !i.fechaRevision ? `<button class="boton" type="button" data-revisar-incidencia-asignacion="${Number(i.id)}">
+          ${Profesionales.icono('solicitudes')}Registrar revisión</button>` : ''}</article>`).join('')
+        : '<p>No hay incidencias de asignación registradas en esta vinculación.</p>'}
+      ${v.puedeReportarIncidencia ? `<button type="button" class="boton secundario" data-incidencia-asignacion>
+        ${Profesionales.icono('advertencia')}Registrar incidencia de asignación</button>` : ''}</section>`;
+  },
+  revisarIncidenciaAsignacion(c,v,sesion,i) {
+    const compatible = {
+      DESISTIMIENTO_FAMILIA: ['CONFIRMADA','Desistimiento familiar confirmado','Tras revisar la información presentada, se confirma el desistimiento de la familia y la procedencia de la revocación de la asignación.'],
+      RECHAZO_NINO: ['CONFIRMADA','Rechazo de la asignación confirmado','Tras revisar las circunstancias documentadas, se confirma el rechazo de la asignación por parte del niño, niña o adolescente y la procedencia de su revocación.']
+    }[i.motivo];
+    Profesionales.justificar({
+      titulo: 'Revisar incidencia de asignación', contexto:v.codigo, instruccion:'Resultado de la revisión',
+      incluirMotivo:false, maximo:2000, ayuda:'La justificación es editable. Si la opción no ofrece una sugerencia, escribe el fundamento de la revisión.',
+      opciones: [...(compatible ? [compatible] : []), ['OTRO','Procede la revocación (otro motivo)',''],
+        ['NO_PROCEDE','No procede la revocación','']],
+      confirmacion:'La revisión quedará registrada. Esta actuación no libera los expedientes.',
+      alConfirmar:(fundamento,datos)=>this.api(`/api/vinculaciones/${v.id}/incidencias-asignacion/${i.id}/revision`,
+        {method:'POST',body:JSON.stringify({fundamento,procede:datos.categoria!=='NO_PROCEDE'})}),
+      alGuardar:async datos=>{await this.detalle(c,v.id,sesion,datos);
+        c.insertAdjacentHTML('afterbegin','<p class="mensaje exito" role="status">La revisión quedó registrada.</p>');}
+    });
+  },
+  registrarInterrupcion(c,v,sesion,asignacion=false){
+    const titulo = asignacion ? 'Registrar incidencia de asignación' : 'Registrar interrupción de la convivencia';
     const d=document.createElement('dialog');d.className='pro-dialogo';d.setAttribute('aria-labelledby','tituloInterrupcion');
-    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('advertencia')}</span><h2 id="tituloInterrupcion">Registrar interrupción de la convivencia</h2></div>
-      <p>Deja constancia de lo ocurrido y de las circunstancias que deben considerarse durante la revisión del Comité.</p>
-      <form class="pro-interrupcion-form"><label>Motivo de la interrupción<select name="motivo" required><option value="">Selecciona el motivo que mejor describa la situación</option>${this.motivosInterrupcion.map(([k,t])=>`<option value="${k}">${t}</option>`).join('')}</select></label>
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('advertencia')}</span><h2 id="tituloInterrupcion">${titulo}</h2></div>
+      <p>${asignacion ? 'La incidencia será remitida al Comité para su revisión. Los expedientes conservarán sus reservas.'
+        : 'Deja constancia de lo ocurrido y de las circunstancias que deben considerarse durante la revisión del Comité.'}</p>
+      <form class="pro-interrupcion-form">${asignacion ? `<fieldset class="pro-motivos"><legend>Motivo de la incidencia</legend>
+        ${Object.entries(this.motivosAsignacion).map(([clave,[nombre]])=>`<label class="pro-motivo"><input type="radio" name="motivo" value="${clave}" required><span>${nombre}</span></label>`).join('')}
+        </fieldset>` : `<label>Motivo de la interrupción<select name="motivo" required><option value="">Selecciona el motivo que mejor describa la situación</option>${this.motivosInterrupcion.map(([k,t])=>`<option value="${k}">${t}</option>`).join('')}</select></label>`}
       <label>Descripción de lo ocurrido<textarea name="justificacion" minlength="10" maxlength="2000" rows="5" required placeholder="Explica lo sucedido y las circunstancias que deba considerar el Comité."></textarea></label>
       <p data-error role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button class="boton" type="submit">Revisar y confirmar</button></div></form>`;
     document.body.append(d);const form=d.querySelector('form');let guardando=false;
     d.onclose=()=>d.remove();d.addEventListener('cancel',e=>{if(guardando)e.preventDefault();});d.querySelector('[data-cancelar]').onclick=()=>d.close();
-    form.elements.motivo.onchange=()=>{form.elements.justificacion.value=this.motivosInterrupcion.find(([k])=>k===form.elements.motivo.value)?.[2]||'';form.elements.justificacion.dispatchEvent(new Event('input',{bubbles:true}));};
+    const campo=form.elements.justificacion;
+    if (asignacion) {
+      const controles=[...form.querySelectorAll('[name=motivo]')];
+      let elegido, plantilla='';
+      controles.forEach(control=>control.onchange=()=>{
+        const aplicar=()=>{
+          elegido=control;control.checked=true;
+          plantilla=this.motivosAsignacion[control.value][1];
+          campo.value=plantilla;campo.dispatchEvent(new Event('input',{bubbles:true}));
+        };
+        if(campo.value.trim() && campo.value!==plantilla){
+          control.checked=false;if(elegido)elegido.checked=true;
+          Profesionales.confirmar('¿Reemplazar el texto?','La sugerencia sustituirá la justificación escrita.',aplicar);
+        }else aplicar();
+      });
+    } else form.elements.motivo.onchange=()=>{campo.value=this.motivosInterrupcion.find(([k])=>k===form.elements.motivo.value)?.[2]||'';campo.dispatchEvent(new Event('input',{bubbles:true}));};
     CamposFormulario.iniciar(form);
     form.onsubmit=e=>{e.preventDefault();if(guardando || !Profesionales.validarFormulario(form))return;
       const datos=Object.fromEntries(new FormData(form));
-      Profesionales.confirmar('Confirmar interrupción','La información quedará disponible para revisión del Comité. Los expedientes conservarán su reserva.',async()=>{
+      Profesionales.confirmar(asignacion?'Confirmar incidencia de asignación':'Confirmar interrupción','La información quedará disponible para revisión del Comité. Los expedientes conservarán su reserva.',async()=>{
         if(guardando)return;guardando=true;form.querySelectorAll('button').forEach(b=>b.disabled=true);
-        try{const actualizado=await this.api(`/api/vinculaciones/${v.id}/interrupcion`,{method:'POST',body:JSON.stringify(datos)});Profesionales.marcarGuardado(form);d.close();await this.detalle(c,v.id,sesion,actualizado);c.insertAdjacentHTML('afterbegin','<p class="mensaje exito" role="status">La información se registró correctamente y quedó disponible para su revisión.</p>');}
+        try{const actualizado=await this.api(`/api/vinculaciones/${v.id}/${asignacion?'incidencias-asignacion':'interrupcion'}`,{method:'POST',body:JSON.stringify(datos)});Profesionales.marcarGuardado(form);d.close();await this.detalle(c,v.id,sesion,actualizado);c.insertAdjacentHTML('afterbegin','<p class="mensaje exito" role="status">La información se registró correctamente y quedó disponible para su revisión.</p>');}
         catch(error){d.querySelector('[data-error]').textContent=error.message;guardando=false;form.querySelectorAll('button').forEach(b=>b.disabled=false);}
       });
     };d.showModal();
