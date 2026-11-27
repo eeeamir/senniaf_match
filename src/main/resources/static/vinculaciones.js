@@ -603,10 +603,10 @@ const Vinculaciones = {
     let datos, visitas, cargando;
     const cargar = (mensaje = '', rol, id) => {
       if (cargando) return cargando;
-      const abiertos = new Set([...reportes.querySelectorAll('details[open][data-especialidad]')]
-        .map(detalle => detalle.dataset.especialidad));
+      const abiertos = new Set([...reportes.querySelectorAll('[data-desplegar-reporte][aria-expanded="true"]')]
+        .map(boton => boton.closest('[data-apartado]').dataset.apartado));
       if (rol) abiertos.add(rol);
-      const visitasAbiertas = reportes.querySelector('[data-panel-visitas]')?.open ?? true;
+      const visitasAbiertas = reportes.querySelector('[data-apartado=visitas] [data-desplegar-reporte]')?.getAttribute('aria-expanded') !== 'false';
       reportes.setAttribute('aria-busy', 'true');
       historial.querySelector('[data-estado-reportes]')?.remove();
       const ruta = `/api/vinculaciones/${vinculacion.id}`;
@@ -624,7 +624,7 @@ const Vinculaciones = {
             + (datos ? SeguimientosVinculacion.panel(datos, abiertos) : '') + aviso;
           historial.innerHTML = aviso + this.historialConDecision(vinculacion, datos?.historial, visitas?.historial);
           if (id && !reportes.hidden) reportes.querySelector(`[data-ver-seguimiento="${id}"]`)?.focus();
-          else if (mensaje && !reportes.hidden) reportes.querySelector('[data-panel-visitas] summary')?.focus();
+          else if (mensaje && !reportes.hidden) reportes.querySelector('[data-apartado=visitas] [data-desplegar-reporte]')?.focus();
         }).catch(error => {
           if (reportes.isConnected) {
             reportes.innerHTML = `<p class="mensaje error" role="alert">${limpiarHtml(error.message)}</p>
@@ -639,6 +639,12 @@ const Vinculaciones = {
     reportes.onclick = evento => {
       const boton = evento.target.closest('button');
       if (!boton) return;
+      if (boton.hasAttribute('data-desplegar-reporte')) {
+        const abrir = boton.getAttribute('aria-expanded') === 'false';
+        boton.setAttribute('aria-expanded', String(abrir));
+        document.getElementById(boton.getAttribute('aria-controls')).hidden = !abrir;
+        return;
+      }
       if (boton.hasAttribute('data-reintentar-reportes')) { cargar(); return; }
       if (cargando) return;
       const visita = visitas?.registros.find(item => String(item.id) === boton.dataset.editarVisita);

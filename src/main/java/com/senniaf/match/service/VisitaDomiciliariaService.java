@@ -95,6 +95,11 @@ public class VisitaDomiciliariaService {
         if (datos.version() != visita.getVersion()) {
             throw new IllegalStateException("La visita cambió mientras la editabas. Actualiza la consulta.");
         }
+        long duracionAnterior = Duration.between(visita.getInicio(), visita.getFin()).toMinutes();
+        long duracionActual = Duration.between(datos.inicio(), datos.fin()).toMinutes();
+        if (duracionAnterior != duracionActual) {
+            cambios.put("duracion", new Cambio(Long.toString(duracionAnterior), Long.toString(duracionActual)));
+        }
         String motivo = SeguimientoVinculacionService.texto(datos.motivoModificacion(), "El motivo de modificación", 1000, false);
         visita.actualizar(datos.fecha(), datos.inicio(), datos.fin());
         visitas.flush();

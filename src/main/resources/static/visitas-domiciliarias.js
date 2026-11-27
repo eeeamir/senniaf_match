@@ -5,6 +5,7 @@ const VisitasDomiciliarias = {
   },
 
   duracion(minutos) {
+    if (minutos === 60) return '1 hora';
     const horas = Math.floor(minutos / 60), resto = minutos % 60;
     return [horas ? horas + ' h' : '', resto || !horas ? resto + ' min' : ''].filter(Boolean).join(' ');
   },
@@ -28,36 +29,41 @@ const VisitasDomiciliarias = {
     const {registros, referencia, puedeRegistrar, estadoConvivencia, trabajoSocial} = datos;
     const vigente = estadoConvivencia === 'VIGENTE';
     const realizadas = registros.length;
-    const pendientes = Math.max(0, referencia - realizadas);
-    const filas = registros.map((visita, i) => `<li><div>
-      <strong>${Profesionales.icono('comprobar')}Visita ${i + 1}</strong>
-      <p class="ayuda">${Vinculaciones.fechaCivil(visita.fecha)} · ${this.hora(visita.inicio)} – ${this.hora(visita.fin)}</p>
-    </div><div class="visita-horario"><strong>${this.duracion(visita.minutos)}</strong>
-      ${trabajoSocial && vigente && visita.puedeEditar ? `<button type="button" class="enlace" data-editar-visita="${visita.id}" aria-label="Editar visita ${i + 1}">Editar</button>` : ''}</div></li>`);
+    const completadas = Math.min(realizadas, referencia);
+    const mostrarProgreso = vigente || realizadas > 0;
+    const porcentaje = Math.round(100 * completadas / referencia);
+    const filas = registros.map((visita, i) => `<li><span class="visita-icono">${Profesionales.icono('comprobar')}</span>
+      <div class="visita-resumen"><strong>Visita ${i + 1}</strong>
+        <p class="ayuda">${Vinculaciones.fechaCivil(visita.fecha)} · ${limpiarHtml(visita.inicio.slice(0, 5))} – ${limpiarHtml(visita.fin.slice(0, 5))}</p></div>
+      <div class="visita-horario"><strong>${this.duracion(visita.minutos)}</strong>
+        ${trabajoSocial && vigente && visita.puedeEditar ? `<button type="button" class="enlace reporte-editar" data-editar-visita="${visita.id}" aria-label="Editar visita ${i + 1}">${Profesionales.icono('editar')}Editar</button>` : ''}</div></li>`);
+    const previstas = filas.slice(0, referencia);
+    if (vigente) {
+      for (let i = completadas; i < referencia; i++) {
+        previstas.push(`<li class="visita-pendiente"><span class="visita-icono">${Profesionales.icono('reloj')}</span>
+          <strong>Visita ${i + 1}</strong><span class="visita-horario">Pendiente</span></li>`);
+      }
+    }
     const aviso = {
-      PENDIENTE: `<strong>Convivencia preadoptiva pendiente de inicio</strong>
-        <p>${trabajoSocial ? 'Podrá registrar las visitas domiciliarias una vez iniciada la convivencia preadoptiva.'
-          : 'Las visitas domiciliarias se registrarán una vez iniciada la convivencia preadoptiva.'}</p>`,
+      PENDIENTE: '<strong>Convivencia no iniciada</strong><p>Las visitas domiciliarias podrán registrarse cuando comience la convivencia.</p>',
       INTERRUMPIDA: '<p>La convivencia fue interrumpida. Puede consultar las visitas realizadas.</p>',
       FINALIZADA: '<p>La vinculación finalizó. Puede consultar las visitas realizadas.</p>',
       NO_DISPONIBLE: '<p>El estado actual de la vinculación permite únicamente consultar las visitas.</p>'
     }[estadoConvivencia];
-    return `<details class="detalle-grupo vinculacion-reporte visitas-domiciliarias ${pendientes === 0 ? 'completadas' : ''}" data-panel-visitas ${abierto ? 'open' : ''}>
-      <summary><span class="vinculacion-emblema">${Profesionales.icono('hogar')}</span>Visitas domiciliarias
-        <strong class="visita-horario">${realizadas} ${realizadas === 1 ? 'realizada' : 'realizadas'}</strong></summary>
-      <div class="vinculacion-reporte-contenido">
-        ${aviso ? `<div class="visita-estado">${aviso}</div>` : ''}
-        ${vigente || realizadas ? `<p class="visita-previstas"><strong>Visitas previstas</strong><span>${Math.min(realizadas, referencia)} de ${referencia}</span></p>
-          <progress max="${referencia}" value="${Math.min(realizadas, referencia)}" aria-label="Visitas previstas completadas"></progress>` : ''}
-        ${realizadas ? `<ol class="visitas-lista">${filas.slice(0, referencia).join('')}</ol>` : '<p class="ayuda">Todavía no se han registrado visitas domiciliarias.</p>'}
-        ${realizadas > referencia ? `<h3 class="visita-adicionales">Visitas adicionales</h3><ol class="visitas-lista" start="${referencia + 1}">${filas.slice(referencia).join('')}</ol>` : ''}
-        <div class="pro-fila-titulo">
-          ${pendientes === 0 ? '<p>Se completaron las tres visitas previstas.</p>'
-            : vigente ? `<p>${pendientes} ${pendientes === 1 ? 'visita prevista pendiente' : 'visitas previstas pendientes'}.</p>` : ''}
-          ${trabajoSocial && vigente && puedeRegistrar ? `<button type="button" class="boton" data-registrar-visita>${pendientes ? 'Registrar visita domiciliaria' : 'Registrar visita adicional'}</button>` : ''}
-        </div>
-      </div>
-    </details>`;
+    const cabecera = `<span class="vinculacion-emblema">${Profesionales.icono('hogar')}</span>
+      <span>Visitas domiciliarias${vigente ? '<small class="seguimiento-meta">Convivencia preadoptiva en curso</small>' : ''}</span>
+      ${mostrarProgreso ? `<strong class="visita-contador">${completadas} de ${referencia}</strong>` : ''}`;
+    const contenido = `${aviso ? `<div class="visita-estado">${aviso}</div>` : ''}
+      ${mostrarProgreso ? `<p class="visita-previstas"><strong>Visitas previstas</strong><span>${porcentaje} %</span></p>
+        <progress max="${referencia}" value="${completadas}" aria-label="Visitas previstas completadas"></progress>` : ''}
+      ${previstas.length ? `<ol class="visitas-lista">${previstas.join('')}</ol>` : ''}
+      ${realizadas > referencia ? `<h4 class="visita-adicionales">Visitas adicionales</h4>
+        <ol class="visitas-lista" start="${referencia + 1}">${filas.slice(referencia).join('')}</ol>
+        <p class="ayuda">Total de visitas realizadas: ${realizadas}</p>` : ''}`;
+    const accion = trabajoSocial && vigente && puedeRegistrar
+      ? `<button type="button" class="boton" data-registrar-visita>${Profesionales.icono('nuevo')}${completadas < referencia ? 'Registrar visita domiciliaria' : 'Registrar visita adicional'}</button>` : '';
+    return SeguimientosVinculacion.apartado('visitas', 'visitas-domiciliarias' + (completadas === referencia ? ' completadas' : ''),
+      abierto, cabecera, contenido, accion);
   },
 
   formulario(vinculacion, datos, visita, disparador, guardar) {
@@ -75,8 +81,7 @@ const VisitasDomiciliarias = {
       <form class="pro-interrupcion-form" novalidate>
         <p class="ayuda">Los campos marcados con * son obligatorios.</p>
         <div class="visita-campo"><label for="visita-fecha">Fecha de la visita *</label>
-          <input id="visita-fecha" name="fecha" type="date" min="${datos.fechaMinima}" max="${hoy}" aria-describedby="visita-fecha-legible visita-error-fecha" required autofocus>
-          <small class="ayuda" id="visita-fecha-legible"></small>
+          <input id="visita-fecha" name="fecha" type="date" min="${datos.fechaMinima}" max="${hoy}" lang="es-PA" aria-describedby="visita-error-fecha" required autofocus>
           <small id="visita-error-fecha" class="visita-error-campo" role="alert" hidden></small></div>
         <div class="visita-horas">
           <div class="visita-campo"><label for="visita-inicio">Hora de inicio *</label>
@@ -104,7 +109,6 @@ const VisitasDomiciliarias = {
     const output = form.querySelector('output');
     const actualizar = () => {
       const duracion = inicio.value && fin.value ? this.minutos(fin.value) - this.minutos(inicio.value) : 0;
-      dialogo.querySelector('#visita-fecha-legible').textContent = fecha.value ? Vinculaciones.fechaCivil(fecha.value) : '';
       output.textContent = duracion > 0 ? this.duracion(duracion) : '—';
     };
     const limpiarError = campo => {
@@ -127,7 +131,7 @@ const VisitasDomiciliarias = {
     actualizar();
 
     const claveRegistro = visita ? null : SeguimientosVinculacion.claveRegistro();
-    const alerta = form.querySelector('[role=alert]');
+    const alerta = form.querySelector('p[role=alert]');
     let enviando = false;
     const cerrar = () => {
       if (enviando) return;
@@ -197,8 +201,11 @@ const VisitasDomiciliarias = {
         <p>Horario · ${this.hora(inicio)} – ${this.hora(fin)}</p>
         <p>Duración · ${this.duracion(this.minutos(fin) - this.minutos(inicio))}</p></div>`;
     }
-    const etiqueta = {fecha: 'Fecha de la visita', inicio: 'Hora de inicio', fin: 'Hora de finalización'};
-    const valor = (campo, dato) => campo === 'fecha' ? Vinculaciones.fechaCivil(dato) : this.hora(dato);
+    const etiqueta = {fecha: 'Fecha de la visita', inicio: 'Hora de inicio', fin: 'Hora de finalización', duracion: 'Duración'};
+    const valor = (campo, dato) => {
+      if (campo === 'fecha') return Vinculaciones.fechaCivil(dato);
+      return campo === 'duracion' ? this.duracion(Number(dato)) : this.hora(dato);
+    };
     return SeguimientosVinculacion.detalleCambios(evento, campo => etiqueta[campo], valor);
   }
 };

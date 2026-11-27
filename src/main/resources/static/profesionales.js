@@ -23,6 +23,7 @@ const Profesionales = {
       psicologia:'M12 3v18 M12 5C7-1 3 5 5 8c-5 1-4 7 0 8-1 5 5 7 7 3 M12 5c5-6 9 0 7 3 5 1 4 7 0 8 1 5-5 7-7 3',
       escuela:'m2 9 10-5 10 5-10 5z M6 12v5c4 3 8 3 12 0v-5 M22 9v7',
       calendario:'M5 5h14v16H5z M8 2v6M16 2v6M5 10h14', flecha:'M4 12h16M15 7l5 5-5 5',
+      editar:'m4 16-1 5 5-1L20 8l-4-4L4 16m10-10 4 4',
       comprobar:'m5 12 4 4L19 6', cerrar:'M6 6l12 12M6 18l12-12', criterios:'M4 6h16v15H4z M9 6V3h6v3',
       informacion:'M12 11v6 M12 7h.01 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',
       credencial:'M4 5h16v16H4z M9 5V2h6v3 M10 11a2 2 0 1 0-4 0 2 2 0 0 0 4 0 M5 17c0-4 6-4 6 0 M14 10h3M14 14h3',

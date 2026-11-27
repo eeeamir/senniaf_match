@@ -197,7 +197,8 @@ public class SeguimientoVinculacionService {
         }
         Map<String, String> contenido = new LinkedHashMap<>();
         contenido.put("tipo", datos.tipo());
-        contenido.put("participantes", texto(datos.participantes(), "Los participantes", 500, true));
+        String participantes = texto(datos.participantes(), "Los participantes", 500, false);
+        if (participantes != null) contenido.put("participantes", participantes);
         contenido.put("adaptacion", texto(datos.adaptacion(), "La observación de adaptación", 2000, true));
         contenido.put("contexto", texto(datos.contexto(), "La segunda observación", 2000, true));
         contenido.put("dificultades", texto(datos.dificultades(), "Las dificultades identificadas", 2000, true));

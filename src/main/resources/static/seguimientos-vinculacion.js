@@ -2,40 +2,54 @@ const SeguimientosVinculacion = {
   especialidades: {
     TRABAJADOR_SOCIAL: {
       titulo: 'Seguimiento social', icono: 'informe', color: 'menta',
-      descripcion: 'Adaptación familiar, condiciones de cuidado y necesidades de acompañamiento.',
       tipos: {
         INTERRELACION: 'Encuentro de interrelación familiar', ENTREVISTA_FAMILIAR: 'Entrevista familiar',
         ORIENTACION_FAMILIAR: 'Orientación familiar', VISITA_DOMICILIARIA: 'Visita domiciliaria',
         TELEFONICO: 'Seguimiento telefónico', OTRO: 'Otro', ENCUENTRO: 'Encuentro de seguimiento'
       },
       campos: {
-        adaptacion: ['Adaptación y dinámica familiar', [
-          ['Rutinas familiares', 'Se observa una adaptación favorable a las rutinas y actividades del entorno familiar.'],
-          ['Adaptación gradual', 'El niño se encuentra en un proceso gradual de adaptación al entorno familiar.'],
-          ['Acompañamiento adicional', 'Se identifican dificultades de adaptación que requieren acompañamiento adicional.']
-        ]],
-        contexto: ['Condiciones de cuidado y entorno familiar', [
-          ['Cuidados adecuados', 'Se observan condiciones adecuadas de cuidado y atención a las necesidades del niño.'],
-          ['Orientación familiar', 'La familia requiere orientación adicional para atender determinadas necesidades del niño.'],
-          ['Información por ampliar', 'Se requiere ampliar la información para valorar las condiciones de cuidado.']
-        ]],
-        dificultades: ['Dificultades identificadas', [
-          ['Sin dificultades relevantes', 'Durante este seguimiento no se identificaron dificultades relevantes.'],
-          ['Nuevas rutinas', 'Se observan dificultades relacionadas con la adaptación a nuevas rutinas.'],
-          ['Comunicación familiar', 'Se identifican aspectos de la comunicación familiar que requieren fortalecimiento.'],
-          ['Organización de cuidados', 'Se identifican dificultades para coordinar la distribución de las tareas de cuidado.']
-        ]],
-        recomendaciones: ['Recomendaciones profesionales', [
-          ['Seguimiento periódico', 'Mantener el seguimiento periódico y observar la evolución de la adaptación familiar.'],
-          ['Orientar a la familia', 'Brindar orientación a la familia sobre las necesidades de acompañamiento identificadas.'],
-          ['Seguimiento adicional', 'Realizar un seguimiento adicional para valorar las dificultades observadas.'],
-          ['Acuerdos de cuidado', 'Acordar con la familia responsables para las tareas de cuidado y revisar su cumplimiento en el próximo encuentro.']
-        ]]
+        adaptacion: 'Adaptación y dinámica familiar', contexto: 'Condiciones de cuidado y entorno familiar',
+        dificultades: 'Dificultades identificadas', recomendaciones: 'Recomendaciones profesionales'
+      },
+      encuentros: {
+        adaptacion: ['¿Cómo fue la interacción entre el niño y la familia?',
+          ['Interacción favorable', 'El niño participó con interés en las actividades compartidas con la familia.'],
+          ['Acercamiento gradual', 'El niño se incorporó progresivamente a las actividades, respetándose su ritmo de acercamiento.'],
+          ['Interacción limitada', 'La participación del niño fue limitada durante el encuentro.']],
+        contexto: ['¿Cómo se está preparando la familia para atender las necesidades del niño?',
+          ['Preparación familiar', 'La familia manifestó disposición para organizar sus responsabilidades de cuidado y mantener la continuidad escolar del niño.'],
+          ['Necesita orientación', 'La familia expresó dudas sobre la organización de los cuidados y solicitó orientación profesional.'],
+          ['Red de apoyo', 'La familia identificó personas de confianza que podrían brindar apoyo durante la transición al hogar.']],
+        dificultades: ['¿Qué situaciones requieren atención para favorecer la integración familiar?',
+          ['Sin dificultades relevantes', 'Durante el encuentro no se identificaron dificultades sociales relevantes.'],
+          ['Reserva inicial', 'El niño mostró cierta reserva al iniciar el encuentro y participó con mayor confianza conforme avanzaron las actividades.'],
+          ['Inquietudes familiares', 'La familia manifestó inquietudes sobre la transición y las responsabilidades de cuidado.']],
+        recomendaciones: ['¿Qué acciones se recomiendan para favorecer la vinculación?',
+          ['Acercamiento gradual', 'Continuar los encuentros progresivos, respetando las preferencias y los tiempos del niño.'],
+          ['Orientación familiar', 'Orientar a la familia sobre las necesidades del niño y la preparación del entorno familiar.'],
+          ['Acuerdos de cuidado', 'Revisar con la familia los acuerdos de cuidado antes de iniciar la convivencia.']]
+      },
+      convivencia: {
+        adaptacion: ['¿Cómo se está integrando el niño a las actividades y rutinas del hogar?',
+          ['Rutinas familiares', 'El niño participa en las actividades cotidianas del hogar y se adapta favorablemente a las rutinas familiares.'],
+          ['Adaptación gradual', 'El niño se encuentra en un proceso gradual de integración a las rutinas del hogar.'],
+          ['Requiere acompañamiento', 'Se identificaron dificultades de adaptación que requieren acompañamiento adicional.']],
+        contexto: ['¿Cómo está atendiendo la familia las necesidades de cuidado, salud y educación del niño?',
+          ['Cuidados adecuados', 'La familia atiende las necesidades cotidianas de cuidado, salud y educación del niño.'],
+          ['Red de apoyo activa', 'La familia cuenta con personas de confianza que colaboran en las tareas de cuidado.'],
+          ['Necesita orientación', 'La familia necesita orientación para ajustar los cuidados a las necesidades del niño.']],
+        dificultades: ['¿Qué situaciones afectan la adaptación o el bienestar del niño durante la convivencia?',
+          ['Sin dificultades relevantes', 'Durante el seguimiento no se identificaron dificultades sociales relevantes.'],
+          ['Adaptación a nuevas rutinas', 'El niño aún requiere apoyo para familiarizarse con algunas rutinas del hogar.'],
+          ['Organización de cuidados', 'Se identificaron dificultades en la distribución de las responsabilidades de cuidado.']],
+        recomendaciones: ['¿Qué acciones pueden favorecer el bienestar del niño y su integración familiar?',
+          ['Seguimiento periódico', 'Mantener el seguimiento periódico de la adaptación al hogar.'],
+          ['Acuerdos de cuidado', 'Revisar con la familia la distribución de las tareas de cuidado y los apoyos disponibles.'],
+          ['Orientación adicional', 'Orientar a la familia sobre los ajustes cotidianos que pueden facilitar la integración del niño.']]
       }
     },
     PSICOLOGO: {
       titulo: 'Seguimiento psicológico', icono: 'psicologia', color: 'lavanda',
-      descripcion: 'Adaptación emocional, evolución del vínculo afectivo y acompañamiento psicológico.',
       tipos: {
         SESION_INDIVIDUAL: 'Sesión individual', SESION_FAMILIAR: 'Sesión familiar',
         INTERRELACION: 'Encuentro de interrelación familiar', ENTREVISTA_PSICOLOGICA: 'Entrevista psicológica',
@@ -44,38 +58,116 @@ const SeguimientosVinculacion = {
         OTRO: 'Otro', ENTREVISTA: 'Entrevista de seguimiento'
       },
       campos: {
-        adaptacion: ['Adaptación emocional', [
-          ['Regulación emocional', 'Se observa una evolución favorable en la expresión y regulación de las emociones.'],
-          ['Adaptación gradual', 'El niño continúa adaptándose emocionalmente a los cambios en su entorno.'],
-          ['Acompañamiento emocional', 'Se identifican dificultades emocionales que requieren acompañamiento psicológico.']
-        ]],
-        contexto: ['Evolución del vínculo afectivo', [
-          ['Fortalecimiento del vínculo', 'Se observa un fortalecimiento progresivo del vínculo afectivo con la familia.'],
-          ['Vínculo en desarrollo', 'El vínculo afectivo se encuentra en desarrollo y requiere observación continua.'],
-          ['Interacción afectiva', 'Se identifican dificultades en la interacción afectiva que requieren acompañamiento profesional.'],
-          ['Búsqueda de apoyo', 'Durante la interacción se observó que el niño buscó apoyo en figuras familiares ante situaciones nuevas.']
-        ]],
-        dificultades: ['Dificultades emocionales o conductuales identificadas', [
-          ['Sin dificultades relevantes', 'Durante esta sesión no se observaron dificultades emocionales relevantes.'],
-          ['Situaciones nuevas', 'Se observan manifestaciones de inseguridad ante situaciones nuevas.'],
-          ['Expresión emocional', 'Se identifican dificultades para comunicar y expresar emociones.']
-        ]],
-        recomendaciones: ['Recomendaciones profesionales', [
-          ['Continuidad del acompañamiento', 'Dar continuidad al acompañamiento psicológico y observar la evolución emocional.'],
-          ['Comunicación y escucha', 'Promover espacios de comunicación, escucha y expresión emocional en el entorno familiar.'],
-          ['Nueva valoración', 'Realizar un seguimiento adicional para ampliar la valoración de las dificultades observadas.'],
-          ['Transiciones', 'Acompañar las transiciones con rutinas previsibles y revisar la respuesta emocional en la próxima sesión.']
-        ]]
+        adaptacion: 'Adaptación emocional', contexto: 'Evolución del vínculo afectivo',
+        dificultades: 'Dificultades emocionales o conductuales identificadas', recomendaciones: 'Recomendaciones profesionales'
+      },
+      encuentros: {
+        adaptacion: ['¿Cómo responde emocionalmente el niño al proceso de vinculación?',
+          ['Expresión emocional', 'El niño expresó sus emociones y preferencias con espontaneidad durante las actividades compartidas.'],
+          ['Seguridad progresiva', 'El niño se mostró reservado al inicio y participó con mayor confianza conforme avanzó el encuentro.'],
+          ['Incertidumbre', 'El niño manifestó incertidumbre respecto a los próximos encuentros y posibles cambios en su entorno.']],
+        contexto: ['¿Cómo evoluciona la relación afectiva entre el niño y la familia?',
+          ['Confianza progresiva', 'Se observó un acercamiento gradual hacia la familia, que respetó los tiempos de participación del niño.'],
+          ['Interacción espontánea', 'El niño inició interacciones espontáneas con la familia durante las actividades compartidas.'],
+          ['Vínculo en desarrollo', 'La relación afectiva se encuentra en una etapa inicial y requiere continuidad de los encuentros.']],
+        dificultades: ['¿Qué preocupaciones o manifestaciones emocionales requieren acompañamiento?',
+          ['Sin dificultades relevantes', 'Durante la atención no se observaron dificultades emocionales o conductuales relevantes.'],
+          ['Temores ante cambios', 'El niño expresó preocupación por posibles cambios en sus rutinas y entorno habitual.'],
+          ['Expresión emocional limitada', 'El niño presentó dificultades para comunicar algunas de sus preocupaciones.']],
+        recomendaciones: ['¿Qué acompañamiento puede favorecer el bienestar emocional del niño y su vinculación?',
+          ['Preparación emocional', 'Brindar información anticipada sobre los próximos encuentros y favorecer espacios de expresión emocional.'],
+          ['Respetar sus tiempos', 'Continuar el acercamiento gradual respetando los límites y preferencias expresados por el niño.'],
+          ['Continuidad psicológica', 'Continuar el acompañamiento psicológico y observar la evolución emocional y afectiva.']]
+      },
+      convivencia: {
+        adaptacion: ['¿Cómo responde emocionalmente el niño a la convivencia y a los cambios cotidianos?',
+          ['Regulación emocional', 'El niño muestra mayor confianza para expresar sus emociones y solicitar apoyo ante dificultades.'],
+          ['Adaptación gradual', 'El niño continúa adaptándose emocionalmente a los cambios asociados con la convivencia familiar.'],
+          ['Acompañamiento emocional', 'Se identificaron manifestaciones de malestar relacionadas con los cambios cotidianos que requieren acompañamiento psicológico.']],
+        contexto: ['¿Cómo evoluciona la relación afectiva entre el niño y su familia?',
+          ['Fortalecimiento del vínculo', 'El niño se comunica con mayor confianza con la familia en las actividades cotidianas.'],
+          ['Búsqueda de apoyo', 'El niño busca apoyo en figuras familiares cuando necesita ayuda.'],
+          ['Vínculo en desarrollo', 'El vínculo afectivo continúa desarrollándose a través de las interacciones cotidianas.']],
+        dificultades: ['¿Qué necesidades emocionales o conductuales requieren atención durante la convivencia?',
+          ['Sin dificultades relevantes', 'Durante la atención no se observaron dificultades emocionales o conductuales relevantes.'],
+          ['Inseguridad ante cambios', 'El niño manifestó inseguridad ante cambios en las rutinas del hogar.'],
+          ['Expresión emocional limitada', 'Al niño le resulta difícil expresar algunas preocupaciones sobre la convivencia.']],
+        recomendaciones: ['¿Qué acompañamiento puede favorecer el bienestar emocional del niño dentro del entorno familiar?',
+          ['Comunicación y escucha', 'Promover espacios de conversación en los que el niño pueda expresar lo que siente.'],
+          ['Rutinas previsibles', 'Mantener rutinas previsibles y anticipar los cambios que afecten al niño.'],
+          ['Continuidad psicológica', 'Dar continuidad al acompañamiento psicológico y revisar la adaptación al hogar.']]
       }
     }
   },
 
-  etapas: {ENCUENTROS_PREVIOS: 'Encuentros previos', CONVIVENCIA_PREADOPTIVA: 'Convivencia preadoptiva'},
+  etapas: {ENCUENTROS_PREVIOS: 'Encuentros previos a la convivencia', CONVIVENCIA_PREADOPTIVA: 'Convivencia preadoptiva'},
+
+  orientaciones(rol, etapa, tipo) {
+    const especialidad = this.especialidades[rol];
+    const convivencia = etapa === 'CONVIVENCIA_PREADOPTIVA';
+    const base = convivencia ? especialidad.convivencia : especialidad.encuentros;
+    const social = rol === 'TRABAJADOR_SOCIAL';
+    const relacion = convivencia ? 'las rutinas del hogar' : 'los próximos encuentros';
+    const familia = ['TELEFONICO', 'ENTREVISTA_FAMILIAR', 'ORIENTACION_FAMILIAR'].includes(tipo);
+    const individual = ['SESION_INDIVIDUAL', 'ENTREVISTA_PSICOLOGICA', 'ENTREVISTA'].includes(tipo);
+    let variaciones = {};
+    if (familia) {
+      const medio = tipo === 'TELEFONICO' ? 'la llamada' : tipo === 'ORIENTACION_FAMILIAR' ? 'la orientación' : 'la entrevista';
+      variaciones = {
+        adaptacion: [`¿Qué comunicó la familia durante ${medio} sobre la adaptación del niño?`,
+          ['Adaptación referida', `La familia informó que el niño se siente progresivamente más cómodo con ${relacion}.`]],
+        contexto: [social ? `¿Qué comunicó la familia durante ${medio} sobre la organización de los cuidados?`
+          : `¿Qué comunicó la familia durante ${medio} sobre el vínculo afectivo?`,
+          social ? ['Organización de cuidados', convivencia ? 'La familia informó cómo distribuye los cuidados y quiénes brindan apoyo.'
+            : 'La familia informó cómo prevé organizar los cuidados y con quién podría contar.']
+            : ['Confianza referida', 'La familia informó que el niño se comunica con mayor confianza.']],
+        dificultades: [`¿Qué dificultades o preocupaciones se comunicaron durante ${medio}?`,
+          ['Sin dificultades reportadas', 'No se reportaron dificultades relevantes durante la atención.'],
+          ['Preocupaciones comunicadas', `La familia expresó inquietudes sobre ${relacion} y solicitó orientación.`]]
+      };
+      if (tipo === 'ORIENTACION_FAMILIAR') variaciones.recomendaciones = [
+        '¿Qué orientaciones o acuerdos conviene retomar con la familia?',
+        ['Revisar acuerdos', `Retomar los acuerdos sobre ${relacion} y revisar las dudas de la familia en la próxima atención.`],
+        ...base.recomendaciones.slice(1)];
+    } else if (individual) {
+      variaciones = {
+        adaptacion: [`¿Qué expresó el niño en la sesión sobre ${relacion}?`,
+          ['Expresión emocional', `El niño pudo expresar cómo se siente respecto a ${relacion} durante la sesión.`]],
+        contexto: ['¿Cómo describe el niño su relación con la familia durante la sesión?',
+          ['Confianza expresada', 'El niño expresó que se siente más cómodo al conversar con la familia.']],
+        dificultades: ['¿Qué preocupaciones expresó el niño durante la sesión?',
+          ['Sin dificultades expresadas', 'El niño no expresó preocupaciones relevantes durante la sesión.'],
+          ['Preocupación expresada', `El niño expresó inquietud por los cambios relacionados con ${relacion}.`]]
+      };
+    } else if (tipo === 'VISITA_DOMICILIARIA') {
+      variaciones = {
+        adaptacion: [`¿Qué pudo observarse durante la visita en relación con ${relacion}?`,
+          convivencia ? ['Participación en el hogar', 'Durante la visita, el niño participó en las actividades cotidianas del hogar.']
+            : ['Preparación observada', 'Durante la visita se conversó con la familia sobre la preparación de los próximos encuentros.']],
+        contexto: [social ? '¿Qué condiciones de cuidado se pudieron valorar durante la visita?'
+          : '¿Qué pudo observarse del vínculo afectivo durante la visita?',
+          social ? ['Condiciones del hogar', 'Durante la visita se identificaron espacios y recursos del hogar que pueden apoyar el cuidado del niño.']
+            : ['Interacción observada', 'Durante la visita se observó una interacción tranquila entre el niño y la familia.']],
+        dificultades: ['¿Qué situaciones observadas durante la visita requieren acompañamiento?',
+          ['Sin dificultades observadas', 'Durante la visita no se observaron dificultades relevantes.']]
+      };
+    } else if (tipo === 'OTRO') {
+      variaciones = {
+        adaptacion: [`¿Qué información se obtuvo en esta atención sobre ${relacion}?`],
+        contexto: ['¿Qué aspectos pudieron valorarse durante esta atención?'],
+        dificultades: ['¿Qué dificultades se observaron o se comunicaron durante la atención?']
+      };
+    }
+    return Object.fromEntries(Object.entries({...base, ...variaciones}).map(([campo, [pregunta, ...opciones]]) => [
+      campo, [pregunta, campo === 'recomendaciones' ? opciones
+        : [...opciones, ['No evaluado', 'Este aspecto no fue evaluado durante la presente atención.']]]
+    ]));
+  },
 
   etiqueta(rol, campo) {
     return {fechaAtencion: 'Fecha de atención', tipo: 'Tipo de seguimiento', etapa: 'Etapa',
       participantes: 'Participantes', proximoSeguimiento: 'Próximo seguimiento previsto'}[campo]
-      || this.especialidades[rol].campos[campo]?.[0] || campo;
+      || this.especialidades[rol].campos[campo] || campo;
   },
 
   valor(rol, campo, valor) {
@@ -86,28 +178,32 @@ const SeguimientosVinculacion = {
     return valor;
   },
 
+  apartado(id, clases, abierto, cabecera, contenido, accion = '') {
+    return `<section class="vinculacion-reporte ${clases}" data-apartado="${id}">
+      <h3 class="reporte-encabezado"><button type="button" class="reporte-desplegar" data-desplegar-reporte
+        aria-expanded="${abierto}" aria-controls="contenido-${id}">${cabecera}
+        <span class="reporte-chevron">${Profesionales.icono('flecha')}</span></button></h3>
+      ${accion ? `<div class="reporte-accion">${accion}</div>` : ''}
+      <div id="contenido-${id}" class="vinculacion-reporte-contenido" ${abierto ? '' : 'hidden'}>${contenido}</div>
+    </section>`;
+  },
+
   panel(datos, abiertos) {
     return `<div class="vinculacion-reportes">${Object.entries(this.especialidades).map(([rol, especialidad]) => {
       const consulta = datos.rolesConsulta.includes(rol);
       const registros = datos.registros.filter(registro => registro.rol === rol);
       const ultimo = registros[0];
-      const resumen = ultimo
-        ? 'Último seguimiento · ' + Vinculaciones.fechaCivil(ultimo.fechaAtencion)
+      const resumen = ultimo ? 'Último seguimiento: ' + Vinculaciones.fechaCivil(ultimo.fechaAtencion)
         : 'Sin seguimientos registrados';
-      const dias = ultimo ? Math.round((Date.parse(datos.hoy) - Date.parse(ultimo.fechaAtencion)) / 86400000) : null;
-      const tiempo = dias === 0 ? 'Hoy' : dias > 0 ? 'Hace ' + Vinculaciones.dias(dias) : '';
-      return `<details class="detalle-grupo vinculacion-reporte ${especialidad.color}" data-especialidad="${rol}" ${abiertos.has(rol) ? 'open' : ''}>
-        <summary><span class="vinculacion-emblema">${Profesionales.icono(especialidad.icono)}</span><span>${especialidad.titulo}${consulta ? `<small class="seguimiento-meta">${resumen}</small><small class="seguimiento-meta">${ultimo?.contenido.proximoSeguimiento
-          ? 'Próximo seguimiento previsto · ' + Vinculaciones.fechaCivil(ultimo.contenido.proximoSeguimiento) : 'Sin próxima fecha prevista'}</small>` : ''}</span>
-        ${tiempo ? `<strong class="seguimiento-tiempo">${tiempo}</strong>` : ''}</summary>
-
-        <div class="vinculacion-reporte-contenido">
-          <p>${especialidad.descripcion}</p>
-          ${consulta ? registros.map(registro => this.tarjeta(registro)).join('') || '<p>No hay seguimientos registrados en este apartado.</p>'
-              : '<p>La consulta está reservada a la especialidad correspondiente y al Comité.</p>'}
-          ${datos.rolRegistro === rol ? '<div class="pro-acciones"><button type="button" class="boton" data-registrar-seguimiento>Registrar seguimiento</button></div>' : ''}
-        </div>
-      </details>`;
+      const proximo = ultimo?.contenido.proximoSeguimiento;
+      const cabecera = `<span class="vinculacion-emblema">${Profesionales.icono(especialidad.icono)}</span>
+        <span>${especialidad.titulo}${consulta ? `<small class="seguimiento-meta">${resumen}</small>
+        ${proximo ? `<small class="seguimiento-meta">Próximo seguimiento previsto: ${Vinculaciones.fechaCivil(proximo)}</small>` : ''}` : ''}</span>`;
+      const contenido = consulta ? registros.map(registro => this.tarjeta(registro)).join('')
+        : '<p>La consulta está reservada a la especialidad correspondiente y al Comité.</p>';
+      const accion = datos.rolRegistro === rol
+        ? `<button type="button" class="boton" data-registrar-seguimiento>${Profesionales.icono('nuevo')}Registrar seguimiento</button>` : '';
+      return this.apartado(rol, especialidad.color, abiertos.has(rol), cabecera, contenido, accion);
     }).join('')}</div>`;
   },
 
@@ -116,12 +212,12 @@ const SeguimientosVinculacion = {
     const observaciones = contenido.adaptacion.replace(/\s+/g, ' ');
     const resumen = observaciones.length > 180 ? observaciones.slice(0, 177) + '…' : observaciones;
     return `<article class="pro-informe">
-      <h3>${limpiarHtml(this.valor(rol, 'tipo', contenido.tipo))}</h3>
+      <h4>${limpiarHtml(this.valor(rol, 'tipo', contenido.tipo))}</h4>
       <p class="ayuda">${limpiarHtml(Vinculaciones.fechaCivil(fechaAtencion))} · ${limpiarHtml(profesional)} · ${limpiarHtml(this.etapas[etapa])}</p>
       <p>${limpiarHtml(resumen)}</p>
       <div class="pro-acciones">
         <button type="button" class="boton secundario chico" data-ver-seguimiento="${id}">Ver seguimiento completo</button>
-        ${puedeEditar ? `<button type="button" class="boton secundario chico" data-editar-seguimiento="${id}">Editar seguimiento</button>` : ''}
+        ${puedeEditar ? `<button type="button" class="enlace reporte-editar" data-editar-seguimiento="${id}">${Profesionales.icono('editar')}Editar</button>` : ''}
       </div>
     </article>`;
   },
@@ -162,48 +258,60 @@ const SeguimientosVinculacion = {
     const especialidad = this.especialidades[rol];
     const dialogo = this.dialogo((registro ? 'Editar ' : 'Registrar ') + especialidad.titulo.toLowerCase(), disparador);
     dialogo.classList.add('seguimiento-dialogo', especialidad.color);
+    dialogo.querySelector('h2').insertAdjacentHTML('afterbegin',
+      `<span class="vinculacion-emblema">${Profesionales.icono(especialidad.icono)}</span>`);
     dialogo.insertAdjacentHTML('beforeend', this.contexto(vinculacion) + `
-      <p>Etapa de la atención <strong data-etapa></strong></p>
-      <form class="pro-interrupcion-form">
-        <label>Fecha de atención<input type="date" name="fechaAtencion" aria-describedby="fecha-atencion-legible" required min="${limpiarHtml(datos.primeraFecha)}" max="${limpiarHtml(datos.hoy)}"><small class="ayuda" id="fecha-atencion-legible"></small></label>
-        <label>Tipo de seguimiento<select name="tipo" required><option value="">Selecciona un tipo</option>
+      <p class="seguimiento-etapa">Etapa del proceso <strong data-etapa></strong></p>
+      <form class="pro-interrupcion-form" novalidate>
+        <div class="seguimiento-cabecera-campos">
+          <label>Fecha de atención *<input type="date" lang="es-PA" name="fechaAtencion" required min="${limpiarHtml(datos.primeraFecha)}" max="${limpiarHtml(datos.hoy)}"></label>
+          <label>Tipo de seguimiento *<select name="tipo" required><option value="">Selecciona el tipo de seguimiento</option>
           ${Object.entries(especialidad.tipos).filter(([tipo]) => !['ENCUENTRO', 'ENTREVISTA'].includes(tipo) || tipo === registro?.contenido.tipo).map(([valor, nombre]) => `<option value="${valor}">${nombre}</option>`).join('')}
-        </select></label>
-        <label>Participantes<textarea name="participantes" rows="2" maxlength="500" required></textarea></label>
-        <p class="ayuda">Selecciona una sugerencia y adapta el texto según lo observado. Elegir otra reemplazará el contenido.</p>
-        ${Object.entries(especialidad.campos).map(([campo, [etiqueta]]) => `
-          <div><label for="seguimiento-${campo}">${etiqueta}</label>
-          <textarea id="seguimiento-${campo}" name="${campo}" rows="3" maxlength="2000" required></textarea></div>`).join('')}
-        <label>Fecha prevista del próximo seguimiento (opcional)<input type="date" name="proximoSeguimiento" aria-describedby="fecha-proxima-legible"><small class="ayuda" id="fecha-proxima-legible"></small></label>
+          </select></label>
+        </div>
+        <label>Participantes (opcional)<textarea name="participantes" rows="1" maxlength="500" placeholder="Ej.: Niño y familia."></textarea></label>
+        <h3>Observaciones profesionales</h3>
+        ${Object.entries(especialidad.campos).map(([campo, etiqueta]) => `
+          <div><label for="seguimiento-${campo}">${etiqueta} *</label>
+          <p class="seguimiento-pregunta" id="pregunta-${campo}"></p>
+          <textarea id="seguimiento-${campo}" name="${campo}" aria-describedby="pregunta-${campo}" rows="2" maxlength="2000" required></textarea></div>`).join('')}
+        <label>Fecha prevista del próximo seguimiento (opcional)<input type="date" lang="es-PA" name="proximoSeguimiento"></label>
         ${registro ? '<label>Motivo de modificación (opcional)<textarea name="motivoModificacion" rows="2" maxlength="1000"></textarea></label>' : ''}
         <p class="mensaje error" role="alert" hidden></p>
         <div class="pro-acciones">
           <button class="boton secundario" type="button" data-cancelar>Cancelar</button>
-          <button class="boton" type="submit">${registro ? 'Guardar cambios' : 'Registrar seguimiento'}</button>
+          <button class="boton" type="submit">${registro ? 'Guardar cambios' : 'Guardar seguimiento'}</button>
         </div>
       </form>`);
     const form = dialogo.querySelector('form');
-    const fecha = form.elements.fechaAtencion;
-    const proxima = form.elements.proximoSeguimiento;
+    CamposFormulario.iniciar(form);
+    const {fechaAtencion: fecha, proximoSeguimiento: proxima, tipo} = form.elements;
     fecha.value = registro?.fechaAtencion || datos.hoy;
-    Object.entries(registro?.contenido || {}).forEach(([campo, valor]) => { form.elements[campo].value = valor; });
-    Object.entries(especialidad.campos).forEach(([campo, [, opciones]]) =>
-      Profesionales.sugerencias(form.elements[campo], opciones, {seleccionUnica: true}));
+    Object.entries(registro?.contenido || {}).forEach(([campo, valor]) => {
+      if (form.elements[campo]) form.elements[campo].value = valor ?? '';
+    });
+    let contextoActual;
     const actualizarEtapa = () => {
       proxima.min = fecha.value;
-      dialogo.querySelector('#fecha-atencion-legible').textContent = fecha.value ? Vinculaciones.fechaCivil(fecha.value) : '';
-      dialogo.querySelector('#fecha-proxima-legible').textContent = proxima.value ? Vinculaciones.fechaCivil(proxima.value) : '';
       const etapa = registro && fecha.value === registro.fechaAtencion ? registro.etapa
         : datos.inicioConvivencia && fecha.value >= datos.inicioConvivencia ? 'CONVIVENCIA_PREADOPTIVA' : 'ENCUENTROS_PREVIOS';
       dialogo.querySelector('[data-etapa]').textContent = fecha.value ? this.etapas[etapa] : 'Selecciona la fecha de atención';
+      const contexto = etapa + ':' + tipo.value;
+      if (contexto === contextoActual) return;
+      contextoActual = contexto;
+      Object.entries(this.orientaciones(rol, etapa, tipo.value || 'OTRO')).forEach(([campo, [pregunta, opciones]]) => {
+        const control = form.elements[campo];
+        dialogo.querySelector('#pregunta-' + campo).textContent = pregunta;
+        control.parentElement.querySelector('.pro-sugerencias')?.remove();
+        Profesionales.sugerencias(control, opciones, {seleccionUnica: true});
+      });
     };
     fecha.addEventListener('input', actualizarEtapa);
-    proxima.addEventListener('input', actualizarEtapa);
+    tipo.addEventListener('change', actualizarEtapa);
     actualizarEtapa();
 
     // La clave pertenece a este envío y se conserva durante los reintentos del formulario.
     const claveRegistro = registro ? null : this.claveRegistro();
-    const enviar = form.querySelector('[type=submit]');
     const cancelar = form.querySelector('[data-cancelar]');
     const error = form.querySelector('[role=alert]');
     let enviando = false;
@@ -218,13 +326,18 @@ const SeguimientosVinculacion = {
     form.onsubmit = async evento => {
       evento.preventDefault();
       if (enviando) return;
+      error.hidden = true;
+      const invalido = (campo, mensaje) => {
+        CamposFormulario.error(campo, mensaje);
+        campo.focus();
+      };
+      if (!fecha.value) return invalido(fecha, 'Selecciona la fecha de atención.');
+      if (!fecha.validity.valid) return invalido(fecha, 'Selecciona una fecha de atención dentro del intervalo permitido.');
+      if (!tipo.value) return invalido(tipo, 'Selecciona el tipo de seguimiento.');
+      if (!proxima.validity.valid) return invalido(proxima, 'El próximo seguimiento no puede ser anterior a la fecha de atención.');
       const payload = Object.fromEntries(new FormData(form));
-      for (const campo of ['participantes', ...Object.keys(especialidad.campos)]) {
-        if (payload[campo].trim()) continue;
-        error.hidden = false;
-        error.textContent = `Completa el campo «${this.etiqueta(rol, campo)}».`;
-        form.elements[campo].focus();
-        return;
+      for (const campo of Object.keys(especialidad.campos)) {
+        if (!payload[campo].trim()) return invalido(form.elements[campo], `Completa el campo «${this.etiqueta(rol, campo)}».`);
       }
       payload.proximoSeguimiento ||= null;
       if (registro) payload.version = registro.version;
