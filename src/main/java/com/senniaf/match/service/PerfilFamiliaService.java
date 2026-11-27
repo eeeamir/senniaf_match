@@ -100,6 +100,9 @@ public class PerfilFamiliaService {
     private PerfilFamiliaResponse respuesta(PerfilFamilia p, String mensaje) {
         var respuesta=new PerfilFamiliaResponse(mensaje, p.getCodigoCaso(), p.isPerfilCompleto(),
                 p.isReevaluacionPendiente(), p.getNumeroReevaluaciones(), vinculaciones!=null?vinculaciones.findByFamiliaRegistradoPorOrderByIdDesc(p.getRegistradoPor()).stream().anyMatch(v->v.isReservaVigente() && (v.getEstado()==com.senniaf.match.model.Vinculacion.Estado.PENDIENTE_RESPUESTA || v.getEstado()==com.senniaf.match.model.Vinculacion.Estado.RESPUESTA_ACEPTADA)):decisiones!=null && decisiones.existsByCodigoFamiliaAndDecision(p.getCodigoCaso(),"ACEPTADA"));
+        respuesta.setDisponibleParaMatch(vinculaciones != null && p.isPerfilCompleto()
+                && !p.isReevaluacionPendiente()
+                && !vinculaciones.existsByFamiliaCodigoCasoAndReservaVigenteTrue(p.getCodigoCaso()));
         var actividad=new java.util.ArrayList<java.util.Map<String,Object>>();
         if(p.getFechaRegistro()!=null)actividad.add(actividad("Entrevista registrada","Se recibió la información de tu hogar.",p.getFechaRegistro()));
         if(decisiones!=null)for(var d:decisiones.findByCodigoFamiliaOrderByFechaAsc(p.getCodigoCaso())) {
@@ -118,6 +121,16 @@ public class PerfilFamiliaService {
         if(auditoria!=null)for(var e:auditoria.findByCodigoCasoOrderByFechaAsc(p.getCodigoCaso())) {
             if(e.getFecha()!=null && "CORRECCION_ENTREVISTA".equals(e.getAccion()))actividad.add(actividad(tituloCorreccion(e.getDescripcion()),"Se recibió una actualización de tu entrevista.",e.getFecha()));
             if(e.getFecha()!=null && "CONTENIDO_ACADEMICO_ACTUALIZADO".equals(e.getAccion()))actividad.add(actividad("Información del hogar actualizada","Se completó la descripción del hogar conservando las respuestas de la entrevista.",e.getFecha()));
+            if (e.getFecha() == null) continue;
+            String reincorporacion = switch (e.getAccion()) {
+                case "REINCORPORACION_SOLICITADA" -> "Solicitud de reincorporación registrada";
+                case "REINCORPORACION_ENTREVISTA_CONFIRMADA" -> "Entrevista de reincorporación confirmada";
+                case "REINCORPORACION_AUTORIZADA" -> "Reincorporación autorizada";
+                case "REINCORPORACION_NO_AUTORIZADA" -> "Reincorporación no autorizada";
+                default -> null;
+            };
+            if (reincorporacion != null)
+                actividad.add(actividad(reincorporacion, "Consulta el estado de tu solicitud en Mi vinculación.", e.getFecha()));
         }
         actividad.sort(java.util.Comparator.comparing(a->a.get("fecha").toString()));
         respuesta.setActividad(actividad);

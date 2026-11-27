@@ -330,3 +330,134 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 
 .s8-acabado .pro-dialogo-decision > .pro-modal-contexto { grid-column: 1 / -1; }
 .s8-acabado .ayuda.pro-ayuda-con-icono:has(> .pro-icono) { gap: 8px; }
+
+/* Resumen horizontal y progreso detallado del portal familiar. */
+.familia-seguimiento.familia-inicio-proceso { background: #fff; }
+.familia-inicio-proceso .familia-etapas-horizontal {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  padding: 22px 0;
+}
+.familia-etapas-horizontal li {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 0 4px;
+  overflow-wrap: anywhere;
+}
+.familia-etapas-horizontal .familia-paso { margin-bottom: 13px; }
+.familia-etapas-horizontal li:not(:last-child)::after {
+  top: 24px;
+  left: 50%;
+  right: -50%;
+  width: auto;
+  height: 3px;
+  background: #c8d9f1;
+}
+.familia-etapas-horizontal small { padding: 0; }
+.familia-seguimiento .familia-siguiente { margin-top: 14px; }
+.familia-seguimiento .familia-siguiente .pro-icono { flex-shrink: 0; }
+.familia-total-inicio, .familia-resultado, .familia-titulo-progreso {
+  border-top: 1px solid #d6e1f0;
+  padding-top: 16px;
+}
+.familia-total-inicio { display: flex; align-items: center; gap: 8px; }
+.familia-total-inicio strong { margin-left: auto; color: #0866f5; }
+.familia-actividad-reciente { list-style: none; margin: 12px 0 0; padding: 0; }
+.familia-actividad-reciente li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 12px 0;
+  border-top: 1px solid #d6e1f0;
+}
+.familia-actividad-reciente time, .familia-resumen time { color: #476788; font-size: .875rem; }
+.familia-seguimiento.familia-detalle-proceso { padding: 16px 0 0; border: 0; border-top: 1px solid #d6e1f0; border-radius: 0; }
+.familia-datos-proceso { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.familia-datos-proceso > div { padding: 14px; border-radius: 12px; background: #f1f5fb; }
+.familia-datos-proceso > div:nth-child(3) { background: #e9f1ff; }
+.familia-datos-proceso > div:nth-child(4) { background: #e4f4ee; }
+.familia-datos-proceso dt { display: flex; align-items: center; gap: 8px; }
+.familia-datos-proceso dd { margin: 8px 0 0; font-weight: 650; color: #0866f5; }
+.familia-datos-proceso > div:nth-child(even) dd { color: #007b69; }
+.familia-seguimiento .familia-titulo-progreso { margin-top: 20px; }
+.familia-etapas-vertical { list-style: none; margin: 16px 0 24px; padding: 0; }
+.familia-etapas-vertical > li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 14px;
+}
+.familia-etapas-vertical > li:not(:last-child) { padding-bottom: 14px; }
+.familia-etapas-vertical > li:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  width: 2px;
+  background: #c8d9f1;
+  left: 20px;
+  top: 31px;
+  bottom: -31px;
+}
+.familia-etapas-vertical .familia-paso { width: 42px; height: 42px; margin-top: 10px; }
+.familia-etapas-vertical .completado .familia-paso {
+  background: #e4f4ee;
+  color: #007b69;
+  border-color: #007b69;
+}
+.familia-etapas-vertical .interrumpido .familia-paso,
+.familia-etapas-horizontal .interrumpido:last-child .familia-paso {
+  background: #fff1dc;
+  color: #a46208;
+  border-color: #a46208;
+}
+.familia-etapa-tarjeta { padding: 14px; border: 1px solid #ceddf2; border-radius: 12px; }
+.familia-etapa-tarjeta header, .familia-actuacion { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; }
+.familia-etapa-tarjeta h3 { margin-bottom: 4px; }
+.familia-etapa-tarjeta time { color: #476788; font-size: .875rem; }
+.familia-etapas-vertical .completado header p { color: #007b69; }
+.familia-etapas-vertical .interrumpido header p { color: #a46208; }
+.familia-actuaciones { margin-top: 8px; padding-top: 8px; border-top: 1px solid #d6e1f0; }
+.familia-resultado { display: flex; gap: 12px; align-items: flex-start; }
+@media (max-width: 600px) {
+  .familia-inicio-proceso, .familia-etapa-tarjeta { padding: 12px; }
+  .familia-etapas-horizontal li { font-size: .75rem; }
+  .familia-etapas-horizontal .familia-paso { width: 36px; height: 36px; font-size: 1rem; }
+  .familia-etapas-horizontal li:not(:last-child)::after { top: 18px; }
+  .familia-datos-proceso > div { padding: 10px; }
+}
+.familia-portal-proceso #contenido > .hero {
+  min-height: 0;
+  padding: 20px 62px 20px 20px;
+  margin-bottom: 14px;
+  border: 0;
+  border-radius: 18px;
+  background: #e9effb;
+}
+.familia-portal-proceso #contenido > .hero h1 { margin: 0 0 8px; font-size: clamp(1.35rem, 3vw, 1.75rem); }
+.familia-portal-proceso #contenido > .hero p { margin: 0; font-size: .95rem; }
+.familia-portal-proceso .hero .pro-hero-icono {
+  width: 42px;
+  height: 42px;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  background: transparent;
+}
+.familia-portal-proceso .hero .pro-hero-icono .pro-icono { width: 32px; height: 32px; }
+.familia-inicio-proceso .familia-etapas-horizontal { margin: 8px 0; }
+.familia-inicio-proceso:has(.familia-siguiente) .completado .familia-paso {
+  background: #e4f4ee;
+  color: #007b69;
+  border-color: #007b69;
+}
+.familia-inicio-proceso .familia-etapas-horizontal .interrumpido:last-child small { color: #a46208; }
+.familia-inicio-proceso + .familia-resumen { gap: 10px; margin: 14px 0; }
+.familia-inicio-proceso + .familia-resumen .tarjeta { padding: 14px; }
+.familia-inicio-proceso + .familia-resumen .pro-simbolo { width: 40px; height: 40px; }
+@media (max-width: 600px) {
+  .familia-inicio-proceso > header { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
+  .familia-etapas-horizontal li { overflow-wrap: normal; padding: 0 2px; font-size: .7rem; }
+  .familia-inicio-proceso + .familia-resumen { gap: 8px; }
+}

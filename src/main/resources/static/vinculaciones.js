@@ -66,12 +66,24 @@ const Vinculaciones = {
       clase = resultado[2] === 'exito' ? 'vinculacion-positiva' : resultado[2] === 'aviso' ? 'vinculacion-interrumpida'
         : resultado[2] === 'error' ? 'vinculacion-negativa' : 'retirado';
     }
-    const etiqueta = resultado ? resultado[0] : familiar && v.estado === 'RESPUESTA_ACEPTADA'
-      ? 'Propuesta aceptada' : this.estados[v.estado] || v.estado;
+    let etiqueta = resultado?.[0] || this.estados[v.estado] || v.estado;
+    if (familiar && v.estado === 'RESPUESTA_ACEPTADA') {
+      etiqueta = v.autorizacionPreadoptiva || v.interrupcionRegistrada
+        ? this.obtenerProgreso(v).estado : 'Propuesta aceptada';
+      if (v.interrupcionRegistrada) {
+        icono = 'advertencia';
+        clase = 'vinculacion-interrumpida';
+      }
+    }
+    if (familiar && v.estado === 'CERRADA' && v.interrupcionRegistrada) {
+      etiqueta = 'Vinculación cerrada';
+      icono = 'informacion';
+      clase = 'retirado';
+    }
     return `
       <div class="vinculacion-estados">
         <span class="chip ${clase}">${Profesionales.icono(icono)}${limpiarHtml(etiqueta)}</span>
-        ${v.interrupcionRegistrada && v.estado !== 'CERRADA' ? `
+        ${!familiar && v.interrupcionRegistrada && v.estado !== 'CERRADA' ? `
           <span class="chip retirado vinculacion-antecedente">
             ${Profesionales.icono('advertencia')}
             ${v.interrupcionPendiente ? 'Interrupción pendiente de revisión' : 'Interrupción revisada'}
@@ -98,7 +110,6 @@ const Vinculaciones = {
                 <div>
                   <h2>${limpiarHtml(v.codigo)} · Mi vinculación</h2>
                   <p>Expediente familiar ${limpiarHtml(v.expedienteFamiliar)}</p>
-                  <p>Propuesta recibida: ${limpiarHtml(this.fechaHora(v.fechaCreacion))}</p>
                 </div>
               </div>
               ${this.estado(v, true)}
@@ -151,11 +162,11 @@ const Vinculaciones = {
     const ordenadas = [...lista].sort((a, b) => Number(b.id) - Number(a.id));
     const vigente = ordenadas.find(
       (v) =>
-        ['PENDIENTE_RESPUESTA', 'RESPUESTA_ACEPTADA'].includes(v.estado) &&
-        !v.interrupcionRegistrada,
+        ['PENDIENTE_RESPUESTA', 'RESPUESTA_ACEPTADA'].includes(v.estado),
     );
     return vigente || ordenadas[0] || null;
   },
+  titulosEtapas: ['Propuesta del Comité', 'Respuesta familiar', 'Acompañamiento e interrelación', 'Convivencia preadoptiva'],
   obtenerProgreso(v) {
     if (!v) return null;
     const autorizacion = v.autorizacionPreadoptiva;
@@ -183,15 +194,13 @@ const Vinculaciones = {
         'El equipo responsable coordinará el acompañamiento y te comunicará las actuaciones siguientes.';
     }
     if (autorizacion) {
-      actual = 4;
-      estado = 'Autorización preadoptiva registrada';
+      actual = 3;
+      estado = 'Convivencia preadoptiva';
       mensaje = 'Se registró una autorización preadoptiva emitida por SENNIAF.';
       accion = 'El equipo responsable coordinará el inicio de convivencia.';
-      if (inicioPendiente) mensaje = 'La convivencia está pendiente de comenzar el '
-        + this.fechaCivil(autorizacion.fechaInicioConvivencia) + '.';
     }
     if (iniciada) {
-      estado = 'Convivencia preadoptiva iniciada';
+      estado = 'Convivencia preadoptiva';
       mensaje = 'El inicio de convivencia está registrado.';
       accion = 'El equipo técnico dará seguimiento a la convivencia preadoptiva.';
     }
@@ -205,7 +214,7 @@ const Vinculaciones = {
           : 'No hay acciones pendientes de tu parte para esta propuesta. La disponibilidad depende de los requisitos y revisiones institucionales.';
     }
     if (v.interrupcionRegistrada) {
-      estado = v.interrupcionPendiente ? 'En revisión por el Comité' : 'Convivencia interrumpida';
+      estado = v.interrupcionPendiente ? 'En proceso de revisión' : 'Pendiente de cierre institucional';
       mensaje = v.interrupcionPendiente
         ? 'El Comité está revisando la interrupción de tu convivencia preadoptiva.'
         : 'El Comité registró la revisión de la interrupción de tu convivencia preadoptiva.';
@@ -231,6 +240,7 @@ const Vinculaciones = {
           AUTORIZADA:'La reincorporación fue autorizada. La participación depende de las condiciones de elegibilidad vigentes.'}[reincorporacion.estado]
           || 'Tu expediente permanece fuera del Match.';
     }
+    if (rechazada) mensaje = 'Tu familia rechazó la propuesta. Esta respuesta quedó registrada.';
     if (revocada) mensaje = 'La asignación finalizó antes de iniciar la convivencia';
     if (cerrada && v.resultadoCierre !== 'ADOPCION_FORMALIZADA' && v.estadoDisponibilidadFamiliar) {
       accion = {
@@ -241,49 +251,28 @@ const Vinculaciones = {
         SIN_CONSTANCIA: 'Este antecedente no contiene una revisión de disponibilidad registrada.'
       }[v.estadoDisponibilidadFamiliar] || accion;
     }
-    const titulos = [
-      'Propuesta del Comité',
-      'Respuesta familiar',
-      'Acompañamiento e interrelación',
-      'Autorización preadoptiva',
-      'Convivencia preadoptiva',
-    ];
-    const etapas = titulos.map((titulo, indice) => {
+    const etapas = this.titulosEtapas.map((titulo, indice) => {
       let clase = 'pendiente';
-      let texto = detenida ? 'No iniciada' : 'Pendiente';
+      let texto = 'No iniciada';
       if (indice === 0) {
         clase = 'completado';
-        texto = 'Propuesta registrada';
+        texto = 'Registrada';
       } else if (indice === 1 && (aceptada || rechazada)) {
         clase = rechazada ? 'interrumpido' : 'completado';
         texto = rechazada ? 'Rechazada' : 'Aceptada';
       } else if (indice === 2 && aceptada) {
-        clase = !detenida && actual === 2 ? 'actual' : 'registrada';
-        texto = clase === 'actual' ? 'Etapa actual' : 'Iniciada';
+        clase = autorizacion ? 'completado' : detenida ? 'registrada' : 'actual';
+        texto = autorizacion ? 'Completada' : detenida ? 'Iniciada' : 'En curso';
       } else if (indice === 3 && autorizacion) {
-        clase = 'completado';
-        texto = 'Autorización registrada';
-      } else if (indice === 4 && iniciada) {
-        clase = v.interrupcionRegistrada ? 'interrumpido' : cerrada ? 'registrada' : 'actual';
-        texto = v.interrupcionRegistrada ? 'Convivencia interrumpida' : 'Inicio registrado';
-        if (v.resultadoCierre === 'ADOPCION_FORMALIZADA') {
-          clase = 'completado'; texto = 'Convivencia finalizada';
-        }
-      } else if (indice === 4 && autorizacion && !iniciada) {
-        texto = inicioPendiente && !detenida ? 'Pendiente de comenzar' : 'No iniciada';
+        clase = cerrada ? 'completado' : 'actual';
+        texto = cerrada ? 'Finalizada' : 'En curso';
       } else if (!detenida && indice === actual) {
         clase = 'actual';
-        texto = 'Etapa actual';
+        texto = 'Pendiente de respuesta';
       }
-      if (v.interrupcionRegistrada) {
-        if ((indice === 3 && !autorizacion) || (indice === 2 && !aceptada)) {
-          clase = 'sin-constancia';
-          texto = indice === 3 ? 'Autorización no documentada en este antecedente' : 'Sin actuación específica registrada';
-        }
-        if (indice === 4) {
-          clase = 'interrumpido';
-          texto = 'Interrumpida';
-        }
+      if (indice === 3 && v.interrupcionRegistrada) {
+        clase = 'interrumpido';
+        texto = 'Interrumpida';
       }
       if (indice === 1 && v.fechaRespuesta && !aceptada && !rechazada) {
         clase = 'registrada';
@@ -294,13 +283,15 @@ const Vinculaciones = {
         texto = 'Asignación revocada';
       }
       const rolInterrupcion = seguimiento.interrupcionRol || v.interrupcion?.rolProfesional;
-      const detalle = indice === 4 && v.interrupcionRegistrada
+      const detalle = indice === 3 && v.interrupcionRegistrada
         ? rolInterrupcion === 'FAMILIA' ? 'La familia registró la interrupción de la convivencia.'
           : rolInterrupcion === 'TRABAJADOR_SOCIAL' ? 'Trabajo Social registró la interrupción de la convivencia.'
           : rolInterrupcion === 'PSICOLOGO' ? 'Psicología registró la interrupción de la convivencia.'
           : 'La interrupción de la convivencia quedó registrada.' : '';
-      const fechaHecho = indice === 4 && v.interrupcionRegistrada ? seguimiento.fechaInterrupcion || v.interrupcion?.fechaInterrupcion : null;
-      return { titulo, clase, texto, detalle, fechaHecho };
+      const fechaHecho = indice === 3 && v.interrupcionRegistrada ? seguimiento.fechaInterrupcion || v.interrupcion?.fechaInterrupcion : null;
+      const fecha = [v.fechaCreacion, v.fechaRespuesta, aceptada ? v.fechaRespuesta : null,
+        autorizacion?.inicioRegistradoEl || autorizacion?.registradaEl][indice];
+      return { titulo, clase, texto, detalle, fechaHecho, fecha };
     });
     const eventos = [
       { titulo: 'Propuesta registrada', fecha: v.fechaCreacion },
@@ -328,6 +319,7 @@ const Vinculaciones = {
         detalle: autorizacion?.fechaInicioConvivencia
           ? 'Inicio de convivencia: ' + this.fechaCivil(autorizacion.fechaInicioConvivencia) : '',
       },
+      { titulo: 'Disponibilidad confirmada', fecha: seguimiento.disponibilidadRevisadaEl },
       { titulo: 'Interrupción registrada', fecha: v.seguimientoFamiliar?.interrupcionRegistradaEl },
       {
         titulo: 'Revisión del Comité registrada',
@@ -353,6 +345,10 @@ const Vinculaciones = {
   },
   fechaCivil(valor) {
     if (!valor) return 'Fecha no registrada';
+    if (valor.includes('T')) {
+      return new Intl.DateTimeFormat('en-GB', {day:'2-digit', month:'2-digit', year:'numeric',
+        timeZone:'America/Panama'}).format(new Date(valor));
+    }
     const [anio, mes, dia] = valor.split('-');
     return `${dia}/${mes}/${anio}`;
   },
@@ -365,7 +361,7 @@ const Vinculaciones = {
   tiempoConvivencia(tiempos) {
     if (!tiempos?.convivenciaInterrumpida && !tiempos?.convivenciaFinalizada) {
       if (!tiempos?.fechaInicio) return 'Convivencia no iniciada';
-      if (this.inicioPendiente(tiempos.fechaInicio)) return 'Pendiente de comenzar';
+      if (this.inicioPendiente(tiempos.fechaInicio)) return 'Sin tiempo transcurrido';
     }
     return this.dias(tiempos.convivencia);
   },
@@ -399,70 +395,87 @@ const Vinculaciones = {
     const t = v.tiempos;
     if (!t) return '';
     const a = v.autorizacionPreadoptiva;
-    const texto = [];
-    if (indice === 1 && (v.fechaRespuesta || v.estado === 'PENDIENTE_RESPUESTA')) {
-      texto.push(this.dias(t.respuesta) + (t.respuesta == null ? '' : ' desde la propuesta'));
-    }
-    if (indice === 3 && a?.fechaEmision) {
-      texto.push('Fecha de emisión · ' + this.fechaCivil(a.fechaEmision));
-      if (v.respuestaFamiliar === 'ACEPTADA') texto.push(this.dias(t.autorizacion) + (t.autorizacion == null ? '' : ' desde la aceptación familiar'));
-    }
-    if (indice === 4 && (t.fechaInicio || t.convivenciaInterrumpida)) {
-      if (t.fechaInicio) {
-        texto.push('Inicio de convivencia · ' + this.fechaCivil(t.fechaInicio));
-        if (a?.fechaEmision && !this.inicioPendiente(t.fechaInicio)) texto.push(this.dias(t.inicio) + (t.inicio == null ? '' : ' desde la emisión de la autorización'));
-      }
-      const fin = t.convivenciaInterrumpida ? ' hasta la interrupción' : t.convivenciaFinalizada ? ' hasta el cierre' : ' transcurridos';
-      const convivencia = t.convivencia == null ? this.tiempoConvivencia(t)
-        : this.dias(t.convivencia) + ' de convivencia' + fin;
-      texto.push(convivencia);
-    }
-    const etiqueta = familiar ? 'small' : 'p';
-    return texto.map(linea => `<${etiqueta} class="vinculacion-tiempo">${limpiarHtml(linea)}</${etiqueta}>`).join('');
-  },
-  progresoFamiliar(v, inicio = false) {
-    const progreso = this.obtenerProgreso(v);
-    if (!progreso) return '';
-    const revocada = v.resultadoCierre === 'REVOCACION_ASIGNACION';
-    const fechas = [v.fechaCreacion, v.fechaRespuesta, v.respuestaFamiliar === 'ACEPTADA' || revocada ? v.fechaRespuesta : null,
-      v.autorizacionPreadoptiva?.registradaEl, v.autorizacionPreadoptiva?.inicioRegistradoEl];
-    const adopcion = v.resultadoCierre === 'ADOPCION_FORMALIZADA';
-    const finalizada = v.estado === 'CERRADA' || v.estado === 'RECHAZADA_POR_FAMILIA';
-    const puedeActualizar = !inicio && !finalizada;
-    const aviso = `<p class="familia-siguiente">${limpiarHtml(progreso.accion)}</p>`;
-    const cierre = v.seguimientoFamiliar?.cierreRegistradoEl;
+    const duracion = (titulo, valor) => valor == null ? '' :
+      `<p class="vinculacion-tiempo">${titulo}: <strong>${this.dias(valor)}</strong></p>`;
+    if (indice === 1) return duracion('Desde la propuesta', t.respuesta);
+    if (indice !== 3) return '';
+    const fecha = (titulo, valor) => valor
+      ? `<p class="familia-actuacion"><span>${titulo}</span><time>${limpiarHtml(valor)}</time></p>` : '';
     const interrupcion = v.seguimientoFamiliar?.interrupcionRegistradaEl;
-    return `
-      <section class="familia-seguimiento" aria-label="Progreso de ${limpiarHtml(v.codigo)}">
-        <header>
-          <span class="vinculacion-emblema ${revocada ? 'familia-emblema-revocado' : adopcion ? 'familia-emblema-adopcion' : ''}">${Profesionales.icono(revocada ? 'revocacion' : adopcion ? 'comprobar' : 'solicitudes')}</span>
-          <div><h3 class="${revocada ? 'familia-resultado-revocado' : ''}">${limpiarHtml(progreso.estado)}</h3><p>${limpiarHtml(progreso.mensaje)}</p></div>
-        </header>
-        ${revocada && v.motivoRevocacion ? `<p>${limpiarHtml(v.motivoRevocacion)}</p>` : ''}
-        ${v.tiempos?.vinculacion != null ? `<p class="familia-tiempo-total">Tiempo de vinculación · ${this.dias(v.tiempos.vinculacion)}
-          ${!inicio && v.tiempos.fechaInicio ? ' · ' + this.tiempoConvivencia(v.tiempos) : ''}
-          ${!inicio && v.tiempos.fechaInicio ? '<small>Referencia de convivencia · ' + v.tiempos.diasReferencia + ' días calendario</small>' : ''}
-        </p>` : ''}
-        ${finalizada ? aviso : ''}
-        <ol class="familia-etapas">
-          ${progreso.etapas
-            .map(
-              (etapa, indice) => `
-            <li class="${etapa.clase}" ${etapa.clase === 'actual' ? 'aria-current="step"' : ''}>
-              <span class="familia-paso">${etapa.clase === 'interrumpido' ? Profesionales.icono('advertencia') : etapa.clase === 'completado' ? Profesionales.icono('comprobar') : indice + 1}</span>
-              <strong>${etapa.titulo}</strong><small>${etapa.texto}</small>${etapa.detalle ? `<small class="familia-etapa-detalle">${limpiarHtml(etapa.detalle)}</small>` : ''}${etapa.fechaHecho ? `<small class="familia-etapa-detalle">Fecha de interrupción: ${limpiarHtml(this.fechaCivil(etapa.fechaHecho))}</small>` : ''}
-              ${fechas[indice] ? `<time>${limpiarHtml(this.fechaHora(fechas[indice]))}</time>` : ''}
-              ${indice === 2 && revocada && cierre ? `<time>Revocación · ${limpiarHtml(this.fechaHora(cierre))}</time>` : ''}
-              ${indice === 4 && interrupcion ? `<time>Interrupción · ${limpiarHtml(this.fechaHora(interrupcion))}</time>` : ''}
-              ${indice === 4 && !revocada && cierre ? `<time>Cierre · ${limpiarHtml(this.fechaHora(cierre))}</time>` : ''}
-              ${!inicio ? this.tiemposEtapa(v, indice, true) : ''}
-            </li>
-          `,
-            )
-            .join('')}
-        </ol>
-        ${puedeActualizar ? '<button class="boton secundario chico" type="button" data-actualizar-familiar>Actualizar seguimiento</button><p data-estado-seguimiento-familiar role="status" hidden></p>' : ''}
-        ${finalizada ? '' : aviso}
+    return (a ? `<div class="familia-actuaciones">
+      ${fecha('Autorización preadoptiva', a.fechaEmision && this.fechaCivil(a.fechaEmision))}
+      ${fecha('Registro de autorización', a.registradaEl && this.fechaHora(a.registradaEl))}
+      ${duracion('Desde la aceptación', t.autorizacion)}
+      ${fecha('Inicio de convivencia', t.fechaInicio && this.fechaCivil(t.fechaInicio))}
+      ${duracion('Desde la autorización', t.inicio)}
+      ${duracion(t.convivenciaInterrumpida ? 'Hasta la interrupción' : t.convivenciaFinalizada ? 'Hasta el cierre' : 'Tiempo de convivencia', t.convivencia)}
+      </div>` : '') + (familiar && interrupcion ? fecha('Interrupción de convivencia', this.fechaHora(interrupcion)) : '');
+  },
+  indicadorEtapa(etapa, indice) {
+    const icono = {interrumpido: 'advertencia', completado: 'comprobar'}[etapa.clase];
+    return `<span class="familia-paso" aria-hidden="true">${icono ? Profesionales.icono(icono) : indice + 1}</span>`;
+  },
+  inicioFamiliar(v, estado, mensaje, disponible, enlace) {
+    const progreso = this.obtenerProgreso(v);
+    const etapas = progreso?.etapas || this.titulosEtapas.map((titulo, indice) => ({
+      titulo, clase: indice === 0 && disponible ? 'actual' : 'pendiente',
+      texto: indice === 0 && disponible ? 'En espera' : 'No iniciada'
+    }));
+    const tituloHorizontal = titulo => titulo
+      .replace('Acompañamiento', 'Acompaña&shy;miento')
+      .replace('interrelación', 'interrela&shy;ción')
+      .replace('Convivencia', 'Convi&shy;vencia')
+      .replace('preadoptiva', 'preadop&shy;tiva');
+    return `<section class="familia-seguimiento familia-inicio-proceso">
+      <header><span class="vinculacion-emblema">${Profesionales.icono('solicitudes')}</span>
+        <div><h3>${limpiarHtml(estado)}</h3><p>${limpiarHtml(mensaje)}</p></div></header>
+      ${v?.estadoDisponibilidadFamiliar === 'PENDIENTE_REVISION'
+        ? `<p class="familia-siguiente">${Profesionales.icono('informacion')}${limpiarHtml(progreso.accion)}</p>` : ''}
+      <ol class="familia-etapas familia-etapas-horizontal">
+        ${etapas.map((etapa, indice) => `<li class="${etapa.clase}" ${etapa.clase === 'actual' ? 'aria-current="step"' : ''}>
+          ${this.indicadorEtapa(etapa, indice)}<strong>${tituloHorizontal(etapa.titulo)}</strong><small>${etapa.texto}</small>
+          ${etapa.fecha ? `<time>${this.fechaCivil(etapa.fecha)}</time>` : ''}</li>`).join('')}
+      </ol>
+      ${enlace ? `<a class="boton secundario chico" href="${enlace[0]}">${enlace[1]}</a>` : ''}
+      ${v?.tiempos?.vinculacion != null ? `<p class="familia-total-inicio">${Profesionales.icono('reloj')}
+        Tiempo de vinculación <strong>${this.dias(v.tiempos.vinculacion)}</strong></p>` : ''}
+    </section>`;
+  },
+  progresoFamiliar(v) {
+    const progreso = this.obtenerProgreso(v);
+    const cierre = v.seguimientoFamiliar?.cierreRegistradoEl;
+    const tiempos = v.tiempos;
+    const finalizada = v.estado === 'CERRADA' || v.estado === 'RECHAZADA_POR_FAMILIA';
+    const datos = [
+      ['calendario', 'Fecha de creación', this.fechaHora(v.fechaCreacion)],
+      ['calendario', 'Inicio de convivencia', tiempos?.fechaInicio ? this.fechaCivil(tiempos.fechaInicio) : 'Sin inicio registrado'],
+      ['reloj', 'Tiempo de vinculación', this.dias(tiempos?.vinculacion)],
+      ['hogar', 'Tiempo de convivencia', this.tiempoConvivencia(tiempos)]
+    ];
+    return `<section class="familia-seguimiento familia-detalle-proceso" aria-label="Progreso de ${limpiarHtml(v.codigo)}">
+      <h3>Información general</h3>
+      <dl class="familia-datos-proceso">${datos.map(([icono, titulo, valor]) =>
+        `<div><dt>${Profesionales.icono(icono)}${titulo}</dt><dd>${limpiarHtml(valor)}</dd></div>`).join('')}</dl>
+      ${tiempos?.diasReferencia != null ? `<p class="ayuda">${Profesionales.icono('informacion')}
+        Periodo de referencia de convivencia: ${tiempos.diasReferencia} días calendario.</p>` : ''}
+      <p class="familia-siguiente">${Profesionales.icono('informacion')}${limpiarHtml(progreso.accion)}</p>
+      <h3 class="familia-titulo-progreso">Progreso de la vinculación</h3>
+      <ol class="familia-etapas-vertical">
+        ${progreso.etapas.map((etapa, indice) => `<li class="${etapa.clase}" ${etapa.clase === 'actual' ? 'aria-current="step"' : ''}>
+          ${this.indicadorEtapa(etapa, indice)}
+          <div class="familia-etapa-tarjeta"><header><div><h3>${etapa.titulo}</h3><p>${etapa.texto}</p></div>
+            ${etapa.fecha ? `<time>${limpiarHtml(this.fechaHora(etapa.fecha))}</time>` : ''}</header>
+            ${etapa.detalle ? `<p>${limpiarHtml(etapa.detalle)}</p>` : ''}
+            ${etapa.fechaHecho ? `<p>Fecha de interrupción: ${this.fechaCivil(etapa.fechaHecho)}</p>` : ''}
+            ${this.tiemposEtapa(v, indice, true)}
+          </div></li>`).join('')}
+      </ol>
+      ${finalizada || v.interrupcionRegistrada ? `<div class="familia-resultado">
+        ${Profesionales.icono('informacion')}<div><h3>${limpiarHtml(this.resultadosCierre[v.resultadoCierre]?.[0]
+          || (v.interrupcionRegistrada && cierre ? 'Cierre por interrupción de convivencia' : progreso.estado))}</h3>
+        <p>${limpiarHtml(v.motivoRevocacion || progreso.mensaje)}</p>
+        ${cierre ? `<time>${limpiarHtml(this.fechaHora(cierre))}</time>` : ''}</div></div>` : ''}
+      ${!finalizada ? '<button class="boton secundario chico" type="button" data-actualizar-familiar>Actualizar seguimiento</button><p data-estado-seguimiento-familiar role="status" hidden></p>' : ''}
       </section>`;
   },
   async informacionFamiliar(id){
@@ -651,14 +664,7 @@ const Vinculaciones = {
   },
   proceso(v) {
     const progreso = this.obtenerProgreso(v);
-    const autorizacion = v.autorizacionPreadoptiva;
     const revocada = v.resultadoCierre === 'REVOCACION_ASIGNACION';
-    const fechas = [
-      v.fechaCreacion, v.fechaRespuesta,
-      revocada || progreso.etapas[2].texto === 'Iniciada' || progreso.etapas[2].clase === 'actual'
-        ? v.fechaRespuesta : null,
-      autorizacion?.registradaEl, v.interrupcionRegistrada ? v.seguimientoFamiliar?.interrupcionRegistradaEl || v.interrupcion?.fechaRegistro : autorizacion?.inicioRegistradoEl
-    ];
     return `
       <section class="tarjeta">
         <h2>${Profesionales.icono('solicitudes')}Etapas del proceso</h2>
@@ -672,7 +678,7 @@ const Vinculaciones = {
               <div class="vinculacion-etapa-meta">
                 <span class="chip ${etapa.clase === 'interrumpido' ? 'vinculacion-negativa' : etapa.clase === 'completado' ? 'vinculacion-positiva' : 'retirado'}">${etapa.texto}</span>
                 ${revocada && indice === 2 && v.cierre?.registradoEl ? `<time>Revocación · ${limpiarHtml(this.fechaHora(v.cierre.registradoEl))}</time>` : ''}
-                ${fechas[indice] ? `<time>${indice === 3 || indice === 4 ? 'Registro · ' : ''}${limpiarHtml(this.fechaHora(fechas[indice]))}</time>` : ''}
+                ${etapa.fecha ? `<time>${limpiarHtml(this.fechaHora(etapa.fecha))}</time>` : ''}
               </div>
             </li>`).join('')}
         </ol>

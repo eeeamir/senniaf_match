@@ -10,6 +10,9 @@ package com.senniaf.match.dto;
  * }
  */
 public class PerfilFamiliaResponse {
+    private boolean disponibleParaMatch;
+    public boolean isDisponibleParaMatch() { return disponibleParaMatch; }
+    public void setDisponibleParaMatch(boolean disponible) { disponibleParaMatch = disponible; }
     private java.util.List<String> apartadosReevaluacion=java.util.List.of();
     public java.util.List<String> getApartadosReevaluacion(){return apartadosReevaluacion;} public void setApartadosReevaluacion(java.util.List<String> v){apartadosReevaluacion=java.util.List.copyOf(v);}
     private String observacionReevaluacion;

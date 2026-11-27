@@ -8,6 +8,7 @@ const Familia = {
       ? solicitada
       : 'inicio';
     document.body.classList.toggle('s8-acabado', vista !== 'inicio');
+    document.body.classList.toggle('familia-portal-proceso', vista === 'inicio' || vista === 'propuesta');
     Profesionales.iniciar(sesion, vista);
     try {
       const r = await fetch('/api/familias/mi-perfil', {
@@ -54,57 +55,50 @@ const Familia = {
         || (ultima?.resultadoCierre === 'ADOPCION_FORMALIZADA' && ultima.reincorporacion?.disponible);
       const vigente = disponibleDeNuevo ? null : ultima;
       const progreso = Vinculaciones.obtenerProgreso(vigente);
+      const eventosVinculacion = vinculaciones.flatMap((v) => Vinculaciones.obtenerProgreso(v).eventos);
       const eventos = [
-        ...(p.actividad || []),
-        ...vinculaciones.flatMap((v) => Vinculaciones.obtenerProgreso(v).eventos),
+        ...(p.actividad || []).filter(e => e.titulo !== 'Propuesta enviada por el Comité'
+          || !vinculaciones.some(v => +new Date(v.fechaCreacion) === +new Date(e.fecha))),
+        ...eventosVinculacion,
       ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-      const progresoAnterior = disponibleDeNuevo ? Vinculaciones.obtenerProgreso(ultima).eventos.map(e => e.descripcion) : [];
-      const eventosInicio = eventos.filter(e => !progresoAnterior.includes(e.descripcion));
-      const ultimo = progreso
-        ? [...progreso.eventos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0]
-        : eventosInicio[0];
+      const ultimo = eventos[0];
+      const disponible = disponibleDeNuevo || p.disponibleParaMatch === true;
       let estado = 'Entrevista incompleta';
+      let mensaje = 'Completa la información de tu hogar para continuar.';
       let accion = 'Revisa y completa tu entrevista.';
-      if (p.perfilCompleto) {
-        estado = 'En espera de una propuesta del Comité';
-        accion = 'El Comité revisará las propuestas según los requisitos y la disponibilidad institucional.';
+      if (disponible) {
+        estado = 'En espera de una propuesta';
+        mensaje = 'Tu expediente está disponible para recibir propuestas del Comité.';
+        accion = 'Esperar una propuesta del Comité.';
+      } else if (p.perfilCompleto) {
+        estado = 'Expediente familiar registrado';
+        mensaje = 'Consulta las actualizaciones de tu proceso.';
+        accion = 'Esperar una actualización del Comité.';
       }
       if (p.reevaluacionPendiente) {
         estado = 'Entrevista en revisión';
+        mensaje = 'El Comité solicitó actualizar la información de tu hogar.';
         accion = 'Revisa y completa tu entrevista.';
       }
-      if (sinEntrevista) accion = 'Completa tu entrevista para iniciar el proceso.';
       if (progreso) {
-        estado = progreso.estado;
-        accion = progreso.accion;
-      }
-      const proceso = progreso
-        ? `<section class="tarjeta">${Vinculaciones.progresoFamiliar(vigente, true)}</section>`
-        : `
-      <section class="tarjeta">
-        <h2>${Profesionales.icono('solicitudes')}Preparación del expediente familiar</h2>
-        <p>${limpiarHtml(estado)}</p>
-        ${disponibleDeNuevo ? `<p>Tu expediente está disponible para recibir nuevas propuestas</p>
-          <ol class="familia-etapas">
-          ${['Propuesta del Comité','Respuesta familiar','Acompañamiento e interrelación','Autorización preadoptiva','Convivencia preadoptiva'].map((etapa, indice) =>
-            `<li class="${indice === 0 ? 'actual' : 'pendiente'}"><span class="familia-paso">${indice + 1}</span><strong>${etapa}</strong><small>${indice === 0 ? 'En espera de propuesta' : 'No iniciada'}</small></li>`).join('')}
-          </ol>` : '<p>Todavía no tienes una propuesta registrada.</p>'}
-        ${
-          p.reevaluacionPendiente || !p.perfilCompleto
-            ? `
-          <a class="boton" href="${enlaceEntrevista}">
-            ${p.perfilCompleto ? 'Revisar entrevista' : 'Completar mi entrevista'}
-          </a>`
-            : ''
+        ({estado, mensaje, accion} = progreso);
+        if (vigente.estado === 'CERRADA' && vigente.interrupcionRegistrada) {
+          estado = 'Vinculación cerrada';
+          mensaje = 'Cierre por interrupción de convivencia.';
+          if (vigente.estadoDisponibilidadFamiliar === 'PENDIENTE_REVISION') accion = 'Esperar la revisión del Comité.';
         }
-      </section>`;
+      }
+      const enlaceProceso = pendiente ? ['match.html?vista=propuesta', 'Consultar mi vinculación']
+        : p.reevaluacionPendiente || !p.perfilCompleto
+          ? [enlaceEntrevista, p.perfilCompleto ? 'Revisar entrevista' : 'Completar mi entrevista'] : null;
+      const proceso = Vinculaciones.inicioFamiliar(vigente, estado, mensaje, disponible, enlaceProceso);
       const antecedente = vinculaciones.find(v => v.resultadoCierre === 'ADOPCION_FORMALIZADA');
       const mostrarReincorporacion = antecedente && !vinculaciones.some(v =>
         ['PENDIENTE_RESPUESTA','RESPUESTA_ACEPTADA'].includes(v.estado));
       const propuesta = Vinculaciones.familiar(vinculaciones)
         + (mostrarReincorporacion ? this.reincorporacion(antecedente) : '');
       const actividad = (todos = false) => {
-        const visibles = todos ? eventos : eventosInicio.slice(0, 3);
+        const visibles = todos ? eventos : eventos.slice(0, 3);
         return `
           <section class="tarjeta">
             <div class="pro-fila-titulo">
@@ -115,7 +109,11 @@ const Familia = {
                   Ver historial completo →
                 </a>`}
             </div>
-            ${visibles.length ? Vinculaciones.lineaTiempo(visibles.map(evento => ({...evento, resumen: evento.descripcion, zona: 'Panamá'}))) : '<p>Todavía no hay actuaciones disponibles.</p>'}
+            ${visibles.length ? todos
+              ? Vinculaciones.lineaTiempo(visibles.map(evento => ({...evento, resumen: evento.descripcion, zona: 'Panamá'})))
+              : `<ul class="familia-actividad-reciente">${visibles.map(evento => `<li>
+                  <strong>${limpiarHtml(evento.titulo)}</strong><time>${Vinculaciones.fechaCivil(evento.fecha)}</time></li>`).join('')}</ul>`
+              : '<p>Todavía no hay actuaciones disponibles.</p>'}
             ${todos && p.numeroReevaluaciones ? `
               <p class="ayuda">Reevaluaciones completadas: ${Number(p.numeroReevaluaciones)}.
                 Solo se muestran fechas que quedaron registradas.</p>` : ''}
@@ -124,7 +122,7 @@ const Familia = {
       const tarjetas = [
         ['carpeta', 'Estado actual', estado],
         ['calendario', 'Última actualización', ultimo
-          ? ultimo.titulo + ' · ' + Profesionales.fecha(ultimo.fecha)
+          ? ultimo.titulo
           : 'Sin actualizaciones registradas'],
         ['comprobar', 'Próxima acción', accion]
       ];
@@ -134,12 +132,13 @@ const Familia = {
             <section class="tarjeta">
               <span class="pro-simbolo">${Profesionales.icono(icono)}</span>
               <h3>${titulo}</h3><p>${limpiarHtml(texto)}</p>
+              ${icono === 'calendario' && ultimo ? `<time>${Vinculaciones.fechaCivil(ultimo.fecha)}</time>` : ''}
             </section>`).join('')}
         </div>`;
       const pantallas = {
         inicio: [
           'Bienvenida, familia',
-          'Consulta el estado de tu proceso de adopción, las etapas y las actualizaciones registradas.',
+          'Consulta el estado de tu proceso de adopción.',
           'hogar',
         ],
         entrevista: [
@@ -149,7 +148,7 @@ const Familia = {
         ],
         propuesta: [
           'Mi vinculación',
-          'Consulta el resultado comunicado a tu familia y los siguientes pasos.',
+          'Consulta las etapas, los tiempos y las actualizaciones de tu proceso.',
           'vinculacion',
         ],
         historial: [
@@ -163,7 +162,7 @@ const Familia = {
       if (vista === 'entrevista') contenidoVista = entrevista;
       if (vista === 'historial') contenidoVista = actividad(true);
       if (vista === 'propuesta') contenidoVista = propuesta;
-      const avisoPropuesta = pendiente && vista !== 'propuesta' ? `
+      const avisoPropuesta = pendiente && !['inicio', 'propuesta'].includes(vista) ? `
         <section class="tarjeta" role="status">
           ${Profesionales.icono('informacion')} Tienes una propuesta pendiente de respuesta.
           <a href="match.html?vista=propuesta">Consultar mi vinculación</a>

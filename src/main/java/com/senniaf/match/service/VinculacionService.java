@@ -234,6 +234,17 @@ public class VinculacionService {
                 seguimientoFamiliar.put("fechaInterrupcion", seguimiento.getFechaInterrupcion());
             }
             seguimientoFamiliar.put("cierreRegistradoEl", fecha(v.getFechaRegistroCierre()));
+            if (familiar && v.isFamiliaLiberada()) {
+                auditoria.findByCodigoCasoOrderByFechaAsc(v.getNino().getCodigoCaso()).stream()
+                    .filter(e -> "DISPONIBILIDAD_REVISADA".equals(e.getAccion()))
+                    .filter(e -> {
+                        var datos = detalleEvento(e);
+                        return datos.path("vinculacionId").asLong(-1) == v.getId()
+                                && "FAMILIA".equals(datos.path("expediente").asText());
+                    })
+                    .reduce((anterior, ultimo) -> ultimo)
+                    .ifPresent(e -> seguimientoFamiliar.put("disponibilidadRevisadaEl", fecha(e.getFecha())));
+            }
             r.put("seguimientoFamiliar", seguimientoFamiliar);
             if (v.getEstado() == Vinculacion.Estado.CERRADA && v.getFechaRespuesta() != null) {
                 auditoria.findByCodigoCasoOrderByFechaAsc(v.getNino().getCodigoCaso()).stream()
@@ -252,7 +263,9 @@ public class VinculacionService {
         }
         r.put("tiempos", TiemposVinculacion.calcular(v, (String) r.get("respuestaFamiliar"),
                 r.get("estado") == Vinculacion.Estado.RECHAZADA_POR_FAMILIA, seguimiento != null,
-                seguimiento == null ? null : seguimiento.getFechaInterrupcion()));
+                seguimiento == null ? null : seguimiento.getFechaInterrupcion() != null
+                        ? seguimiento.getFechaInterrupcion()
+                        : TiemposVinculacion.fechaCivil(seguimiento.getFechaRegistro())));
         if(!familiar){r.put("decisionComite",Map.of("decision",v.getDecision().getDecision(),"responsable",v.getDecision().getFuncionario(),"fecha",fecha(v.getDecision().getFecha()),"motivo",v.getDecision().getMotivo()));r.put("respondidoPor",v.getRespondidoPor());}
         return r;
     }
