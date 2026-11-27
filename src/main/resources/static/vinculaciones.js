@@ -310,6 +310,32 @@ const Vinculaciones = {
     }
     return this.dias(tiempos.convivencia);
   },
+  informacionGeneral(v) {
+    const tiempos = v.tiempos;
+    const inicio = tiempos?.fechaInicio;
+    const cierre = tiempos?.convivenciaInterrumpida ? 'Convivencia interrumpida'
+      : tiempos?.convivenciaFinalizada ? 'Convivencia finalizada' : '';
+    const vigente = inicio && !cierre && !this.inicioPendiente(inicio);
+    const indicador = (clase, icono, valor) =>
+      `<span class="vinculacion-indicador ${clase}">${Profesionales.icono(icono)}${limpiarHtml(valor)}</span>`;
+    return `<section class="tarjeta vinculacion-general">
+      <div class="pro-fila-titulo"><h2>${Profesionales.icono('carpeta')}Información general</h2>
+        <button class="boton secundario chico" type="button" data-actualizar-vinculacion>${Profesionales.icono('refrescar')}Actualizar</button></div>
+      <p data-estado-actualizacion role="status" hidden></p>
+      <dl class="detalle-datos vinculacion-tiempos">
+        <div><dt>Fecha de creación</dt><dd>${limpiarHtml(this.fechaHora(v.fechaCreacion))}</dd></div>
+        <div><dt>Tiempo transcurrido de vinculación</dt>
+          <dd>${indicador('azul', 'calendario', this.dias(tiempos?.vinculacion))}</dd></div>
+        <div><dt>Inicio de convivencia</dt>
+          <dd>${indicador(vigente ? 'menta' : '', inicio ? 'calendario' : 'reloj',
+            inicio ? this.fechaCivil(inicio) : 'Sin inicio registrado')}</dd></div>
+        <div><dt>Tiempo de convivencia</dt>
+          <dd>${indicador(vigente ? 'menta' : '', vigente ? 'hogar' : 'informacion', this.tiempoConvivencia(tiempos))}
+            ${cierre ? `<small class="vinculacion-estado-convivencia">${cierre}</small>` : ''}</dd>
+          ${tiempos ? `<small>Periodo de referencia · ${tiempos.diasReferencia} días calendario</small>` : ''}</div>
+      </dl>
+    </section>`;
+  },
   tiemposEtapa(v, indice, familiar = false) {
     const t = v.tiempos;
     if (!t) return '';
@@ -474,18 +500,7 @@ const Vinculaciones = {
     const panelActivo=c.querySelector('[data-seguimiento][aria-selected="true"]')?.dataset.seguimiento||'proceso';
     c.innerHTML = `<div class="vinculacion-detalle"><p class="pro-breadcrumb"><a href="vinculaciones.html">${Profesionales.icono('flecha')}Volver a Vinculaciones</a></p>`+
       Profesionales.encabezado(v.codigo+' · Detalle de vinculación','Seguimiento de la asignación familiar.','heart-handshake')+`
-      <section class="tarjeta vinculacion-general">
-        <div class="pro-fila-titulo"><h2>${Profesionales.icono('carpeta')}Información general</h2>
-          <button class="boton secundario chico" type="button" data-actualizar-vinculacion>Actualizar</button></div>
-        <p data-estado-actualizacion role="status" hidden></p>
-        <dl class="detalle-datos vinculacion-tiempos">
-          <div><dt>Fecha de creación</dt><dd>${limpiarHtml(this.fechaHora(v.fechaCreacion))}</dd></div>
-          <div><dt>Tiempo transcurrido de vinculación</dt><dd class="vinculacion-tiempo-destacado">${this.dias(v.tiempos?.vinculacion)}</dd></div>
-          <div><dt>Inicio de convivencia</dt><dd>${v.tiempos?.fechaInicio ? this.fechaCivil(v.tiempos.fechaInicio) : 'Sin inicio registrado'}</dd></div>
-          <div><dt>Tiempo de convivencia</dt><dd class="vinculacion-tiempo-destacado convivencia">${this.tiempoConvivencia(v.tiempos)}</dd>
-          ${v.tiempos ? `<small>Periodo de referencia · ${v.tiempos.diasReferencia} días calendario</small>` : ''}</div>
-        </dl>
-      </section>
+      ${this.informacionGeneral(v)}
       <div class="vinculacion-accesos" aria-label="Accesos de la vinculación">
         ${this.acceso('carpeta','Expediente infantil',v.expedienteInfantil,enlaceNino,'Ver expediente','azul')}
         ${this.acceso('personas','Expediente familiar',v.expedienteFamiliar,sesion.rol==='COMITE'?enlaceFamilia:null,'Ver expediente','menta')}

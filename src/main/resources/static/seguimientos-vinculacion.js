@@ -243,12 +243,21 @@ const SeguimientosVinculacion = {
     const {id, rol, profesional, fechaAtencion, etapa, contenido, puedeEditar} = registro;
     const observaciones = contenido.adaptacion.replace(/\s+/g, ' ');
     const resumen = observaciones.length > 180 ? observaciones.slice(0, 177) + '…' : observaciones;
-    return `<article class="pro-informe">
-      <h4>${limpiarHtml(this.valor(rol, 'tipo', contenido.tipo))}</h4>
-      <p class="ayuda">${limpiarHtml(Vinculaciones.fechaCivil(fechaAtencion))} · ${limpiarHtml(profesional)} · ${limpiarHtml(this.etapas[etapa])}</p>
-      <p>${limpiarHtml(resumen)}</p>
+    const icono = {
+      ORIENTACION_FAMILIAR: 'conversacion', INTERRELACION: 'personas', ENCUENTRO: 'personas',
+      VISITA_DOMICILIARIA: 'hogar', TELEFONICO: 'telefono', SESION_INDIVIDUAL: 'persona',
+      SESION_FAMILIAR: 'personas', OBSERVACION_VINCULO: 'heart-handshake'
+    }[contenido.tipo] || 'informe';
+    return `<article class="pro-informe seguimiento-tarjeta">
+      <header class="seguimiento-tarjeta-cabecera">
+        <span class="vinculacion-emblema">${Profesionales.icono(icono)}</span>
+        <div><h4>${limpiarHtml(this.valor(rol, 'tipo', contenido.tipo))}</h4>
+          <p class="ayuda">${limpiarHtml(Vinculaciones.fechaCivil(fechaAtencion))} · ${limpiarHtml(profesional)}</p></div>
+      </header>
+      <span class="seguimiento-tarjeta-etapa">${limpiarHtml(this.etapas[etapa])}</span>
+      <p class="seguimiento-tarjeta-resumen">${limpiarHtml(resumen)}</p>
       <div class="pro-acciones">
-        <button type="button" class="boton secundario chico" data-ver-seguimiento="${id}">Ver seguimiento completo</button>
+        <button type="button" class="enlace reporte-editar" data-ver-seguimiento="${id}">${Profesionales.icono('consulta')}Ver seguimiento</button>
         ${puedeEditar ? `<button type="button" class="enlace reporte-editar" data-editar-seguimiento="${id}">${Profesionales.icono('editar')}Editar</button>` : ''}
       </div>
     </article>`;
@@ -321,7 +330,15 @@ const SeguimientosVinculacion = {
       }
       campo.value = seleccionadas.join(', ');
     };
-    grupo.addEventListener('change', actualizar);
+    // Las casillas opcionales no necesitan la validación de campos de texto del formulario.
+    grupo.addEventListener('input', evento => {
+      if (opciones.includes(evento.target)) evento.stopPropagation();
+    });
+    grupo.addEventListener('change', evento => {
+      if (!opciones.includes(evento.target)) return;
+      evento.stopPropagation();
+      actualizar();
+    });
     detalle.addEventListener('input', actualizar);
     actualizar();
     return detalle;
