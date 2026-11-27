@@ -461,7 +461,7 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .seguimiento-dialogo form :is(input, select, textarea) { min-width: 0; margin-top: .25rem; }
 .seguimiento-dialogo form select { appearance: auto; padding-inline: .65rem; border: 1px solid #b9c9da; border-radius: 8px; }
 .seguimiento-dialogo form h3 { border-top: 1px solid #dce5ee; margin: .2rem 0 0; padding-top: .7rem; }
-.seguimiento-dialogo form textarea { min-height: 0; resize: vertical; }
+.s8-acabado .seguimiento-dialogo form textarea { min-height: 0; padding: .45rem .75rem; resize: vertical; }
 .seguimiento-dialogo .seguimiento-pregunta { margin: .15rem 0 .2rem; color: #435367; }
 .seguimiento-dialogo .pro-sugerencias { margin: .25rem 0 0; gap: .35rem; }
 .seguimiento-dialogo form > .pro-acciones {
@@ -477,7 +477,7 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .seguimiento-participantes { margin: 0; padding: 0; border: 0; min-width: 0; }
 .seguimiento-participantes legend { padding: 0; font-weight: 600; }
 .seguimiento-participantes legend small { margin-inline-start: .55rem; color: #435367; font-weight: 400; }
-.seguimiento-dialogo .seguimiento-opcion { position: relative; }
+.seguimiento-dialogo .seguimiento-opcion { position: relative; font-weight: 500; }
 .seguimiento-opcion input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .seguimiento-opcion input:focus-visible + span { outline: 2px solid #397fe7; outline-offset: 2px; }
 .seguimiento-opcion input:checked + span {
