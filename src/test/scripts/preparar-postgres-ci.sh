@@ -37,7 +37,9 @@ for archivo in \
     deploy/azure/sql/018-apoyos-familia-interrupcion.sql \
     deploy/azure/sql/019-autorizacion-y-reevaluacion.sql \
     deploy/azure/sql/020-citas-vinculacion.sql \
-    deploy/azure/sql/021-reingreso-revisado.sql; do
+    deploy/azure/sql/021-reingreso-revisado.sql \
+    deploy/azure/sql/022-seguimientos-profesionales.sql \
+    deploy/azure/sql/023-visitas-domiciliarias.sql; do
     confirmacion=AMPLIAR_SIN_BORRAR
     [[ $archivo != *010-* ]] || confirmacion=AGREGAR_DOCUMENTOS_SIN_REEMPLAZAR
     [[ $archivo != *012-* ]] || confirmacion=CREAR_VINCULACIONES_SIN_BORRAR
@@ -50,5 +52,7 @@ for archivo in \
     [[ $archivo != *019-* ]] || confirmacion=REGISTRAR_AUTORIZACION_Y_APARTADOS_SIN_BORRAR
     [[ $archivo != *020-* ]] || confirmacion=CREAR_CITAS_SIN_ALTERAR_HISTORICOS
     [[ $archivo != *021-* ]] || confirmacion=PERMITIR_REINGRESO_REVISADO_SIN_BORRAR
+    [[ $archivo != *022-* ]] || confirmacion=CREAR_SEGUIMIENTOS_PROFESIONALES
+    [[ $archivo != *023-* ]] || confirmacion=CREAR_VISITAS_DOMICILIARIAS
     psql -X -v ON_ERROR_STOP=1 -v base_autorizada="$PGDATABASE" -v confirmacion="$confirmacion" -f "$raiz/$archivo"
 done
