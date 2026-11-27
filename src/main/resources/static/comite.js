@@ -79,7 +79,7 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
       titulo:'Análisis de compatibilidad', descripcion:'Consulta el resultado y sus criterios.',
       puntaje:familia.puntaje, maximo:familia.maximoAplicable, factores:familia.f,
       pesos, estados:familia.estadosFactores, actualizar:true,
-      nota:`<p class="ayuda">${this.icono('informacion')} Los criterios que no aplican se excluyen del puntaje máximo. Peso de criterios evaluados: ${familia.pesoEvaluado}.</p>`
+      nota:`<p class="ayuda pro-ayuda-con-icono">${this.icono('informacion')}<span>Los criterios que no aplican se excluyen del puntaje máximo. Peso de criterios evaluados: ${familia.pesoEvaluado}.</span></p>`
     });
   },
   async reevaluar() {
@@ -163,7 +163,7 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
     if (!s || document.querySelector('[data-revisar-reincorporacion-dialogo]')) return;
     const revisable=s.estado==='REVISION_PENDIENTE', d=document.createElement('dialog');
     d.className='pro-dialogo';d.dataset.revisarReincorporacionDialogo='';d.setAttribute('aria-label','Revisar reincorporación familiar');
-    d.innerHTML=`<h2>${this.icono('solicitudes')}Revisar reincorporación familiar</h2>
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('solicitudes')}</span><h2>Revisar reincorporación familiar</h2></div>
       <p>${limpiarHtml(s.codigoCaso)} · Antecedente ${limpiarHtml(s.vinculacion)} · ${limpiarHtml(Profesionales.fechaSolicitud(s.fechaSolicitud))}</p>
       <dl class="detalle-datos"><div><dt>Proceso anterior</dt><dd>Adopción formalizada</dd></div>
         <div><dt>Entrevista familiar</dt><dd>${s.estado==='ENTREVISTA_PENDIENTE'?'Pendiente de actualización':'Actualizada'}</dd></div></dl>

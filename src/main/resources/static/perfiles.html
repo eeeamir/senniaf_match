@@ -69,7 +69,7 @@
 
     <dialog id="dialogoSolicitud" class="pro-dialogo" aria-labelledby="tituloDialogoSolicitud">
       <button type="button" class="pro-dialogo-cerrar" id="cerrarDialogoSolicitud" aria-label="Cerrar solicitud">×</button>
-      <h2 id="tituloDialogoSolicitud">Solicitar desactivación</h2>
+      <div class="pro-modal-cabecera"><span class="pro-simbolo" data-icono="solicitudes"></span><h2 id="tituloDialogoSolicitud">Solicitar desactivación</h2></div><p class="pro-identificadores" id="expedienteDialogoSolicitud"></p>
       <p>Selecciona el motivo. El Comité revisará tu solicitud antes de cambiar el estado del expediente.</p>
       <form id="formSolicitud" hidden>
         <input id="tipoSolicitud" type="hidden">
@@ -402,6 +402,7 @@ async function cargarSolicitudes() {
     : reservaMatch ? 'Existe una reserva vigente en Vinculaciones.' : '';
   ayuda.hidden = !ayuda.textContent;
   document.getElementById('abrirSolicitud').textContent=expedienteSeleccionado.bajaLogica?'Solicitar reactivación':'Solicitar desactivación';
+  document.getElementById('expedienteDialogoSolicitud').textContent = p.codigoCaso;
   document.getElementById('tituloDialogoSolicitud').textContent=document.getElementById('abrirSolicitud').textContent;
   document.getElementById('abrirSolicitud').hidden=sesion.rol!=='TRABAJADOR_SOCIAL'||pendiente||expedienteSeleccionado.cierrePorAdopcion;
   document.getElementById('historialSolicitudes').hidden = !['COMITE','TRABAJADOR_SOCIAL'].includes(sesion.rol);
@@ -596,7 +597,7 @@ const MOTIVOS_REACTIVACION=[
  ['OTRO','Otro motivo.','Describe la situación','']];
 function prepararMotivos(){
  const opciones=expedienteSeleccionado.bajaLogica?MOTIVOS_REACTIVACION:MOTIVOS_RETIRO;
- document.getElementById('motivosPredeterminados').innerHTML='<legend>Motivo de la solicitud</legend>'+opciones.map(([clave,titulo,ayuda])=>`<label class="pro-motivo"><input type="radio" name="categoriaSolicitud" value="${clave}" required>${Profesionales.icono('solicitudes')}<span>${titulo}<small>${ayuda}</small></span></label>`).join('');
+ document.getElementById('motivosPredeterminados').innerHTML='<legend>Motivo de la solicitud</legend>'+opciones.map(([clave,titulo,ayuda])=>`<label class="pro-motivo"><input type="radio" name="categoriaSolicitud" value="${clave}" required>${Profesionales.iconoMotivo(clave)}<span>${titulo}<small>${ayuda}</small></span></label>`).join('');
  const controles=[...document.querySelectorAll('[name="categoriaSolicitud"]')];
  const texto=document.getElementById('motivoSolicitud');
  let anterior='', plantilla='';

@@ -168,8 +168,6 @@ const Vinculaciones = {
       v.estado === 'RESPUESTA_ACEPTADA' ||
       v.respuestaFamiliar === 'ACEPTADA' || revocada;
     const cerrada = v.estado === 'CERRADA';
-    // Compatibilidad de presentación del único antecedente confirmado; no crea constancia documental.
-    const autorizacionHistorica = Number(v.id) === 1 && v.codigo === 'VIN-1' && cerrada && v.interrupcionRegistrada && !autorizacion;
     const inicioPendiente = this.inicioPendiente(autorizacion?.fechaInicioConvivencia);
     const iniciada = Boolean(autorizacion?.fechaInicioConvivencia) && !inicioPendiente;
     const detenida = rechazada || cerrada || v.interrupcionRegistrada;
@@ -286,10 +284,6 @@ const Vinculaciones = {
           clase = 'interrumpido';
           texto = 'Interrumpida';
         }
-      }
-      if (indice === 3 && autorizacionHistorica) {
-        clase = 'completado';
-        texto = 'Autorizada';
       }
       if (indice === 1 && v.fechaRespuesta && !aceptada && !rechazada) {
         clase = 'registrada';
@@ -855,11 +849,11 @@ const Vinculaciones = {
     if(document.querySelector('[data-dialogo-cierre]'))return;
     const d=document.createElement('dialog');d.className='pro-dialogo';d.dataset.dialogoCierre='';d.setAttribute('aria-labelledby','tituloCierre');
     const opciones = v.resultadosCierre || [];
-    d.innerHTML=`<h2 id="tituloCierre">${Profesionales.icono('informe')}Registrar cierre institucional</h2>
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('informe')}</span><h2 id="tituloCierre">Registrar cierre institucional</h2></div>
       <p>${limpiarHtml(v.codigo)} · ${limpiarHtml(v.expedienteInfantil)} · ${limpiarHtml(v.expedienteFamiliar)}</p>
       <form class="pro-interrupcion-form" novalidate><fieldset class="pro-motivos"><legend>Resultado de la vinculación *</legend>
       ${opciones.map(k => `
-        <label class="pro-motivo"><input type="radio" name="resultado" value="${k}" required>
+        <label class="pro-motivo"><input type="radio" name="resultado" value="${k}" required>${Profesionales.iconoMotivo(k)}
         <span>${k === 'INTERRUPCION_CONVIVENCIA' ? 'Cierre por interrupción de convivencia' : this.resultadosCierre[k][0]}</span></label>`).join('')}</fieldset>
       <label>Fundamento del cierre *<textarea name="motivo" rows="4" minlength="10" maxlength="2000" required></textarea></label>
       <p data-efecto hidden></p>
@@ -1024,11 +1018,11 @@ const Vinculaciones = {
   registrarInterrupcion(c,v,sesion,asignacion=false){
     const titulo = asignacion ? 'Registrar incidencia de asignación' : 'Registrar interrupción de la convivencia';
     const d=document.createElement('dialog');d.className='pro-dialogo';d.setAttribute('aria-labelledby','tituloInterrupcion');
-    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('advertencia')}</span><h2 id="tituloInterrupcion">${titulo}</h2></div>
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('advertencia')}</span><h2 id="tituloInterrupcion">${titulo}</h2></div><p class="pro-identificadores">${limpiarHtml(v.codigo)} · ${limpiarHtml(v.expedienteInfantil)} · ${limpiarHtml(v.expedienteFamiliar)}</p>
       <p>${asignacion ? 'La incidencia será remitida al Comité para su revisión. Los expedientes conservarán sus reservas.'
         : 'Deja constancia de lo ocurrido y de las circunstancias que deben considerarse durante la revisión del Comité.'}</p>
       <form class="pro-interrupcion-form">${asignacion ? `<fieldset class="pro-motivos"><legend>Motivo de la incidencia</legend>
-        ${Object.entries(this.motivosAsignacion).map(([clave,[nombre]])=>`<label class="pro-motivo"><input type="radio" name="motivo" value="${clave}" required><span>${nombre}</span></label>`).join('')}
+        ${Object.entries(this.motivosAsignacion).map(([clave,[nombre]])=>`<label class="pro-motivo"><input type="radio" name="motivo" value="${clave}" required>${Profesionales.iconoMotivo(clave)}<span>${nombre}</span></label>`).join('')}
         </fieldset>` : `<label>Motivo de la interrupción<select name="motivo" required><option value="">Selecciona el motivo que mejor describa la situación</option>${this.motivosInterrupcion.map(([k,t])=>`<option value="${k}">${t}</option>`).join('')}</select></label>`}
       <label>Descripción de lo ocurrido<textarea name="justificacion" minlength="10" maxlength="2000" rows="5" required placeholder="Explica lo sucedido y las circunstancias que deba considerar el Comité."></textarea></label>
       <p data-error role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button class="boton" type="submit">Revisar y confirmar</button></div></form>`;

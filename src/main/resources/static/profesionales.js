@@ -25,6 +25,8 @@ const Profesionales = {
       salud:'M12 21S2 15 2 8a5 5 0 0 1 10-2A5 5 0 0 1 22 8c0 7-10 13-10 13z',
       estrella:'m12 3 3 6 6 1-4 5 1 6-6-3-6 3 1-6-4-5 6-1z',
       hogar:'m3 11 9-8 9 8 M5 10v11h14V10M10 21v-7h4v7',
+      documentoEditable:'M6 3h9l4 4v4 M14 3v5h5 M6 3v18h5 M13 17l5-5 3 3-5 5-4 1z',
+      documentoVerificado:'M6 3h9l4 4v14H6z M14 3v5h5 M9 14l2 2 5-5',
       informe:'M6 3h9l4 4v14H6z M14 3v5h5M9 12h7M9 16h7',
       reloj:'M12 7v5l3 2 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',
       buscar:'M16 16l5 5 M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',
@@ -263,9 +265,20 @@ const Profesionales = {
     return `<aside class="pro-aviso-interrupcion" role="note"><span class="pro-simbolo">${this.icono('informacion')}</span><div><h3>Antecedente de vinculación interrumpida</h3><p>${antecedente.cierrePendiente?'Esta familia registra una interrupción de convivencia revisada por el Comité. El cierre institucional aún está pendiente. Consulta los antecedentes antes de continuar.':'Esta familia registra una interrupción anterior revisada por el Comité. Consulta los antecedentes antes de considerar una nueva propuesta.'}</p><small>Aviso informativo. No modifica automáticamente su idoneidad ni su puntuación.</small></div></aside>`;
   },
   fechaCivil(valor){return valor?new Intl.DateTimeFormat('es-PA',{dateStyle:'medium',timeZone:'UTC'}).format(new Date(valor+'T12:00:00Z')):'Fecha no registrada';},
+  iconoMotivo(clave) {
+    const iconos = {FAVORABLE:'comprobar',CONDICIONES:'documentoVerificado',OTRO:'documentoEditable',
+      INFORMACION:'informacion',CAPACIDADES:'heart-handshake',INCOMPLETA:'informe',
+      DESACTUALIZADA:'refrescar',ACLARACION:'consulta',INCONSISTENCIAS:'advertencia',
+      CAMBIO_SITUACION:'advertencia',TRASLADO:'ubicacion',SUSPENSION_TEMPORAL:'reloj',
+      SITUACION_RESUELTA:'comprobar',REVISION_COMPLETADA:'documentoVerificado',
+      CONDICIONES_RESTABLECIDAS:'comprobar',DESISTIMIENTO_FAMILIA:'personas',RECHAZO_NINO:'persona',
+      CONFIRMADA:'documentoVerificado',NO_PROCEDE:'cerrar',ADOPCION_FORMALIZADA:'comprobar',
+      REVOCACION_ASIGNACION:'revocacion',INTERRUPCION_CONVIVENCIA:'advertencia'};
+    return this.icono(iconos[clave] || 'informe');
+  },
   justificar({titulo,contexto,opciones,confirmacion,alConfirmar,alGuardar,alError=null,maximo=1850,incluirMotivo=true,instruccion='Selecciona un motivo',textoRevisar='Revisar y confirmar',tituloConfirmacion='Confirmar acción',textoConfirmar='Confirmar',ayuda='Puedes editar completamente la justificación. Para «Otro», escribe tu propia explicación.'}) {
     const d=document.createElement('dialog');d.className='pro-dialogo pro-dialogo-decision'+(titulo==='Solicitar reevaluación'?' pro-dialogo-reevaluacion':'');d.setAttribute('aria-label',titulo);
-    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('solicitudes')}</span><h2>${limpiarHtml(titulo)}</h2></div><p class="pro-modal-contexto">${limpiarHtml(contexto)}</p><form><fieldset class="pro-motivos"><legend>${limpiarHtml(instruccion)}</legend>${opciones.map(([valor,nombre])=>`<label class="pro-motivo"><input type="radio" name="motivoDecision" value="${limpiarHtml(valor)}" required><span>${limpiarHtml(nombre)}</span></label>`).join('')}</fieldset><label>Justificación<textarea name="justificacion" required minlength="10" maxlength="${maximo}" rows="5" placeholder="Selecciona un motivo para ver la sugerencia editable."></textarea></label><p class="ayuda">${limpiarHtml(ayuda)}</p><p data-error role="alert"></p><div class="pro-acciones"><button class="boton secundario" type="button" data-cancelar>Cancelar</button><button class="boton" type="submit">${limpiarHtml(textoRevisar)}</button></div></form>`;
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${this.icono('solicitudes')}</span><h2>${limpiarHtml(titulo)}</h2></div><p class="pro-modal-contexto">${limpiarHtml(contexto)}</p><form><fieldset class="pro-motivos"><legend>${limpiarHtml(instruccion)}</legend>${opciones.map(([valor,nombre])=>`<label class="pro-motivo"><input type="radio" name="motivoDecision" value="${limpiarHtml(valor)}" required>${this.iconoMotivo(valor)}<span>${limpiarHtml(nombre)}</span></label>`).join('')}</fieldset><label>Justificación<textarea name="justificacion" required minlength="10" maxlength="${maximo}" rows="5" placeholder="Selecciona un motivo para ver la sugerencia editable."></textarea></label><p class="ayuda pro-ayuda-con-icono">${this.icono('informacion')}<span>${limpiarHtml(ayuda)}</span></p><p data-error role="alert"></p><div class="pro-acciones"><button class="boton secundario" type="button" data-cancelar>Cancelar</button><button class="boton" type="submit">${limpiarHtml(textoRevisar)}</button></div></form>`;
     document.body.append(d);
     if(titulo==='Solicitar reevaluación')d.querySelector('form').insertAdjacentHTML('afterbegin',`<fieldset class="pro-apartados-reevaluacion"><legend>Apartados de la entrevista familiar</legend><p class="ayuda pro-instruccion-apartados">Selecciona uno o más apartados de la entrevista que consideres necesario revisar o actualizar.</p>${['Hogar y red de apoyo','Preferencias familiares','Salud y acompañamiento','Disponibilidad y entorno','Apoyos culturales y comunitarios'].map((t,i)=>`<label><input type="checkbox" name="apartadoFamiliar" value="${t}">${this.icono(['personas','estrella','salud','hogar','personas'][i])}<span>${t}</span></label>`).join('')}</fieldset>`);
     const form=d.querySelector('form'),texto=d.querySelector('textarea'),boton=d.querySelector('[type=submit]');

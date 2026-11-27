@@ -211,7 +211,7 @@ const Familia = {
     if (!v?.reincorporacion?.puedeSolicitar || document.querySelector('[data-reincorporacion-dialogo]')) return;
     const d=document.createElement('dialog');
     d.className='pro-dialogo';d.dataset.reincorporacionDialogo='';d.setAttribute('aria-label','Solicitar reincorporación');
-    d.innerHTML=`<h2>${Profesionales.icono('solicitudes')}Solicitar reincorporación</h2>
+    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('solicitudes')}</span><h2>Solicitar reincorporación</h2></div><p class="pro-identificadores">${limpiarHtml(v.codigo)}</p>
       <ol><li>Actualizar la información de tu hogar.</li><li>Enviar tu entrevista familiar.</li><li>Esperar la revisión institucional.</li></ol>
       <p>Conservarás tu cuenta, expediente e historial de vinculaciones.</p>
       <p class="mensaje error" role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button>

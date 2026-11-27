@@ -635,3 +635,18 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .analisis-desglose .analisis-tabla thead th { text-align: start; font-weight: 600; }
 .analisis-desglose .analisis-tabla tbody th { color: #153e63; }
 .analisis-desglose .analisis-razon { color: #476788; line-height: 1.5; }
+
+.pro-ayuda-con-icono { display: flex; align-items: flex-start; gap: 8px; }
+.pro-ayuda-con-icono > .pro-icono { flex: 0 0 1.1em; width: 1.1em; height: 1lh; margin: 0; }
+.pro-modal-cabecera > .pro-simbolo { flex-shrink: 0; }
+.pro-motivo > .pro-icono { display: block; flex: 0 0 1.1rem; width: 1.1rem; height: 1.1rem; color: #1761b6; }
+.pro-identificadores { color: #476788; }
+.seguimiento-tarjeta .seguimiento-identificador { margin: 0 0 .6rem; }
+.seguimiento-tarjeta-cabecera h4 { margin: 0; }
+#seguimiento-reportes .seguimiento-tarjeta .pro-acciones { justify-content: flex-end; }
+.seguimiento-titulo > p.ayuda { grid-column: 1 / -1; margin-inline: 0; }
+.seguimiento-titulo .vinculacion-emblema { grid-row: auto; }
+.seguimiento-titulo { row-gap: .5rem; }
+
+.profesional .pro-dialogo .pro-motivo { align-items: center; gap: 8px; }
+.pro-dialogo-decision textarea { font-weight: 400; }

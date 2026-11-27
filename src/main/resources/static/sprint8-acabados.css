@@ -327,3 +327,6 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 .s8-acabado .familia-seguimiento > header > .familia-emblema-revocado { background: #fff0f0; color: #a12232; }
 .familia-seguimiento .familia-siguiente:has(+ .familia-etapas) { margin-top: 12px; }
 .familia-propuesta-acciones:not(:has(> *)) { display: none; }
+
+.s8-acabado .pro-dialogo-decision > .pro-modal-contexto { grid-column: 1 / -1; }
+.s8-acabado .ayuda.pro-ayuda-con-icono:has(> .pro-icono) { gap: 8px; }

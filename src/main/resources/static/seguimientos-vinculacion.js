@@ -249,11 +249,12 @@ const SeguimientosVinculacion = {
       SESION_FAMILIAR: 'personas', OBSERVACION_VINCULO: 'heart-handshake'
     }[contenido.tipo] || 'informe';
     return `<article class="pro-informe seguimiento-tarjeta">
+      <p class="ayuda seguimiento-identificador">${this.codigo(id)}</p>
       <header class="seguimiento-tarjeta-cabecera">
         <span class="vinculacion-emblema">${Profesionales.icono(icono)}</span>
-        <div><h4>${limpiarHtml(this.valor(rol, 'tipo', contenido.tipo))}</h4>
-          <p class="ayuda">${limpiarHtml(Vinculaciones.fechaCivil(fechaAtencion))} · ${limpiarHtml(profesional)}</p></div>
+        <h4>${limpiarHtml(this.valor(rol, 'tipo', contenido.tipo))}</h4>
       </header>
+      <p class="ayuda pro-ayuda-con-icono">${Profesionales.icono('calendario')}<span>${limpiarHtml(Vinculaciones.fechaCivil(fechaAtencion))} · ${limpiarHtml(profesional)}</span></p>
       <span class="seguimiento-tarjeta-etapa">${limpiarHtml(this.etapas[etapa])}</span>
       <p class="seguimiento-tarjeta-resumen">${limpiarHtml(resumen)}</p>
       <div class="pro-acciones">
@@ -262,6 +263,8 @@ const SeguimientosVinculacion = {
       </div>
     </article>`;
   },
+
+  codigo(id) { return `SEG-${String(Number(id)).padStart(3, '0')}`; },
 
   dialogo(titulo, disparador) {
     const dialogo = document.createElement('dialog');
@@ -284,7 +287,8 @@ const SeguimientosVinculacion = {
   ver(vinculacion, registro, disparador) {
     const dialogo = this.dialogo(this.especialidades[registro.rol].titulo, disparador);
     const campos = {fechaAtencion: registro.fechaAtencion, etapa: registro.etapa, ...registro.contenido};
-    dialogo.insertAdjacentHTML('beforeend', this.contexto(vinculacion) + `
+    dialogo.querySelector('h2').outerHTML = `<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono(this.especialidades[registro.rol].icono)}</span><h2 id="tituloModalSeguimiento">${limpiarHtml(this.especialidades[registro.rol].titulo)}</h2></div>`;
+    dialogo.insertAdjacentHTML('beforeend', `<p class="ayuda seguimiento-identificador">${this.codigo(registro.id)}</p>` + this.contexto(vinculacion) + `
       <p>${limpiarHtml(registro.profesional)} · Registrado el ${limpiarHtml(Vinculaciones.fechaHora(registro.registrado))}</p>
       <dl class="detalle-datos">${Object.entries(campos).map(([campo, valor]) => `
         <div><dt>${limpiarHtml(this.etiqueta(registro.rol, campo))}</dt>
@@ -355,7 +359,7 @@ const SeguimientosVinculacion = {
     titulo.before(cabecera);
     cabecera.innerHTML = `<span class="vinculacion-emblema">${Profesionales.icono(especialidad.icono)}</span>`;
     cabecera.append(titulo);
-    cabecera.insertAdjacentHTML('beforeend', this.contexto(vinculacion));
+    cabecera.insertAdjacentHTML('beforeend', (registro ? `<p class="ayuda seguimiento-identificador">${this.codigo(registro.id)}</p>` : '') + this.contexto(vinculacion));
     dialogo.insertAdjacentHTML('beforeend', `
       <form class="pro-interrupcion-form" novalidate>
         <div class="seguimiento-desplazable">
@@ -489,7 +493,7 @@ const SeguimientosVinculacion = {
   },
 
   evento(movimiento) {
-    return {...movimiento, titulo: this.especialidades[movimiento.rol].titulo + ' ' + movimiento.accion.toLowerCase()};
+    return {...movimiento, titulo: (movimiento.seguimientoId ? this.codigo(movimiento.seguimientoId) + ' · ' : '') + this.especialidades[movimiento.rol].titulo + ' ' + movimiento.accion.toLowerCase()};
   },
 
   cambios(evento) {
