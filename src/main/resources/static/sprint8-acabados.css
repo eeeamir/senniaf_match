@@ -539,10 +539,13 @@ details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); 
 .s8-acabado .vinculacion-detalle .vinculacion-autorizacion .autorizacion-registrada {
   color: #08705f;
 }
-.autorizacion-registrada .pro-icono {
-  box-sizing: content-box;
-  width: .7rem;
-  height: .7rem;
+.s8-acabado .autorizacion-registrada > .pro-icono:first-child {
+  box-sizing: border-box;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  align-self: center;
+  margin: 0;
   padding: 2px;
   border: 1px solid currentColor;
   border-radius: 50%;
