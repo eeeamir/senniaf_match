@@ -36,21 +36,94 @@ const VisitasDomiciliarias = {
     return !Number.isNaN(fecha.getTime()) && fecha.toISOString().slice(0, 10) === iso ? iso : '';
   },
 
-  horaInterna(valor, periodo) {
-    const partes = /^(0?[1-9]|1[0-2]):([0-5]\d)$/.exec(valor.trim());
-    if (!partes || !['AM', 'PM'].includes(periodo)) return '';
-    const hora = Number(partes[1]) % 12 + (periodo === 'PM' ? 12 : 0);
-    return String(hora).padStart(2, '0') + ':' + partes[2];
+  horaInterna(valor) {
+    const texto = valor.toLowerCase().replace(/[.\s]/g, '');
+    const partes = /^(0?[1-9]|1[0-2]):([0-5]\d)(am|pm)$/.exec(texto);
+    if (partes) {
+      const hora = Number(partes[1]) % 12 + (partes[3] === 'pm' ? 12 : 0);
+      return String(hora).padStart(2, '0') + ':' + partes[2];
+    }
+    return /^(?:[01]?\d|2[0-3]):[0-5]\d$/.test(texto) ? texto.padStart(5, '0') : '';
   },
 
   campoHora(nombre, etiqueta) {
     return `<div class="visita-campo"><label for="visita-${nombre}">${etiqueta} *</label>
-      <input id="visita-${nombre}" name="${nombre}" type="text" placeholder="hh:mm" maxlength="5" autocomplete="off" aria-describedby="visita-error-${nombre}" required>
-      <div class="visita-periodos" role="group" aria-label="Periodo de ${etiqueta.toLowerCase()}">
-        <label><input type="radio" name="${nombre}Periodo" value="AM" checked><span>a. m.</span></label>
-        <label><input type="radio" name="${nombre}Periodo" value="PM"><span>p. m.</span></label>
+      <div class="visita-selector-hora">
+        <input id="visita-${nombre}" name="${nombre}" type="text" placeholder="Seleccionar hora" autocomplete="off"
+          role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="visita-opciones-${nombre}"
+          aria-describedby="visita-error-${nombre}" required>
+        <span class="reporte-chevron" aria-hidden="true"></span>
+        <ul id="visita-opciones-${nombre}" role="listbox" aria-label="${etiqueta}" hidden></ul>
       </div>
       <small id="visita-error-${nombre}" class="visita-error-campo" role="alert" hidden></small></div>`;
+  },
+
+  enlazarHora(campo, opciones, disponible) {
+    const lista = campo.parentElement.querySelector('ul');
+    const normalizar = texto => texto.toLowerCase().replace(/[.\s]/g, '').replace(/^0(?=\d)/, '');
+    let activa = -1;
+    const cerrar = () => {
+      lista.hidden = true;
+      campo.setAttribute('aria-expanded', 'false');
+      campo.removeAttribute('aria-activedescendant');
+      activa = -1;
+    };
+    const abrir = buscar => {
+      const consulta = buscar ? normalizar(campo.value) : '';
+      lista.replaceChildren();
+      opciones.filter(({hora, texto}) => disponible(hora) &&
+        (normalizar(texto).startsWith(consulta) || normalizar(hora).startsWith(consulta)))
+        .forEach(({texto}, indice) => {
+          const opcion = document.createElement('li');
+          opcion.id = lista.id + '-' + indice;
+          opcion.setAttribute('role', 'option');
+          opcion.setAttribute('aria-selected', 'false');
+          opcion.textContent = texto;
+          lista.append(opcion);
+        });
+      cerrar();
+      if (!lista.childElementCount) return;
+      lista.hidden = false;
+      lista.scrollTop = 0;
+      campo.setAttribute('aria-expanded', 'true');
+    };
+    const elegir = opcion => {
+      campo.value = opcion.textContent;
+      campo.dispatchEvent(new Event('input', {bubbles: true}));
+      cerrar();
+      campo.dispatchEvent(new Event('change', {bubbles: true}));
+    };
+    campo.addEventListener('focus', () => abrir(false));
+    campo.addEventListener('click', () => { if (lista.hidden) abrir(false); });
+    campo.addEventListener('input', () => abrir(true));
+    campo.addEventListener('blur', cerrar);
+    lista.addEventListener('mousedown', evento => evento.preventDefault());
+    lista.addEventListener('click', evento => {
+      const opcion = evento.target.closest('li');
+      if (opcion) elegir(opcion);
+    });
+    campo.addEventListener('keydown', evento => {
+      if (evento.key === 'Escape' && !lista.hidden) {
+        evento.preventDefault();
+        cerrar();
+      }
+      if (evento.key === 'Enter' && activa >= 0) {
+        evento.preventDefault();
+        elegir(lista.children[activa]);
+      }
+      if (!['ArrowDown', 'ArrowUp'].includes(evento.key)) return;
+      evento.preventDefault();
+      if (lista.hidden) abrir(false);
+      const cantidad = lista.childElementCount;
+      if (!cantidad) return;
+      lista.children[activa]?.setAttribute('aria-selected', 'false');
+      activa = activa < 0 ? (evento.key === 'ArrowDown' ? 0 : cantidad - 1)
+        : Math.max(0, Math.min(cantidad - 1, activa + (evento.key === 'ArrowDown' ? 1 : -1)));
+      const opcion = lista.children[activa];
+      opcion.setAttribute('aria-selected', 'true');
+      campo.setAttribute('aria-activedescendant', opcion.id);
+      opcion.scrollIntoView({block: 'nearest'});
+    });
   },
 
   panel(datos, abierto, visitasAbiertas = new Set()) {
@@ -99,7 +172,7 @@ const VisitasDomiciliarias = {
         <ol class="visitas-lista" start="${referencia + 1}">${filas.slice(referencia).join('')}</ol>
         <p class="ayuda">Total de visitas realizadas: ${realizadas}</p>` : ''}`;
     const accion = trabajoSocial && vigente && puedeRegistrar
-      ? `<button type="button" class="boton" data-registrar-visita>${Profesionales.icono('nuevo')}${completadas < referencia ? 'Registrar visita domiciliaria' : 'Registrar visita adicional'}</button>` : '';
+      ? `<button type="button" class="boton" data-registrar-visita>${Profesionales.icono('nuevo')}Registrar visita</button>` : '';
     return `<div class="vinculacion-reportes visita-panel">${SeguimientosVinculacion.apartado('visitas',
       'visitas-domiciliarias' + (completadas === referencia ? ' completadas' : ''), abierto, cabecera, contenido, accion)}</div>`;
   },
@@ -118,7 +191,7 @@ const VisitasDomiciliarias = {
     const hoy = this.ahora().fecha;
     dialogo.insertAdjacentHTML('beforeend', `
       <form class="pro-interrupcion-form" novalidate>
-        <div class="visita-campo"><label for="visita-fecha">Fecha de la visita *</label>
+        <div class="visita-campo"><label for="visita-fecha">Fecha *</label>
           <div class="visita-fecha-control">
             <input id="visita-fecha" name="fecha" type="text" placeholder="dd/mm/aaaa" maxlength="10" autocomplete="off" aria-describedby="visita-error-fecha" required autofocus>
             <label class="visita-calendario">${Profesionales.icono('calendario')}
@@ -129,8 +202,8 @@ const VisitasDomiciliarias = {
           ${this.campoHora('inicio', 'Hora de inicio')}
           ${this.campoHora('fin', 'Hora de finalización')}
         </div>
-        <p class="visita-duracion">${Profesionales.icono('reloj')} Duración de la visita <output for="visita-inicio visita-fin" aria-live="polite">—</output></p>
-        <p class="ayuda visita-aviso">${Profesionales.icono('informacion')}<span>Registre únicamente visitas que ya hayan finalizado.</span></p>
+        <p class="visita-duracion">${Profesionales.icono('reloj')} Duración <output for="visita-inicio visita-fin" aria-live="polite">—</output></p>
+        <p class="ayuda visita-aviso">${Profesionales.icono('informacion')}<span>Registre únicamente actividades que ya hayan finalizado.</span></p>
         ${visita ? `<label>Motivo de modificación (opcional)<textarea name="motivoModificacion" rows="2" maxlength="1000"></textarea></label>
           <p class="ayuda">Los cambios realizados quedarán registrados en el historial.</p>` : ''}
         <p class="mensaje error" role="alert" hidden></p>
@@ -149,14 +222,15 @@ const VisitasDomiciliarias = {
     });
     calendario.value = visita?.fecha || hoy;
     fecha.value = Vinculaciones.fechaCivil(calendario.value);
-    if (visita) {
-      for (const campo of [inicio, fin]) {
-        const [horas, minutos] = visita[campo.name].slice(0, 5).split(':');
-        campo.value = String(Number(horas) % 12 || 12).padStart(2, '0') + ':' + minutos;
-        form.elements[campo.name + 'Periodo'].value = Number(horas) < 12 ? 'AM' : 'PM';
-      }
-    }
-    const leerHora = campo => this.horaInterna(campo.value, form.elements[campo.name + 'Periodo'].value);
+    const leerHora = campo => this.horaInterna(campo.value);
+    if (visita) [inicio, fin].forEach(campo => { campo.value = this.hora(visita[campo.name]); });
+    const opciones = Array.from({length: 288}, (_, indice) => {
+      const hora = String(Math.floor(indice / 12)).padStart(2, '0') + ':' + String(indice % 12 * 5).padStart(2, '0');
+      return {hora, texto: this.hora(hora)};
+    });
+    const antesDelLimite = hora => this.fechaInterna(fecha.value) !== hoy || hora <= this.ahora().hora;
+    this.enlazarHora(inicio, opciones, antesDelLimite);
+    this.enlazarHora(fin, opciones, hora => hora > leerHora(inicio) && antesDelLimite(hora));
     const output = form.querySelector('output');
     const actualizar = () => {
       const horaInicio = leerHora(inicio), horaFin = leerHora(fin);
@@ -175,11 +249,15 @@ const VisitasDomiciliarias = {
       error.textContent = mensaje;
       campo.focus();
     };
+    inicio.addEventListener('change', () => {
+      if (leerHora(inicio) && leerHora(fin) && leerHora(fin) <= leerHora(inicio)) fin.value = '';
+      actualizar();
+    });
     form.addEventListener('input', evento => {
       if (evento.target === calendario && calendario.value) fecha.value = Vinculaciones.fechaCivil(calendario.value);
       if (evento.target === fecha) calendario.value = this.fechaInterna(fecha.value);
       if (evento.target === calendario) limpiarError(fecha);
-      limpiarError(evento.target.name === 'inicioPeriodo' ? inicio : evento.target.name === 'finPeriodo' ? fin : evento.target);
+      limpiarError(evento.target);
       if (evento.target === inicio || evento.target === fecha) limpiarError(fin);
       actualizar();
     });

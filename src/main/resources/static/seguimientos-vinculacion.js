@@ -232,7 +232,7 @@ const SeguimientosVinculacion = {
       const cabecera = `<span class="vinculacion-emblema">${Profesionales.icono(especialidad.icono)}</span>
         <span>${especialidad.titulo}${consulta ? `<small class="seguimiento-meta">${resumen}</small>
         ${proximo ? `<small class="seguimiento-meta">Próximo seguimiento previsto: ${Vinculaciones.fechaCivil(proximo)}</small>` : ''}` : ''}</span>`;
-      const contenido = consulta ? registros.map(registro => this.tarjeta(registro)).join('')
+      const contenido = consulta ? registros.map((registro, indice) => this.tarjeta(registro, registros.length - indice)).join('')
         : '<p>La consulta está reservada a la especialidad correspondiente y al Comité.</p>';
       const accion = datos.rolRegistro === rol
         ? `<button type="button" class="boton" data-registrar-seguimiento>${Profesionales.icono('nuevo')}Registrar seguimiento</button>` : '';
@@ -240,7 +240,7 @@ const SeguimientosVinculacion = {
     }).join('')}</div>`;
   },
 
-  tarjeta(registro) {
+  tarjeta(registro, numero) {
     const {id, rol, profesional, fechaAtencion, etapa, contenido, puedeEditar} = registro;
     const observaciones = contenido.adaptacion.replace(/\s+/g, ' ');
     const resumen = observaciones.length > 180 ? observaciones.slice(0, 177) + '…' : observaciones;
@@ -253,7 +253,8 @@ const SeguimientosVinculacion = {
       <p class="ayuda seguimiento-identificador">${this.codigo(id)}</p>
       <header class="seguimiento-tarjeta-cabecera">
         <span class="vinculacion-emblema">${Profesionales.icono(icono)}</span>
-        <h4>${limpiarHtml(this.valor(rol, 'tipo', contenido.tipo))}</h4>
+        <div><h4>${this.especialidades[rol].titulo} ${numero}</h4>
+          <span class="ayuda">${limpiarHtml(this.valor(rol, 'tipo', contenido.tipo))}</span></div>
       </header>
       <p class="ayuda pro-ayuda-con-icono">${Profesionales.icono('calendario')}<span>${limpiarHtml(Vinculaciones.fechaCivil(fechaAtencion))} · ${limpiarHtml(profesional)}</span></p>
       <span class="seguimiento-tarjeta-etapa">${limpiarHtml(this.etapas[etapa])}</span>
