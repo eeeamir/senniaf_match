@@ -1,7 +1,7 @@
 /* Presentación familiar: reutiliza la entrevista y expone únicamente actividad autorizada del caso propio. */
 const Familia = {
   async mostrar(sesion, {actualizarSeguimiento = false} = {}) {
-    if (this.cargando) return;
+    if (this.cargando || document.querySelector('[data-reincorporacion-dialogo][open]')) return;
     this.cargando = true;
     const solicitada = new URLSearchParams(location.search).get('vista');
     const vista = ['entrevista', 'propuesta', 'historial'].includes(solicitada)
@@ -25,7 +25,8 @@ const Familia = {
       document.querySelectorAll('[data-asignacion-info]').forEach(dialogo => {
         if (!this.informacionAutorizada.has(dialogo.dataset.asignacionInfo)) dialogo.close();
       });
-      if (actualizarSeguimiento && document.querySelector('dialog[open]')) return;
+      if (document.querySelector('[data-reincorporacion-dialogo][open]')
+        || (actualizarSeguimiento && document.querySelector('dialog[open]'))) return;
       const pendiente = vinculaciones.find((v) => v.estado === 'PENDIENTE_RESPUESTA');
       const p = sinEntrevista ? { perfilCompleto: false, actividad: [] } : await r.json();
       const enlaceEntrevista = sinEntrevista ? 'perfil.html' : 'perfil.html?reevaluacion=1';
@@ -63,7 +64,8 @@ const Familia = {
       let mensaje = 'Completa la información de tu hogar para continuar.';
       let accion = 'Revisa y completa tu entrevista.';
       if (disponible) {
-        estado = 'En espera de una propuesta';
+        estado = ultima?.reincorporacion?.estado === 'AUTORIZADA' && disponibleDeNuevo
+          ? 'Pendiente de vinculación' : 'En espera de una propuesta';
         mensaje = 'Tu expediente está disponible para recibir propuestas del Comité.';
         accion = 'Esperar una propuesta del Comité.';
       } else if (p.perfilCompleto) {
@@ -88,11 +90,12 @@ const Familia = {
         : p.reevaluacionPendiente || !p.perfilCompleto
           ? [enlaceEntrevista, p.perfilCompleto ? 'Revisar entrevista' : 'Completar mi entrevista'] : null;
       const proceso = Vinculaciones.inicioFamiliar(vigente, estado, mensaje, disponible, enlaceProceso);
-      const antecedente = vinculaciones.find(v => v.resultadoCierre === 'ADOPCION_FORMALIZADA');
+      const antecedente = vinculaciones.filter(v => v.resultadoCierre === 'ADOPCION_FORMALIZADA')
+        .sort((a, b) => (b.fechaCierre || '').localeCompare(a.fechaCierre || '') || Number(b.id) - Number(a.id))[0];
       const mostrarReincorporacion = antecedente && !vinculaciones.some(v =>
-        ['PENDIENTE_RESPUESTA','RESPUESTA_ACEPTADA'].includes(v.estado));
-      const propuesta = Vinculaciones.familiar(vinculaciones, v =>
-        mostrarReincorporacion && v.id === antecedente.id ? this.reincorporacion(v) : '');
+        Number(v.id) > Number(antecedente.id) || ['PENDIENTE_RESPUESTA', 'RESPUESTA_ACEPTADA'].includes(v.estado));
+      const propuesta = Vinculaciones.familiar(vinculaciones)
+        + (mostrarReincorporacion ? this.reincorporacion(antecedente) : '');
       const actividad = (todos = false) => {
         const visibles = todos ? eventos : eventos.slice(0, 3);
         return `
@@ -188,35 +191,61 @@ const Familia = {
     }
   },
   reincorporacion(v) {
-    const r = v.reincorporacion || {}, estado = r.estado;
-    const resuelta = ['AUTORIZADA','NO_AUTORIZADA'].includes(estado);
-    const entrevista = estado !== 'ENTREVISTA_PENDIENTE';
-    const pasos = [['Solicitud registrada', 'comprobar'],
-      ['Entrevista actualizada', entrevista ? 'comprobar' : 'reloj'],
-      ['Revisión institucional', resuelta ? 'comprobar' : entrevista ? 'reloj' : 'informacion'],
-      ['Resolución de solicitud', estado === 'AUTORIZADA' ? 'comprobar' : estado === 'NO_AUTORIZADA' ? 'advertencia' : 'informacion']];
-    if (!r.puedeSolicitar && (!estado || estado === 'SIN_SOLICITUD')) return '';
-    return `<section class="familia-reincorporacion">
+    const {estado, puedeSolicitar, disponible} = v.reincorporacion || {};
+    const estados = {
+      ENTREVISTA_PENDIENTE: ['Solicitud registrada', 'comprobarCircular', 'completado'],
+      REVISION_PENDIENTE: ['Pendiente de revisión institucional', 'reloj', 'pendiente'],
+      AUTORIZADA: ['Reincorporación aprobada', 'comprobarCircular', 'completado'],
+      NO_AUTORIZADA: ['Reincorporación no autorizada', 'advertencia', 'no-autorizado'],
+    };
+    const estadoVisible = estados[estado];
+    if (!puedeSolicitar && !estadoVisible) return '';
+    const entrevistaPendiente = estado === 'ENTREVISTA_PENDIENTE';
+    const aprobada = estado === 'AUTORIZADA';
+    const pasos = entrevistaPendiente
+      ? [
+        ['1', 'Actualiza y envía tu entrevista familiar', 'Completa la información actual de tu hogar.', 'actual'],
+        ['2', 'Revisión institucional', 'Espera la evaluación de tu expediente.', 'en-espera'],
+      ]
+      : [
+        [Profesionales.icono('comprobar'), 'Entrevista familiar actualizada y enviada', 'Completado', 'completado'],
+        [Profesionales.icono(aprobada ? 'comprobar' : estado === 'NO_AUTORIZADA' ? 'advertencia' : 'reloj'),
+          'Revisión institucional', aprobada ? 'Completado' : estado === 'NO_AUTORIZADA' ? 'No autorizada' : 'Pendiente',
+          aprobada ? 'completado' : estado === 'NO_AUTORIZADA' ? 'no-autorizado' : 'pendiente'],
+      ];
+    const aviso = {
+      REVISION_PENDIENTE: 'Tu información ha sido enviada correctamente. Por el momento, no necesitas realizar ninguna acción adicional.',
+      AUTORIZADA: disponible ? 'Tu expediente ha sido reincorporado. Podrás ser considerado para futuros procesos de adopción.'
+        : 'La reincorporación fue autorizada. La participación depende de las condiciones de elegibilidad vigentes.',
+      NO_AUTORIZADA: 'El Comité resolvió la solicitud. Tu expediente permanece fuera del Match.',
+    }[estado];
+    return `<section class="tarjeta familia-reincorporacion">
       <header><span class="pro-simbolo">${Profesionales.icono('solicitudes')}</span><div>
-      <h3>${estado && estado !== 'SIN_SOLICITUD' ? 'Solicitud de reincorporación' : 'Reincorporación del expediente'}</h3><p>${limpiarHtml(v.codigo)} · Expediente familiar ${limpiarHtml(v.expedienteFamiliar)}</p></div></header>
-      ${r.puedeSolicitar ? `<button class="boton" type="button" data-solicitar-reincorporacion>Solicitar reincorporación</button>` : ''}
-      ${estado && estado !== 'SIN_SOLICITUD' ? `
-        <div class="mensaje ${estado === 'AUTORIZADA' ? 'exito' : estado === 'NO_AUTORIZADA' ? 'error' : 'aviso'}">
-          <div><strong>${Vinculaciones.estadoReincorporacion(estado)}</strong>
-          ${estado === 'ENTREVISTA_PENDIENTE' ? '<p>Completa la actualización de tu entrevista para continuar.</p>'
-            : estado === 'REVISION_PENDIENTE' ? '<p>Tu entrevista actualizada fue recibida. El Comité revisará la solicitud.</p>' : ''}</div></div>
-        <ul class="familia-actividad reincorporacion-pasos">${pasos.map(([texto,icono])=>`<li class="${icono}">${Profesionales.icono(icono)}${texto}</li>`).join('')}</ul>
-        ${estado === 'ENTREVISTA_PENDIENTE' ? `<a class="boton" href="perfil.html?reevaluacion=1&reincorporacion=${encodeURIComponent(v.id)}">Actualizar mi entrevista</a>` : ''}
-        <p>Estado de participación · <strong>${r.disponible ? 'Disponible para Match' : 'Fuera del Match'}</strong></p>` : ''}
+        <h3>Reincorporación del expediente</h3><p>Expediente familiar ${limpiarHtml(v.expedienteFamiliar)}</p>
+      </div></header>
+      ${puedeSolicitar ? `<p>Si deseas participar en un nuevo proceso de adopción, puedes solicitar la reincorporación de tu expediente.</p>
+        <div class="pro-acciones"><button class="boton" type="button" data-solicitar-reincorporacion>Solicitar reincorporación</button></div>` : ''}
+      ${estadoVisible ? `<div class="reincorporacion-estado ${estadoVisible[2]}">
+        ${Profesionales.icono(estadoVisible[1])}<strong>${estadoVisible[0]}</strong></div>
+        <ol class="reincorporacion-pasos${aprobada ? ' reincorporacion-pasos-aprobados' : ''}">${pasos.map(([icono, texto, detalle, clase]) =>
+          `<li class="${clase}"><span class="reincorporacion-indicador" aria-hidden="true">${icono}</span><strong>${texto}</strong><small>${detalle}</small></li>`).join('')}</ol>
+        ${aviso ? `<p class="familia-siguiente reincorporacion-aviso">${Profesionales.icono('informacion')}<span>${aviso}</span></p>` : ''}
+        ${entrevistaPendiente ? `<div class="pro-acciones"><a class="boton" href="perfil.html?reevaluacion=1&reincorporacion=${encodeURIComponent(v.id)}">Actualizar entrevista ${Profesionales.icono('flecha')}</a></div>` : ''}
+      ` : ''}
       </section>`;
   },
   confirmarReincorporacion(v, sesion) {
     if (!v?.reincorporacion?.puedeSolicitar || document.querySelector('[data-reincorporacion-dialogo]')) return;
     const d=document.createElement('dialog');
     d.className='pro-dialogo';d.dataset.reincorporacionDialogo='';d.setAttribute('aria-label','Solicitar reincorporación');
-    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('solicitudes')}</span><h2>Solicitar reincorporación</h2></div><p class="pro-identificadores">${limpiarHtml(v.codigo)} · Expediente familiar ${limpiarHtml(v.expedienteFamiliar)}</p>
-      <ol><li>Actualizar la información de tu hogar.</li><li>Enviar tu entrevista familiar.</li><li>Esperar la revisión institucional.</li></ol>
-      <p>Conservarás tu cuenta, expediente e historial de vinculaciones.</p>
+    d.innerHTML = `<header class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('solicitudes')}</span>
+      <div><h2>Solicitar reincorporación</h2><p>Expediente familiar ${limpiarHtml(v.expedienteFamiliar)}</p></div></header>
+      <p><strong>Para participar en un nuevo proceso de adopción:</strong></p>
+      <ol class="reincorporacion-pasos">
+        <li><span class="reincorporacion-indicador" aria-hidden="true">1</span>Actualiza y envía tu entrevista familiar.</li>
+        <li><span class="reincorporacion-indicador" aria-hidden="true">2</span>Espera la revisión institucional.</li>
+      </ol>
+      <p class="familia-siguiente reincorporacion-aviso">${Profesionales.icono('informacion')}<span>Conservarás tu cuenta, expediente e historial de vinculaciones.</span></p>
       <p class="mensaje error" role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button>
       <button type="button" class="boton" data-confirmar>Confirmar solicitud</button></div>`;
     const confirmar=d.querySelector('[data-confirmar]'), cancelar=d.querySelector('[data-cancelar]');

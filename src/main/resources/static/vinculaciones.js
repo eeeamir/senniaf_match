@@ -99,7 +99,7 @@ const Vinculaciones = {
           </span>` : ''}
       </div>`;
   },
-  familiar(lista, reincorporacion = () => '') {
+  familiar(lista) {
     if (!lista.length) {
       return `
         <section class="tarjeta">
@@ -168,7 +168,6 @@ const Vinculaciones = {
                   : ''
               }
             ${this.resultadoFamiliar(v)}
-            ${reincorporacion(v)}
           </details>`,
           )
           .join('')}
@@ -463,9 +462,9 @@ const Vinculaciones = {
           <p>El equipo técnico dará seguimiento durante esta etapa.</p>
           ${tiempos.diasReferencia != null ? `<p>Periodo de referencia: <strong>${tiempos.diasReferencia} días calendario.</strong></p>` : ''}
         </div></div>` : ''}
-      ${!convivenciaVigente && tiempos?.diasReferencia != null ? `<p class="ayuda">${Profesionales.icono('informacion')}
-        Periodo de referencia de convivencia: ${tiempos.diasReferencia} días calendario.</p>` : ''}
-      ${!convivenciaVigente && (!rechazada || v.estado === 'RESPUESTA_RECHAZADA_PENDIENTE_CIERRE') && v.estado !== 'PENDIENTE_RESPUESTA' ? `<p class="familia-siguiente">${Profesionales.icono('informacion')}${limpiarHtml(progreso.accion)}</p>` : ''}
+      ${!convivenciaVigente && v.resultadoCierre !== 'ADOPCION_FORMALIZADA'
+        && (!rechazada || v.estado === 'RESPUESTA_RECHAZADA_PENDIENTE_CIERRE') && v.estado !== 'PENDIENTE_RESPUESTA'
+        ? `<p class="familia-siguiente">${Profesionales.icono('informacion')}${limpiarHtml(progreso.accion)}</p>` : ''}
       <h3 class="familia-titulo-progreso">Progreso de la vinculación</h3>
       ${this.progresoVertical(v, progreso)}
       </section>`;

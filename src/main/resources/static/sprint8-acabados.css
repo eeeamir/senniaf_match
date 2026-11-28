@@ -464,16 +464,48 @@ details.vinculacion-familiar:not([open]) > summary { border-bottom: 0; padding-b
 .familia-flecha { position: absolute; right: 4px; top: 10px; color: #0866f5; font-size: 1.4rem; }
 details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); }
 .familia-etapas-horizontal strong { overflow-wrap: normal; text-wrap: balance; }
-.familia-reincorporacion > header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.familia-reincorporacion > header .pro-simbolo { flex-shrink: 0; }
-.familia-reincorporacion > header :is(h3,p) { margin: 0; }
-.familia-reincorporacion > header p { margin-top: 4px; }
-.familia-reincorporacion .reincorporacion-pasos { list-style: none; margin: 14px 0; padding: 0; border: 0; }
-.familia-reincorporacion .reincorporacion-pasos > li::before { display: none; }
-.familia-reincorporacion .reincorporacion-pasos .pro-icono { flex: 0 0 18px; }
+.familia-reincorporacion { margin-top: 1rem; }
+.familia-reincorporacion > header,
+[data-reincorporacion-dialogo] > header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+:is(.familia-reincorporacion, [data-reincorporacion-dialogo]) > header .pro-simbolo { flex-shrink: 0; }
+:is(.familia-reincorporacion, [data-reincorporacion-dialogo]) > header :is(h2,h3,p) { margin: 0; }
+:is(.familia-reincorporacion, [data-reincorporacion-dialogo]) > header p { margin-top: 4px; }
+[data-reincorporacion-dialogo] > header { padding-bottom: 1rem; border-bottom: 1px solid #d6e1f0; }
+.familia-reincorporacion > .reincorporacion-estado {
+  border-top: 1px solid #d6e1f0; padding-top: 1rem; display: flex; align-items: center; gap: .5rem;
+}
+:is(.familia-reincorporacion, [data-reincorporacion-dialogo]) .reincorporacion-pasos {
+  list-style: none; margin: .9rem 0; padding: 0;
+}
+.reincorporacion-indicador {
+  grid-row: 1 / span 2; display: grid; place-items: center; flex: 0 0 36px;
+  width: 36px; height: 36px; border-radius: 50%; background: #e8f0ff; color: #0866f5;
+}
+.familia-reincorporacion .reincorporacion-pasos > li {
+  display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: .2rem .75rem;
+}
+.familia-reincorporacion .reincorporacion-pasos small { grid-column: 2; font-size: .9rem; }
+.familia-reincorporacion .reincorporacion-pasos-aprobados > li {
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+}
+.familia-reincorporacion .reincorporacion-pasos-aprobados small { grid-column: 3; }
+.familia-reincorporacion .completado { color: #08705f; }
+.familia-reincorporacion .pendiente { color: #895e1e; }
+.familia-reincorporacion .no-autorizado { color: #a52e38; }
+.familia-reincorporacion li > strong { color: #153e63; }
+.completado > .reincorporacion-indicador { background: #e0f1eb; color: #08705f; }
+.pendiente > .reincorporacion-indicador { background: #fff1db; color: #895e1e; }
+.en-espera > .reincorporacion-indicador { background: #edf2f7; color: #59789a; }
+.reincorporacion-aviso { display: flex; gap: .6rem; align-items: center; padding: .8rem; background: #eef4fb; border-radius: .6rem; }
+.reincorporacion-aviso .pro-icono { flex: 0 0 16px; }
+.familia-reincorporacion .pro-acciones { justify-content: flex-end; }
+@media (max-width: 480px) {
+  .familia-reincorporacion .reincorporacion-pasos-aprobados > li { grid-template-columns: 36px minmax(0, 1fr); }
+  .familia-reincorporacion .reincorporacion-pasos-aprobados small { grid-column: 2; }
+}
 [data-revisar-reincorporacion-dialogo] .pro-motivo > .pro-icono { flex-shrink: 0; }
 
-.vinculacion-familiar > :is(.familia-informacion-asignada, .familia-respuesta, .familia-resultado, .familia-reincorporacion) {
+.vinculacion-familiar > :is(.familia-informacion-asignada, .familia-respuesta, .familia-resultado) {
   border-top: 1px solid #d6e1f0;
   padding-top: 18px;
   margin: 0;
@@ -485,7 +517,6 @@ details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); 
 .vinculacion-familiar > .familia-respuesta h3 { margin: 0 0 8px; }
 .vinculacion-familiar > .familia-respuesta .pro-acciones { justify-content: flex-end; }
 .vinculacion-familiar > .familia-respuesta .aviso-legal-familia { margin: 12px 0 0; }
-.vinculacion-familiar > .familia-reincorporacion { border-inline: 0; border-bottom: 0; border-radius: 0; box-shadow: none; padding-inline: 0; padding-bottom: 0; }
 .familia-fecha-etapa { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; margin-top: 5px; }
 .familia-tiempo-relativo { color: #476788; font-size: .875rem; font-weight: 600; }
 .familia-etapas-vertical .completado .familia-etapa-estado { color: #007b69; }
@@ -548,6 +579,7 @@ details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); 
   margin: 0;
   padding: 0;
 }
+.profesional .vinculacion-autorizacion .detalle-datos.autorizacion-resumen { padding-inline: 0; }
 .vinculacion-autorizacion .detalle-datos.autorizacion-resumen > div { border-bottom: 0; }
 .s8-acabado .visita-panel .visita-cabecera { color: #153952; }
 .visita-panel .detalle-datos.visita-detalle > div { border-bottom: 0; }
