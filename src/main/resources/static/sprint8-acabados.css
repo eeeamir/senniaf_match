@@ -498,7 +498,7 @@ details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); 
 .en-espera > .reincorporacion-indicador { background: #edf2f7; color: #59789a; }
 .reincorporacion-aviso { display: flex; gap: .6rem; align-items: center; padding: .8rem; background: #eef4fb; border-radius: .6rem; }
 .reincorporacion-aviso .pro-icono { flex: 0 0 16px; }
-[data-reincorporacion-dialogo] > .reincorporacion-aviso > span {
+.familia-siguiente.reincorporacion-aviso > span {
   flex: 1 1 auto; min-width: 0; color: inherit;
 }
 .familia-reincorporacion .pro-acciones { justify-content: flex-end; }
