@@ -175,14 +175,7 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 .vinculacion-pestanas button { flex: 1; justify-content: center; }
 .vinculacion-pestanas button[aria-selected=true] { background: #0866f5; color: #fff; }
 .vinculacion-panel[hidden] { display: none!important; }
-.vinculacion-etapas { list-style: none; padding: 0; margin: 26px 0; }
-.vinculacion-etapas > li { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: start; gap: 18px; position: relative; padding-bottom: 26px; }
-.vinculacion-etapas > li:not(:last-child)::before { content: ''; position: absolute; width: 2px; background: #d6e5fa; left: 17px; top: 34px; bottom: 0; }
-.vinculacion-hito { width: 36px; height: 36px; border: 2px solid #c3d9fa; border-radius: 50%; display: grid; place-items: center; background: #fff; color: #5c80b0; z-index: 1; }
-.registrada .vinculacion-hito { background: #00865e; border-color: #00865e; color: #fff; }
-.vinculacion-etapas h3, .vinculacion-historial h3 { margin: 0 0 8px; font-size: 16px; }
-.vinculacion-etapas p { margin: 0; line-height: 1.6; }
-.vinculacion-etapa-meta { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; font-size: 12px; color: #56769b; }
+.vinculacion-historial h3 { margin: 0 0 8px; font-size: 16px; }
 .vinculacion-reportes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
 .vinculacion-reporte-contenido { padding: 0 24px 26px; }
 .vinculacion-reporte-contenido p { margin: 0 0 20px; line-height: 1.65; }
@@ -212,8 +205,6 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 @media(max-width:1250px) {
   .vinculaciones-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .vinculacion-accesos > .vinculacion-acceso { flex-direction: column; }
-  .vinculacion-etapas > li { grid-template-columns: 36px minmax(0, 1fr); }
-  .vinculacion-etapa-meta { grid-column: 2; align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
 }
 @media(max-width:850px) {
   .vinculaciones-lista, .vinculacion-accesos, .vinculacion-reportes { grid-template-columns: 1fr; }
@@ -225,7 +216,6 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 @media(max-width:600px) {
   .vinculacion-tarjeta { padding: 24px!important; }
   .vinculacion-detalle > .tarjeta, .vinculacion-panel > .tarjeta { padding: 24px 20px; }
-  .vinculacion-etapas > li { gap: 12px; }
   .vinculacion-historial > li { gap: 12px; }
   .pro-panel-profesional .pro-informe-contenido { grid-template-columns: 1fr; padding: 0 20px 24px; }
   .pro-panel-profesional .pro-informe-registro { padding: 22px 20px; }
@@ -728,3 +718,28 @@ body.profesional{--azul:#0866f5;--azul-oscuro:#103957;--suave:#56769b;background
 }
 .pro-historial-pesos .pesos-meta { margin-top: 14px; }
 .pro-modulo-pesos .pro-ayuda-con-icono > span { min-width: 0; }
+
+#seguimiento-reportes .visita-panel { margin-bottom: 1rem; }
+#seguimiento-reportes .visita-panel .visitas-domiciliarias { margin-bottom: 0; }
+.visitas-lista li.visita-realizada { display: block; padding: 0; border-color: #badfd3; background: #f1f8f5; }
+.visita-cabecera {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: .6rem;
+  list-style: none;
+  cursor: pointer;
+  padding: .85rem;
+}
+.visita-cabecera::-webkit-details-marker { display: none; }
+.visita-realizada-estado, .autorizacion-registrada { color: #08705f; }
+.visita-realizada-estado { font-size: .875rem; font-weight: 600; }
+.visita-realizada details[open] .reporte-chevron::before { transform: rotate(225deg); }
+.visita-detalle { margin: 0 .85rem; padding: .8rem 0; border-top: 1px solid #cddfd8; }
+.visita-detalle > div { border-bottom: 0; min-width: 0; }
+.visita-edicion { justify-content: flex-end; margin: 0 .85rem .85rem; }
+.autorizacion-registrada { display: flex; align-items: center; gap: .55rem; }
+.autorizacion-resumen { margin: 1rem 0 0; padding-top: 1rem; border-top: 1px solid #d6e1f0; }
+.autorizacion-resumen > div { border-bottom: 0; min-width: 0; }
+.autorizacion-resumen dd { font-weight: 600; }
+.familia-fecha-etapa .familia-tiempo-relativo { margin-inline-start: auto; }

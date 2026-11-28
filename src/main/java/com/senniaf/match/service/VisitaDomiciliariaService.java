@@ -35,7 +35,7 @@ public class VisitaDomiciliariaService {
     public record Solicitud(LocalDate fecha, LocalTime inicio, LocalTime fin, UUID claveRegistro,
                             Long version, String motivoModificacion) {}
     public record Registro(Long id, LocalDate fecha, LocalTime inicio, LocalTime fin, long minutos,
-                           long version, boolean puedeEditar) {}
+                           long version, boolean puedeEditar, String responsable) {}
     public record Movimiento(Long visitaId, String responsable, Instant fecha, Accion accion,
                              Map<String, Cambio> cambios, String motivo) {}
     public record Consulta(List<Registro> registros, List<Movimiento> historial, LocalDate fechaMinima,
@@ -130,7 +130,7 @@ public class VisitaDomiciliariaService {
         if (v.getEstado() != Vinculacion.Estado.RESPUESTA_ACEPTADA) return "NO_DISPONIBLE";
         if (v.getFechaInicioConvivencia() == null || v.getFechaRegistroInicio() == null
                 || v.getFechaInicioConvivencia().isAfter(LocalDate.now(PANAMA))) return "PENDIENTE";
-        return vinculaciones.reportable(v) && v.getFechaEmisionAutorizacion() != null ? "VIGENTE" : "NO_DISPONIBLE";
+        return vinculaciones.reportable(v) ? "VIGENTE" : "NO_DISPONIBLE";
     }
 
     private void validar(Vinculacion v, Solicitud datos, Instant ahora, Long excluir) {
@@ -171,7 +171,7 @@ public class VisitaDomiciliariaService {
     private Registro vista(VisitaDomiciliaria visita, Usuario usuario, boolean editable) {
         return new Registro(visita.getId(), visita.getFecha(), visita.getInicio(), visita.getFin(),
                 Duration.between(visita.getInicio(), visita.getFin()).toMinutes(), visita.getVersion(),
-                editable && autor(visita, usuario));
+                editable && autor(visita, usuario), visita.getAutor());
     }
 
     private void auditar(VisitaDomiciliaria visita, Usuario usuario, Instant ahora, Accion accion,

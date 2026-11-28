@@ -407,32 +407,11 @@ const Vinculaciones = {
       </dl>
     </section>`;
   },
-  tiemposEtapa(v, indice, fechaFamiliar) {
-    const t = v.tiempos;
-    if (!t) return '';
-    const a = v.autorizacionPreadoptiva;
-    const duracion = (titulo, valor) => valor == null ? '' :
-      `<p class="vinculacion-tiempo">${titulo}: <strong>${this.dias(valor)}</strong></p>`;
-    const familiar = fechaFamiliar !== undefined;
-    if (indice !== 3 && familiar) return '';
-    if (indice === 1) return duracion('Desde la propuesta', t.respuesta);
-    if (indice !== 3) return '';
-    const fecha = (titulo, valor) => valor
-      ? `<p class="familia-actuacion"><span>${titulo}</span><time>${limpiarHtml(valor)}</time></p>` : '';
-    const interrupcion = v.seguimientoFamiliar?.interrupcionRegistradaEl;
-    return (a ? `<div class="familia-actuaciones">
-      ${fecha('Autorización preadoptiva', a.fechaEmision && this.fechaCivil(a.fechaEmision))}
-      ${fecha('Registro de autorización', a.registradaEl && this.fechaHora(a.registradaEl))}
-      ${duracion('Desde la aceptación', t.autorizacion)}
-      ${a.registradaEl !== a.inicioRegistradoEl ? fecha('Inicio de convivencia', t.fechaInicio && this.fechaCivil(t.fechaInicio)) : ''}
-      ${duracion(t.convivenciaInterrumpida ? 'Hasta la interrupción' : t.convivenciaFinalizada ? 'Hasta el cierre' : 'Tiempo de convivencia', t.convivencia)}
-      </div>` : '') + (familiar && interrupcion ? fecha('Interrupción de convivencia', this.fechaHora(interrupcion)) : '');
-  },
   haceDias(valor) {
     if (!valor) return '';
     const civil = f => new Intl.DateTimeFormat('sv-SE', {dateStyle: 'short', timeZone: 'America/Panama'}).format(new Date(f));
     const dias = (Date.parse(civil(Date.now())) - Date.parse(civil(valor))) / 86400000;
-    return Number.isFinite(dias) && dias >= 0 ? `<span class="familia-tiempo-relativo">${dias === 0 ? 'Hoy' : 'Hace ' + this.dias(dias)}</span>` : '';
+    return Number.isFinite(dias) && dias >= 0 ? `<span class="familia-tiempo-relativo">${dias === 0 ? 'Hoy' : 'Hace ' + new Intl.NumberFormat('es-PA').format(dias) + (dias === 1 ? ' día' : ' días')}</span>` : '';
   },
   indicadorEtapa(etapa, indice) {
     const icono = etapa.texto === 'Rechazada' ? 'cerrar' : {interrumpido: 'advertencia', completado: 'comprobar'}[etapa.clase];
@@ -481,16 +460,7 @@ const Vinculaciones = {
         Periodo de referencia de convivencia: ${tiempos.diasReferencia} días calendario.</p>` : ''}
       ${(!rechazada || v.estado === 'RESPUESTA_RECHAZADA_PENDIENTE_CIERRE') && v.estado !== 'PENDIENTE_RESPUESTA' ? `<p class="familia-siguiente">${Profesionales.icono('informacion')}${limpiarHtml(progreso.accion)}</p>` : ''}
       <h3 class="familia-titulo-progreso">Progreso de la vinculación</h3>
-      <ol class="familia-etapas-vertical">
-        ${progreso.etapas.map((etapa, indice) => `<li class="${etapa.clase}${etapa.texto === 'Rechazada' ? ' familia-etapa-rechazada' : ''}" ${etapa.clase === 'actual' ? 'aria-current="step"' : ''}>
-          ${this.indicadorEtapa(etapa, indice)}
-          <div class="familia-etapa-tarjeta"><h3>${etapa.titulo}</h3><p class="familia-etapa-estado">${etapa.texto}</p>
-            ${etapa.fecha ? `<div class="familia-fecha-etapa"><time>${limpiarHtml(this.fechaHora(etapa.fecha))}</time>${this.haceDias(etapa.fecha)}</div>` : ''}
-            ${etapa.detalle ? `<p>${limpiarHtml(etapa.detalle)}</p>` : ''}
-            ${etapa.fechaHecho ? `<p>Fecha de interrupción: ${this.fechaCivil(etapa.fechaHecho)}</p>` : ''}
-            ${this.tiemposEtapa(v, indice, etapa.fecha)}
-          </div></li>`).join('')}
-      </ol>
+      ${this.progresoVertical(v, progreso)}
       </section>`;
   },
   resultadoFamiliar(v) {
@@ -691,27 +661,27 @@ const Vinculaciones = {
     botones.forEach((b,i)=>{b.onclick=()=>mostrar(b.dataset.seguimiento);b.onkeydown=e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const j=e.key==='Home'?0:e.key==='End'?botones.length-1:(i+(e.key==='ArrowRight'?1:-1)+botones.length)%botones.length;botones[j].focus();mostrar(botones[j].dataset.seguimiento);};});
     mostrar(botones.some(b=>b.dataset.seguimiento===activo)?activo:'proceso');
   },
+  progresoVertical(v, progreso = this.obtenerProgreso(v)) {
+    return `<ol class="familia-etapas-vertical">${progreso.etapas.map((etapa, indice) => {
+      const fecha = indice === 3 && v.interrupcionRegistrada
+        ? v.seguimientoFamiliar?.interrupcionRegistradaEl || etapa.fecha
+        : indice === 2 && v.resultadoCierre === 'REVOCACION_ASIGNACION'
+          ? v.cierre?.registradoEl || v.seguimientoFamiliar?.cierreRegistradoEl || etapa.fecha
+          : etapa.fecha;
+      return `<li class="${etapa.clase}${etapa.texto === 'Rechazada' ? ' familia-etapa-rechazada' : ''}" ${etapa.clase === 'actual' ? 'aria-current="step"' : ''}>
+        ${this.indicadorEtapa(etapa, indice)}
+        <div class="familia-etapa-tarjeta">
+          <h3>${etapa.titulo}</h3><p class="familia-etapa-estado">${etapa.texto}</p>
+          ${fecha ? `<div class="familia-fecha-etapa"><time>${limpiarHtml(this.fechaHora(fecha))}</time>${this.haceDias(fecha)}</div>` : ''}
+        </div>
+      </li>`;
+    }).join('')}</ol>`;
+  },
   proceso(v) {
-    const progreso = this.obtenerProgreso(v);
-    const revocada = v.resultadoCierre === 'REVOCACION_ASIGNACION';
-    return `
-      <section class="tarjeta">
-        <h2>${Profesionales.icono('solicitudes')}Etapas del proceso</h2>
-        <ol class="vinculacion-etapas">
-          ${progreso.etapas.map((etapa, indice) => `
-            <li class="${etapa.clase}">
-              <span class="vinculacion-hito">
-                ${Profesionales.icono(etapa.clase === 'interrumpido' ? 'advertencia' : etapa.clase === 'completado' ? 'comprobar' : 'informacion')}
-              </span>
-              <div><h3>${etapa.titulo}</h3>${etapa.detalle ? `<p>${limpiarHtml(etapa.detalle)}</p>` : ''}${etapa.fechaHecho ? `<p>Fecha de interrupción: ${limpiarHtml(this.fechaCivil(etapa.fechaHecho))}</p>` : ''}${this.tiemposEtapa(v, indice)}</div>
-              <div class="vinculacion-etapa-meta">
-                <span class="chip ${etapa.clase === 'interrumpido' ? 'vinculacion-negativa' : etapa.clase === 'completado' ? 'vinculacion-positiva' : 'retirado'}">${etapa.texto}</span>
-                ${revocada && indice === 2 && v.cierre?.registradoEl ? `<time>Revocación · ${limpiarHtml(this.fechaHora(v.cierre.registradoEl))}</time>` : ''}
-                ${etapa.fecha ? `<time>${limpiarHtml(this.fechaHora(etapa.fecha))}</time>` : ''}
-              </div>
-            </li>`).join('')}
-        </ol>
-      </section>`;
+    return `<section class="tarjeta">
+      <h2>${Profesionales.icono('solicitudes')}Progreso de la vinculación</h2>
+      ${this.progresoVertical(v)}
+    </section>`;
   },
   historialConDecision(v, seguimientos = [], visitas = []) {
     const decision = v.decisionComite;
@@ -741,6 +711,8 @@ const Vinculaciones = {
       const abiertos = new Set([...reportes.querySelectorAll('[data-desplegar-reporte][aria-expanded="true"]')]
         .map(boton => boton.closest('[data-apartado]').dataset.apartado));
       if (rol) abiertos.add(rol);
+      const visitasIndividualesAbiertas = new Set([...reportes.querySelectorAll('details[data-visita-id][open]')]
+        .map(visita => visita.dataset.visitaId));
       const visitasAbiertas = reportes.querySelector('[data-apartado=visitas] [data-desplegar-reporte]')?.getAttribute('aria-expanded') !== 'false';
       reportes.setAttribute('aria-busy', 'true');
       historial.querySelector('[data-estado-reportes]')?.remove();
@@ -755,7 +727,7 @@ const Vinculaciones = {
             <p class="mensaje error" role="alert">No se pudo cargar toda la información profesional. ${limpiarHtml(errores[0].reason.message)}</p>
             <button class="boton secundario chico" type="button" data-reintentar-reportes>Reintentar consulta</button></div>` : '';
           reportes.innerHTML = (mensaje ? `<p class="mensaje exito" role="status">${limpiarHtml(mensaje)}</p>` : '')
-            + (visitas ? VisitasDomiciliarias.panel(visitas, visitasAbiertas) : '')
+            + (visitas ? VisitasDomiciliarias.panel(visitas, visitasAbiertas, visitasIndividualesAbiertas) : '')
             + (datos ? SeguimientosVinculacion.panel(datos, abiertos) : '') + aviso;
           historial.innerHTML = aviso + this.historialConDecision(vinculacion, datos?.historial, visitas?.historial);
           if (id && !reportes.hidden) reportes.querySelector(`[data-ver-seguimiento="${id}"]`)?.focus();
@@ -845,7 +817,7 @@ const Vinculaciones = {
     }[estado] || 'Sin solicitud de reincorporación';
   },
   panelCierre(v, rol) {
-    if (!v.cierre && !v.estadoCierre && !v.puedeCerrar) return '';
+    if (rol !== 'COMITE' || (!v.cierre && !v.estadoCierre && !v.puedeCerrar)) return '';
     const x = v.cierre;
     const pendienteInfantil = x?.estadoInfantil === 'PENDIENTE_REVISION';
     const pendienteFamiliar = x?.estadoFamiliar === 'PENDIENTE_REVISION';
@@ -955,33 +927,28 @@ const Vinculaciones = {
   panelAutorizacion(v) {
     const autorizacion = v.autorizacionPreadoptiva;
     if (!autorizacion && !v.puedeRegistrarAutorizacion) return '';
-    return `
-      <section class="tarjeta vinculacion-autorizacion">
-        <h2>${Profesionales.icono('informe')}Registro de autorización preadoptiva</h2>
-        <p>
-          Registra una autorización previamente emitida por la autoridad competente
-          para continuar con el proceso de vinculación
-        </p>
-        ${autorizacion ? `
-          <dl class="detalle-datos">
-            ${autorizacion.referencia ? `<div><dt>Resolución o autorización institucional</dt>
-              <dd>${limpiarHtml(autorizacion.referencia)}</dd></div>` : ''}
-            ${autorizacion.fechaEmision ? `<div><dt>Fecha de emisión</dt>
-              <dd>${limpiarHtml(this.fechaCivil(autorizacion.fechaEmision))}</dd></div>` : ''}
-            <div><dt>Inicio de convivencia</dt>
-              <dd>${autorizacion.fechaInicioConvivencia
-                ? limpiarHtml(this.fechaCivil(autorizacion.fechaInicioConvivencia))
-                : 'Sin inicio registrado'}</dd></div>
-            <div><dt>Responsable del registro</dt>
-              <dd>${limpiarHtml(autorizacion.responsable)}
-                · ${limpiarHtml(Profesionales.etiqueta(autorizacion.rol))}
-                · ${limpiarHtml(this.fechaHora(autorizacion.registradaEl))} · Panamá</dd></div>
-          </dl>` : ''}
-        ${v.puedeRegistrarAutorizacion ? `
-          <button type="button" class="boton" data-autorizacion>
-            ${Profesionales.icono('informe')}Registrar autorización preadoptiva
-          </button>` : ''}
-      </section>`;
+    const mismaActuacion = autorizacion?.registradaEl && autorizacion.registradaEl === autorizacion.inicioRegistradoEl
+      && autorizacion.fechaInicioConvivencia === this.fechaCivil(autorizacion.registradaEl).split('/').reverse().join('-');
+    return `<section class="tarjeta vinculacion-autorizacion">
+      <h2>${Profesionales.icono('informe')}Autorización de convivencia preadoptiva</h2>
+      ${autorizacion ? `
+        <p class="autorizacion-registrada">${Profesionales.icono('comprobar')}<strong>Autorización registrada</strong></p>
+        <p>${autorizacion.fechaInicioConvivencia
+          ? 'La autorización quedó registrada y se inició la etapa de convivencia preadoptiva.'
+          : 'La autorización quedó registrada. Este antecedente no tiene fecha de inicio de convivencia.'}</p>
+        <dl class="detalle-datos autorizacion-resumen">
+          <div><dt>${mismaActuacion ? 'Autorización e inicio de convivencia' : 'Registro de autorización'}</dt>
+            <dd>${limpiarHtml(this.fechaHora(autorizacion.registradaEl))}</dd></div>
+          <div><dt>Responsable del registro</dt>
+            <dd>${limpiarHtml(autorizacion.responsable)} · ${autorizacion.rol === 'COMITE' ? 'Comité' : limpiarHtml(Profesionales.etiqueta(autorizacion.rol))}</dd></div>
+          ${!mismaActuacion && autorizacion.fechaInicioConvivencia ? `
+            <div><dt>Inicio efectivo registrado</dt><dd>${limpiarHtml(this.fechaCivil(autorizacion.fechaInicioConvivencia))}</dd></div>` : ''}
+        </dl>` : `
+        <p>Registra la autorización emitida por SENNIAF para iniciar la convivencia preadoptiva.</p>
+        <button type="button" class="boton" data-autorizacion>
+          ${Profesionales.icono('informe')}Registrar autorización preadoptiva
+        </button>`}
+    </section>`;
   },
   registrarAutorizacion(c,v,sesion){
     const d = document.createElement('dialog');

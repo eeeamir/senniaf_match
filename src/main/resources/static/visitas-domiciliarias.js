@@ -26,23 +26,34 @@ const VisitasDomiciliarias = {
       hora: `${valor('hour')}:${valor('minute')}`};
   },
 
-  panel(datos, abierto) {
+  panel(datos, abierto, visitasAbiertas = new Set()) {
     const {registros, referencia, puedeRegistrar, estadoConvivencia, trabajoSocial} = datos;
     const vigente = estadoConvivencia === 'VIGENTE';
     const realizadas = registros.length;
     const completadas = Math.min(realizadas, referencia);
     const mostrarProgreso = vigente || realizadas > 0;
     const porcentaje = Math.round(100 * completadas / referencia);
-    const filas = registros.map((visita, i) => `<li><span class="visita-icono">${Profesionales.icono('comprobar')}</span>
-      <div class="visita-resumen"><strong>Visita ${i + 1}</strong>
-        <p class="ayuda">${Vinculaciones.fechaCivil(visita.fecha)} · ${limpiarHtml(visita.inicio.slice(0, 5))} – ${limpiarHtml(visita.fin.slice(0, 5))}</p></div>
-      <div class="visita-horario"><strong>${this.duracion(visita.minutos)}</strong>
-        ${trabajoSocial && vigente && visita.puedeEditar ? `<button type="button" class="enlace reporte-editar" data-editar-visita="${visita.id}" aria-label="Editar visita ${i + 1}">${Profesionales.icono('editar')}Editar</button>` : ''}</div></li>`);
+    const filas = registros.map((visita, i) => `<li class="visita-realizada">
+      <details data-visita-id="${visita.id}" ${visitasAbiertas.has(String(visita.id)) ? 'open' : ''}>
+        <summary class="visita-cabecera">
+          <span class="visita-icono">${Profesionales.icono('comprobar')}</span>
+          <strong>Visita domiciliaria ${i + 1}</strong>
+          <span class="visita-realizada-estado">Realizada</span>
+          <span class="reporte-chevron" aria-hidden="true"></span>
+        </summary>
+        <dl class="detalle-datos visita-detalle">
+          <div><dt>Fecha de visita</dt><dd>${Vinculaciones.fechaCivil(visita.fecha)}</dd></div>
+          <div><dt>Horario</dt><dd>${this.hora(visita.inicio)} – ${this.hora(visita.fin)}</dd></div>
+          <div><dt>Profesional responsable</dt><dd>${limpiarHtml(visita.responsable)}</dd></div>
+          <div><dt>Duración</dt><dd>${this.duracion(visita.minutos)}</dd></div>
+        </dl>
+        ${trabajoSocial && vigente && visita.puedeEditar ? `<div class="pro-acciones visita-edicion"><button type="button" class="enlace reporte-editar" data-editar-visita="${visita.id}" aria-label="Editar visita ${i + 1}">${Profesionales.icono('editar')}Editar</button></div>` : ''}
+      </details></li>`);
     const previstas = filas.slice(0, referencia);
     if (vigente) {
       for (let i = completadas; i < referencia; i++) {
-        previstas.push(`<li class="visita-pendiente"><span class="visita-icono">${Profesionales.icono('reloj')}</span>
-          <strong>Visita ${i + 1}</strong><span class="visita-horario">Pendiente</span></li>`);
+        previstas.push(`<li class="visita-pendiente"><span class="visita-icono">${Profesionales.icono('calendario')}</span>
+          <strong>Visita domiciliaria ${i + 1}</strong><span class="visita-horario">Pendiente</span></li>`);
       }
     }
     const aviso = {
@@ -63,8 +74,8 @@ const VisitasDomiciliarias = {
         <p class="ayuda">Total de visitas realizadas: ${realizadas}</p>` : ''}`;
     const accion = trabajoSocial && vigente && puedeRegistrar
       ? `<button type="button" class="boton" data-registrar-visita>${Profesionales.icono('nuevo')}${completadas < referencia ? 'Registrar visita domiciliaria' : 'Registrar visita adicional'}</button>` : '';
-    return SeguimientosVinculacion.apartado('visitas', 'visitas-domiciliarias' + (completadas === referencia ? ' completadas' : ''),
-      abierto, cabecera, contenido, accion);
+    return `<div class="vinculacion-reportes visita-panel">${SeguimientosVinculacion.apartado('visitas',
+      'visitas-domiciliarias' + (completadas === referencia ? ' completadas' : ''), abierto, cabecera, contenido, accion)}</div>`;
   },
 
   formulario(vinculacion, datos, visita, disparador, guardar) {
@@ -80,7 +91,6 @@ const VisitasDomiciliarias = {
     dialogo.insertAdjacentHTML('beforeend', `
       <p class="ayuda">${limpiarHtml(vinculacion.codigo)} · ${numero ? 'Visita ' + numero : 'Convivencia preadoptiva'}</p>
       <form class="pro-interrupcion-form" novalidate>
-        <p class="ayuda">Los campos marcados con * son obligatorios.</p>
         <div class="visita-campo"><label for="visita-fecha">Fecha de la visita *</label>
           <input id="visita-fecha" name="fecha" type="date" min="${datos.fechaMinima}" max="${hoy}" lang="es-PA" aria-describedby="visita-error-fecha" required autofocus>
           <small id="visita-error-fecha" class="visita-error-campo" role="alert" hidden></small></div>

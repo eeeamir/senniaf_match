@@ -94,7 +94,7 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 .s8-acabado .pro-ajuste-total{background:#edf8f4;border-radius:12px;padding:14px 18px}
 .s8-acabado .familia-actividad>li h3 .chip{background:#e7f8f1;color:#166747}
 
-.s8-acabado .pro-dialogo [data-error]:empty{display:none}.s8-acabado .s8-autorizacion-dialogo form>p{margin:0}.s8-acabado .vinculacion-etapas [data-autorizacion]{margin-top:12px}.s8-acabado .vinculacion-estado-hero .chip.retirado{background:#ffe8ed;color:#864050}
+.s8-acabado .pro-dialogo [data-error]:empty{display:none}.s8-acabado .s8-autorizacion-dialogo form>p{margin:0}.s8-acabado .vinculacion-estado-hero .chip.retirado{background:#ffe8ed;color:#864050}
 
 /* Los apartados familiares comparten proporciones; el color identifica cada sección. */
 .s8-acabado .pro-expedientes-completos{gap:14px 16px;align-items:start}
@@ -119,9 +119,6 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 /* Los encabezados y acciones mantienen la misma separación sin mover el contenido de lectura. */
 .s8-acabado .pro-fila-titulo{gap:16px;align-items:center}
 .s8-acabado .vinculacion-general>h2,.s8-acabado .vinculacion-panel>.tarjeta>h2{margin-top:0}
-.s8-acabado .vinculacion-etapas>li{gap:16px;padding-block:16px}
-.s8-acabado .vinculacion-etapas h3{margin:0 0 6px;line-height:1.4}
-.s8-acabado .vinculacion-etapas p{margin:0;line-height:1.6}
 .s8-acabado .familia-entrevista-seccion{border-radius:16px;margin-bottom:16px}
 .s8-acabado .familia-entrevista-seccion>summary{padding:16px 20px;min-height:76px;gap:12px}
 .s8-acabado .familia-entrevista-seccion .pro-simbolo{width:38px;height:38px;border-radius:12px}
@@ -319,8 +316,6 @@ body.s8-acabado{background:#f4f7fc;color:#173b5c}
 
 .s8-acabado .chip.vinculacion-negativa { background: #fff0f0; color: #a12232; }
 .s8-acabado .chip.vinculacion-positiva { background: #eaf6ee; color: #21633b; }
-.s8-acabado .vinculacion-etapas .interrumpido .vinculacion-hito { background: #fff0f0; border-color: #a12232; color: #a12232; }
-.s8-acabado .vinculacion-etapas .completado .vinculacion-hito { background: #21633b; border-color: #21633b; color: #fff; }
 .s8-acabado .familia-etapas .interrumpido .familia-paso { background: #fff0f0; color: #a12232; border-color: #a12232; }
 .s8-acabado .familia-etapas .interrumpido small { color: #a12232; }
 .s8-acabado .vinculacion-cierre p, .s8-acabado .vinculacion-linea p { color: #476788; }
@@ -540,3 +535,18 @@ details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); 
   padding-top: 16px;
   margin-top: 4px;
 }
+
+.s8-acabado .vinculacion-detalle .vinculacion-autorizacion .autorizacion-registrada {
+  color: #08705f;
+}
+.autorizacion-registrada .pro-icono {
+  box-sizing: content-box;
+  width: .7rem;
+  height: .7rem;
+  padding: 2px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.vinculacion-autorizacion .detalle-datos.autorizacion-resumen > div { border-bottom: 0; }
+.s8-acabado .visita-panel .visita-cabecera { color: #153952; }
+.visita-panel .detalle-datos.visita-detalle > div { border-bottom: 0; }
