@@ -9,7 +9,7 @@ public class SolicitudReincorporacion {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "vinculacion_id", nullable = false, unique = true, updatable = false)
+    @JoinColumn(name = "vinculacion_id", nullable = false, updatable = false)
     private Vinculacion vinculacion;
     @Column(nullable = false, updatable = false)
     private LocalDateTime solicitada;

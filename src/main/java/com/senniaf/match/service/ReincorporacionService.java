@@ -37,11 +37,13 @@ public class ReincorporacionService {
 
     public Map<String, Object> estado(Vinculacion v) {
         if (v.getResultadoCierre() != ADOPCION_FORMALIZADA) return null;
-        var solicitud = solicitudes.findByVinculacionId(v.getId());
+        var solicitud = solicitudes.findFirstByVinculacionIdOrderByIdDesc(v.getId());
         Map<String, Object> resultado = new LinkedHashMap<>();
         resultado.put("estado", solicitud.map(this::estado).orElse("SIN_SOLICITUD"));
-        resultado.put("puedeSolicitar", solicitud.isEmpty() && habilitada(v, v.getFamilia())
+        resultado.put("puedeSolicitar", solicitud.map(s -> Boolean.FALSE.equals(s.getAutorizada())).orElse(true) && habilitada(v, v.getFamilia())
                 && v.getFamilia().isPerfilCompleto() && !v.getFamilia().isReevaluacionPendiente());
+        solicitud.filter(s -> Boolean.FALSE.equals(s.getAutorizada()))
+                .ifPresent(s -> resultado.put("motivoNoAutorizacion", s.getFundamento()));
         boolean otraReserva = vinculaciones.otraReservaFamiliar(v.getFamilia().getId(), v.getId());
         resultado.put("otraReserva", otraReserva);
         resultado.put("disponible", solicitud.map(s -> Boolean.TRUE.equals(s.getAutorizada())).orElse(false)
@@ -58,7 +60,8 @@ public class ReincorporacionService {
         if (!familia.getId().equals(v.getFamilia().getId())) throw sinAcceso();
         if (!habilitada(v, familia) || !familia.isPerfilCompleto() || familia.isReevaluacionPendiente())
             throw new IllegalStateException("La familia no reúne las condiciones para solicitar reincorporación");
-        if (solicitudes.findByVinculacionId(id).isPresent())
+        if (solicitudes.findFirstByVinculacionIdOrderByIdDesc(id)
+                .filter(s -> !Boolean.FALSE.equals(s.getAutorizada())).isPresent())
             throw new IllegalStateException("Ya existe una solicitud de reincorporación para este cierre");
         solicitudes.save(new SolicitudReincorporacion(v));
         auditar(familia, actor, "REINCORPORACION_SOLICITADA");
@@ -67,7 +70,7 @@ public class ReincorporacionService {
     /** Se ejecuta dentro de la misma transacción que guarda la entrevista y bloquea la familia. */
     void confirmarEntrevista(PerfilFamilia familia, Long id, boolean confirmacion) {
         if (!confirmacion) throw new IllegalArgumentException("Confirma la información de tu entrevista");
-        var s = solicitudes.findByVinculacionId(id).orElseThrow(this::sinAcceso);
+        var s = solicitudes.findByVinculacionIdAndResueltaIsNull(id).orElseThrow(this::sinAcceso);
         var v = s.getVinculacion();
         if (!familia.getId().equals(v.getFamilia().getId())) throw sinAcceso();
         if (!habilitada(v, familia) || s.getEntrevistaActualizada() != null || s.getResuelta() != null
@@ -75,6 +78,10 @@ public class ReincorporacionService {
             throw new IllegalStateException("No hay una solicitud habilitada para confirmar esta entrevista completa");
         s.confirmarEntrevista();
         auditar(familia, familia.getRegistradoPor(), "REINCORPORACION_ENTREVISTA_CONFIRMADA");
+    }
+
+    List<SolicitudReincorporacion> noAutorizadas(Long familiaId) {
+        return solicitudes.findByVinculacionFamiliaIdAndAutorizadaFalse(familiaId);
     }
 
     public List<Map<String, Object>> listar() {

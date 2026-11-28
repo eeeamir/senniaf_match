@@ -126,11 +126,16 @@ public class PerfilFamiliaService {
                 case "REINCORPORACION_SOLICITADA" -> "Solicitud de reincorporación registrada";
                 case "REINCORPORACION_ENTREVISTA_CONFIRMADA" -> "Entrevista de reincorporación confirmada";
                 case "REINCORPORACION_AUTORIZADA" -> "Reincorporación autorizada";
-                case "REINCORPORACION_NO_AUTORIZADA" -> "Reincorporación no autorizada";
+                case "REINCORPORACION_NO_AUTORIZADA" -> reincorporaciones == null ? "Reincorporación no autorizada" : null;
                 default -> null;
             };
             if (reincorporacion != null)
                 actividad.add(actividad(reincorporacion, "Consulta el estado de tu solicitud en Mi vinculación.", e.getFecha()));
+        }
+        if (reincorporaciones != null) {
+            for (var solicitud : reincorporaciones.noAutorizadas(p.getId())) {
+                actividad.add(actividad("Reincorporación no autorizada", solicitud.getFundamento(), solicitud.getResuelta()));
+            }
         }
         actividad.sort(java.util.Comparator.comparing(a->a.get("fecha").toString()));
         respuesta.setActividad(actividad);

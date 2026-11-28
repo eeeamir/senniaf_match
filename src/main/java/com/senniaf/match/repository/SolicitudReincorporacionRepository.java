@@ -11,6 +11,8 @@ public interface SolicitudReincorporacionRepository extends JpaRepository<Solici
     @org.springframework.data.jpa.repository.Query("select s from SolicitudReincorporacion s where s.id = :id")
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     Optional<SolicitudReincorporacion> bloquear(@org.springframework.data.repository.query.Param("id") Long id);
-    Optional<SolicitudReincorporacion> findByVinculacionId(Long vinculacionId);
+    Optional<SolicitudReincorporacion> findFirstByVinculacionIdOrderByIdDesc(Long vinculacionId);
+    Optional<SolicitudReincorporacion> findByVinculacionIdAndResueltaIsNull(Long vinculacionId);
+    List<SolicitudReincorporacion> findByVinculacionFamiliaIdAndAutorizadaFalse(Long familiaId);
     List<SolicitudReincorporacion> findAllByOrderBySolicitadaDescIdDesc();
 }

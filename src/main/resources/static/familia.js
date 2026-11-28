@@ -191,7 +191,7 @@ const Familia = {
     }
   },
   reincorporacion(v) {
-    const {estado, puedeSolicitar, disponible} = v.reincorporacion || {};
+    const {estado, puedeSolicitar, disponible, motivoNoAutorizacion} = v.reincorporacion || {};
     const estados = {
       ENTREVISTA_PENDIENTE: ['Solicitud registrada', 'comprobarCircular', 'completado'],
       REVISION_PENDIENTE: ['Pendiente de revisión institucional', 'reloj', 'pendiente'],
@@ -230,6 +230,7 @@ const Familia = {
         <ol class="reincorporacion-pasos${aprobada ? ' reincorporacion-pasos-aprobados' : ''}">${pasos.map(([icono, texto, detalle, clase]) =>
           `<li class="${clase}"><span class="reincorporacion-indicador" aria-hidden="true">${icono}</span><strong>${texto}</strong><small>${detalle}</small></li>`).join('')}</ol>
         ${aviso ? `<p class="familia-siguiente reincorporacion-aviso">${Profesionales.icono('informacion')}<span>${aviso}</span></p>` : ''}
+        ${estado === 'NO_AUTORIZADA' && motivoNoAutorizacion ? `<p class="pro-texto-registrado"><strong>Motivo de la decisión</strong><br>${limpiarHtml(motivoNoAutorizacion)}</p>` : ''}
         ${entrevistaPendiente ? `<div class="pro-acciones"><a class="boton" href="perfil.html?reevaluacion=1&reincorporacion=${encodeURIComponent(v.id)}">Actualizar entrevista ${Profesionales.icono('flecha')}</a></div>` : ''}
       ` : ''}
       </section>`;
