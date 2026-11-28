@@ -349,8 +349,8 @@ async function cargarFamilia() {
     document.getElementById('datosDetalle').innerHTML = (datos.reevaluacionPendiente?`<aside class="pro-aviso-reevaluaciones" role="status"><h3>${Profesionales.icono('reloj')}Revisión de entrevista pendiente</h3><p>La familia no recibe nuevas recomendaciones hasta completar su actualización.</p>${datos.apartadosReevaluacion?.length?`<p><strong>Apartados solicitados:</strong> ${datos.apartadosReevaluacion.map(limpiarHtml).join(', ')}.</p>`:''}${datos.observacionReevaluacion?`<p><strong>Justificación del Comité</strong></p><p class="pro-texto-registrado">${limpiarHtml(datos.observacionReevaluacion)}</p>`:''}</aside>`:'')+detalleSecciones(datos,CAMPOS_FAMILIA,GRUPOS_FAMILIA);
     if (datos.antecedenteAdopcion?.vinculacionId) {
       const solicitudes = await leerApi('/api/reincorporaciones');
-      const delCaso = solicitudes.filter(s => s.codigoCaso === codigoFamilia).map(s => ({...s, familiar:true}));
-      const resueltas = delCaso.filter(s => ['AUTORIZADA','NO_AUTORIZADA'].includes(s.estado));
+      const delCaso = solicitudes.filter(s => s.codigoCaso === codigoFamilia);
+      const resolucionesConFundamento = delCaso.filter(s => ['AUTORIZADA', 'NO_AUTORIZADA'].includes(s.estado) && s.motivoResolucion?.trim());
       const {vinculacionId, reincorporacion: estado} = datos.antecedenteAdopcion;
       const solicitud = delCaso.find(s => s.vinculacion === `VIN-${vinculacionId}`);
       const mensaje = estado.disponible ? 'Disponible para análisis'
@@ -359,7 +359,7 @@ async function cargarFamilia() {
         ? '<span class="chip retirado">Sin solicitud</span>' : Profesionales.estadoSolicitud(estado);
       const historial = s => `<article class="solicitud"><div class="pro-fila-titulo">
         <h3>Solicitud de reincorporación</h3>${Profesionales.estadoSolicitud(s)}</div>
-        ${Profesionales.detalleSolicitud(s)}</article>`;
+        ${Profesionales.detalleSolicitud({...s, familiar: true})}</article>`;
       document.getElementById('datosDetalle').insertAdjacentHTML('afterbegin', `
         <details id="gestionFamiliar" class="tarjeta">
           <summary class="gestion-familiar-resumen">
@@ -368,12 +368,15 @@ async function cargarFamilia() {
             ${chip}
           </summary>
           <div class="gestion-familiar-contenido">
-            ${solicitud ? `<div class="pro-fila-titulo"><h3>Solicitud de reincorporación</h3>${chip}</div>
-              <p>Solicitud recibida el ${limpiarHtml(Profesionales.fechaSolicitud(solicitud.fechaSolicitud))}</p>` : ''}
-            <a class="boton secundario chico" href="vinculaciones.html?id=${Number(vinculacionId)}">Consultar cierre por adopción</a>
-            <details class="pro-seccion historial-gestion"><summary>Historial de gestión · ${resueltas.length}</summary>
-              ${resueltas.length ? resueltas.map(historial).join('') : '<p>No hay solicitudes resueltas.</p>'}
-            </details>
+            ${solicitud ? '<h3>Solicitud de reincorporación</h3>' : ''}
+            <div class="gestion-familiar-actuacion">
+              ${solicitud ? `<p>Recibida el ${limpiarHtml(Profesionales.fechaSolicitud(solicitud.fechaSolicitud))}</p>` : ''}
+              <a class="boton secundario chico" href="vinculaciones.html?id=${Number(vinculacionId)}">Consultar cierre por adopción</a>
+            </div>
+            ${resolucionesConFundamento.length ? `<details class="pro-seccion historial-gestion">
+              <summary>Historial de gestión · ${resolucionesConFundamento.length}</summary>
+              ${resolucionesConFundamento.map(historial).join('')}
+            </details>` : ''}
           </div>
         </details>`);
       if (location.hash === '#gestionFamiliar') {

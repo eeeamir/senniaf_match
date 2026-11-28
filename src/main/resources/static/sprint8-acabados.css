@@ -698,7 +698,10 @@ details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); 
   padding: 16px 0;
   border-top: 1px solid #d6e1f0;
 }
-.gestion-familiar-contenido h3 { margin: 0; }
+.gestion-familiar-contenido h3 { margin: 0 0 .65rem; }
+.gestion-familiar-actuacion { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; }
+.gestion-familiar-actuacion > p { margin: 0; }
+.gestion-familiar-actuacion > a { margin-inline-start: auto; }
 .gestion-familiar-contenido .historial-gestion { padding-top: 1rem; border-top: 1px solid #d6e1f0; }
 .gestion-familiar-contenido .historial-gestion > summary { display: flex; justify-content: space-between; list-style: none; }
 .gestion-familiar-contenido .historial-gestion > summary::-webkit-details-marker { display: none; }
