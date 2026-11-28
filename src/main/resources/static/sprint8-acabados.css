@@ -679,7 +679,7 @@ details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); 
   margin-bottom: 14px;
   padding: 0;
 }
-.gestion-familiar-resumen {
+.profesional #gestionFamiliar > .gestion-familiar-resumen {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto auto;
   gap: .65rem;
@@ -718,7 +718,7 @@ details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); 
 }
 .expediente-cierre-adopcion > .pro-acciones > a { width: 100%; }
 @media (max-width: 520px) {
-  .gestion-familiar-resumen { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .profesional #gestionFamiliar > .gestion-familiar-resumen { grid-template-columns: auto minmax(0, 1fr) auto; }
   .gestion-familiar-resumen .chip { grid-column: 2; grid-row: 2; justify-self: start; }
   .gestion-familiar-resumen::after { grid-column: 3; grid-row: 1 / span 2; }
 }
