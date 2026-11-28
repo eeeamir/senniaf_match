@@ -21,15 +21,11 @@ const Familia = {
       const sinEntrevista = r.status === 404;
       if (sinEntrevista && vista === 'entrevista') return location.replace('perfil.html');
       const vinculaciones = await Vinculaciones.api('/api/vinculaciones/propias');
-      if (actualizarSeguimiento && document.querySelector('dialog[open]')) return;
-      document.querySelectorAll('[data-asignacion-info]').forEach((d) => {
-        if (
-          !vinculaciones.some(
-            (v) => String(v.id) === d.dataset.asignacionInfo && v.puedeConsultarInformacion,
-          )
-        )
-          d.close();
+      this.informacionAutorizada = new Set(vinculaciones.filter(v => v.puedeConsultarInformacion).map(v => String(v.id)));
+      document.querySelectorAll('[data-asignacion-info]').forEach(dialogo => {
+        if (!this.informacionAutorizada.has(dialogo.dataset.asignacionInfo)) dialogo.close();
       });
+      if (actualizarSeguimiento && document.querySelector('dialog[open]')) return;
       const pendiente = vinculaciones.find((v) => v.estado === 'PENDIENTE_RESPUESTA');
       const p = sinEntrevista ? { perfilCompleto: false, actividad: [] } : await r.json();
       const enlaceEntrevista = sinEntrevista ? 'perfil.html' : 'perfil.html?reevaluacion=1';
@@ -95,8 +91,8 @@ const Familia = {
       const antecedente = vinculaciones.find(v => v.resultadoCierre === 'ADOPCION_FORMALIZADA');
       const mostrarReincorporacion = antecedente && !vinculaciones.some(v =>
         ['PENDIENTE_RESPUESTA','RESPUESTA_ACEPTADA'].includes(v.estado));
-      const propuesta = Vinculaciones.familiar(vinculaciones)
-        + (mostrarReincorporacion ? this.reincorporacion(antecedente) : '');
+      const propuesta = Vinculaciones.familiar(vinculaciones, v =>
+        mostrarReincorporacion && v.id === antecedente.id ? this.reincorporacion(v) : '');
       const actividad = (todos = false) => {
         const visibles = todos ? eventos : eventos.slice(0, 3);
         return `
@@ -200,7 +196,7 @@ const Familia = {
       ['Revisión institucional', resuelta ? 'comprobar' : entrevista ? 'reloj' : 'informacion'],
       ['Resolución de solicitud', estado === 'AUTORIZADA' ? 'comprobar' : estado === 'NO_AUTORIZADA' ? 'advertencia' : 'informacion']];
     if (!r.puedeSolicitar && (!estado || estado === 'SIN_SOLICITUD')) return '';
-    return `<section class="tarjeta familia-reincorporacion">
+    return `<section class="familia-reincorporacion">
       <header><span class="pro-simbolo">${Profesionales.icono('solicitudes')}</span><div>
       <h3>${estado && estado !== 'SIN_SOLICITUD' ? 'Solicitud de reincorporación' : 'Reincorporación del expediente'}</h3><p>${limpiarHtml(v.codigo)} · Expediente familiar ${limpiarHtml(v.expedienteFamiliar)}</p></div></header>
       ${r.puedeSolicitar ? `<button class="boton" type="button" data-solicitar-reincorporacion>Solicitar reincorporación</button>` : ''}

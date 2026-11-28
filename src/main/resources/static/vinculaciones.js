@@ -70,11 +70,19 @@ const Vinculaciones = {
     let etiqueta = resultado?.[0] || this.estados[v.estado] || v.estado;
     if (familiar && v.estado === 'RESPUESTA_ACEPTADA') {
       etiqueta = v.autorizacionPreadoptiva || v.interrupcionRegistrada
-        ? this.obtenerProgreso(v).estado : 'Propuesta aceptada';
+        ? this.obtenerProgreso(v).estado : 'En acompañamiento e interrelación';
+      if (!v.autorizacionPreadoptiva && !v.interrupcionRegistrada) {
+        icono = 'heart-handshake';
+        clase = 'vinculacion-pendiente';
+      }
       if (v.interrupcionRegistrada) {
         icono = 'advertencia';
         clase = 'vinculacion-interrumpida';
       }
+    }
+    if (familiar && rechazado) {
+      etiqueta = 'Propuesta rechazada';
+      icono = 'cerrar';
     }
     if (familiar && v.estado === 'CERRADA' && v.interrupcionRegistrada) {
       etiqueta = 'Vinculación cerrada';
@@ -91,7 +99,7 @@ const Vinculaciones = {
           </span>` : ''}
       </div>`;
   },
-  familiar(lista) {
+  familiar(lista, reincorporacion = () => '') {
     if (!lista.length) {
       return `
         <section class="tarjeta">
@@ -99,12 +107,15 @@ const Vinculaciones = {
           <p>Por ahora no tienes vinculaciones registradas.</p>
         </section>`;
     }
+    const vigente = this.seleccionarVinculacion(lista);
+    const activa = ['PENDIENTE_RESPUESTA', 'RESPUESTA_ACEPTADA'].includes(vigente.estado);
+    const ordenadas = [vigente, ...lista.filter(v => v.id !== vigente.id)];
     return `
       <div class="vinculaciones-lista familiar-amplia">
-        ${lista
+        ${ordenadas
           .map(
             (v) => `
-          <details class="tarjeta vinculacion-familiar vinculacion-tarjeta" data-vinculacion-familiar="${v.id}" ${v.estado === 'PENDIENTE_RESPUESTA' ? 'open' : ''}>
+          <details class="tarjeta vinculacion-familiar vinculacion-tarjeta" data-vinculacion-familiar="${v.id}" ${activa && v.id === vigente.id ? 'open' : ''}>
             <summary class="vinculacion-cabecera">
               <div class="familia-identificacion">
                 <span class="vinculacion-emblema">${Profesionales.icono('heart-handshake')}</span>
@@ -117,7 +128,6 @@ const Vinculaciones = {
               <span class="familia-flecha" aria-hidden="true">⌄</span>
             </summary>
             ${this.progresoFamiliar(v)}
-            <div class="familia-propuesta-acciones">
               ${
                 v.puedeConsultarInformacion
                   ? `
@@ -136,8 +146,11 @@ const Vinculaciones = {
               ${
                 v.estado === 'PENDIENTE_RESPUESTA'
                   ? `
-                <div class="familia-respuesta">
-                  <p>Tu decisión sobre la propuesta</p>
+                <section class="familia-respuesta">
+                  <div class="familia-decision-texto">
+                    <h3>Tu decisión sobre la propuesta</h3>
+                    <p>¿Deseas continuar con esta vinculación?</p>
+                  </div>
                   <div class="pro-acciones">
                     <button class="boton" data-responder="ACEPTAR" data-id="${v.id}">
                       ${Profesionales.icono('comprobar')}Aceptar
@@ -146,15 +159,16 @@ const Vinculaciones = {
                       ${Profesionales.icono('cerrar')}Rechazar
                     </button>
                   </div>
-                </div>`
+                  <p class="ayuda aviso-legal-familia">
+                    ${Profesionales.icono('informacion')}
+                    <span>La respuesta en este portal no sustituye las formalidades legales
+                      ni autoriza el acogimiento preadoptivo.</span>
+                  </p>
+                </section>`
                   : ''
               }
-            </div>
-            <p class="ayuda aviso-legal-familia">
-              ${Profesionales.icono('informacion')}
-              <span>La respuesta en este portal no sustituye las formalidades legales
-                ni autoriza el acogimiento preadoptivo.</span>
-            </p>
+            ${this.resultadoFamiliar(v)}
+            ${reincorporacion(v)}
           </details>`,
           )
           .join('')}
@@ -400,14 +414,13 @@ const Vinculaciones = {
     const duracion = (titulo, valor) => valor == null ? '' :
       `<p class="vinculacion-tiempo">${titulo}: <strong>${this.dias(valor)}</strong></p>`;
     const familiar = fechaFamiliar !== undefined;
-    const transcurrido = familiar ? this.haceDias(fechaFamiliar) : '';
-    if (indice !== 3 && familiar) return transcurrido;
+    if (indice !== 3 && familiar) return '';
     if (indice === 1) return duracion('Desde la propuesta', t.respuesta);
     if (indice !== 3) return '';
     const fecha = (titulo, valor) => valor
       ? `<p class="familia-actuacion"><span>${titulo}</span><time>${limpiarHtml(valor)}</time></p>` : '';
     const interrupcion = v.seguimientoFamiliar?.interrupcionRegistradaEl;
-    return transcurrido + (a ? `<div class="familia-actuaciones">
+    return (a ? `<div class="familia-actuaciones">
       ${fecha('Autorización preadoptiva', a.fechaEmision && this.fechaCivil(a.fechaEmision))}
       ${fecha('Registro de autorización', a.registradaEl && this.fechaHora(a.registradaEl))}
       ${duracion('Desde la aceptación', t.autorizacion)}
@@ -419,10 +432,10 @@ const Vinculaciones = {
     if (!valor) return '';
     const civil = f => new Intl.DateTimeFormat('sv-SE', {dateStyle: 'short', timeZone: 'America/Panama'}).format(new Date(f));
     const dias = (Date.parse(civil(Date.now())) - Date.parse(civil(valor))) / 86400000;
-    return Number.isFinite(dias) && dias >= 0 ? `<p class="vinculacion-tiempo"><strong>Hace ${this.dias(dias)}</strong></p>` : '';
+    return Number.isFinite(dias) && dias >= 0 ? `<span class="familia-tiempo-relativo">${dias === 0 ? 'Hoy' : 'Hace ' + this.dias(dias)}</span>` : '';
   },
   indicadorEtapa(etapa, indice) {
-    const icono = {interrumpido: 'advertencia', completado: 'comprobar'}[etapa.clase];
+    const icono = etapa.texto === 'Rechazada' ? 'cerrar' : {interrumpido: 'advertencia', completado: 'comprobar'}[etapa.clase];
     return `<span class="familia-paso" aria-hidden="true">${icono ? Profesionales.icono(icono) : indice + 1}</span>`;
   },
   inicioFamiliar(v, estado, mensaje, disponible, enlace) {
@@ -452,14 +465,13 @@ const Vinculaciones = {
   },
   progresoFamiliar(v) {
     const progreso = this.obtenerProgreso(v);
-    const cierre = v.seguimientoFamiliar?.cierreRegistradoEl;
     const tiempos = v.tiempos;
-    const finalizada = v.estado === 'CERRADA' || v.estado === 'RECHAZADA_POR_FAMILIA';
+    const rechazada = v.respuestaFamiliar === 'RECHAZADA';
     const datos = [
-      ['calendario', 'Fecha de creación', this.fechaHora(v.fechaCreacion)],
-      ['calendario', 'Inicio de convivencia', tiempos?.fechaInicio ? this.fechaCivil(tiempos.fechaInicio) : 'Sin inicio registrado'],
+      ['calendario', 'Fecha de creación', this.fechaCivil(v.fechaCreacion)],
+      ['calendario', 'Inicio de convivencia', tiempos?.fechaInicio ? this.fechaCivil(tiempos.fechaInicio) : 'No iniciada'],
       ['reloj', 'Tiempo de vinculación', this.dias(tiempos?.vinculacion)],
-      ['hogar', 'Tiempo de convivencia', this.tiempoConvivencia(tiempos)]
+      ['hogar', 'Tiempo de convivencia', tiempos?.fechaInicio || tiempos?.convivenciaInterrumpida ? this.tiempoConvivencia(tiempos) : 'No iniciada']
     ];
     return `<section class="familia-seguimiento familia-detalle-proceso" aria-label="Progreso de ${limpiarHtml(v.codigo)}">
       <h3>Información general</h3>
@@ -467,29 +479,40 @@ const Vinculaciones = {
         `<div><dt>${Profesionales.icono(icono)}${titulo}</dt><dd>${limpiarHtml(valor)}</dd></div>`).join('')}</dl>
       ${tiempos?.diasReferencia != null ? `<p class="ayuda">${Profesionales.icono('informacion')}
         Periodo de referencia de convivencia: ${tiempos.diasReferencia} días calendario.</p>` : ''}
-      <p class="familia-siguiente">${Profesionales.icono('informacion')}${limpiarHtml(progreso.accion)}</p>
+      ${(!rechazada || v.estado === 'RESPUESTA_RECHAZADA_PENDIENTE_CIERRE') && v.estado !== 'PENDIENTE_RESPUESTA' ? `<p class="familia-siguiente">${Profesionales.icono('informacion')}${limpiarHtml(progreso.accion)}</p>` : ''}
       <h3 class="familia-titulo-progreso">Progreso de la vinculación</h3>
       <ol class="familia-etapas-vertical">
-        ${progreso.etapas.map((etapa, indice) => `<li class="${etapa.clase}" ${etapa.clase === 'actual' ? 'aria-current="step"' : ''}>
+        ${progreso.etapas.map((etapa, indice) => `<li class="${etapa.clase}${etapa.texto === 'Rechazada' ? ' familia-etapa-rechazada' : ''}" ${etapa.clase === 'actual' ? 'aria-current="step"' : ''}>
           ${this.indicadorEtapa(etapa, indice)}
-          <div class="familia-etapa-tarjeta"><header><div><h3>${etapa.titulo}</h3><p>${etapa.texto}</p></div>
-            ${etapa.fecha ? `<time>${limpiarHtml(this.fechaHora(etapa.fecha))}</time>` : ''}</header>
+          <div class="familia-etapa-tarjeta"><h3>${etapa.titulo}</h3><p class="familia-etapa-estado">${etapa.texto}</p>
+            ${etapa.fecha ? `<div class="familia-fecha-etapa"><time>${limpiarHtml(this.fechaHora(etapa.fecha))}</time>${this.haceDias(etapa.fecha)}</div>` : ''}
             ${etapa.detalle ? `<p>${limpiarHtml(etapa.detalle)}</p>` : ''}
             ${etapa.fechaHecho ? `<p>Fecha de interrupción: ${this.fechaCivil(etapa.fechaHecho)}</p>` : ''}
             ${this.tiemposEtapa(v, indice, etapa.fecha)}
           </div></li>`).join('')}
       </ol>
-      ${finalizada || v.interrupcionRegistrada ? `<div class="familia-resultado">
-        ${Profesionales.icono('informacion')}<div><h3>${limpiarHtml(this.resultadosCierre[v.resultadoCierre]?.[0]
-          || (v.interrupcionRegistrada && cierre ? 'Cierre por interrupción de convivencia' : progreso.estado))}</h3>
-        <p>${limpiarHtml(v.motivoRevocacion || progreso.mensaje)}</p>
-        ${cierre ? `<time>${limpiarHtml(this.fechaHora(cierre))}</time>` : ''}</div></div>` : ''}
-      ${!finalizada ? '<button class="boton secundario chico" type="button" data-actualizar-familiar>Actualizar seguimiento</button><p data-estado-seguimiento-familiar role="status" hidden></p>' : ''}
       </section>`;
   },
-  async informacionFamiliar(id){
+  resultadoFamiliar(v) {
+    const rechazada = v.respuestaFamiliar === 'RECHAZADA' || v.estado === 'RECHAZADA_POR_FAMILIA';
+    if (!rechazada && v.estado !== 'CERRADA' && !v.interrupcionRegistrada) return '';
+    const progreso = this.obtenerProgreso(v);
+    const fecha = v.seguimientoFamiliar?.cierreRegistradoEl || (rechazada ? v.fechaRespuesta : null);
+    const titulo = this.resultadosCierre[v.resultadoCierre]?.[0]
+      || (v.interrupcionRegistrada && fecha ? 'Cierre por interrupción de convivencia' : progreso.estado);
+    const mensaje = v.estado === 'RECHAZADA_POR_FAMILIA'
+      ? 'Tu respuesta quedó registrada. Esta vinculación ha finalizado.'
+      : v.motivoRevocacion || progreso.mensaje;
+    return `<section class="familia-resultado${rechazada ? ' familia-resultado-rechazado' : ''}">
+      ${Profesionales.icono(rechazada ? 'cerrar' : 'informacion')}<div><h3>${limpiarHtml(titulo)}</h3>
+      <p>${limpiarHtml(mensaje)}</p>${fecha ? `<time>${limpiarHtml(this.fechaHora(fecha))}</time>` : ''}</div>
+    </section>`;
+  },
+  async informacionFamiliar(boton){
+    const id = boton.dataset.informacionNino;
     try{
       const datos=await this.api(`/api/vinculaciones/${encodeURIComponent(id)}/informacion-asignada`);
+      if (!boton.isConnected || !Familia.informacionAutorizada?.has(id)) return;
       const d=document.createElement('dialog');d.className='pro-dialogo vinculacion-informacion-dialogo';d.dataset.asignacionInfo=String(id);d.setAttribute('aria-label','Información del niño asignado');
       const etiquetas={edad:'Edad',unidadEdad:'Unidad de edad',nivelEscolar:'Escolaridad',rendimientoAcademico:'Rendimiento académico',alergias:'Alergias registradas',intoleranciaLactosa:'Intolerancia a la lactosa',condicionesSalud:'Condiciones de salud registradas',habilidades:'Habilidades',gustos:'Intereses',personalidad:'Características personales registradas'};
       const valor=v=>v==null?'No disponible':Array.isArray(v)?v.length?v.map(x=>Profesionales.etiqueta(x)).join(', '):'Sin información registrada':Profesionales.etiqueta(v);
@@ -503,20 +526,7 @@ const Vinculaciones = {
     return ({PENDIENTE_RESPUESTA:'La propuesta fue enviada a la familia y estamos a la espera de su respuesta.',RESPUESTA_ACEPTADA:'La familia aceptó la propuesta. Consulta el estado y las actuaciones registradas.',RECHAZADA_POR_FAMILIA:'La familia rechazó la propuesta. Su respuesta quedó registrada.',RESPUESTA_RECHAZADA_PENDIENTE_CIERRE:'La respuesta negativa quedó registrada. El cierre institucional sigue pendiente.',CERRADA:'El cierre quedó registrado. La disponibilidad de cada expediente se revisa por separado.'})[v.estado]||'Consulta las actuaciones registradas en el detalle.';
   },
   enlazarRespuestas(sesion) {
-    document.querySelectorAll('[data-actualizar-familiar]').forEach(boton => boton.onclick = async () => {
-      if (document.querySelector('dialog[open]') || Profesionales.formulariosPendientes().length) return;
-      boton.disabled = true;
-      try { await Familia.mostrar(sesion, {actualizarSeguimiento: true}); }
-      catch (error) {
-        const estado = boton.parentElement.querySelector('[data-estado-seguimiento-familiar]');
-        estado.textContent = error.message;
-        estado.hidden = false;
-      } finally {
-        boton.disabled = false;
-        if (!document.querySelector('dialog[open]')) document.querySelector('[data-actualizar-familiar]')?.focus();
-      }
-    });
-    document.querySelectorAll('[data-informacion-nino]').forEach(b=>b.onclick=()=>this.informacionFamiliar(b.dataset.informacionNino));
+    document.querySelectorAll('[data-informacion-nino]').forEach(b => b.onclick = () => this.informacionFamiliar(b));
     document.querySelectorAll('[data-responder]').forEach(b => b.onclick = () => {
       if (document.querySelector('dialog[data-respuesta]')) return;
       const aceptar = b.dataset.responder === 'ACEPTAR', d = document.createElement('dialog');
@@ -533,6 +543,7 @@ const Vinculaciones = {
         d.addEventListener('cancel', impedirCierre);
         try {
           await this.api(`/api/vinculaciones/${b.dataset.id}/respuesta`, {method: 'POST', body: JSON.stringify({respuesta: b.dataset.responder})});
+          if (!aceptar) Familia.informacionAutorizada.delete(b.dataset.id);
           document.querySelectorAll('[data-asignacion-info]').forEach(info=>info.close());d.close(); Familia.version = null; await Familia.mostrar(sesion);
         } catch (error) {
           d.querySelector('[data-error]').textContent = error.message || 'No pudimos guardar el cambio. Inténtalo nuevamente.';

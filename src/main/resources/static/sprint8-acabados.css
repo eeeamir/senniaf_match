@@ -477,3 +477,50 @@ details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); 
 .familia-reincorporacion .reincorporacion-pasos > li::before { display: none; }
 .familia-reincorporacion .reincorporacion-pasos .pro-icono { flex: 0 0 18px; }
 [data-revisar-reincorporacion-dialogo] .pro-motivo > .pro-icono { flex-shrink: 0; }
+
+.vinculacion-familiar > :is(.familia-informacion-asignada, .familia-respuesta, .familia-resultado, .familia-reincorporacion) {
+  border-top: 1px solid #d6e1f0;
+  padding-top: 18px;
+  margin: 0;
+}
+.vinculacion-familiar > .familia-seguimiento { margin: 0; }
+.vinculacion-familiar > .familia-detalle-proceso { border-top: 0; padding-top: 0; }
+.vinculacion-familiar > .familia-informacion-asignada { display: flex; flex-wrap: wrap; gap: 12px; }
+.vinculacion-familiar > .familia-informacion-asignada .boton { align-self: center; }
+.vinculacion-familiar > .familia-respuesta h3 { margin: 0 0 8px; }
+.vinculacion-familiar > .familia-respuesta .pro-acciones { justify-content: flex-end; }
+.vinculacion-familiar > .familia-respuesta .aviso-legal-familia { margin: 12px 0 0; }
+.vinculacion-familiar > .familia-reincorporacion { border-inline: 0; border-bottom: 0; border-radius: 0; box-shadow: none; padding-inline: 0; padding-bottom: 0; }
+.familia-fecha-etapa { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; margin-top: 5px; }
+.familia-tiempo-relativo { color: #476788; font-size: .875rem; font-weight: 600; }
+.familia-etapas-vertical .completado .familia-etapa-estado { color: #007b69; }
+.familia-etapas-vertical .interrumpido .familia-etapa-estado { color: #a46208; }
+.familia-etapas-vertical .familia-etapa-rechazada .familia-paso { color: #a12232; border-color: #a12232; background: #fff0f0; }
+.familia-etapas-vertical .familia-etapa-rechazada .familia-etapa-estado,
+.familia-resultado-rechazado :is(h3, .pro-icono) { color: #a12232; }
+.familia-resultado :is(h3,p) { margin: 0 0 4px; }
+
+.vinculacion-familiar > .familia-respuesta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px 20px;
+}
+.familia-decision-texto p { margin: 0; }
+.vinculacion-familiar > .familia-respuesta .pro-acciones {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.vinculacion-familiar > .familia-respuesta .pro-acciones .boton { margin: 0; }
+.vinculacion-familiar > .familia-respuesta .aviso-legal-familia {
+  grid-column: 1 / -1;
+  border-top: 1px solid #d6e1f0;
+  margin: 0;
+  padding-top: 14px;
+}
+@media (max-width: 600px) {
+  .vinculacion-familiar > .familia-respuesta { grid-template-columns: minmax(0, 1fr); }
+  .vinculacion-familiar > .familia-respuesta .pro-acciones { justify-content: flex-start; }
+}
