@@ -855,8 +855,19 @@ const Vinculaciones = {
               : reincorporacion?.estado === 'SIN_SOLICITUD' ? 'Proceso finalizado. Adopción formalizada. Puede solicitar su reincorporación.'
               : 'Proceso finalizado. ' + this.estadoReincorporacion(reincorporacion?.estado)]
           : estados[estado] || estados.SIN_CONSTANCIA;
-        return `<article><h4>${Profesionales.icono(k === 'NINO' ? 'carpeta' : 'personas')}${n}</h4><p>${limpiarHtml(codigo)}</p><strong>${info[0]}</strong><p>${info[1]}</p><div class="pro-acciones">${v.puedeRevisarDisponibilidad && estado === 'PENDIENTE_REVISION' ? `<button class="boton secundario" data-disponibilidad="${k}">${Profesionales.icono('consulta')}Revisar disponibilidad</button>` : ''}<a class="boton secundario" href="perfiles.html?${k === 'NINO' ? 'caso' : 'familia'}=${encodeURIComponent(codigo)}&origen=vinculacion&vinculacionOrigen=${Number(v.id)}">Consultar expediente</a></div></article>`;
-      }).join('')}</div></section>${adopcion ? (v.puedeResolverReincorporacion && v.reincorporacion?.estado !== 'SIN_SOLICITUD' ? '<a class="boton secundario" href="match.html?vista=solicitudes">Consultar solicitud</a>' : '') : pendientes ? `<aside class="vinculacion-proximo"><h3>${Profesionales.icono('flecha')}Próximo paso</h3><p>Corresponde revisar la disponibilidad ${pendientes}.</p></aside>` : ''}` : ''}
+        const estadoSolicitud = reincorporacion?.estado;
+        const consultarSolicitud = adopcion && k === 'FAMILIA' && v.puedeResolverReincorporacion
+          && estadoSolicitud && estadoSolicitud !== 'SIN_SOLICITUD';
+        return `<article${adopcion ? ' class="expediente-cierre-adopcion"' : ''}>
+          <h4>${Profesionales.icono(k === 'NINO' ? 'carpeta' : 'personas')}${n}</h4>
+          <p>${limpiarHtml(codigo)}</p><strong>${info[0]}</strong><p>${info[1]}</p>
+          ${consultarSolicitud ? '<p><a class="enlace" href="match.html?vista=solicitudes">Consultar solicitud</a></p>' : ''}
+          <div class="pro-acciones">
+            ${v.puedeRevisarDisponibilidad && estado === 'PENDIENTE_REVISION' ? `<button class="boton secundario" data-disponibilidad="${k}">${Profesionales.icono('consulta')}Revisar disponibilidad</button>` : ''}
+            <a class="boton secundario" href="perfiles.html?${k === 'NINO' ? 'caso' : 'familia'}=${encodeURIComponent(codigo)}&origen=vinculacion&vinculacionOrigen=${Number(v.id)}">Consultar expediente</a>
+          </div>
+        </article>`;
+      }).join('')}</div></section>${!adopcion && pendientes ? `<aside class="vinculacion-proximo"><h3>${Profesionales.icono('flecha')}Próximo paso</h3><p>Corresponde revisar la disponibilidad ${pendientes}.</p></aside>` : ''}` : ''}
       ${v.puedeCerrar ? `<button class="boton secundario" data-cierre>${Profesionales.icono('informe')}Registrar cierre institucional</button>` : ''}
       <p class="ayuda">Este registro no sustituye la actuación de la autoridad competente ni formaliza una adopción.</p></section>`;
   },

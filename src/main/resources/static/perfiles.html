@@ -351,20 +351,36 @@ async function cargarFamilia() {
       const solicitudes = await leerApi('/api/reincorporaciones');
       const delCaso = solicitudes.filter(s => s.codigoCaso === codigoFamilia).map(s => ({...s, familiar:true}));
       const resueltas = delCaso.filter(s => ['AUTORIZADA','NO_AUTORIZADA'].includes(s.estado));
-      const estado = datos.antecedenteAdopcion.reincorporacion;
+      const {vinculacionId, reincorporacion: estado} = datos.antecedenteAdopcion;
+      const solicitud = delCaso.find(s => s.vinculacion === `VIN-${vinculacionId}`);
       const mensaje = estado.disponible ? 'Disponible para análisis'
-        : estado.otraReserva ? 'Reservado por otra vinculación'
-        : {SIN_SOLICITUD:'Fuera del Match tras la adopción formalizada',ENTREVISTA_PENDIENTE:'Fuera del Match · Entrevista pendiente',
-          REVISION_PENDIENTE:'Fuera del Match · Revisión institucional pendiente',NO_AUTORIZADA:'Fuera del Match · Reincorporación no autorizada',
-          AUTORIZADA:'Reincorporación autorizada · Sujeta a la elegibilidad actual'}[estado.estado];
-      const tarjeta = s => `<article class="solicitud"><div class="pro-fila-titulo"><h3>Reincorporación familiar · ${limpiarHtml(s.vinculacion)}</h3>${Profesionales.estadoSolicitud(s)}</div>${Profesionales.detalleSolicitud(s)}</article>`;
-      document.getElementById('datosDetalle').insertAdjacentHTML('afterbegin', `<section id="gestionFamiliar" class="tarjeta">
-        <h2>Gestión del expediente</h2><p><strong>Estado actual</strong> · ${limpiarHtml(mensaje)}</p>
-        <a class="boton secundario chico" href="vinculaciones.html?id=${Number(datos.antecedenteAdopcion.vinculacionId)}">Consultar cierre por adopción</a>
-        ${delCaso.filter(s => !resueltas.includes(s)).map(tarjeta).join('')}
-        <details class="pro-seccion historial-gestion"><summary>Historial de gestión · ${resueltas.length}</summary>
-          ${resueltas.length ? resueltas.map(tarjeta).join('') : '<p>No hay solicitudes resueltas.</p>'}</details></section>`);
-      if (location.hash === '#gestionFamiliar') document.getElementById('gestionFamiliar').scrollIntoView();
+        : estado.otraReserva ? 'Reservado por otra vinculación' : 'Fuera del Match';
+      const chip = estado.estado === 'SIN_SOLICITUD'
+        ? '<span class="chip retirado">Sin solicitud</span>' : Profesionales.estadoSolicitud(estado);
+      const historial = s => `<article class="solicitud"><div class="pro-fila-titulo">
+        <h3>Solicitud de reincorporación</h3>${Profesionales.estadoSolicitud(s)}</div>
+        ${Profesionales.detalleSolicitud(s)}</article>`;
+      document.getElementById('datosDetalle').insertAdjacentHTML('afterbegin', `
+        <details id="gestionFamiliar" class="tarjeta">
+          <summary class="gestion-familiar-resumen">
+            ${Profesionales.icono('carpeta')}
+            <span><strong>Gestión del expediente</strong><small>${limpiarHtml(mensaje)}</small></span>
+            ${chip}
+          </summary>
+          <div class="gestion-familiar-contenido">
+            ${solicitud ? `<div class="pro-fila-titulo"><h3>Solicitud de reincorporación</h3>${chip}</div>
+              <p>Solicitud recibida el ${limpiarHtml(Profesionales.fechaSolicitud(solicitud.fechaSolicitud))}</p>` : ''}
+            <a class="boton secundario chico" href="vinculaciones.html?id=${Number(vinculacionId)}">Consultar cierre por adopción</a>
+            <details class="pro-seccion historial-gestion"><summary>Historial de gestión · ${resueltas.length}</summary>
+              ${resueltas.length ? resueltas.map(historial).join('') : '<p>No hay solicitudes resueltas.</p>'}
+            </details>
+          </div>
+        </details>`);
+      if (location.hash === '#gestionFamiliar') {
+        const gestion = document.getElementById('gestionFamiliar');
+        gestion.open = true;
+        gestion.scrollIntoView();
+      }
     }
     if(location.hash==='#apoyosCulturales'){const a=document.getElementById('apoyosCulturales');if(a){a.open=true;a.scrollIntoView({block:'start'});}}
     document.getElementById('datosDetalle').classList.add('pro-expedientes-completos');
