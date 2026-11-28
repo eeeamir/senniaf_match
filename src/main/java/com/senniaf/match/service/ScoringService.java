@@ -470,16 +470,18 @@ public class ScoringService {
             d.setContextoScoring(codificar(contexto));
         }
         decisiones.save(d);
-        if (decision.equals("ACEPTADA")) vinculaciones.crear(d,n,f);
+        Long vinculacionId = decision.equals("ACEPTADA") ? vinculaciones.crear(d,n,f) : null;
         if (decision.equals("REEVALUACION")) {
             // La solicitud se audita ahora, pero solo cuenta cuando la familia
             // envía una entrevista corregida completa.
             f.setReevaluacionPendiente(true);
             familias.save(f);
         }
-        return Map.of("mensaje", decision.equals("ACEPTADA") ? "La propuesta se envió a la familia" : decision.equals("DESCARTADA")?"El rechazo de esta propuesta quedó registrado. Esta combinación no volverá a aparecer en las recomendaciones automáticas.":"La decisión quedó registrada", "decision", decision,
+        var respuesta = new LinkedHashMap<String, Object>(Map.of("mensaje", decision.equals("ACEPTADA") ? "La propuesta se envió a la familia" : decision.equals("DESCARTADA")?"El rechazo de esta propuesta quedó registrado. Esta combinación no volverá a aparecer en las recomendaciones automáticas.":"La decisión quedó registrada", "decision", decision,
                 "numeroReevaluaciones", f.getNumeroReevaluaciones(),
-                "alertaRevisionTecnica", f.getNumeroReevaluaciones() >= 3);
+                "alertaRevisionTecnica", f.getNumeroReevaluaciones() >= 3));
+        if (vinculacionId != null) respuesta.put("vinculacionId", vinculacionId);
+        return respuesta;
     }
 
     /** Metadatos institucionales de registros reales revisados; nunca se modifica la puntuación. */

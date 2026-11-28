@@ -29,13 +29,14 @@ public class VinculacionService {
     public VinculacionService(VinculacionRepository repo,EventoCasoRepository auditoria,InterrupcionConvivenciaRepository interrupciones){this.repo=repo;this.auditoria=auditoria;this.interrupciones=interrupciones;}
 
     @Transactional
-    public void crear(DecisionComite decision,PerfilNino nino,PerfilFamilia familia){
+    public Long crear(DecisionComite decision,PerfilNino nino,PerfilFamilia familia){
         if(repo.existsByNinoCodigoCasoAndReservaVigenteTrue(nino.getCodigoCaso())
                 || repo.existsByFamiliaCodigoCasoAndReservaVigenteTrue(familia.getCodigoCaso()))
             throw new IllegalStateException("No puedes continuar porque el expediente ya tiene una asignación vigente");
         Vinculacion v=new Vinculacion();v.setDecision(decision);v.setNino(nino);v.setFamilia(familia);
         repo.saveAndFlush(v);
         auditar(v,decision.getFuncionario(),"VINCULACION_CREADA","El Comité aceptó la propuesta. Se creó la vinculación pendiente de respuesta familiar.");
+        return v.getId();
     }
     private boolean accesoInfantilFamiliar(Vinculacion v){
         return v.isReservaVigente() && Set.of(Vinculacion.Estado.PENDIENTE_RESPUESTA,Vinculacion.Estado.RESPUESTA_ACEPTADA).contains(v.getEstado()) && interrupcion(v)==null;

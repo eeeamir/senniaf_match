@@ -549,8 +549,17 @@ const Vinculaciones = {
     const c = document.getElementById('contenido');
     c.innerHTML = '<p role="status">Cargando vinculaciones…</p>';
     try {
-      const id = new URLSearchParams(location.search).get('id');
-      if (id) { await this.detalle(c, id, s); return; }
+      const parametros = new URLSearchParams(location.search);
+      const id = parametros.get('id');
+      if (id) {
+        await this.detalle(c, id, s);
+        if (s.rol === 'COMITE' && parametros.get('propuestaEnviada') === '1') {
+          c.insertAdjacentHTML('afterbegin', '<p class="mensaje exito" role="status">La propuesta se envió a la familia</p>');
+          parametros.delete('propuestaEnviada');
+          history.replaceState(history.state, '', location.pathname + '?' + parametros + location.hash);
+        }
+        return;
+      }
       c.innerHTML = Profesionales.encabezado('Vinculaciones', 'Consulta las asignaciones y las respuestas familiares.', 'vinculacion') + `
         <section class="tarjeta"><form id="filtroVinculaciones">
           <label>Estado<select name="estado"><option value="">Todos los estados</option>${Object.entries(this.estados).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>

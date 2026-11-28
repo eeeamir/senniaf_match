@@ -118,6 +118,10 @@ ${Profesionales.avisoReevaluaciones(familia.reevaluaciones)}
       alError:error=>{if(tipo==='REEVALUACION'||error.estado!==409)return false;const aviso=document.getElementById('estadoDecision');aviso.className='mensaje error';aviso.textContent=error.message;const boton=document.createElement('button');boton.className='boton secundario';boton.textContent='Actualizar compatibilidad';boton.onclick=async()=>{boton.disabled=true;this.contenido.querySelectorAll('[data-decision]').forEach(b=>b.disabled=true);try{this.casos=await this.api('/api/scoring/casos');this.programacion=await this.api('/api/scoring/pesos/programacion');await this.analisis();}catch(e){aviso.textContent=e.message;boton.disabled=false;this.contenido.querySelectorAll('[data-decision]').forEach(b=>b.disabled=false);}};aviso.append(document.createElement('br'),boton);return true;},
       alConfirmar:(motivo,seleccion)=>this.api(`/api/scoring/casos/${encodeURIComponent(caso.codigo)}/decisiones`,{method:'POST',body:JSON.stringify({familia:familia.codigo,decision:tipo,motivo,versionPesos:caso.versionPesos,...(tipo==='REEVALUACION'?seleccion:{})})}),
       alGuardar:async datos=>{
+        if (tipo === 'ACEPTADA') {
+          location.assign('vinculaciones.html?' + new URLSearchParams({id: datos.vinculacionId, propuestaEnviada: '1'}));
+          return;
+        }
         if(tipo==='REEVALUACION'){
           this.codigo=null;this.familia=null;this.vista='compatibilidad';history.replaceState(null,'','match.html?vista=compatibilidad');
           try{this.casos=this.casos.map(c=>({...c,familias:c.familias.filter(f=>f.codigo!==familia.codigo)}));this.revisionesPendientes=await this.api('/api/scoring/reevaluaciones-pendientes');this.compatibilidad();}
