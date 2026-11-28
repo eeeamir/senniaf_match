@@ -464,7 +464,7 @@ details.vinculacion-familiar:not([open]) > summary { border-bottom: 0; padding-b
 .familia-flecha { position: absolute; right: 4px; top: 10px; color: #0866f5; font-size: 1.4rem; }
 details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); }
 .familia-etapas-horizontal strong { overflow-wrap: normal; text-wrap: balance; }
-.familia-reincorporacion { margin-top: 1rem; }
+.profesional .tarjeta.familia-reincorporacion { margin-top: 22px; }
 .familia-reincorporacion > header,
 [data-reincorporacion-dialogo] > header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 :is(.familia-reincorporacion, [data-reincorporacion-dialogo]) > header .pro-simbolo { flex-shrink: 0; }
@@ -498,6 +498,9 @@ details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); 
 .en-espera > .reincorporacion-indicador { background: #edf2f7; color: #59789a; }
 .reincorporacion-aviso { display: flex; gap: .6rem; align-items: center; padding: .8rem; background: #eef4fb; border-radius: .6rem; }
 .reincorporacion-aviso .pro-icono { flex: 0 0 16px; }
+[data-reincorporacion-dialogo] > .reincorporacion-aviso > span {
+  flex: 1 1 auto; min-width: 0; color: inherit;
+}
 .familia-reincorporacion .pro-acciones { justify-content: flex-end; }
 @media (max-width: 480px) {
   .familia-reincorporacion .reincorporacion-pasos-aprobados > li { grid-template-columns: 36px minmax(0, 1fr); }
