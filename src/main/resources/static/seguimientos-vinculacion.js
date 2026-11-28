@@ -213,10 +213,10 @@ const SeguimientosVinculacion = {
 
   apartado(id, clases, abierto, cabecera, contenido, accion = '') {
     return `<section class="vinculacion-reporte ${clases}" data-apartado="${id}">
-      <h3 class="reporte-encabezado"><button type="button" class="reporte-desplegar" data-desplegar-reporte
-        aria-expanded="${abierto}" aria-controls="contenido-${id}">${cabecera}
-        <span class="reporte-chevron">${Profesionales.icono('flecha')}</span></button></h3>
+      <h3 class="reporte-encabezado" id="encabezado-${id}">${cabecera}</h3>
       ${accion ? `<div class="reporte-accion">${accion}</div>` : ''}
+      <button type="button" class="reporte-desplegar" data-desplegar-reporte aria-labelledby="encabezado-${id}"
+        aria-expanded="${abierto}" aria-controls="contenido-${id}"><span class="reporte-chevron" aria-hidden="true"></span></button>
       <div id="contenido-${id}" class="vinculacion-reporte-contenido" ${abierto ? '' : 'hidden'}>${contenido}</div>
     </section>`;
   },

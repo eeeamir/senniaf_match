@@ -446,6 +446,8 @@ const Vinculaciones = {
     const progreso = this.obtenerProgreso(v);
     const tiempos = v.tiempos;
     const rechazada = v.respuestaFamiliar === 'RECHAZADA';
+    const convivenciaVigente = v.estado === 'RESPUESTA_ACEPTADA' && v.autorizacionPreadoptiva?.registradaEl
+      && tiempos?.fechaInicio && !this.inicioPendiente(tiempos.fechaInicio) && !v.interrupcionRegistrada;
     const datos = [
       ['calendario', 'Fecha de creación', this.fechaCivil(v.fechaCreacion)],
       ['calendario', 'Inicio de convivencia', tiempos?.fechaInicio ? this.fechaCivil(tiempos.fechaInicio) : 'No iniciada'],
@@ -456,9 +458,14 @@ const Vinculaciones = {
       <h3>Información general</h3>
       <dl class="familia-datos-proceso">${datos.map(([icono, titulo, valor]) =>
         `<div><dt>${Profesionales.icono(icono)}${titulo}</dt><dd>${limpiarHtml(valor)}</dd></div>`).join('')}</dl>
-      ${tiempos?.diasReferencia != null ? `<p class="ayuda">${Profesionales.icono('informacion')}
+      ${convivenciaVigente ? `<div class="familia-siguiente familia-convivencia-aviso">${Profesionales.icono('informacion')}
+        <div><h3>Seguimiento de la convivencia preadoptiva</h3>
+          <p>El equipo técnico dará seguimiento durante esta etapa.</p>
+          ${tiempos.diasReferencia != null ? `<p>Periodo de referencia: <strong>${tiempos.diasReferencia} días calendario.</strong></p>` : ''}
+        </div></div>` : ''}
+      ${!convivenciaVigente && tiempos?.diasReferencia != null ? `<p class="ayuda">${Profesionales.icono('informacion')}
         Periodo de referencia de convivencia: ${tiempos.diasReferencia} días calendario.</p>` : ''}
-      ${(!rechazada || v.estado === 'RESPUESTA_RECHAZADA_PENDIENTE_CIERRE') && v.estado !== 'PENDIENTE_RESPUESTA' ? `<p class="familia-siguiente">${Profesionales.icono('informacion')}${limpiarHtml(progreso.accion)}</p>` : ''}
+      ${!convivenciaVigente && (!rechazada || v.estado === 'RESPUESTA_RECHAZADA_PENDIENTE_CIERRE') && v.estado !== 'PENDIENTE_RESPUESTA' ? `<p class="familia-siguiente">${Profesionales.icono('informacion')}${limpiarHtml(progreso.accion)}</p>` : ''}
       <h3 class="familia-titulo-progreso">Progreso de la vinculación</h3>
       ${this.progresoVertical(v, progreso)}
       </section>`;
@@ -706,14 +713,14 @@ const Vinculaciones = {
     const reportes = contenedor.querySelector('#seguimiento-reportes');
     const historial = contenedor.querySelector('#seguimiento-historial');
     let datos, visitas, cargando;
-    const cargar = (mensaje = '', rol, id) => {
+    const cargar = (mensaje = '', rol, id, visitaNueva = false) => {
       if (cargando) return cargando;
       const abiertos = new Set([...reportes.querySelectorAll('[data-desplegar-reporte][aria-expanded="true"]')]
         .map(boton => boton.closest('[data-apartado]').dataset.apartado));
       if (rol) abiertos.add(rol);
       const visitasIndividualesAbiertas = new Set([...reportes.querySelectorAll('details[data-visita-id][open]')]
         .map(visita => visita.dataset.visitaId));
-      const visitasAbiertas = reportes.querySelector('[data-apartado=visitas] [data-desplegar-reporte]')?.getAttribute('aria-expanded') !== 'false';
+      const visitasAbiertas = visitaNueva || reportes.querySelector('[data-apartado=visitas] [data-desplegar-reporte]')?.getAttribute('aria-expanded') !== 'false';
       reportes.setAttribute('aria-busy', 'true');
       historial.querySelector('[data-estado-reportes]')?.remove();
       const ruta = `/api/vinculaciones/${vinculacion.id}`;
@@ -726,9 +733,11 @@ const Vinculaciones = {
           const aviso = errores.length ? `<div data-estado-reportes>
             <p class="mensaje error" role="alert">No se pudo cargar toda la información profesional. ${limpiarHtml(errores[0].reason.message)}</p>
             <button class="boton secundario chico" type="button" data-reintentar-reportes>Reintentar consulta</button></div>` : '';
-          reportes.innerHTML = (mensaje ? `<p class="mensaje exito" role="status">${limpiarHtml(mensaje)}</p>` : '')
+          reportes.innerHTML = (mensaje ? `<p class="mensaje exito${visitaNueva ? ' visita-confirmacion' : ''}" role="status">${visitaNueva ? Profesionales.icono('comprobarCircular') : ''}${limpiarHtml(mensaje)}</p>` : '')
             + (visitas ? VisitasDomiciliarias.panel(visitas, visitasAbiertas, visitasIndividualesAbiertas) : '')
             + (datos ? SeguimientosVinculacion.panel(datos, abiertos) : '') + aviso;
+          const confirmacion = reportes.querySelector('.visita-confirmacion');
+          if (confirmacion) setTimeout(() => confirmacion.remove(), 7000);
           historial.innerHTML = aviso + this.historialConDecision(vinculacion, datos?.historial, visitas?.historial);
           if (id && !reportes.hidden) reportes.querySelector(`[data-ver-seguimiento="${id}"]`)?.focus();
           else if (mensaje && !reportes.hidden) reportes.querySelector('[data-apartado=visitas] [data-desplegar-reporte]')?.focus();
@@ -756,7 +765,7 @@ const Vinculaciones = {
       if (cargando) return;
       const visita = visitas?.registros.find(item => String(item.id) === boton.dataset.editarVisita);
       if (visitas?.trabajoSocial && (visita?.puedeEditar || (visitas.puedeRegistrar && boton.hasAttribute('data-registrar-visita')))) {
-        VisitasDomiciliarias.formulario(vinculacion, visitas, visita, boton, mensaje => cargar(mensaje));
+        VisitasDomiciliarias.formulario(vinculacion, visitas, visita, boton, (mensaje, nueva) => cargar(mensaje, undefined, undefined, nueva));
         return;
       }
       if (!datos) return;
@@ -932,7 +941,7 @@ const Vinculaciones = {
     return `<section class="tarjeta vinculacion-autorizacion">
       <h2>${Profesionales.icono('informe')}Autorización de convivencia preadoptiva</h2>
       ${autorizacion ? `
-        <p class="autorizacion-registrada">${Profesionales.icono('comprobar')}<strong>Autorización registrada</strong></p>
+        <p class="autorizacion-registrada">${Profesionales.icono('comprobarCircular')}<strong>Autorización registrada</strong></p>
         <p>${autorizacion.fechaInicioConvivencia
           ? 'La autorización quedó registrada y se inició la etapa de convivencia preadoptiva.'
           : 'La autorización quedó registrada. Este antecedente no tiene fecha de inicio de convivencia.'}</p>

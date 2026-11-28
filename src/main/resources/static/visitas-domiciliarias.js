@@ -8,7 +8,9 @@ const VisitasDomiciliarias = {
   duracion(minutos) {
     if (minutos === 60) return '1 hora';
     const horas = Math.floor(minutos / 60), resto = minutos % 60;
-    return [horas ? horas + ' h' : '', resto || !horas ? resto + ' min' : ''].filter(Boolean).join(' ');
+    const partes = [horas ? horas + (horas === 1 ? ' hora' : ' horas') : '',
+      resto || !horas ? resto + (resto === 1 ? ' minuto' : ' minutos') : ''].filter(Boolean);
+    return partes.join(' y ');
   },
 
   hora(valor) {
@@ -26,6 +28,31 @@ const VisitasDomiciliarias = {
       hora: `${valor('hour')}:${valor('minute')}`};
   },
 
+  fechaInterna(valor) {
+    const partes = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(valor.trim());
+    if (!partes || partes[3] === '0000') return '';
+    const iso = `${partes[3]}-${partes[2]}-${partes[1]}`;
+    const fecha = new Date(iso + 'T00:00:00Z');
+    return !Number.isNaN(fecha.getTime()) && fecha.toISOString().slice(0, 10) === iso ? iso : '';
+  },
+
+  horaInterna(valor, periodo) {
+    const partes = /^(0?[1-9]|1[0-2]):([0-5]\d)$/.exec(valor.trim());
+    if (!partes || !['AM', 'PM'].includes(periodo)) return '';
+    const hora = Number(partes[1]) % 12 + (periodo === 'PM' ? 12 : 0);
+    return String(hora).padStart(2, '0') + ':' + partes[2];
+  },
+
+  campoHora(nombre, etiqueta) {
+    return `<div class="visita-campo"><label for="visita-${nombre}">${etiqueta} *</label>
+      <input id="visita-${nombre}" name="${nombre}" type="text" placeholder="hh:mm" maxlength="5" autocomplete="off" aria-describedby="visita-error-${nombre}" required>
+      <div class="visita-periodos" role="group" aria-label="Periodo de ${etiqueta.toLowerCase()}">
+        <label><input type="radio" name="${nombre}Periodo" value="AM" checked><span>a. m.</span></label>
+        <label><input type="radio" name="${nombre}Periodo" value="PM"><span>p. m.</span></label>
+      </div>
+      <small id="visita-error-${nombre}" class="visita-error-campo" role="alert" hidden></small></div>`;
+  },
+
   panel(datos, abierto, visitasAbiertas = new Set()) {
     const {registros, referencia, puedeRegistrar, estadoConvivencia, trabajoSocial} = datos;
     const vigente = estadoConvivencia === 'VIGENTE';
@@ -36,7 +63,7 @@ const VisitasDomiciliarias = {
     const filas = registros.map((visita, i) => `<li class="visita-realizada">
       <details data-visita-id="${visita.id}" ${visitasAbiertas.has(String(visita.id)) ? 'open' : ''}>
         <summary class="visita-cabecera">
-          <span class="visita-icono">${Profesionales.icono('comprobar')}</span>
+          <span class="visita-icono">${Profesionales.icono('comprobarCircular')}</span>
           <strong>Visita domiciliaria ${i + 1}</strong>
           <span class="visita-realizada-estado">Realizada</span>
           <span class="reporte-chevron" aria-hidden="true"></span>
@@ -63,8 +90,7 @@ const VisitasDomiciliarias = {
       NO_DISPONIBLE: '<p>El estado actual de la vinculación permite únicamente consultar las visitas.</p>'
     }[estadoConvivencia];
     const cabecera = `<span class="vinculacion-emblema">${Profesionales.icono('hogar')}</span>
-      <span>Visitas domiciliarias${vigente ? '<small class="seguimiento-meta">Convivencia preadoptiva en curso</small>' : ''}</span>
-      ${mostrarProgreso ? `<strong class="visita-contador">${completadas} de ${referencia}</strong>` : ''}`;
+      <span>Visitas domiciliarias<small class="seguimiento-meta">${completadas} de ${referencia} visitas realizadas</small></span>`;
     const contenido = `${aviso ? `<div class="visita-estado">${aviso}</div>` : ''}
       ${mostrarProgreso ? `<p class="visita-previstas"><strong>Visitas previstas</strong><span>${porcentaje} %</span></p>
         <progress max="${referencia}" value="${completadas}" aria-label="Visitas previstas completadas"></progress>` : ''}
@@ -82,28 +108,29 @@ const VisitasDomiciliarias = {
     const titulo = visita ? 'Editar visita domiciliaria' : 'Registrar visita domiciliaria';
     const dialogo = SeguimientosVinculacion.dialogo(titulo, disparador);
     const encabezado = dialogo.querySelector('h2');
-    encabezado.insertAdjacentHTML('afterbegin', Profesionales.icono(visita ? 'calendario' : 'hogar'));
-    encabezado.insertAdjacentHTML('afterend', `<button class="enlace" type="button" data-cerrar-visita aria-label="Cerrar formulario">${Profesionales.icono('cerrar')}</button>`);
-    dialogo.classList.add('visita-dialogo');
-
-    const hoy = this.ahora().fecha;
     const numero = visita ? datos.registros.findIndex(item => item.id === visita.id) + 1 : null;
+    encabezado.outerHTML = `<header class="visita-modal-cabecera">
+      <span class="pro-simbolo">${Profesionales.icono('hogar')}</span>
+      <div><h2 id="tituloModalSeguimiento">${titulo}</h2><p>${limpiarHtml(vinculacion.codigo)} · ${numero ? 'Visita ' + numero : 'Convivencia preadoptiva'}</p></div>
+      <button class="enlace" type="button" data-cerrar-visita aria-label="Cerrar formulario">${Profesionales.icono('cerrar')}</button>
+    </header>`;
+    dialogo.classList.add('visita-dialogo');
+    const hoy = this.ahora().fecha;
     dialogo.insertAdjacentHTML('beforeend', `
-      <p class="ayuda">${limpiarHtml(vinculacion.codigo)} · ${numero ? 'Visita ' + numero : 'Convivencia preadoptiva'}</p>
       <form class="pro-interrupcion-form" novalidate>
         <div class="visita-campo"><label for="visita-fecha">Fecha de la visita *</label>
-          <input id="visita-fecha" name="fecha" type="date" min="${datos.fechaMinima}" max="${hoy}" lang="es-PA" aria-describedby="visita-error-fecha" required autofocus>
+          <div class="visita-fecha-control">
+            <input id="visita-fecha" name="fecha" type="text" placeholder="dd/mm/aaaa" maxlength="10" autocomplete="off" aria-describedby="visita-error-fecha" required autofocus>
+            <label class="visita-calendario">${Profesionales.icono('calendario')}
+              <input type="date" data-calendario-visita min="${datos.fechaMinima}" max="${hoy}" aria-label="Seleccionar fecha de la visita"></label>
+          </div>
           <small id="visita-error-fecha" class="visita-error-campo" role="alert" hidden></small></div>
         <div class="visita-horas">
-          <div class="visita-campo"><label for="visita-inicio">Hora de inicio *</label>
-            <input id="visita-inicio" name="inicio" type="time" aria-describedby="visita-error-inicio" required>
-            <small id="visita-error-inicio" class="visita-error-campo" role="alert" hidden></small></div>
-          <div class="visita-campo"><label for="visita-fin">Hora de finalización *</label>
-            <input id="visita-fin" name="fin" type="time" aria-describedby="visita-error-fin" required>
-            <small id="visita-error-fin" class="visita-error-campo" role="alert" hidden></small></div>
+          ${this.campoHora('inicio', 'Hora de inicio')}
+          ${this.campoHora('fin', 'Hora de finalización')}
         </div>
         <p class="visita-duracion">${Profesionales.icono('reloj')} Duración de la visita <output for="visita-inicio visita-fin" aria-live="polite">—</output></p>
-        <p class="ayuda">Registre únicamente visitas que ya hayan finalizado.</p>
+        <p class="ayuda visita-aviso">${Profesionales.icono('informacion')}<span>Registre únicamente visitas que ya hayan finalizado.</span></p>
         ${visita ? `<label>Motivo de modificación (opcional)<textarea name="motivoModificacion" rows="2" maxlength="1000"></textarea></label>
           <p class="ayuda">Los cambios realizados quedarán registrados en el historial.</p>` : ''}
         <p class="mensaje error" role="alert" hidden></p>
@@ -114,12 +141,26 @@ const VisitasDomiciliarias = {
       </form>`);
     const form = dialogo.querySelector('form');
     const {fecha, inicio, fin} = form.elements;
-    fecha.value = visita?.fecha || hoy;
-    inicio.value = visita ? visita.inicio.slice(0, 5) : '';
-    fin.value = visita ? visita.fin.slice(0, 5) : '';
+    const calendario = form.querySelector('[data-calendario-visita]');
+    calendario.addEventListener('click', evento => {
+      if (!calendario.showPicker) return;
+      try { calendario.showPicker(); evento.preventDefault(); }
+      catch { /* El navegador conserva su selector nativo. */ }
+    });
+    calendario.value = visita?.fecha || hoy;
+    fecha.value = Vinculaciones.fechaCivil(calendario.value);
+    if (visita) {
+      for (const campo of [inicio, fin]) {
+        const [horas, minutos] = visita[campo.name].slice(0, 5).split(':');
+        campo.value = String(Number(horas) % 12 || 12).padStart(2, '0') + ':' + minutos;
+        form.elements[campo.name + 'Periodo'].value = Number(horas) < 12 ? 'AM' : 'PM';
+      }
+    }
+    const leerHora = campo => this.horaInterna(campo.value, form.elements[campo.name + 'Periodo'].value);
     const output = form.querySelector('output');
     const actualizar = () => {
-      const duracion = inicio.value && fin.value ? this.minutos(fin.value) - this.minutos(inicio.value) : 0;
+      const horaInicio = leerHora(inicio), horaFin = leerHora(fin);
+      const duracion = horaInicio && horaFin ? this.minutos(horaFin) - this.minutos(horaInicio) : 0;
       output.textContent = duracion > 0 ? this.duracion(duracion) : '—';
     };
     const limpiarError = campo => {
@@ -135,7 +176,10 @@ const VisitasDomiciliarias = {
       campo.focus();
     };
     form.addEventListener('input', evento => {
-      limpiarError(evento.target);
+      if (evento.target === calendario && calendario.value) fecha.value = Vinculaciones.fechaCivil(calendario.value);
+      if (evento.target === fecha) calendario.value = this.fechaInterna(fecha.value);
+      if (evento.target === calendario) limpiarError(fecha);
+      limpiarError(evento.target.name === 'inicioPeriodo' ? inicio : evento.target.name === 'finPeriodo' ? fin : evento.target);
       if (evento.target === inicio || evento.target === fecha) limpiarError(fin);
       actualizar();
     });
@@ -157,18 +201,21 @@ const VisitasDomiciliarias = {
       evento.preventDefault();
       if (enviando) return;
       const ahora = this.ahora();
-      const datosEnvio = Object.fromEntries(new FormData(form));
-      const superpuesta = datos.registros.some(otra => otra.id !== visita?.id && otra.fecha === fecha.value
-        && otra.inicio.slice(0, 5) < fin.value && otra.fin.slice(0, 5) > inicio.value);
+      const dia = this.fechaInterna(fecha.value);
+      const horaInicio = leerHora(inicio), horaFin = leerHora(fin);
+      const datosEnvio = {fecha: dia, inicio: horaInicio, fin: horaFin};
+      if (visita) datosEnvio.motivoModificacion = form.elements.motivoModificacion.value;
+      const superpuesta = datos.registros.some(otra => otra.id !== visita?.id && otra.fecha === dia
+        && otra.inicio.slice(0, 5) < horaFin && otra.fin.slice(0, 5) > horaInicio);
       [fecha, inicio, fin].forEach(limpiarError);
       alerta.hidden = true;
-      if (!fecha.value) return mostrarError(fecha, 'Indica la fecha de la visita.');
-      if (fecha.value > ahora.fecha) return mostrarError(fecha, 'No puedes registrar una visita en una fecha futura.');
-      if (fecha.value < datos.fechaMinima) return mostrarError(fecha, 'La visita no puede ser anterior al inicio de la convivencia.');
-      if (!inicio.value) return mostrarError(inicio, 'Indica la hora de inicio.');
-      if (!fin.value) return mostrarError(fin, 'Indica la hora de finalización.');
-      if (fin.value <= inicio.value) return mostrarError(fin, 'La hora de finalización debe ser posterior a la hora de inicio.');
-      if (fecha.value === ahora.fecha && fin.value > ahora.hora) {
+      if (!dia) return mostrarError(fecha, 'Indica una fecha válida en formato dd/mm/aaaa.');
+      if (dia > ahora.fecha) return mostrarError(fecha, 'No puedes registrar una visita en una fecha futura.');
+      if (dia < datos.fechaMinima) return mostrarError(fecha, 'La visita no puede ser anterior al inicio de la convivencia.');
+      if (!horaInicio) return mostrarError(inicio, 'Indica una hora válida de inicio en formato hh:mm.');
+      if (!horaFin) return mostrarError(fin, 'Indica una hora válida de finalización en formato hh:mm.');
+      if (horaFin <= horaInicio) return mostrarError(fin, 'La hora de finalización debe ser posterior a la hora de inicio.');
+      if (dia === ahora.fecha && horaFin > ahora.hora) {
         return mostrarError(fin, 'Solo puedes registrar visitas que ya hayan finalizado.');
       }
       if (superpuesta) return mostrarError(fin, 'Ya existe una visita registrada que coincide con ese horario.');
@@ -194,7 +241,7 @@ const VisitasDomiciliarias = {
       Profesionales.marcarGuardado(form);
       dialogo.close();
       await guardar(visita ? (respuesta.version === visita.version ? 'No hay cambios para guardar.' : 'La visita quedó actualizada.')
-        : 'La visita domiciliaria quedó registrada.');
+        : 'La visita domiciliaria quedó registrada correctamente.', !visita);
     };
     Profesionales.marcarGuardado(form);
     dialogo.showModal();
