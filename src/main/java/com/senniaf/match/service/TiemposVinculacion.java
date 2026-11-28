@@ -19,6 +19,7 @@ final class TiemposVinculacion {
         LocalDate propuesta = fechaCivil(vinculacion.getDecision().getFecha());
         LocalDate fechaRespuesta = fechaCivil(vinculacion.getFechaRespuesta());
         LocalDate emision = vinculacion.getFechaEmisionAutorizacion();
+        LocalDate autorizacion = emision != null ? emision : fechaCivil(vinculacion.getFechaRegistroAutorizacion());
         LocalDate inicio = vinculacion.getFechaInicioConvivencia();
         boolean cerrada = vinculacion.getEstado() == Vinculacion.Estado.CERRADA;
         boolean pendiente = vinculacion.getEstado() == Vinculacion.Estado.PENDIENTE_RESPUESTA;
@@ -30,8 +31,8 @@ final class TiemposVinculacion {
         }
         return new Indicadores(dias(propuesta, finVinculacion, hoy),
                 dias(propuesta, pendiente ? hoy : fechaRespuesta, hoy),
-                "ACEPTADA".equals(respuesta) ? dias(fechaRespuesta, emision, hoy) : null,
-                dias(emision, inicio, hoy), dias(inicio, finConvivencia, hoy), inicio,
+                "ACEPTADA".equals(respuesta) ? dias(fechaRespuesta, autorizacion, hoy) : null,
+                dias(autorizacion, inicio, hoy), dias(inicio, finConvivencia, hoy), inicio,
                 DIAS_REFERENCIA_ACOGIMIENTO, interrumpida,
                 cerrada && vinculacion.getResultadoCierre() != Vinculacion.ResultadoCierre.REVOCACION_ASIGNACION);
     }

@@ -1,11 +1,15 @@
 package com.senniaf.match.dto;
 
-import jakarta.validation.constraints.*;
-import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotNull;
 
-/** Constancia de un acto ya emitido; el portal no lo concede. */
+/** Constancia de un acto ya emitido. El servidor registra el momento de la actuación. */
 public record AutorizacionPreadoptivaRequest(
- @NotBlank @Size(min=5,max=200) String referencia,
- @NotNull LocalDate fechaEmision,
- LocalDate fechaInicioConvivencia,
- @NotNull @AssertTrue(message="Confirma la existencia de la autorización emitida por SENNIAF") Boolean confirmacion) {}
+        @NotNull @AssertTrue(message = "Confirma la existencia de la autorización emitida por SENNIAF") Boolean confirmacion) {
+
+    @JsonAnySetter
+    public void rechazarCampoAdicional(String campo, Object valor) {
+        throw new IllegalArgumentException("El registro de autorización solo admite la confirmación institucional");
+    }
+}

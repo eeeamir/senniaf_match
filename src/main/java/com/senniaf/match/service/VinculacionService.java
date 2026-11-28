@@ -278,19 +278,14 @@ public class VinculacionService {
             throw new IllegalStateException("Se requiere una propuesta aceptada y vigente, sin interrupción ni cierre");
         if (bloqueante(incidencias(v)) != null)
             throw new IllegalStateException("Resuelve primero la incidencia de asignación registrada");
-        if(r==null || !Boolean.TRUE.equals(r.confirmacion()) || r.fechaEmision()==null)throw new IllegalArgumentException("Confirma la autorización institucional y su fecha de emisión");
-        String referencia=texto(r.referencia(),5,200,"Identifica la resolución o autorización institucional existente");
-        var hoy=java.time.LocalDate.now(ZoneId.of("America/Panama"));
-        if(r.fechaEmision().isAfter(hoy))throw new IllegalArgumentException("La fecha de emisión no puede ser futura");
+        if (r == null || !Boolean.TRUE.equals(r.confirmacion()))
+            throw new IllegalArgumentException("Confirma la autorización institucional");
         if (v.getFechaRegistroAutorizacion() != null)
             throw new IllegalStateException("La autorización y el inicio de convivencia ya se registraron en una sola actuación");
-        // Las solicitudes antiguas pueden omitir la fecha efectiva y usan la fecha de la autorización.
-        var inicio = r.fechaInicioConvivencia() == null ? r.fechaEmision() : r.fechaInicioConvivencia();
-        if (inicio.isAfter(hoy) || inicio.isBefore(r.fechaEmision()))
-            throw new IllegalArgumentException("El inicio efectivo debe estar entre la emisión de la autorización y hoy");
-        var ahora = LocalDateTime.now();
-        v.setReferenciaAutorizacion(referencia);
-        v.setFechaEmisionAutorizacion(r.fechaEmision());
+        var registroPanama = java.time.ZonedDateTime.now(TiemposVinculacion.PANAMA);
+        var inicio = registroPanama.toLocalDate();
+        // Los instantes se guardan con la misma convención horaria que los registros históricos.
+        var ahora = registroPanama.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
         v.setAutorizacionRegistradaPor(actor);
         v.setAutorizacionRol(rol);
         v.setFechaRegistroAutorizacion(ahora);

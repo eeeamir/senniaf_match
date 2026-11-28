@@ -524,3 +524,19 @@ details.vinculacion-familiar[open] .familia-flecha { transform: rotate(180deg); 
   .vinculacion-familiar > .familia-respuesta { grid-template-columns: minmax(0, 1fr); }
   .vinculacion-familiar > .familia-respuesta .pro-acciones { justify-content: flex-start; }
 }
+
+.s8-autorizacion-dialogo .s8-autorizacion-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #edf3fc;
+  color: #476788;
+}
+.s8-autorizacion-aviso .pro-icono { flex-shrink: 0; }
+.s8-autorizacion-dialogo form > .pro-acciones {
+  border-top: 1px solid #d6e1f0;
+  padding-top: 16px;
+  margin-top: 4px;
+}

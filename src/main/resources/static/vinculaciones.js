@@ -964,10 +964,10 @@ const Vinculaciones = {
         </p>
         ${autorizacion ? `
           <dl class="detalle-datos">
-            <div><dt>Resolución o autorización institucional</dt>
-              <dd>${limpiarHtml(autorizacion.referencia)}</dd></div>
-            <div><dt>Fecha de emisión</dt>
-              <dd>${limpiarHtml(this.fechaCivil(autorizacion.fechaEmision))}</dd></div>
+            ${autorizacion.referencia ? `<div><dt>Resolución o autorización institucional</dt>
+              <dd>${limpiarHtml(autorizacion.referencia)}</dd></div>` : ''}
+            ${autorizacion.fechaEmision ? `<div><dt>Fecha de emisión</dt>
+              <dd>${limpiarHtml(this.fechaCivil(autorizacion.fechaEmision))}</dd></div>` : ''}
             <div><dt>Inicio de convivencia</dt>
               <dd>${autorizacion.fechaInicioConvivencia
                 ? limpiarHtml(this.fechaCivil(autorizacion.fechaInicioConvivencia))
@@ -984,12 +984,32 @@ const Vinculaciones = {
       </section>`;
   },
   registrarAutorizacion(c,v,sesion){
-    const a=v.autorizacionPreadoptiva,d=document.createElement('dialog');d.className='pro-dialogo s8-autorizacion-dialogo';d.setAttribute('aria-labelledby','tituloAutorizacion');
-    const hoy=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-    d.innerHTML=`<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('informe')}</span><h2 id="tituloAutorizacion">Registrar autorización de convivencia preadoptiva</h2></div><p>Confirma que SENNIAF ya emitió la autorización institucional correspondiente. Esta acción registrará su existencia en SENNIAF Match y actualizará la etapa del proceso.</p><form><label>Resolución o referencia institucional existente<input name="referencia" required minlength="5" maxlength="200" value="${limpiarHtml(a?.referencia||'')}" ${a?'readonly':''}></label><label>Fecha de emisión<input name="fechaEmision" type="date" required max="${hoy}" value="${limpiarHtml(a?.fechaEmision||'')}" ${a?'readonly':''}></label><label>Fecha efectiva de inicio de convivencia<input name="fechaInicioConvivencia" type="date" required max="${hoy}"></label><p class="ayuda">La autorización y el inicio efectivo se registran juntos. Indica la fecha en que comenzó la convivencia.</p><label class="pro-confirmacion-check"><input name="confirmacion" type="checkbox" required><span>Confirmo que SENNIAF emitió la autorización y que los datos corresponden a la actuación institucional existente.</span></label><p data-error role="alert"></p><div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button><button type="submit" class="boton">Revisar y confirmar</button></div></form>`;
-    document.body.append(d);const f=d.querySelector('form');let guardando=false;CamposFormulario.iniciar(f);d.onclose=()=>d.remove();d.oncancel=e=>{if(guardando)e.preventDefault();};d.querySelector('[data-cancelar]').onclick=()=>d.close();
-    f.onsubmit=e=>{e.preventDefault();if(guardando||!Profesionales.validarFormulario(f))return;const datos={referencia:f.elements.referencia.value,fechaEmision:f.elements.fechaEmision.value,fechaInicioConvivencia:f.elements.fechaInicioConvivencia.value||null,confirmacion:f.elements.confirmacion.checked};
-      Profesionales.confirmar('Confirmar constancia institucional','Se registrará una autorización existente. El portal no emitirá una resolución ni autorizará legalmente la convivencia.',async()=>{if(guardando)return;guardando=true;f.querySelectorAll('button,input').forEach(b=>b.disabled=true);
+    const d = document.createElement('dialog');
+    d.className = 'pro-dialogo s8-autorizacion-dialogo';
+    d.setAttribute('aria-labelledby', 'tituloAutorizacion');
+    d.innerHTML = `<div class="pro-modal-cabecera"><span class="pro-simbolo">${Profesionales.icono('informe')}</span>
+      <h2 id="tituloAutorizacion">Registrar autorización de convivencia preadoptiva</h2></div>
+      <p>Confirma que SENNIAF ha autorizado el inicio de la convivencia preadoptiva.</p>
+      <form>
+        <p class="s8-autorizacion-aviso">${Profesionales.icono('informacion')}<span>Al confirmar, se registrará automáticamente la fecha y hora de inicio de la convivencia preadoptiva.</span></p>
+        <label class="pro-confirmacion-check"><input name="confirmacion" type="checkbox" required>
+          <span>Confirmo que SENNIAF ha emitido la autorización correspondiente.</span></label>
+        <p data-error role="alert"></p>
+        <div class="pro-acciones"><button type="button" class="boton secundario" data-cancelar>Cancelar</button>
+          <button type="submit" class="boton">Revisar y confirmar</button></div>
+      </form>`;
+    document.body.append(d);
+    const f = d.querySelector('form');
+    let guardando = false;
+    CamposFormulario.iniciar(f);
+    d.onclose = () => d.remove();
+    d.oncancel = e => { if (guardando) e.preventDefault(); };
+    d.querySelector('[data-cancelar]').onclick = () => d.close();
+    f.onsubmit = e => {
+      e.preventDefault();
+      if (guardando || !Profesionales.validarFormulario(f)) return;
+      const datos = {confirmacion: f.elements.confirmacion.checked};
+      Profesionales.confirmar('Confirmar constancia institucional','Al confirmar, el sistema usará la fecha y hora del servidor en Panamá para registrar la autorización y el inicio de la convivencia en una sola actuación.',async()=>{if(guardando)return;guardando=true;f.querySelectorAll('button,input').forEach(b=>b.disabled=true);
         try{const actualizado=await this.api(`/api/vinculaciones/${v.id}/autorizacion-preadoptiva`,{method:'POST',body:JSON.stringify(datos)});Profesionales.marcarGuardado(f);d.close();await this.detalle(c,v.id,sesion,actualizado);}
         catch(error){f.querySelector('[data-error]').textContent=error.message;guardando=false;f.querySelectorAll('button,input').forEach(b=>b.disabled=false);}
       });
